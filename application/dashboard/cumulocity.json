@@ -1,0 +1,8 @@
+{
+  "name": "Dashboards",
+  "ngModules": [
+    "framework"
+  ],
+  "category": "Framework",
+  "description": "Dashboards for the framework."
+}

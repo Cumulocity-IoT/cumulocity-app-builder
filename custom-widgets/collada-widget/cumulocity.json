@@ -1,0 +1,17 @@
+{
+  "name": "Collada",
+  "ngModules": [
+    "collada-widget"
+  ],
+  "category": "Widgets",
+  "description": "Display 3D models in the *.dae format.",
+  "css": [
+    "collada-widget.css"
+  ],
+  "js": [
+    "collada-widget.js"
+  ],
+  "imports": [
+    "core/scada"
+  ]
+}

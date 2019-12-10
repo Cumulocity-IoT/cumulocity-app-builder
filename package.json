@@ -1,0 +1,69 @@
+{
+  "name": "app-builder",
+  "version": "1.0.0",
+  "description": "Application builder for Cumulocity (written by Software AG Global Presales)",
+  "navMain": "index.js",
+  "scripts": {
+    "start": "c8ycli server --env.extraWebpackConfig=./extra-webpack.config.js -u http://industrysolutions.cumulocity.com",
+    "build": "c8ycli build --env.extraWebpackConfig=./extra-webpack.config.js",
+    "deploy": "c8ycli deploy --env.extraWebpackConfig=./extra-webpack.config.js -u http://industrysolutions.cumulocity.com",
+    "postinstall": "patch-package"
+  },
+  "keywords": [],
+  "author": "Richard Peach - Software AG, Global Presales",
+  "license": "Apache 2.0",
+  "dependencies": {
+    "@angular-contrib/common": "0.0.2",
+    "@angular-contrib/core": "0.0.2",
+    "@angular/animations": "7.2.15",
+    "@angular/common": "7.2.15",
+    "@angular/compiler": "7.2.15",
+    "@angular/core": "7.2.15",
+    "@angular/forms": "7.2.15",
+    "@angular/http": "7.2.15",
+    "@angular/platform-browser": "7.2.15",
+    "@angular/platform-browser-dynamic": "7.2.15",
+    "@angular/router": "7.2.15",
+    "@angular/upgrade": "7.2.15",
+    "@c8y/ng1-modules": "1005.0.3",
+    "@c8y/ngx-components": "1005.0.3",
+    "@c8y/style": "1005.0.3",
+    "@ng-reactive/async-input": "0.0.1",
+    "angular": "1.6.9",
+    "core-js": "^2.6.2",
+    "css.escape": "^1.5.1",
+    "d3-color": "^1.4.0",
+    "fontawesome": "4.7.2",
+    "ngx-markdown": "^8.2.1",
+    "rxjs": "~6.3.3",
+    "rxjs-compat": "^6.5.3",
+    "url-search-params-polyfill": "6.0.0",
+    "web-animations-js": "^2.3.2",
+    "zone.js": "~0.8.28"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "~0.10.4",
+    "@angular/compiler-cli": "7.2.15",
+    "@angular/language-service": "7.2.15",
+    "@c8y/cli": "1005.0.3",
+    "@types/d3-color": "^1.2.2",
+    "patch-package": "^6.2.0",
+    "typescript": "3.1.6"
+  },
+  "c8y": {
+    "application": {
+      "name": "App Builder",
+      "contextPath": "app-builder",
+      "key": "app-builder-application-key",
+      "brandingEntry": "./ui-assets/index.less",
+      "tabsHorizontal": true,
+      "upgrade": true,
+      "sensorAppOneLink": "http://onelink.to/pca6qe",
+      "contentSecurityPolicy": "base-uri 'none'; default-src 'self' 'unsafe-inline' http: https: ws: wss:; connect-src 'self' *.billwerk.com http: https: ws: wss: blob:;  script-src 'self' open.mapquestapi.com *.twitter.com *.twimg.com 'unsafe-inline' 'unsafe-eval' data:; style-src * 'unsafe-inline' blob:; img-src * data:; font-src * data:; frame-src *;",
+      "icon": {
+        "class": "fa fa-magic"
+      }
+    },
+    "cli": {}
+  }
+}

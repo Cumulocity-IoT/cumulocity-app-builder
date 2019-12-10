@@ -1,0 +1,13 @@
+diff --git a/node_modules/@c8y/client/lib/src/core/ObservableList.d.ts b/node_modules/@c8y/client/lib/src/core/ObservableList.d.ts
+index d4c3197..78804da 100644
+--- a/node_modules/@c8y/client/lib/src/core/ObservableList.d.ts
++++ b/node_modules/@c8y/client/lib/src/core/ObservableList.d.ts
+@@ -3,7 +3,7 @@ import { IResultBase } from './IResultBase';
+ /**
+  * Creates an observable list (or detail) from a promise-callback.
+  */
+-export declare class ObservableList<TData> extends Observable<TData> {
++export declare class ObservableList<TData> extends Observable<TData[]> {
+     private realtimeFilter;
+     private options;
+     private seed;

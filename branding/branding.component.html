@@ -1,0 +1,108 @@
+<c8y-title>Styling</c8y-title>
+
+<ng-container *ngIf="app | async as app">
+    <c8y-action-bar-item [placement]="'right'">
+        <button class="btn btn-link" (click)="save(app)">
+            <i c8yIcon="save"></i> Save
+        </button>
+    </c8y-action-bar-item>
+
+    <div class="card-group">
+        <div class="col-xs-12 col-md-5">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-light" style="margin-top: 20px;" translate="">Application Styling</h2>
+                </div>
+                <div class="card-block">
+                    <p>
+                        Here you can adjust the styling and logo used in your application. <br>
+                        <br>
+                        <b>Important:</b> Changes are not persisted until save is clicked.
+                    </p>
+                    <br>
+                    <button class="btn btn-default" [(ngModel)]="app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)" btnCheckbox tabindex="0">{{app.applicationBuilder.branding.enabled ? 'Enabled' : 'Disabled'}}</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-md-7">
+            <div class="card">
+                <div class="card-header">
+                    <h4 translate>Logo</h4>
+                </div>
+                <hr/>
+                <div class="card-block">
+                    <div class="form-group">
+                        <label for="logo"><span>Logo</span></label>
+                        <input class="form-control" id="logo" name="logo" type="file" [disabled]="!app.applicationBuilder.branding.enabled" (change)="logoChange(app, $event.target.files)">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="height"><span>Height</span></label>
+
+                        <div class="input-group">
+                            <input class="form-control" id="height" name="height" type="number" min="0" step="1" placeholder="eg. 40 (optional)" [disabled]="!app.applicationBuilder.branding.enabled" [(ngModel)]="app.applicationBuilder.branding.logoHeight" (ngModelChange)="showBrandingChange(app)">
+                            <div class="input-group-addon">px</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="hide-icon"><span>App Icon</span></label>
+                        <button class="btn btn-default" id="hide-icon" name="hide-icon" [(ngModel)]="app.applicationBuilder.branding.hideIcon" (ngModelChange)="showBrandingChange(app)" [disabled]="!app.applicationBuilder.branding.enabled" [class.disabled]="!app.applicationBuilder.branding.enabled" btnCheckbox tabindex="0">{{app.applicationBuilder.branding.hideIcon ? 'Hidden' : 'Visible'}}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 translate>Themes</h4>
+                </div>
+                <hr/>
+                <div class="card-block">
+                    <button class="btn btn-primary" style="--brand-primary: #1776BF; color: white" (click)="setTheme(app, '#1776BF', '#14629F', '#333333', 'white', 'white')">Software AG Blue</button>
+                    <button class="btn btn-primary" style="--brand-primary: #FFCC00; color: black;" (click)="setTheme(app, '#FFCC00', 'firebrick', 'firebrick', 'firebrick', 'white')">Yellow</button>
+                    <button class="btn btn-primary" style="--brand-primary: #D40511; color: white;" (click)="setTheme(app, '#D40511', '#8b0000', 'firebrick', 'white', 'white')">Red</button>
+                    <button class="btn btn-primary" style="--brand-primary: #009000; color: white;" (click)="setTheme(app, '#009000', '#205115', '#333333', 'white', 'white')">Green</button>
+                    <button class="btn btn-primary" style="--brand-primary: salmon; color: black;" (click)="setTheme(app, 'salmon', 'firebrick', 'firebrick', 'firebrick', 'white')">Salmon</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 translate>Colors</h4>
+                </div>
+                <hr/>
+                <div class="card-block">
+                    Colors can be entered as any valid CSS color (salmon, #fff, #ffffff, rgb(255, 255, 255))<br>
+                    <div class="row">
+                        <div class="col-xs-12 col-md-6">
+                            <div class="form-group">
+                                <label for="primary"><span>Primary</span></label>
+                                <input type="text" class="form-control" id="primary" name="primary" placeholder="e.g. salmon (required)" required [(ngModel)]="app.applicationBuilder.branding.colors.primary" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
+                            </div>
+                            <div class="form-group">
+                                <label for="active"><span>Active</span></label>
+                                <input type="text" class="form-control" id="active" name="active" placeholder="e.g. salmon (required)" required [(ngModel)]="app.applicationBuilder.branding.colors.active" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
+                            </div>
+                            <div class="form-group">
+                                <label for="text"><span>Text</span></label>
+                                <input type="text" class="form-control" id="text" name="text" placeholder="e.g. salmon (required)" required [(ngModel)]="app.applicationBuilder.branding.colors.text" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-md-6">
+                            <div class="form-group">
+                                <label for="text-primary"><span>Text on Primary</span></label>
+                                <input type="text" class="form-control" id="text-primary" name="text-primary" placeholder="e.g. salmon (required)" required [(ngModel)]="app.applicationBuilder.branding.colors.textOnPrimary" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
+                            </div>
+                            <div class="form-group">
+                                <label for="text-active"><span>Text on Active</span></label>
+                                <input type="text" class="form-control" id="text-active" name="text-active" placeholder="e.g. salmon (required)" required [(ngModel)]="app.applicationBuilder.branding.colors.textOnActive" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-container>

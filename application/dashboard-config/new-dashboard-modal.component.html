@@ -1,0 +1,109 @@
+<wizard activeStepId="menu">
+    <wizard-step stepId="menu">
+        <div class="modal-header text-center bg-primary">
+            <div style="font-size: 62px;">
+                <span c8yIcon="c8y-chart"></span>
+            </div>
+            <h4 class="text-uppercase" style="margin:0; letter-spacing: 0.15em;">Add Dashboard</h4>
+        </div>
+        <div class="c8y-wizard-nav">
+            <span>Select Method</span>
+        </div>
+        <hr style="margin:0;">
+        <div class="modal-inner-scroll">
+            <div class="c8y-wizard-list-nav">
+                <a class="list-group-item clickable" (click)="creationMode = 'blank'; wizard.selectStep('create')">
+                    <span class="list-group-icon">
+                      <i c8yIcon="plus-circle"></i>
+                    </span>
+                    <span>Blank Dashboard</span>
+                </a>
+                <a class="list-group-item clickable" (click)="creationMode = 'template'; wizard.selectStep('template')">
+                    <span class="list-group-icon">
+                      <i c8yIcon="th"></i>
+                    </span>
+                    <span>Select from Template</span>
+                </a>
+                <a class="list-group-item clickable" (click)="creationMode = 'clone'; wizard.selectStep('create')">
+                    <span class="list-group-icon">
+                      <i c8yIcon="copy"></i>
+                    </span>
+                    <span>Copy an Existing Dashboard</span>
+                </a>
+                <a class="list-group-item clickable" (click)="creationMode = 'existing'; wizard.selectStep('create')">
+                    <span class="list-group-icon">
+                      <i c8yIcon="external-link-square"></i>
+                    </span>
+                    <span>Link to Existing Dashboard</span>
+                </a>
+            </div>
+        </div>
+        <div class="c8y-wizard-footer">
+            <button class="btn btn-default" (click)="bsModalRef.hide()">Cancel</button>
+        </div>
+    </wizard-step>
+    <wizard-step stepId="template">
+        <div class="modal-header text-center bg-primary">
+            <div style="font-size: 62px;">
+                <span c8yIcon="c8y-chart"></span>
+            </div>
+            <h4 class="text-uppercase" style="margin:0; letter-spacing: 0.15em;">Add Dashboard</h4>
+        </div>
+        <div class="c8y-wizard-nav">
+            <span>Select Template</span>
+        </div>
+        <hr style="margin:0;">
+        <div class="modal-inner-scroll">
+            <div class="c8y-wizard-list-nav">
+                <a class="list-group-item clickable" (click)="dashboardTemplate = 'welcome'; dashboardName = 'Welcome'; dashboardIcon = 'home'; wizard.selectStep('create')">
+                    <span class="list-group-icon">
+                      <i c8yIcon="home"></i>
+                    </span>
+                    <span>Welcome Screen</span>
+                </a>
+            </div>
+        </div>
+        <div class="c8y-wizard-footer">
+            <button class="btn btn-default" (click)="wizard.selectStep('menu')">Back</button>
+            <button class="btn btn-default" (click)="bsModalRef.hide()">Cancel</button>
+        </div>
+    </wizard-step>
+    <wizard-step stepId="create">
+        <div class="modal-header text-center bg-primary">
+            <div style="font-size: 62px;">
+                <span c8yIcon="c8y-chart"></span>
+            </div>
+            <h4 class="text-uppercase" style="margin:0; letter-spacing: 0.15em;">Add Dashboard</h4>
+        </div>
+        <div class="c8y-wizard-nav">
+            <span>Dashboard Details</span>
+        </div>
+        <hr style="margin:0;">
+        <div class="modal-inner-scroll">
+            <form name="newAppBuilderAppForm" class="c8y-wizard-form">
+                <div class="form-group" *ngIf="showId()">
+                    <label for="id"><span>Dashboard ID</span></label>
+                    <input type="text" class="form-control" id="id" name="id" placeholder="e.g. 12345 (required)" required [autofocus]="showId()" [(ngModel)]="dashboardId">
+                </div>
+
+                <div class="form-group">
+                    <label for="name"><span>Name</span></label>
+                    <input type="text" class="form-control" id="name" name="name" placeholder="e.g. My First Application (required)" required [autofocus]="!showId()" [(ngModel)]="dashboardName">
+                </div>
+
+                <div class="form-group">
+                    <label for="icon"><span>Icon</span></label>
+                    <div class="input-group">
+                        <div class="input-group-addon"><i [c8yIcon]="dashboardIcon"></i></div>
+                        <input type="text" class="form-control" id="icon" name="icon" placeholder="e.g. bathtub (required)" required [(ngModel)]="dashboardIcon">
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="c8y-wizard-footer">
+            <button class="btn btn-default" (click)="wizard.selectStep('menu')">Back</button>
+            <button class="btn btn-default" (click)="bsModalRef.hide()">Cancel</button>
+            <button class="btn btn-primary" (click)="createDashboard()" [disabled]="busy">Save</button>
+        </div>
+    </wizard-step>
+</wizard>

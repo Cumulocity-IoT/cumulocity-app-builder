@@ -1,0 +1,14 @@
+{
+  "name": "Help",
+  "ngModules": [
+    "framework"
+  ],
+  "copy":[
+    "images/AddApp.png",
+    "images/AddDashboard.png",
+    "images/AddDashboardExisting.png",
+    "images/AppConfiguration.png",
+    "images/MainScreen.png",
+    "images/Styling.png"
+  ]
+}

@@ -1,0 +1,52 @@
+<div class="card-group interact-grid">
+    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3" style="min-height: 165px">
+        <a class="card add-card clickable" (click)="showCreateSimulatorDialog()">
+            <i c8yIcon="plus-square"></i><br>
+            Add simulator
+        </a>
+    </div>
+    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3" *ngFor="let sim of deviceSimulatorSvc.simulatorInstances">
+        <div class="card">
+            <div class="dropdown card-actions" dropdown (click)="$event.stopPropagation()">
+                <button title="Settings" class="dropdown-toggle c8y-dropdown" dropdownToggle type="button">
+                    <i c8yIcon="ellipsis-v"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-right" *dropdownMenu role="menu">
+                    <li role="menuitem">
+                        <a class="dropdown-item clickable" (click)="showEditSimulatorDialog(sim)">
+                            <i c8yIcon="edit"></i> Edit
+                        </a>
+                    </li>
+                    <li role="menuitem">
+                        <a class="dropdown-item clickable" (click)="deviceSimulatorSvc.deleteInstance(sim)">
+                            <i c8yIcon="times"></i> Remove
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-header separator">
+                <div class="card-icon">
+                    <i [c8yIcon]="sim.icon"></i>
+                </div>
+                <div class="text-truncate card-title" [title]="sim.instance.instanceName">
+                    {{sim.instance.instanceName}}
+                </div>
+            </div>
+            <div class="card-block row" style="margin-bottom: 5px;">
+                <div class="col-xs-6">
+                    <label class="c8y-switch">
+                        <input type="checkbox" [ngModel]="sim.instance.isStarted()" (ngModelChange)="$event ? sim.instance.start() : sim.instance.stop()"/>
+                        <span></span>
+                        {{sim.instance.isStarted() ? 'Running' : 'Paused'}}
+                    </label>
+                </div>
+                <div class="col-xs-6 text-right">
+                    <p class="text-truncate"><small class="text-muted">Type: {{sim.name}}</small></p>
+                    <p class="text-truncate"><small class="text-muted">Device: {{sim.deviceId}}</small></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

@@ -1,0 +1,35 @@
+diff --git a/node_modules/@c8y/ngx-components/fesm5/c8y-ngx-components-upgrade.js b/node_modules/@c8y/ngx-components/fesm5/c8y-ngx-components-upgrade.js
+index 55bdee8..abacb13 100644
+--- a/node_modules/@c8y/ngx-components/fesm5/c8y-ngx-components-upgrade.js
++++ b/node_modules/@c8y/ngx-components/fesm5/c8y-ngx-components-upgrade.js
+@@ -269,7 +269,7 @@ var DashboardBridgeService = /** @class */ (function () {
+      */
+     function (componentDefinitions) {
+         var _this = this;
+-        if (componentDefinitions === void 0) { componentDefinitions = []; }
++        if (componentDefinitions == null) { componentDefinitions = []; }
+         componentDefinitions.forEach((/**
+          * @param {?} cmp
+          * @return {?}
+@@ -1679,7 +1679,7 @@ var DashboardUpgradeModule = /** @class */ (function () {
+                     declarations: [WidgetComponent],
+                     entryComponents: [WidgetComponent],
+                     // Uncoment the following line for demo
+-                    exports: [DashboardWidgetDemoModule],
++                    // exports: [DashboardWidgetDemoModule],
+                     providers: [
+                         {
+                             provide: DashboardBridgeService,
+diff --git a/node_modules/@c8y/ngx-components/fesm5/c8y-ngx-components.js b/node_modules/@c8y/ngx-components/fesm5/c8y-ngx-components.js
+index 9e86f1b..0abca49 100644
+--- a/node_modules/@c8y/ngx-components/fesm5/c8y-ngx-components.js
++++ b/node_modules/@c8y/ngx-components/fesm5/c8y-ngx-components.js
+@@ -10638,7 +10638,7 @@ var AppSwitcherComponent = /** @class */ (function () {
+         this.ui = ui;
+         this.applications = applications;
+         var _a = this.ui, currentUser = _a.currentUser, currentTenant = _a.currentTenant;
+-        combineLatest(currentUser, currentTenant).pipe(first()).subscribe((/**
++        combineLatest(currentUser, currentTenant).subscribe((/**
+          * @param {?} __0
+          * @return {?}
+          */
