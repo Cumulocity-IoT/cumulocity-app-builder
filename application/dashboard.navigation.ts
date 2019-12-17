@@ -60,7 +60,7 @@ export class DashboardNavigation implements NavigatorNodeFactory {
         return this.nodes;
     }
 
-    dashboardsToNavNodes(appId: string, dashboards: {name: string, icon: string, id: string}[]): NavigatorNode[] {
+    dashboardsToNavNodes(appId: string, dashboards: {name: string, icon: string, id: string, deviceId?: string}[]): NavigatorNode[] {
         const hierarchy = dashboards.reduce((acc, dashboard, i) => {
             const path = dashboard.name.split('/').filter(pathSegment => pathSegment != '');
             const currentHierarchyNode = path.reduce((parent, segment, j) => {
@@ -79,7 +79,11 @@ export class DashboardNavigation implements NavigatorNodeFactory {
                 return parent.children[segment];
             }, acc);
 
-            currentHierarchyNode.node.path = `/application/${appId}/dashboard/${dashboard.id}`;
+            if (dashboard.deviceId) {
+                currentHierarchyNode.node.path = `/application/${appId}/dashboard/${dashboard.id}/device/${dashboard.deviceId}`;
+            } else {
+                currentHierarchyNode.node.path = `/application/${appId}/dashboard/${dashboard.id}`;
+            }
             currentHierarchyNode.node.icon = dashboard.icon;
             currentHierarchyNode.node.priority = dashboards.length - i + 1000;
             return acc;

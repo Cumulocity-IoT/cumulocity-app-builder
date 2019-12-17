@@ -1,0 +1,14 @@
+{
+  "name": "Data Point Explorer UI",
+  "ngModules": [
+    "c8y.cockpit.dataPointExplorerUI"
+  ],
+  "imports": [
+    "core/dataPointExplorer"
+  ],
+  "category": "Measurements",
+  "icon": "bell",
+  "color": "#F2DF0F",
+  "description": "Adds Data Point Explorer UI elements like navigator item and views.",
+  "folderName": "dataPointExplorerUI"
+}

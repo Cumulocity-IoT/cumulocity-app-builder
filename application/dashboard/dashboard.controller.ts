@@ -18,7 +18,7 @@ export class DashboardController {
             )
             .subscribe(dashboard => {
                 c8yTitle.changeTitle({
-                    title: dashboard.c8y_Dashboard.name
+                    title: dashboard.c8y_Dashboard.name.split('/').reduce((acc, val) => val)
                 });
             });
     }

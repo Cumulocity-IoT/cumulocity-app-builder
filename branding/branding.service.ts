@@ -6,17 +6,19 @@ import * as d3 from "d3-color";
 export class BrandingService {
     appGeneral: HTMLStyleElement;
     appBranding: HTMLStyleElement;
+    favicon: HTMLLinkElement;
 
     constructor() {
         this.appGeneral = document.createElement('style');
         this.appBranding = document.createElement('style');
         document.head.appendChild(this.appGeneral);
         document.head.appendChild(this.appBranding);
+
+        this.favicon = document.head.querySelector('[rel=icon]');
     }
 
     updateStyleForApp(app) {
         if (app && app.applicationBuilder) {
-
             this.appGeneral.innerText = `
 .title .c8y-app-icon i {
     display: none;
@@ -33,6 +35,9 @@ export class BrandingService {
     content: '${CSS.escape(app.name)}';
     display: block;
     margin-top: -6px;
+    padding-left: 5px;
+    padding-right: 5px;
+    white-space: pre-wrap;
 }
 .title span {
     display: none;
@@ -62,6 +67,10 @@ export class BrandingService {
 `;
 
             if (app.applicationBuilder.branding && app.applicationBuilder.branding.enabled && app.applicationBuilder.branding.colors) {
+                const faviconUrl = this.createFaviconUrl(app.applicationBuilder.branding.colors.primary, app.applicationBuilder.icon);
+                this.favicon.setAttribute('type', 'image/png');
+                this.favicon.setAttribute('href', faviconUrl);
+
                 this.appBranding.innerText = `
 body {
     /* Navigator color: */
@@ -94,9 +103,16 @@ body {
 }
 `;
             } else {
+                const faviconUrl = this.createFaviconUrl('#1776BF', app.applicationBuilder.icon);
+                this.favicon.setAttribute('type', 'image/png');
+                this.favicon.setAttribute('href', faviconUrl);
+
                 this.appBranding.innerText = '';
             }
         } else {
+            this.favicon.removeAttribute('type');
+            this.favicon.setAttribute('href', 'favicon.ico');
+
             this.appGeneral.innerText = `
 .title span::after {
     content: "V${__VERSION__}";
@@ -132,5 +148,19 @@ body {
         } catch(e) {
             return 'white';
         }
+    }
+
+    createFaviconUrl(primaryColor: string, icon: string): string {
+        const color = this.colorToHex(primaryColor);
+        const canvas = document.createElement('canvas');
+        canvas.height = 16;
+        canvas.width = 16;
+        const context = canvas.getContext('2d');
+        context.font = '16px FontAwesome';
+        context.textBaseline = 'top';
+        context.textAlign = 'left';
+        context.fillStyle = color;
+        context.fillText(fa(icon), 0, 0, 16);
+        return canvas.toDataURL();
     }
 }

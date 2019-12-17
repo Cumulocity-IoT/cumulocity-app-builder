@@ -1,0 +1,86 @@
+<div class="data-point-explorer" style="clear:both" ng-controller="c8yDataPointExplorerCtrl">
+  <c8y-ui-action-bar-set>
+    <li class="navbar-form">
+      <label translate>Aggregation</label>
+        <c8y-aggregation
+        date-from="data.dateFrom"
+        date-to="data.dateTo"
+        realtime="data.realtime"
+        aggregation="data.aggregation"
+        auto="true">
+        </c8y-aggregation>
+    </li>
+    <li class="navbar-form">
+        <c8y-interval
+        date-from="data.dateFrom"
+        date-to="data.dateTo"
+        interval="data.interval">
+        </c8y-interval>
+    </li>
+    <li>
+      <c8y-realtime-button
+        channel="{{channel}}"
+        state="data.realtime"
+        on-data="data.onData($data)">
+      </c8y-realtime-button>
+      <c8y-realtime-button
+          ng-show="false"
+          channel="{{alarmsChannel}}"
+          state="data.realtime"
+          on-data="data.onAlarm($data)"
+          on-data-update="data.onAlarm($data)"
+        >
+        </c8y-realtime-button>
+        <c8y-realtime-button
+          ng-show="false"
+          channel="{{eventsChannel}}"
+          state="data.realtime"
+          on-data="data.onEvent($data)"
+        >
+        </c8y-realtime-button>
+    </li>
+  </c8y-ui-action-bar-set>
+
+
+  <div class="row">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-block">
+          <div class="c8yGraphFill" style="height:540px; clear: both;">
+            <c8y-chart
+              datapoints="data.graphDataPoints"
+              date-from="data.dateFrom"
+              date-to="data.dateTo"
+              realtime="data.realtime"
+              aggregation="data.aggregation"
+              show-time="true"
+              on-data="data.onData"
+              on-update-dates="onUpdateDates($dateFrom, $dateTo)"
+              on-update-displayed-dates="onUpdateDisplayedDates($dateFrom, $dateTo)"
+              on-box-changed="onBoxChanged(box)"
+            >
+            </c8y-chart>
+          </div>
+          <c8y-alarms-events-timelines-chart
+            ng-if="data.graphAlarmsEventsConfigs.length"
+            alarms-events-configs="data.graphAlarmsEventsConfigs"
+            date-from="data.displayedDateFrom"
+            date-to="data.displayedDateTo"
+            on-update-dates="onUpdateDates($dateFrom, $dateTo)"
+            realtime="data.realtime"
+            on-realtime-alarm="data.onAlarm"
+            on-realtime-event="data.onEvent"
+            chart-box="chartBox"
+          >
+          </c8y-alarms-events-timelines-chart>
+
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <c8y-data-point-list datapoints="data.datapoints"></c8y-data-point-list>
+      <c8y-alarms-events-timelines-config configs="data.alarmsEventsConfigs"></c8y-alarms-events-timelines-config>
+    </div>
+  </div>
+
+</div>

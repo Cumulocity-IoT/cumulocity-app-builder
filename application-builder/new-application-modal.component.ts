@@ -20,10 +20,7 @@ import {AppStateService} from "@c8y/ngx-components";
             
             <div class="form-group">
                 <label for="icon"><span>Icon</span></label>
-                <div class="input-group">
-                    <div class="input-group-addon"><i [c8yIcon]="appIcon"></i></div>
-                    <input type="text" class="form-control" id="icon" name="icon" placeholder="e.g. bathtub (required)" required [(ngModel)]="appIcon">
-                </div>
+                <icon-selector id="icon" name="icon" [(value)]="appIcon"></icon-selector>
             </div>
         </form>
     </div>

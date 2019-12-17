@@ -1,7 +1,6 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, ViewChild} from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap/modal';
-import {ApplicationService, ApplicationAvailability, ApplicationType, InventoryService} from '@c8y/client';
-import {AppStateService} from "@c8y/ngx-components";
+import {ApplicationService, InventoryService} from '@c8y/client';
 import {WizardComponent} from "../../wizard/wizard.component";
 import {DashboardNavigation} from "../dashboard.navigation";
 import {WELCOME_DASHBOARD_TEMPLATE} from "./dashboard-templates";
@@ -17,6 +16,7 @@ export class NewDashboardModalComponent {
     dashboardId: string = '12598412';
     dashboardName: string = '';
     dashboardIcon: string = 'th';
+    deviceId: string = '';
 
     dashboardTemplate: 'welcome' = 'welcome';
 
@@ -75,7 +75,8 @@ export class NewDashboardModalComponent {
             {
                 id: dashboardId,
                 name,
-                icon
+                icon,
+                ...(this.deviceId != '' ? { deviceId: this.deviceId } : {})
             }
         ];
         await this.appService.update({
@@ -118,7 +119,8 @@ export class NewDashboardModalComponent {
             {
                 id: dashboardManagedObject.id,
                 name,
-                icon
+                icon,
+                ...(this.deviceId != '' ? { deviceId: this.deviceId } : {})
             }
         ];
         await this.appService.update({

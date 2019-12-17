@@ -3,29 +3,24 @@ import {ActivatedRoute} from "@angular/router";
 import {ApplicationService, InventoryService} from "@c8y/client";
 import {Observable, from, Subject, Subscription} from "rxjs";
 import {debounceTime, map, switchMap, tap} from "rxjs/operators";
-import {WELCOME_DASHBOARD_TEMPLATE} from "./dashboard-templates";
 import {DashboardNavigation} from "../dashboard.navigation";
 import {AppStateService} from "@c8y/ngx-components";
 import {BrandingService} from "../../branding/branding.service";
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import {NewDashboardModalComponent} from "./new-dashboard-modal.component";
+import {EditDashboardModalComponent} from "./edit-dashboard-modal.component";
 
 interface DashboardConfig {
     id: string,
     name: string,
-    icon: string
+    icon: string,
+    deviceId?: string
 }
 
 @Component({
     templateUrl: './dashboard-config.component.html'
 })
 export class DashboardConfigComponent implements OnDestroy {
-    welcomeDashboardTemplate = WELCOME_DASHBOARD_TEMPLATE;
-
-    newDashboardName: string = 'Hello World';
-    newDashboardId: number = 12598412;
-    newDashboardIcon: string = 'map-signs';
-
     newAppName: string;
     newAppIcon: string;
 
@@ -102,6 +97,11 @@ export class DashboardConfigComponent implements OnDestroy {
 
     showCreateDashboardDialog(app) {
         this.bsModalRef = this.modalService.show(NewDashboardModalComponent, { class: 'c8y-wizard', initialState: { app } });
+    }
+
+    showEditDashboardDialog(app, dashboards: DashboardConfig[],index: number) {
+        const dashboard = dashboards[index];
+        this.bsModalRef = this.modalService.show(EditDashboardModalComponent, { class: 'c8y-wizard', initialState: { app, index, dashboardName: dashboard.name, dashboardIcon: dashboard.icon, deviceId: dashboard.deviceId } });
     }
 
     ngOnDestroy(): void {

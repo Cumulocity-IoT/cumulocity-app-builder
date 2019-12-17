@@ -87,16 +87,18 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="name"><span>Name</span></label>
-                    <input type="text" class="form-control" id="name" name="name" placeholder="e.g. My First Application (required)" required [autofocus]="!showId()" [(ngModel)]="dashboardName">
+                    <label for="name"><span>Path</span></label>
+                    <input type="text" class="form-control" id="name" name="name" placeholder="e.g. Some Folder/My First Application (required)" required [autofocus]="!showId()" [(ngModel)]="dashboardName">
                 </div>
 
                 <div class="form-group">
                     <label for="icon"><span>Icon</span></label>
-                    <div class="input-group">
-                        <div class="input-group-addon"><i [c8yIcon]="dashboardIcon"></i></div>
-                        <input type="text" class="form-control" id="icon" name="icon" placeholder="e.g. bathtub (required)" required [(ngModel)]="dashboardIcon">
-                    </div>
+                    <icon-selector id="icon" name="icon" [(value)]="dashboardIcon"></icon-selector>
+                </div>
+
+                <div class="form-group">
+                    <label for="device"><span>Device ID (Optional)</span></label>
+                    <input type="text" class="form-control" id="device" name="device" placeholder="e.g. 12345 (optional)" [(ngModel)]="deviceId">
                 </div>
             </form>
         </div>

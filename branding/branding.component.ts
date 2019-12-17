@@ -69,10 +69,16 @@ export class BrandingComponent implements OnDestroy {
             app.applicationBuilder.branding.logo = dataUrl;
             app.applicationBuilder.branding.logoHeight = Math.min(logoHeight, Math.ceil(240*logoHeight/logoWidth));
         } else {
-            app.applicationBuilder.branding.logo = undefined;
-            app.applicationBuilder.branding.hideIcon = false;
-            app.applicationBuilder.branding.logoHeight = undefined;
+            this.removeLogo(app);
+            return;
         }
+        this.showBrandingChange(app);
+    }
+
+    removeLogo(app) {
+        app.applicationBuilder.branding.logo = undefined;
+        app.applicationBuilder.branding.hideIcon = false;
+        app.applicationBuilder.branding.logoHeight = undefined;
         this.showBrandingChange(app);
     }
 

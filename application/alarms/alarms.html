@@ -1,0 +1,71 @@
+<div ng-controller="alarmListCtrl as vm">
+  <c8y-ui-action-bar-set>
+    <li class="btn-group" action-bar-position="left">
+      <button
+        ng-repeat="severity in vm.severities"
+        type="button"
+        class="btn btn-default"
+        ng-model="severity.active"
+        ng-click="severity.toggleActive()"
+        ng-class="{'active': severity.active}"
+        title="{{severity.name | lowercase | humanize | translate}}"
+      >
+        <i c8y-icon="{{vm.icon(severity.name)}}" class="status" ng-class="severity.name | lowercase"></i>
+        <span class="hidden-sm" ng-bind="severity.name | lowercase | humanize | translate"></span>
+        <span ng-if="severity.active" class="badge badge-dark">
+          <span ng-if="severity.countLoading"><i c8y-icon="circle-o-notch" class="fa-spin"></i></span>
+          <span ng-if="!severity.countLoading" ng-bind="severity.count"></span>
+        </span>
+      </button>
+      <!-- @TODO: this is placeholder button to show all alarm types
+      <button type="button" class="btn btn-default">
+        {{'All' | translate}}
+      </button>
+      -->
+    </li>
+
+    <li class="navbar-form">
+      <label class="c8y-switch">
+        <input
+          type="checkbox"
+          ng-model="vm.unresolved"
+          ng-change="vm.onVmUnresolvedChange()"
+          ng-true-value="false"
+          ng-false-value="true">
+        <span></span>
+        <span translate>Show cleared alarms</span>
+      </label>
+    </li>
+
+    <li>
+      <button type="button" class="btn btn-link" ng-click="vm.resolveAll()">
+        <i c8y-icon="check-circle"></i> {{'Clear all`alarms`' | translate}}
+      </button>
+    </li>
+
+    <c8y-realtime-switch state="vm.realtime"></c8y-realtime-switch>
+
+    <a
+      href=""
+      class="btn btn-link"
+      title="{{'Refresh alarm list contents' | translate}}"
+      ng-click="vm.refresh()"
+    >
+      <i c8y-icon="refresh" ng-class="{'fa-spin': vm.isRefreshing()}"></i>
+      <span translate>Reload</span>
+    </a>
+  </c8y-ui-action-bar-set>
+
+  <div ng-repeat="severity in vm.severities">
+    <c8y-alarm-list
+      ng-if="severity.active"
+      filter="severity.filters"
+      realtime="vm.realtime"
+      hide-header-actions="true"
+      data-title="{text:(severity.name | humanize), icon:vm.icon(severity.name), class:(severity.name | lowercase)}"
+      unresolved="vm.clientSideUnresolved()"
+      refresh-loading="severity.refreshing"
+    >
+    </c8y-alarm-list>
+  </div>
+</div>

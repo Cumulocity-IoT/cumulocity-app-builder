@@ -17,9 +17,12 @@ import {DashboardConfigComponent} from "./dashboard-config/dashboard-config.comp
 import {CommonModule} from "@angular/common";
 import { SortableModule } from 'ngx-bootstrap/sortable';
 import {NewDashboardModalComponent} from "./dashboard-config/new-dashboard-modal.component";
-import {WizardComponent} from "../wizard/wizard.component";
-import {WizardStepComponent} from "../wizard/wizard-step.component";
 import {WizardModule} from "../wizard/wizard.module";
+import {DataExplorerModule} from "./dataexplorer/data-explorer.module";
+import {SmartRulesModule} from "./smartrules/smart-rules.module";
+import {AlarmsModule} from "./alarms/alarms.module";
+import {IconSelectorModule} from "../icon-selector/icon-selector.module";
+import {EditDashboardModalComponent} from "./dashboard-config/edit-dashboard-modal.component";
 
 @Injectable()
 class RedirectToFirstDashboard implements CanActivate {
@@ -57,23 +60,29 @@ class RedirectToFirstDashboard implements CanActivate {
             {
                 path: 'application/:applicationId/config',
                 component: DashboardConfigComponent
-            },{
+            }, {
                 path: 'application/:applicationId',
                 canActivate: [RedirectToFirstDashboard],
                 children: []
             }
         ]),
         DashboardModule,
+        DataExplorerModule,
+        SmartRulesModule,
+        AlarmsModule,
         CoreModule,
         SortableModule.forRoot(),
-        WizardModule
+        WizardModule,
+        IconSelectorModule
     ],
     declarations: [
         DashboardConfigComponent,
-        NewDashboardModalComponent
+        NewDashboardModalComponent,
+        EditDashboardModalComponent
     ],
     entryComponents: [
-        NewDashboardModalComponent
+        NewDashboardModalComponent,
+        EditDashboardModalComponent
     ],
     providers: [
         DashboardNavigation,

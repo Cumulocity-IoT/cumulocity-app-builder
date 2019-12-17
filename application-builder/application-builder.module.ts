@@ -7,6 +7,7 @@ import {CoreModule, HOOK_NAVIGATOR_NODES} from "@c8y/ngx-components";
 import {ApplicationBuilderNavigation} from "./application-builder.navigation";
 import {BsDropdownModule} from "ngx-bootstrap/dropdown";
 import {NewApplicationModalComponent} from "./new-application-modal.component";
+import {IconSelectorModule} from "../icon-selector/icon-selector.module";
 
 @NgModule({
     imports: [
@@ -24,7 +25,8 @@ import {NewApplicationModalComponent} from "./new-application-modal.component";
                 redirectTo: 'application-builder'
             }
         ]),
-        CoreModule
+        CoreModule,
+        IconSelectorModule
     ],
     declarations: [
         ApplicationBuilderComponent,

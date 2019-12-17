@@ -11,8 +11,17 @@ declare const angular: any;
 angular
     .module('framework', [])
     .config(['c8yViewsProvider', c8yViewsProvider => {
-        c8yViewsProvider.when('application/:applicationId/dashboard/:frameworkDashboardId', {
-            template: '<framework-dashboard/>'
+        const paths = [
+            'application/:applicationId/dashboard/:frameworkDashboardId',
+            'application/:applicationId/dashboard/:frameworkDashboardId/device/:deviceId'
+        ];
+        paths.forEach((path) => {
+            c8yViewsProvider.when(path, {
+                priority: 1000,
+                name: "Dashboard",
+                icon: "th",
+                template: '<framework-dashboard/>'
+            });
         });
     }])
     .factory('inventoryService', downgradeInjectable(InventoryService))
@@ -21,7 +30,7 @@ angular
 angular
     .module('framework')
     .component('frameworkDashboard', {
-        template: `<c8y-dashboard-gridstack id="vm.dashboardId" is-frozen="false"/>`,
+        template: `<c8y-dashboard-gridstack id="vm.dashboardId" name="app-builder" is-frozen="false"/>`,
         controllerAs: 'vm',
         controller: [
             '$routeParams',

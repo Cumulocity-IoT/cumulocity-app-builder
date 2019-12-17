@@ -33,7 +33,10 @@
                 <div class="card-block">
                     <div class="form-group">
                         <label for="logo"><span>Logo</span></label>
-                        <input class="form-control" id="logo" name="logo" type="file" [disabled]="!app.applicationBuilder.branding.enabled" (change)="logoChange(app, $event.target.files)">
+                        <div style="display: flex">
+                            <input class="form-control" style="flex: 1;" id="logo" name="logo" type="file" [disabled]="!app.applicationBuilder.branding.enabled" (change)="logoChange(app, $event.target.files)">
+                            <button class="btn btn-primary" [disabled]="!app.applicationBuilder.branding.enabled || !app.applicationBuilder.branding.logo" (click)="removeLogo(app)">Clear</button>
+                        </div>
                     </div>
 
                     <div class="form-group">

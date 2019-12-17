@@ -20,7 +20,7 @@ import {CustomWidgetsModule} from "./custom-widgets/custom-widgets.module";
 
 @NgModule({
   declarations: [
-      HelpComponent
+    HelpComponent
   ],
   imports: [
     BrowserAnimationsModule,
@@ -34,12 +34,12 @@ import {CustomWidgetsModule} from "./custom-widgets/custom-widgets.module";
         path: 'application/:applicationId/branding',
         component: BrandingComponent,
         canDeactivate: [BrandingDirtyGuardService]
-      },{
+      }, {
         path: 'help',
         component: HelpComponent
       },
       ...UPGRADE_ROUTES,
-    ], { enableTracing: false, useHash: true }),
+    ], {enableTracing: false, useHash: true}),
     CoreModule.forRoot(),
     ApplicationBuilderModule,
     BsDropdownModule.forRoot(),
@@ -54,7 +54,7 @@ import {CustomWidgetsModule} from "./custom-widgets/custom-widgets.module";
     UpgradeModule
   ],
   providers: [
-    { provide: HOOK_NAVIGATOR_NODES, useClass: Navigation, multi: true},
+    {provide: HOOK_NAVIGATOR_NODES, useClass: Navigation, multi: true},
     ConfigNavigationService
   ]
 })

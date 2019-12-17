@@ -29,6 +29,7 @@
     "@c8y/ngx-components": "1005.0.3",
     "@c8y/style": "1005.0.3",
     "@ng-reactive/async-input": "0.0.1",
+    "@ng-select/ng-select": "^2.20.5",
     "angular": "1.6.9",
     "core-js": "^2.6.2",
     "css.escape": "^1.5.1",
