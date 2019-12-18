@@ -8,6 +8,9 @@ export class BrandingService {
     appBranding: HTMLStyleElement;
     favicon: HTMLLinkElement;
 
+    fontAwesomeLoaded: Promise<void>;
+    isFontAwesomeLoaded: boolean = false;
+
     constructor() {
         this.appGeneral = document.createElement('style');
         this.appBranding = document.createElement('style');
@@ -15,9 +18,37 @@ export class BrandingService {
         document.head.appendChild(this.appBranding);
 
         this.favicon = document.head.querySelector('[rel=icon]');
+
+
+        if ((document as any).fonts) {
+            this.fontAwesomeLoaded = new Promise(resolve => {
+                function check() {
+                    setTimeout(() => {
+                        if ((document as any).fonts.check('16px FontAwesome')) {
+                            resolve();
+                        } else {
+                            check();
+                        }
+                    }, 100);
+                }
+            });
+        } else {
+            this.fontAwesomeLoaded = Promise.resolve();
+        }
+
+        this.fontAwesomeLoaded.then(() => {
+            this.isFontAwesomeLoaded = true;
+        });
     }
 
     updateStyleForApp(app) {
+        // If font awesome is not loaded then refresh the view when it loads - so that the favicon can be loaded properly
+        if (!this.isFontAwesomeLoaded) {
+            this.fontAwesomeLoaded.then(() => {
+                this.updateStyleForApp(app);
+            });
+        }
+
         if (app && app.applicationBuilder) {
             this.appGeneral.innerText = `
 .title .c8y-app-icon i {

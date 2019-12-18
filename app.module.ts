@@ -1,8 +1,8 @@
 import { NgModule} from '@angular/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import {RouterModule as NgRouterModule} from '@angular/router';
+import {NavigationError, Router, RouterModule as NgRouterModule} from '@angular/router';
 import {UpgradeModule as NgUpgradeModule} from '@angular/upgrade/static';
-import {CoreModule, HOOK_NAVIGATOR_NODES, RouterModule} from '@c8y/ngx-components';
+import {AppStateService, CoreModule, HOOK_NAVIGATOR_NODES, RouterModule} from '@c8y/ngx-components';
 import { UpgradeModule, HybridAppModule, UPGRADE_ROUTES } from '@c8y/ngx-components/upgrade';
 // import {DeviceSimulatorConfigModule} from "./device-simulator-config/device-simulator-config.module";
 import {ApplicationBuilderModule} from "./application-builder/application-builder.module";
@@ -17,6 +17,9 @@ import {BrandingDirtyGuardService} from "./branding/branding-dirty-guard.service
 import {HelpComponent} from "./help/help.component";
 import {MarkdownModule} from "ngx-markdown";
 import {CustomWidgetsModule} from "./custom-widgets/custom-widgets.module";
+import {Location} from "@angular/common";
+import {filter, first, map, startWith, tap, withLatestFrom} from "rxjs/operators";
+import {IUser} from '@c8y/client';
 
 @NgModule({
   declarations: [
@@ -59,7 +62,22 @@ import {CustomWidgetsModule} from "./custom-widgets/custom-widgets.module";
   ]
 })
 export class AppModule extends HybridAppModule {
-  constructor(protected upgrade: NgUpgradeModule) {
+  constructor(protected upgrade: NgUpgradeModule, router: Router, location: Location, appStateService: AppStateService) {
     super();
+
+    // Fixes a bug where the router removes the hash when the user tries to navigate to an app and is not logged in
+    appStateService.currentUser.pipe(filter(user => user != null)).pipe(
+        withLatestFrom(
+            router.events.pipe(
+                filter(event => event instanceof NavigationError),
+                tap((event: NavigationError) => location.replaceState(event.url)), // Change the location without navigating anywhere
+                startWith(null)
+            )
+        ),
+        first(),
+        filter(([, event]: [IUser, NavigationError | null]) => event != null),
+        map(([, event]: [IUser, NavigationError]) => event)
+    )
+    .subscribe(event => router.navigateByUrl(event.url));
   }
 }

@@ -4,7 +4,7 @@
   "description": "Application builder for Cumulocity (written by Software AG Global Presales)",
   "navMain": "index.js",
   "scripts": {
-    "start": "c8ycli server --env.extraWebpackConfig=./extra-webpack.config.js -u http://racm-manufacturing.eu-latest.cumulocity.com",
+    "start": "c8ycli server --env.extraWebpackConfig=./extra-webpack.config.js -u http://industrysolutions.cumulocity.com",
     "build": "c8ycli build --env.extraWebpackConfig=./extra-webpack.config.js",
     "deploy": "c8ycli deploy --env.extraWebpackConfig=./extra-webpack.config.js -u http://industrysolutions.cumulocity.com",
     "postinstall": "patch-package"
