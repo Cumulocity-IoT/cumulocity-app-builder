@@ -30,7 +30,7 @@ angular
 angular
     .module('framework')
     .component('frameworkDashboard', {
-        template: `<c8y-dashboard-gridstack id="vm.dashboardId" name="app-builder" is-frozen="false"/>`,
+        template: `<c8y-dashboard-gridstack id="vm.dashboardId" is-frozen="false"/>`,
         controllerAs: 'vm',
         controller: [
             '$routeParams',

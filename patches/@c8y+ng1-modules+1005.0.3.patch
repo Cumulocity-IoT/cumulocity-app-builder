@@ -1,3 +1,77 @@
+diff --git a/node_modules/@c8y/ng1-modules/dashboard2/dashboard/dashboard.html b/node_modules/@c8y/ng1-modules/dashboard2/dashboard/dashboard.html
+index 7fc1f20..e924ca7 100644
+--- a/node_modules/@c8y/ng1-modules/dashboard2/dashboard/dashboard.html
++++ b/node_modules/@c8y/ng1-modules/dashboard2/dashboard/dashboard.html
+@@ -35,40 +35,40 @@
+       </button>
+     </li>
+ 
+-    <button action-bar-position="more"
+-      title="{{'Copy dashboard' | translate}}"
+-      ng-hide="isNamed"
+-      ng-click="copyDashboard()">
+-      <i c8y-icon="clone"></i> <translate>Copy dashboard</translate>
+-    </button>
++<!--    <button action-bar-position="more"-->
++<!--      title="{{'Copy dashboard' | translate}}"-->
++<!--      ng-hide="isNamed"-->
++<!--      ng-click="copyDashboard()">-->
++<!--      <i c8y-icon="clone"></i> <translate>Copy dashboard</translate>-->
++<!--    </button>-->
+ 
+-    <button action-bar-position="more"
+-      title="{{'Delete dashboard' | translate}}"
+-      ng-click="removeDashboard()"
+-      ng-hide="isNamed"
+-      ng-disabled="!canWriteToDashboard()">
+-      <i c8y-icon="trash"></i> <translate>Delete dashboard</translate>
+-    </button>
++<!--    <button action-bar-position="more"-->
++<!--      title="{{'Delete dashboard' | translate}}"-->
++<!--      ng-click="removeDashboard()"-->
++<!--      ng-hide="isNamed"-->
++<!--      ng-disabled="!canWriteToDashboard()">-->
++<!--      <i c8y-icon="trash"></i> <translate>Delete dashboard</translate>-->
++<!--    </button>-->
+ 
+-    <button action-bar-position="more"
+-      title="{{'Restore default dashboard' | translate}}"
+-      ng-click="restoreDefault()"
+-      ng-show="isRestorable()"
+-      ng-disabled="!canWriteToDashboard()">
+-      <i c8y-icon="undo"></i> <translate>Restore dashboard</translate>
+-    </button>
++<!--    <button action-bar-position="more"-->
++<!--      title="{{'Restore default dashboard' | translate}}"-->
++<!--      ng-click="restoreDefault()"-->
++<!--      ng-show="isRestorable()"-->
++<!--      ng-disabled="!canWriteToDashboard()">-->
++<!--      <i c8y-icon="undo"></i> <translate>Restore dashboard</translate>-->
++<!--    </button>-->
+ 
+-    <button action-bar-position="more"
+-      title="{{'Send dashboard via email' | translate}}"
+-      ng-click="sendViaEmail()"
+-      ng-show="showSendViaEmail">
+-        <i c8y-icon="paper-plane"></i> <translate>Send via email</translate>
+-    </button>
++<!--    <button action-bar-position="more"-->
++<!--      title="{{'Send dashboard via email' | translate}}"-->
++<!--      ng-click="sendViaEmail()"-->
++<!--      ng-show="showSendViaEmail">-->
++<!--        <i c8y-icon="paper-plane"></i> <translate>Send via email</translate>-->
++<!--    </button>-->
+ 
+-    <li action-bar-position="more"
+-      ng-transclude="actions">
++<!--    <li action-bar-position="more"-->
++<!--      ng-transclude="actions">-->
+ 
+-    </li>
++<!--    </li>-->
+   </c8y-ui-action-bar-set>
+ 
+ 
 diff --git a/node_modules/@c8y/ng1-modules/dashboardUI/dashboardUi.provider.js b/node_modules/@c8y/ng1-modules/dashboardUI/dashboardUi.provider.js
 index 1f61cf5..9a7a9c9 100644
 --- a/node_modules/@c8y/ng1-modules/dashboardUI/dashboardUi.provider.js
