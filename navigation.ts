@@ -92,7 +92,7 @@ export class Navigation implements NavigatorNodeFactory {
                             priority: 10
                         }));
                         configNavService.changeConfigNode(appId, configNode);
-                        if (userService.hasAllRoles(appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN", "ROLE_INVENTORY_CREATE"])) {
+                        if (userService.hasAllRoles(appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN"])) {
                             return [configNode];
                         } else {
                             return [];

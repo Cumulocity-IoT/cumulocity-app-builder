@@ -1,7 +1,7 @@
 <c8y-title>Applications</c8y-title>
 
 <div class="card-group interact-grid">
-    <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2" style="min-height: 194px;">
+    <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2" style="min-height: 194px;" *ngIf="userHasAdminRights">
         <a class="card add-card clickable" (click)="createAppWizard()">
             <i c8yIcon="plus-square"></i><br>
             Add application
@@ -9,7 +9,7 @@
     </div>
     <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2" *ngFor="let app of applications | async">
         <div class="card clickable" [routerLink]="'/application/' + app.id">
-            <div class="dropdown card-actions" dropdown (click)="$event.stopPropagation()">
+            <div class="dropdown card-actions" dropdown (click)="$event.stopPropagation()" *ngIf="userHasAdminRights">
                 <button title="Settings" class="dropdown-toggle c8y-dropdown" dropdownToggle type="button">
                     <i c8yIcon="ellipsis-v"></i>
                 </button>
