@@ -21,9 +21,18 @@ index 55bdee8..abacb13 100644
                          {
                              provide: DashboardBridgeService,
 diff --git a/node_modules/@c8y/ngx-components/fesm5/c8y-ngx-components.js b/node_modules/@c8y/ngx-components/fesm5/c8y-ngx-components.js
-index 9e86f1b..0abca49 100644
+index 9e86f1b..8db9a0b 100644
 --- a/node_modules/@c8y/ngx-components/fesm5/c8y-ngx-components.js
 +++ b/node_modules/@c8y/ngx-components/fesm5/c8y-ngx-components.js
+@@ -1497,7 +1497,7 @@ var NavigatorNode = /** @class */ (function () {
+     function NavigatorNode(data) {
+         this.children = [];
+         this.parents = [];
+-        this.routerLinkExact = true;
++        this.routerLinkExact = false;
+         this.open = false;
+         this.hidden = false;
+         this.draggable = false;
 @@ -10638,7 +10638,7 @@ var AppSwitcherComponent = /** @class */ (function () {
          this.ui = ui;
          this.applications = applications;

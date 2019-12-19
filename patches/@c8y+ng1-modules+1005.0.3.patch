@@ -72,6 +72,19 @@ index 7fc1f20..e924ca7 100644
    </c8y-ui-action-bar-set>
  
  
+diff --git a/node_modules/@c8y/ng1-modules/dashboard2/dashboardWidget/config.html b/node_modules/@c8y/ng1-modules/dashboard2/dashboardWidget/config.html
+index 9b8c368..96fd222 100644
+--- a/node_modules/@c8y/ng1-modules/dashboard2/dashboardWidget/config.html
++++ b/node_modules/@c8y/ng1-modules/dashboard2/dashboardWidget/config.html
+@@ -31,7 +31,7 @@
+ 
+       <div class="form-group" ng-if="data.cmp && !componentOptions.noDeviceTarget" ng-style="{height: hideTarget && '0', overflow: 'hidden'}">
+         <label translate>Target assets or devices</label>
+-        <c8y-device-selector-combo parent="rootId" selected-child-device="_config.device" groups-selectable="componentOptions.groupsSelectable">
++        <c8y-device-selector-combo initial-selection="rootId" selected-child-device="_config.device" groups-selectable="componentOptions.groupsSelectable">
+         </c8y-device-selector-combo>
+       </div>
+ 
 diff --git a/node_modules/@c8y/ng1-modules/dashboardUI/dashboardUi.provider.js b/node_modules/@c8y/ng1-modules/dashboardUI/dashboardUi.provider.js
 index 1f61cf5..9a7a9c9 100644
 --- a/node_modules/@c8y/ng1-modules/dashboardUI/dashboardUi.provider.js
@@ -80,6 +93,351 @@ index 1f61cf5..9a7a9c9 100644
 -"use strict";!function(){function t(t,a,d){i.$inject=["c8yPermissions","dashboardSvc"],c.$inject=["$route","dashboardSvc"],s.$inject=["$location","dashboardSvc","gettextCatalog","c8yUiUtil","c8yActions"];var o=_.map(["/device/:deviceId","/group/:groupId"],function(t){return"".concat(t,"/dashboard/:dashboardId")}),e=[{text:d("Add dashboard"),priority:2500,action:c,showIf:i,path:"/(device|group)/\\d+"}],n={template:'<c8y-dashboard-gridstack id="::vm.dashboardId"></c8y-dashboard-gridstack>',controllerAs:"vm",controller:["$routeParams",function(t){this.dashboardId=t.dashboardId}]};return{initUI:function(){e.forEach(t.addUrlAction),_.forEach(o,r)},$get:s};function r(t){a.when(t,n)}function c(d,o){var t=o.getContext(),e="".concat(t.context,"Add"),a=t.id;o.addDashboard({singleUseDashboards:!0},t).then(function(t){t&&(t.deviceType&&(a=t.deviceTypeValue,e="deviceTypeAdd"),function(t,a){o[e](t,a).then(function(){o.clearCacheList(),d.reload()})}(a,t))})}function i(t,a){var d=_.get(a.getContext(),"id");return t.canAdminMOs([d])}function s(o,a,d,e,n){return{addPasteAction:function(t){n.addAction({text:d.getString('Paste dashboard "{{name}}"',t),icon:"clipboard",showIf:i,action:function(){return a.pasteDashboard().then(r)}})},redirectToDashboard:r};function r(t){var a=e.getContext(),d=e.getContextPath(a);t.id&&(d+="/dashboard/".concat(t.id)),o.path(d)}}}t.$inject=["c8yActionsProvider","c8yViewsProvider","gettext"],angular.module("c8y.parts.dashboardUI").provider("c8yDashboardUi",t)}();
 \ No newline at end of file
 +"use strict";!function(){function t(t,a,d){i.$inject=["c8yPermissions","dashboardSvc"],c.$inject=["$route","dashboardSvc"],s.$inject=["$location","dashboardSvc","gettextCatalog","c8yUiUtil","c8yActions"];var o=_.map(["/device/:deviceId","/group/:groupId"],function(t){return"".concat(t,"/dashboard/:dashboardId")}),e=[/*{text:d("Add dashboard"),priority:2500,action:c,showIf:i,path:"/(device|group)/\\d+"}*/],n={template:'<c8y-dashboard-gridstack id="::vm.dashboardId"></c8y-dashboard-gridstack>',controllerAs:"vm",controller:["$routeParams",function(t){this.dashboardId=t.dashboardId}]};return{initUI:function(){e.forEach(t.addUrlAction),_.forEach(o,r)},$get:s};function r(t){a.when(t,n)}function c(d,o){var t=o.getContext(),e="".concat(t.context,"Add"),a=t.id;o.addDashboard({singleUseDashboards:!0},t).then(function(t){t&&(t.deviceType&&(a=t.deviceTypeValue,e="deviceTypeAdd"),function(t,a){o[e](t,a).then(function(){o.clearCacheList(),d.reload()})}(a,t))})}function i(t,a){var d=_.get(a.getContext(),"id");return t.canAdminMOs([d])}function s(o,a,d,e,n){return{addPasteAction:function(t){n.addAction({text:d.getString('Paste dashboard "{{name}}"',t),icon:"clipboard",showIf:i,action:function(){return a.pasteDashboard().then(r)}})},redirectToDashboard:r};function r(t){var a=e.getContext(),d=e.getContextPath(a);t.id&&(d+="/dashboard/".concat(t.id)),o.path(d)}}}t.$inject=["c8yActionsProvider","c8yViewsProvider","gettext"],angular.module("c8y.parts.dashboardUI").provider("c8yDashboardUi",t)}();
+\ No newline at end of file
+diff --git a/node_modules/@c8y/ng1-modules/deviceSelector/controllers/deviceSelectorComboCtrl.js b/node_modules/@c8y/ng1-modules/deviceSelector/controllers/deviceSelectorComboCtrl.js
+index 8530bf6..7fa62cd 100644
+--- a/node_modules/@c8y/ng1-modules/deviceSelector/controllers/deviceSelectorComboCtrl.js
++++ b/node_modules/@c8y/ng1-modules/deviceSelector/controllers/deviceSelectorComboCtrl.js
+@@ -1 +1,202 @@
+-"use strict";function _objectSpread(t){for(var e=1;e<arguments.length;e++){var n=null!=arguments[e]?arguments[e]:{},r=Object.keys(n);"function"==typeof Object.getOwnPropertySymbols&&(r=r.concat(Object.getOwnPropertySymbols(n).filter(function(e){return Object.getOwnPropertyDescriptor(n,e).enumerable}))),r.forEach(function(e){_defineProperty(t,e,n[e])})}return t}function _defineProperty(e,t,n){return t in e?Object.defineProperty(e,t,{value:n,enumerable:!0,configurable:!0,writable:!0}):e[t]=n,e}function _toConsumableArray(e){return _arrayWithoutHoles(e)||_iterableToArray(e)||_nonIterableSpread()}function _nonIterableSpread(){throw new TypeError("Invalid attempt to spread non-iterable instance")}function _iterableToArray(e){if(Symbol.iterator in Object(e)||"[object Arguments]"===Object.prototype.toString.call(e))return Array.from(e)}function _arrayWithoutHoles(e){if(Array.isArray(e)){for(var t=0,n=new Array(e.length);t<e.length;t++)n[t]=e[t];return n}}!function(){function e(a,p,e,n,t,r,i){var c;function o(e,t){e&&(t&&e.id&&e.id===t||(_.isObjectLike(e)?p.when(e):r.detail(e).then(n.getResData)).then(function(e){return v(e),a.parentDevice=e,a.top&&(c=e,a.root=c,a.selectedChildDevice||!e.isDevice&&!a.groupsSelectable||(a.selectedChildDevice=e)),e}).then(h).then(y).then(l))}function l(e,t){var n=(a.children||[]).concat(e);a.children=_.uniqBy(n,"id"),a.truncated=!_.isUndefined(t)&&t}function u(e){a.propagateToggle.value=!1,_.remove(a.children,function(e){return!b(e)}),a.loading=!0,d({text:a.searchData.lastText=e}).then(s).finally(function(){a.loading=!1})}function d(e){var d=0,s=[];return r.list(_objectSpread({},e,{withParents:!0})).then(function e(t){d++;var n,r=t.statistics.pageSize,i=t.paging.next,c=t.length>=r,o=function(e){var t=function(e){return _(e).map(_.property("childDevices.references")).flatten().map(_.property("managedObject.id")).uniq().value()}(e);return _.filter(e,function(e){return e&&(b(e)||e.c8y_IsDevice||f(e)||function(e,t){return function(e){return _.get(e,"deviceParents.references.length")}(e)&&!_.includes(t,e.id)}(e,t))})}(t),a=(s=[].concat(_toConsumableArray(s),_toConsumableArray(o))).length>r,l=i&&c;if(s.length>=r||10<=d||!l){var u=a||l;n=p.resolve({mos:_.take(s,r),truncated:u})}else n=t.paging.next().then(e);return n})}function s(e){var t=e.mos,n=e.truncated;return p.resolve(t).then(y).then(function(e){return l(e,n)})}function f(e){return!!e.c8y_IsDeviceGroup}function h(e){return t[f(e)?"childAssets":"childDevices"](e)}function v(e){var t=!f(e),n=t?"childDevices":"childAssets";return e.isDevice=t,e.__children=e[n]&&e[n].references||[],e}function y(e){return _.map(e,function(e){return v(e),b(e)&&m(e),a.parent&&(e.openChildren=!1,Array.isArray(a.parent.idPath)?(e.idPath=_.cloneDeep(a.parent.idPath),e.idPath.push(a.parent.id)):e.idPath=[a.parent.id]),e})}function g(e){if(e&&e.id){a.$parent.propagateToggle?a.propagateToggle=a.$parent.propagateToggle:a.propagateToggle={value:!0};var t=e.idPath?e.idPath[0]:e.id;!a.deviceSelectorForm.$dirty&&a.selectedChildDeviceId&&a.selectedChildDeviceId!==e.id&&a.deviceSelectorForm.$setDirty(),a.idPath=e.idPath,a.selectedChildDeviceId=e.id,a.children||!a.top||a.parent||d({ids:t}).then(s)}}function m(e,t){var n=["id","type","name"],r=t?[D(n,e)]:[];(t||a).$emit("selectDevice",r,n,e)}function D(e,n){return _.reduce(e,function(e,t){return e[t]=_.get(n,[t]),e},{})}function b(e){return e&&a.selectedChildDevice&&a.selectedChildDevice.id===e.id}function S(e){return b(e)}function P(e,t,n,r){var i=a.top?_.reduce(n,function(e,t){return e[t]="_root",e},{}):D(n,a.parentDevice);if(t.push(i),a.top){var c=t.reverse(),o=_.reduce(c[0],function(e,t,n){return e["path_".concat(n)]=_.map(c,n).join("/"),e},{});e.stopPropagation(),a.selectedChildDevice=r,a.contextPaths=o,a.onSelect({selDevice:r,contextPaths:o})}}a.placeholder=i("Device's name or value of any device's property"),a.selectRoot=a.selectRoot||function(){m(c)},a.isSelectedRoot=a.isSelectedRoot||function(){return S(c)||a.selectedChildDevice&&(c&&c.id)===a.selectedChildDevice.id},a.select=a.select||m,a.clickSelect=function(e){a.select(e,a),a.form&&a.form.$setDirty()},a.isSelected=a.isSelected||S,a.isSelectedById=a.isSelectedById||b,a.isSelectionEmpty=a.isSelectionEmpty||function(){return!a.selectedChildDevice},a.search=u,a.searchData={},a.propagateToggle={},a.icon=function(){return a.loading?"circle-o-notch":"search"},a.checkEnter=function(e){e.keyCode===C&&u(a.searchData.text)},a.getRootName=function(e){return e||i("Root Device")},a.emptySelectionAvailable=_.result(a,"emptySelectionAvailable")||!1,a.emptySelectionIcon=_.result(a,"emptySelectionIcon")||"",a.emptySelectionLabel=_.result(a,"emptySelectionLabel")||i("None"),a.readOnlyInfoText=_.result(a,"readOnlyInfo")||i("Selection change is disabled."),a.getScope=function(){return a},a.$watch("parent",o),a.$watch("selectedChildDevice",g),a.$on("selectDevice",P);var C=13}e.$inject=["$scope","$q","$timeout","c8yBase","c8yDevices","c8yInventory","gettext"],angular.module("c8y.deviceSelector").controller("DeviceSelectorComboCtrl",e)}();
+\ No newline at end of file
++"use strict";
++
++function _objectSpread(t) {
++    for (var e = 1; e < arguments.length; e++) {
++        var n = null != arguments[e] ? arguments[e] : {},
++            r = Object.keys(n);
++        "function" == typeof Object.getOwnPropertySymbols && (r = r.concat(Object.getOwnPropertySymbols(n).filter(function(e) {
++            return Object.getOwnPropertyDescriptor(n, e).enumerable
++        }))), r.forEach(function(e) {
++            _defineProperty(t, e, n[e])
++        })
++    }
++    return t
++}
++
++function _defineProperty(e, t, n) {
++    return t in e ? Object.defineProperty(e, t, {
++        value: n,
++        enumerable: !0,
++        configurable: !0,
++        writable: !0
++    }) : e[t] = n, e
++}
++
++function _toConsumableArray(e) {
++    return _arrayWithoutHoles(e) || _iterableToArray(e) || _nonIterableSpread()
++}
++
++function _nonIterableSpread() {
++    throw new TypeError("Invalid attempt to spread non-iterable instance")
++}
++
++function _iterableToArray(e) {
++    if (Symbol.iterator in Object(e) || "[object Arguments]" === Object.prototype.toString.call(e)) return Array.from(e)
++}
++
++function _arrayWithoutHoles(e) {
++    if (Array.isArray(e)) {
++        for (var t = 0, n = new Array(e.length); t < e.length; t++) n[t] = e[t];
++        return n
++    }
++}! function() {
++    function e(a, p, e, n, t, r, i) {
++        var c;
++
++        function o(e, t) {
++            e && (t && e.id && e.id === t || (_.isObjectLike(e) ? p.when(e) : r.detail(e).then(n.getResData)).then(function(e) {
++                return v(e), a.parentDevice = e, a.top && (c = e, a.root = c, a.selectedChildDevice || !e.isDevice && !a.groupsSelectable || (a.selectedChildDevice = e)), e
++            }).then(h).then(y).then(l))
++        }
++
++        function l(e, t) {
++            var n = (a.children || []).concat(e);
++            a.children = _.uniqBy(n, "id"), a.truncated = !_.isUndefined(t) && t
++        }
++
++        function u(e) {
++            a.propagateToggle.value = !1, _.remove(a.children, function(e) {
++                return !b(e)
++            }), a.loading = !0, d({
++                text: a.searchData.lastText = e
++            }).then(s).finally(function() {
++                a.loading = !1
++            })
++        }
++
++        function d(e) {
++            var d = 0,
++                s = [];
++            return r.list(_objectSpread({}, e, {
++                withParents: !0
++            })).then(function e(t) {
++                d++;
++                var n, r = t.statistics.pageSize,
++                    i = t.paging.next,
++                    c = t.length >= r,
++                    o = function(e) {
++                        var t = function(e) {
++                            return _(e).map(_.property("childDevices.references")).flatten().map(_.property("managedObject.id")).uniq().value()
++                        }(e);
++                        return _.filter(e, function(e) {
++                            return e && (b(e) || e.c8y_IsDevice || f(e) || function(e, t) {
++                                return function(e) {
++                                    return _.get(e, "deviceParents.references.length")
++                                }(e) && !_.includes(t, e.id)
++                            }(e, t))
++                        })
++                    }(t),
++                    a = (s = [].concat(_toConsumableArray(s), _toConsumableArray(o))).length > r,
++                    l = i && c;
++                if (s.length >= r || 10 <= d || !l) {
++                    var u = a || l;
++                    n = p.resolve({
++                        mos: _.take(s, r),
++                        truncated: u
++                    })
++                } else n = t.paging.next().then(e);
++                return n
++            })
++        }
++
++        function s(e) {
++            var t = e.mos,
++                n = e.truncated;
++            return p.resolve(t).then(y).then(function(e) {
++                return l(e, n)
++            })
++        }
++
++        function f(e) {
++            return !!e.c8y_IsDeviceGroup
++        }
++
++        function h(e) {
++            return t[f(e) ? "childAssets" : "childDevices"](e)
++        }
++
++        function v(e) {
++            var t = !f(e),
++                n = t ? "childDevices" : "childAssets";
++            return e.isDevice = t, e.__children = e[n] && e[n].references || [], e
++        }
++
++        function y(e) {
++            return _.map(e, function(e) {
++                return v(e), b(e) && m(e), a.parent && (e.openChildren = !1, Array.isArray(a.parent.idPath) ? (e.idPath = _.cloneDeep(a.parent.idPath), e.idPath.push(a.parent.id)) : e.idPath = [a.parent.id]), e
++            })
++        }
++
++        function g(e) {
++            if (e && e.id) {
++                a.$parent.propagateToggle ? a.propagateToggle = a.$parent.propagateToggle : a.propagateToggle = {
++                    value: !0
++                };
++                var t = e.idPath ? e.idPath[0] : e.id;
++                !a.deviceSelectorForm.$dirty && a.selectedChildDeviceId && a.selectedChildDeviceId !== e.id && a.deviceSelectorForm.$setDirty(), a.idPath = e.idPath, a.selectedChildDeviceId = e.id, a.children || !a.top || a.parent || d({
++                    ids: t
++                }).then(s)
++            }
++        }
++
++        function m(e, t) {
++            var n = ["id", "type", "name"],
++                r = t ? [D(n, e)] : [];
++            (t || a).$emit("selectDevice", r, n, e)
++        }
++
++        function D(e, n) {
++            return _.reduce(e, function(e, t) {
++                return e[t] = _.get(n, [t]), e
++            }, {})
++        }
++
++        function b(e) {
++            return e && a.selectedChildDevice && a.selectedChildDevice.id === e.id
++        }
++
++        function S(e) {
++            return b(e)
++        }
++
++        function P(e, t, n, r) {
++            var i = a.top ? _.reduce(n, function(e, t) {
++                return e[t] = "_root", e
++            }, {}) : D(n, a.parentDevice);
++            if (t.push(i), a.top) {
++                var c = t.reverse(),
++                    o = _.reduce(c[0], function(e, t, n) {
++                        return e["path_".concat(n)] = _.map(c, n).join("/"), e
++                    }, {});
++                e.stopPropagation(), a.selectedChildDevice = r, a.contextPaths = o, a.onSelect({
++                    selDevice: r,
++                    contextPaths: o
++                })
++            }
++        }
++        a.placeholder = i("Device's name or value of any device's property"), a.selectRoot = a.selectRoot || function() {
++            m(c)
++        }, a.isSelectedRoot = a.isSelectedRoot || function() {
++            return S(c) || a.selectedChildDevice && (c && c.id) === a.selectedChildDevice.id
++        }, a.select = a.select || m, a.clickSelect = function(e) {
++            a.select(e, a), a.form && a.form.$setDirty()
++        }, a.isSelected = a.isSelected || S, a.isSelectedById = a.isSelectedById || b, a.isSelectionEmpty = a.isSelectionEmpty || function() {
++            return !a.selectedChildDevice
++        }, a.search = u, a.searchData = {}, a.propagateToggle = {}, a.icon = function() {
++            return a.loading ? "circle-o-notch" : "search"
++        }, a.checkEnter = function(e) {
++            e.keyCode === C && u(a.searchData.text)
++        }, a.getRootName = function(e) {
++            return e || i("Root Device")
++        }, a.emptySelectionAvailable = _.result(a, "emptySelectionAvailable") || !1, a.emptySelectionIcon = _.result(a, "emptySelectionIcon") || "", a.emptySelectionLabel = _.result(a, "emptySelectionLabel") || i("None"), a.readOnlyInfoText = _.result(a, "readOnlyInfo") || i("Selection change is disabled."), a.getScope = function() {
++            return a
++        }, a.$watch("parent", o), a.$watch("selectedChildDevice", g), a.$on("selectDevice", P);
++        a.$watch("initialSelection", function (e, t) {
++            e && (t && e.id && e.id === t || (_.isObjectLike(e) ? p.when(e) : r.detail(e).then(n.getResData)).then(function(e) {
++                return v(e), a.top && (c = e, a.selectedChildDevice || !e.isDevice && !a.groupsSelectable || (a.selectedChildDevice = e)), e
++            }).then(h).then(y).then(l))
++        });
++        var C = 13
++    }
++    e.$inject = ["$scope", "$q", "$timeout", "c8yBase", "c8yDevices", "c8yInventory", "gettext"], angular.module("c8y.deviceSelector").controller("DeviceSelectorComboCtrl", e)
++}();
+\ No newline at end of file
+diff --git a/node_modules/@c8y/ng1-modules/deviceSelector/controllers/deviceSelectorCtrl.js b/node_modules/@c8y/ng1-modules/deviceSelector/controllers/deviceSelectorCtrl.js
+index 5fd24cc..5b2c3be 100644
+--- a/node_modules/@c8y/ng1-modules/deviceSelector/controllers/deviceSelectorCtrl.js
++++ b/node_modules/@c8y/ng1-modules/deviceSelector/controllers/deviceSelectorCtrl.js
+@@ -1 +1,52 @@
+-"use strict";angular.module("c8y.deviceSelector").controller("deviceSelectorCtrl",["$scope","$q","c8yDevices","gettext",function(i,n,a,e){var s,r=5;function c(){t(null,r)}function t(e,n){i.searchDone=!1,i.searchProgress=!0,i.devices.length=0;var c=e&&e.text||"";r=n=n||r,s=n;var t=c?a.searchIncludingChildDevices({text:c,pageSize:n}):a.list({pageSize:n});t.then(o).then(l).finally(function(){i.searchDone=!0,i.searchProgress=!1})}function l(e){return s-=e.length,i.paging.next&&0<s?i.paging.next().then(o).then(l):n.when()}function o(e){var n=_.uniqBy((i.selectedDevices||[]).concat(i.devices||[]).concat(e),"id");return i.devices=n,i.paging=e.paging,n}function h(){i.selectedDevices.splice(0,i.selectedDevices.length)}i.devices=[],i.selectedDevices=[],i.placeholder=e("Device's name or value of any device's property"),i.search=t,i.loadNext=function(){s=r,i.paging.loading=!0,i.paging.next().then(o).then(l).finally(function(){i.paging.loading=!1})},i.clearSearch=function(){i.devices.length=0,i.selectedDevices.length=0,i.searchDone=!1,i.searchProgress=!1,i.searchData=i.searchData||{},i.searchData.text="",c()},i.selectAll=function c(e,n){n||h(),_.forEach(e,function(e){var n;n=e,_.find(i.disabledDevices,function(e){return e.id===n.id})||i.selectedDevices.push(e),c(e.children,!0)})},i.deselectAll=h,i.checkEnter=function(e){13===e.keyCode&&t(i.searchData)},c()}]);
+\ No newline at end of file
++"use strict";
++angular.module("c8y.deviceSelector").controller("deviceSelectorCtrl", ["$scope", "$q", "c8yDevices", "gettext", function(i, n, a, e) {
++    var s, r = 5;
++
++    function c() {
++        t(null, r)
++    }
++
++    function t(e, n) {
++        i.searchDone = !1, i.searchProgress = !0, i.devices.length = 0;
++        var c = e && e.text || "";
++        r = n = n || r, s = n;
++        var t = c ? a.searchIncludingChildDevices({
++            text: c,
++            pageSize: n
++        }) : a.list({
++            pageSize: n
++        });
++        t.then(o).then(l).finally(function() {
++            i.searchDone = !0, i.searchProgress = !1
++        })
++    }
++
++    function l(e) {
++        return s -= e.length, i.paging.next && 0 < s ? i.paging.next().then(o).then(l) : n.when()
++    }
++
++    function o(e) {
++        var n = _.uniqBy((i.selectedDevices || []).concat(i.devices || []).concat(e), "id");
++        return i.devices = n, i.paging = e.paging, n
++    }
++
++    function h() {
++        i.selectedDevices.splice(0, i.selectedDevices.length)
++    }
++    i.devices = [], i.selectedDevices = [], i.placeholder = e("Device's name or value of any device's property"), i.search = t, i.loadNext = function() {
++        s = r, i.paging.loading = !0, i.paging.next().then(o).then(l).finally(function() {
++            i.paging.loading = !1
++        })
++    }, i.clearSearch = function() {
++        i.devices.length = 0, i.selectedDevices.length = 0, i.searchDone = !1, i.searchProgress = !1, i.searchData = i.searchData || {}, i.searchData.text = "", c()
++    }, i.selectAll = function c(e, n) {
++        n || h(), _.forEach(e, function(e) {
++            var n;
++            n = e, _.find(i.disabledDevices, function(e) {
++                return e.id === n.id
++            }) || i.selectedDevices.push(e), c(e.children, !0)
++        })
++    }, i.deselectAll = h, i.checkEnter = function(e) {
++        13 === e.keyCode && t(i.searchData)
++    }, c()
++}]);
+\ No newline at end of file
+diff --git a/node_modules/@c8y/ng1-modules/deviceSelector/directives/deviceSelectorCombo.js b/node_modules/@c8y/ng1-modules/deviceSelector/directives/deviceSelectorCombo.js
+index 0aafe4f..f1782cc 100644
+--- a/node_modules/@c8y/ng1-modules/deviceSelector/directives/deviceSelectorCombo.js
++++ b/node_modules/@c8y/ng1-modules/deviceSelector/directives/deviceSelectorCombo.js
+@@ -1 +1,67 @@
+-"use strict";angular.module("c8y.deviceSelector").directive("c8yDeviceSelectorComboDevices",function(){return{restrict:"A",link:function(e,t){e.__el=t;var i=e.depth||0;function l(){e.child.openChildren=e.idPath&&!!e.idPath[i]&&e.idPath[i]===e.child.id&&e.selectedChildDevice.id!==e.child.id,e.child.openChildren&&e.toggleChildren(e,e.child)}e.$evalAsync(function(){return e.propagateToggle.value&&l()})}}}).directive("c8yDeviceSelectorCombo",["$compile",function(i){return{restrict:"EA",scope:{parent:"=?",selectedChildDevice:"=?",selectedChildDeviceId:"=?",contextPaths:"=?",onSelect:"&",groupsSelectable:"=?",idPath:"=?",emptySelectionAvailable:"&?",emptySelectionIcon:"&?",emptySelectionLabel:"&?",readOnly:"<",readOnlyInfo:"&?"},templateUrl:":::PLUGIN_PATH:::/views/deviceSelectorCombo.html",controller:"DeviceSelectorComboCtrl",require:"?^form",link:{post:function(n,r,e,t){var c=i('<div ng-include="\':::PLUGIN_PATH:::/views/deviceSelectorCombo.html\'" ng-controller="DeviceSelectorComboCtrl"></div>');n.top=!0,n.form=t,n.toggleChildren=function(e,t,i){return n._toggleChildren($(e.target),t,i)},n._toggleChildren=function(){var e=0<arguments.length&&void 0!==arguments[0]?arguments[0]:r,t=1<arguments.length&&void 0!==arguments[1]?arguments[1]:n,i=2<arguments.length?arguments[2]:void 0,l=e.hasClass("deviceRow")?e:e.parents(".deviceRow").first();if(i.openChildren=!i.openChildren,i.openChildren){var o=t.$new();(i.childrenNewScope=o).openChildren=!1,o.propagateToggle=t.propagateToggle,o.parent=i,o.depth=_.isNumber(t.depth)?t.depth+1:1,o.children=[],o.top=!1,c(o,function(e){l.append(e)})}else l.children().last().remove(),i.childrenNewScope.$destroy(),delete i.childrenNewScope}}}}}]);
+\ No newline at end of file
++"use strict";
++angular.module("c8y.deviceSelector").directive("c8yDeviceSelectorComboDevices", function() {
++        return {
++            restrict:"A", link:function(e, t) {
++                e.__el=t;
++                var i=e.depth||0;
++                function l() {
++                    e.child.openChildren=e.idPath&&!!e.idPath[i]&&e.idPath[i]===e.child.id&&e.selectedChildDevice.id!==e.child.id, e.child.openChildren&&e.toggleChildren(e, e.child)
++                }
++                e.$evalAsync(function() {
++                        return e.propagateToggle.value&&l()
++                    }
++                )
++            }
++        }
++    }
++
++).directive("c8yDeviceSelectorCombo", ["$compile", function(i) {
++    return {
++        restrict:"EA", scope: {
++            parent: "=?",
++            initialSelection: "=?",
++            selectedChildDevice: "=?",
++            selectedChildDeviceId: "=?",
++            contextPaths: "=?",
++            onSelect: "&",
++            groupsSelectable: "=?",
++            idPath: "=?",
++            emptySelectionAvailable: "&?",
++            emptySelectionIcon: "&?",
++            emptySelectionLabel: "&?",
++            readOnly: "<",
++            readOnlyInfo: "&?"
++        }
++        , templateUrl:":::PLUGIN_PATH:::/views/deviceSelectorCombo.html", controller:"DeviceSelectorComboCtrl", require:"?^form", link: {
++            post:function(n, r, e, t) {
++                var c=i('<div ng-include="\':::PLUGIN_PATH:::/views/deviceSelectorCombo.html\'" ng-controller="DeviceSelectorComboCtrl"></div>');
++                n.top=!0;
++                n.form=t;
++                n.toggleChildren=function(e, t, i) {
++                    return n._toggleChildren($(e.target), t, i)
++                };
++                n._toggleChildren=function() {
++                    var e=0<arguments.length&&void 0!==arguments[0]?arguments[0]: r;
++                    var t=1<arguments.length&&void 0!==arguments[1]?arguments[1]: n;
++                    var i=2<arguments.length?arguments[2]: void 0;
++                    var l=e.hasClass("deviceRow")?e: e.parents(".deviceRow").first();
++                    if(i.openChildren=!i.openChildren, i.openChildren) {
++                        var o=t.$new();
++                        (i.childrenNewScope=o).openChildren=!1;
++                        o.propagateToggle=t.propagateToggle;
++                        o.parent=i;
++                        o.depth=_.isNumber(t.depth)?t.depth+1:1;
++                        o.children=[];
++                        o.top=!1;
++                        c(o, function(e) {
++                            l.append(e)
++                        })
++                    }
++                    else l.children().last().remove(), i.childrenNewScope.$destroy(), delete i.childrenNewScope
++                }
++            }
++        }
++    }
++}
++
++]);
 \ No newline at end of file
 diff --git a/node_modules/@c8y/ng1-modules/devicemanagement-location/index.js b/node_modules/@c8y/ng1-modules/devicemanagement-location/index.js
 index cbf28b5..bdbd068 100644
