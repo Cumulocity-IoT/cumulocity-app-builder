@@ -82,7 +82,8 @@
         <div class="modal-inner-scroll">
             <form name="newAppBuilderAppForm" class="c8y-wizard-form">
                 <div class="form-group" *ngIf="showId()">
-                    <label for="id"><span>Dashboard ID</span></label>
+                    <ng-template #dashboardTooltip><strong>To get a Dashboard ID:</strong><br>Add HTML widget to dashboard.<br>In the widget's code section, add: <br><code>Dashboard ID: {{'{{id\}\}'}}</code></ng-template>
+                    <label for="id"><span>Dashboard ID <i c8yIcon="question-circle" [tooltip]="dashboardTooltip" placement="right"></i></span></label>
                     <input type="text" class="form-control" id="id" name="id" placeholder="e.g. 12345 (required)" required [autofocus]="showId()" [(ngModel)]="dashboardId">
                 </div>
 

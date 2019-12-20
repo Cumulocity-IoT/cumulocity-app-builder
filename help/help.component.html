@@ -37,9 +37,9 @@
     ![Dashboard Configuration](./images/AddDashboardExisting.png)
 
     4. Enter a name, and icon ([pick one from this list](http://styleguide.cumulocity.com/icons/icons/#)). If you have selected to copy or link to an existing dashboard then enter the id of the dashboard.
-    You can get the dashboard id from the URL when opening the dashboard in the cockpit application.
-    In the URL: `/apps/cockpit/index.html#/device/5569038/dashboard/12598412`
-    The dashboard id is: `12598412`
+    There are a few ways to get a dashboard's ID:
+    * Check the URL
+    * Add an HTML widget to the dashboard with the code: `Dashboard ID: {{'{{id}' + '}'}}`
 
     ## Configuring the navigation
     1. Open the application that you would like to configure the navigation for.

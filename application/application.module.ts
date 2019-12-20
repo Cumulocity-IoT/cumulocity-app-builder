@@ -23,6 +23,7 @@ import {SmartRulesModule} from "./smartrules/smart-rules.module";
 import {AlarmsModule} from "./alarms/alarms.module";
 import {IconSelectorModule} from "../icon-selector/icon-selector.module";
 import {EditDashboardModalComponent} from "./dashboard-config/edit-dashboard-modal.component";
+import {TooltipModule} from "ngx-bootstrap";
 
 @Injectable()
 class RedirectToFirstDashboard implements CanActivate {
@@ -73,7 +74,8 @@ class RedirectToFirstDashboard implements CanActivate {
         CoreModule,
         SortableModule.forRoot(),
         WizardModule,
-        IconSelectorModule
+        IconSelectorModule,
+        TooltipModule.forRoot()
     ],
     declarations: [
         DashboardConfigComponent,
