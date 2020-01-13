@@ -53,7 +53,7 @@
   },
   "c8y": {
     "application": {
-      "name": "App Builder",
+      "name": "Application Builder",
       "contextPath": "app-builder",
       "key": "app-builder-application-key",
       "brandingEntry": "./ui-assets/index.less",
