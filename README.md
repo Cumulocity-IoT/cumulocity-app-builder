@@ -1,6 +1,8 @@
 # Application Builder for Cumulocity
 The Application Builder for Cumulocity provides a simple, coding-free way to create new applications inside Cumulocity. 
 
+![](https://user-images.githubusercontent.com/38696279/72333172-47cec300-36b3-11ea-9abf-1bb29b490a22.png)
+
 # Installation
 1. Grab the **[Latest Release Zip](https://github.com/SoftwareAG/cumulocity-app-builder/releases)**
 2. Go to the **Administration view** in your tenant (/apps/administration)
