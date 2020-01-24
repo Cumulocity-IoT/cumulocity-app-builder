@@ -42,6 +42,20 @@ angular
             });
         });
     }])
+    // Redirect all device/:deviceId, group/:groupId.... back to the cockpit
+    .run(['$rootScope', $rootScope => {
+        $rootScope.$on('$locationChangeStart', (event, next, current) => {
+            const url = new URL(next);
+            const hash = url.hash;
+            const pathSegments = hash.replace('#/', '').split('/');
+            if (pathSegments.length >= 1) {
+                if (['device', 'group', 'users', 'applications', 'subscribedApplications', 'tenants'].includes(pathSegments[0])) {
+                    event.preventDefault();
+                    window.location.assign(`/apps/cockpit/${hash}`);
+                }
+            }
+        });
+    }])
     .factory('inventoryService', downgradeInjectable(InventoryService))
     .factory('appStateService', downgradeInjectable(AppStateService));
 
