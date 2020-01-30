@@ -18,7 +18,6 @@
 
 import {Component} from "@angular/core";
 
-// noinspection AngularMissingOrInvalidDeclarationInModule
 @Component({
     template: `        
         <div class="form-group">

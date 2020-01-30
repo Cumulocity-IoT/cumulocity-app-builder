@@ -67,14 +67,14 @@ export class Navigation implements NavigatorNodeFactory {
                 priority: 2
             }));
         });
-        // configNavService.registerNewConfigListener((appId, configNode) => {
-        //     configNode.add(new NavigatorNode({
-        //         label: 'Simulator',
-        //         icon: 'c8y-simulator',
-        //         path: `/application/${appId}/simulator-config`,
-        //         priority: 1
-        //     }));
-        // });
+        configNavService.registerNewConfigListener((appId, configNode) => {
+            configNode.add(new NavigatorNode({
+                label: 'Simulator',
+                icon: 'c8y-simulator',
+                path: `/application/${appId}/simulator-config`,
+                priority: 1
+            }));
+        });
 
         // Have to use the router and manually extract path rather than using ActivatedRoute because this route may be an ng1 route
         this.router.events
