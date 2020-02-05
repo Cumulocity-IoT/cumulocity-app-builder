@@ -28,8 +28,7 @@ import {DeviceIntervalSimulator} from "../../device-simulator/device-interval-si
 })
 export class FixedValueSimulationStrategy extends DeviceIntervalSimulator {
     protected interval = 1000;
-
     onTick() {
-        this.device.sendMeasurement(this.config.value);
+        this.device.sendMeasurement(this.config);
     }
 }

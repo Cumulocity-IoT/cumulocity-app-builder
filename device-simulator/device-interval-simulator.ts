@@ -28,6 +28,9 @@ export abstract class DeviceIntervalSimulator extends DeviceSimulator {
 
     onStart() {
         if (this.started) throw Error("Simulator already started");
+        if (this.config.interval) {
+            this.interval = this.config.interval;
+        }
         console.log("Device Simulator started");
         this.intervalHandle = setInterval(() => this.onTick(), this.interval);
         this.started = true;
