@@ -22,17 +22,21 @@ import {
     ComponentFactoryResolver,
     Injector,
     ViewChild,
-    ViewContainerRef
+    ViewContainerRef,
+    OnInit
 } from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap/modal';
 import {WizardComponent} from "../wizard/wizard.component";
 import {DeviceSimulatorService, DeviceSimulatorStrategy} from "../device-simulator/device-simulator.service";
-import {InventoryService} from '@c8y/client';
-
+import {InventoryService, ApplicationService} from '@c8y/client';
+import { Timestamp } from 'rxjs/internal/operators/timestamp';
+import { ActivatedRoute, Router, ActivationEnd } from '@angular/router';
+import { map, filter, switchMap } from 'rxjs/operators';
+import { from, Observable } from 'rxjs';
 @Component({
     templateUrl: './new-simulator-modal.component.html'
 })
-export class NewSimulatorModalComponent {
+export class NewSimulatorModalComponent implements OnInit{
     busy: boolean = false;
 
     @ViewChild(WizardComponent) wizard: WizardComponent;
@@ -44,8 +48,14 @@ export class NewSimulatorModalComponent {
     deviceId: string | undefined;
     simulatorName: string = '';
 
-    constructor(public bsModalRef: BsModalRef, private deviceSimulatorService: DeviceSimulatorService, private resolver: ComponentFactoryResolver, private injector: Injector, private inventoryService: InventoryService) {}
+    constructor(public bsModalRef: BsModalRef, private deviceSimulatorService: DeviceSimulatorService, 
+        private resolver: ComponentFactoryResolver, private injector: Injector, private inventoryService: InventoryService,
+        private appService: ApplicationService) {
+       
+        }
 
+    ngOnInit() {
+    }
     openSimulatorConfig() {
         this.wizard.selectStep('config');
 
@@ -67,26 +77,42 @@ export class NewSimulatorModalComponent {
         if (!this.deviceId) {
             // createDevice
             device = (await this.inventoryService.create({
-                c8y_IsDevice: {}
+                c8y_IsDevice: {},
+                name: this.simulatorName
             })).data;
         } else {
             // getExistingDevice
             device = (await this.inventoryService.detail(this.deviceId)).data;
         }
-
+        this.deviceId = device.id;
+        
+        const appId = this.deviceSimulatorService.getCurrentAppId();
+        let appServiceData;
+        if(appId){
+            appServiceData = (await this.appService.detail(appId)).data;
+        
+        }
         // updateDevice
-        const simulators = device.simulators || [];
+        const simulators = appServiceData.applicationBuilder.simulators || [];
         const simulatorId = Math.floor(Math.random() * 1000000);
+        this.newConfig.deviceId = this.deviceId;
         simulators.push({
             id: simulatorId,
             name: this.simulatorName,
             type: this.selectedStrategy.name,
             config: this.newConfig
         });
-        await this.inventoryService.update({
+        /* await this.inventoryService.update({
             id: this.deviceId,
             simulators
-        });
+        }); */
+        console.log('app Id ==' + appId);
+        appServiceData.applicationBuilder.simulators = simulators;
+        console.log(appServiceData);
+        await this.appService.update({
+            id: appId,
+            applicationBuilder: appServiceData.applicationBuilder
+        } as any);
 
         this.deviceSimulatorService.createInstance(simulatorId, this.selectedStrategy.name, this.simulatorName, this.deviceId, this.newConfig);
 

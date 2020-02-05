@@ -41,7 +41,7 @@ export class DashboardConfigNavigation implements NavigatorNodeFactory {
                                 icon: 'wrench',
                                 path: `/application/${appId}/config`,
                                 priority: 0
-                            })
+                            })  
                         ]
                     } else {
                         return [];

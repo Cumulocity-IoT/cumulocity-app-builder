@@ -22,8 +22,20 @@ import {Component} from "@angular/core";
     template: `        
         <div class="form-group">
             <label for="value"><span>Value</span></label>
-            <input type="number" class="form-control" id="value" name="value" placeholder="e.g. 15 (required)" required autofocus [(ngModel)]="config.value">
+            <input type="text" class="form-control" id="value" name="value" placeholder="e.g. 15 (required)" required autofocus [(ngModel)]="config.value">
+        </div> 
+        <div class="form-group">
+            <label for="unit"><span>Unit</span></label>
+            <input type="text" class="form-control" id="unit" name="unit" placeholder="e.g. C (required)" required [(ngModel)]="config.unit">
+        </div> 
+         <div class="form-group">
+            <label for="type"><span>Type</span></label>
+            <input type="text" class="form-control" id="type" name="type" placeholder="e.g. temparature_measurement (required)" required [(ngModel)]="config.type">
         </div>
+         <div class="form-group">
+            <label for="internval"><span>Interval</span></label>
+            <input type="number" class="form-control" id="interval" name="interval" placeholder="e.g. default 1000 ms (optional)" required [(ngModel)]="config.interval">
+        </div>  
     `
 })
 export class FixedValueSimulationStrategyConfigComponent {

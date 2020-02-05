@@ -21,9 +21,10 @@ import {DeviceSimulator} from "./device-simulator";
 import {DeviceHandle} from "./device-handle";
 import {HOOK_SIMULATION_STRATEGY} from "../simulation-strategies/fixed-value/fixed-value.simulation-strategy.module";
 import {SimulationStrategyMetadata} from "./simulation-strategy.decorator";
-import {InventoryService} from "@c8y/client";
-import {AppStateService} from "@c8y/ngx-components";
-import {filter, first, mapTo} from "rxjs/operators";
+import {InventoryService, MeasurementService, ApplicationService} from "@c8y/client";
+import {AppStateService, NavigatorNodeFactory} from "@c8y/ngx-components";
+import {filter, first, mapTo, map} from "rxjs/operators";
+import { Router, ActivationEnd, NavigationEnd } from '@angular/router';
 
 export interface DeviceSimulatorStrategy {
     name: string,
@@ -38,12 +39,14 @@ export interface DeviceSimulatorInstance extends DeviceSimulatorStrategy {
     deviceId: string
 }
 
-@Injectable({providedIn: 'root'})
-export class DeviceSimulatorService {
+@Injectable({providedIn:"root"})
+export class DeviceSimulatorService implements NavigatorNodeFactory {
     readonly strategiesByName: Map<string, DeviceSimulatorStrategy>;
     simulatorInstances: DeviceSimulatorInstance[] = [];
-
-    constructor(@Inject(HOOK_SIMULATION_STRATEGY) simulationStrategies: Type<DeviceSimulator>[], private inventoryService: InventoryService, appStateService: AppStateService) {
+    currentAppID : string | undefined;
+    constructor(@Inject(HOOK_SIMULATION_STRATEGY) simulationStrategies: Type<DeviceSimulator>[], private inventoryService: InventoryService, 
+        appStateService: AppStateService, private measurementService: MeasurementService,
+        private route: Router, private appService: ApplicationService) {
         const strategies = simulationStrategies.map(simulatorClass => {
             const metadata: SimulationStrategyMetadata = Reflect.getMetadata('simulationStrategy', simulatorClass)[0];
             return {
@@ -56,7 +59,7 @@ export class DeviceSimulatorService {
         });
 
         this.strategiesByName = new Map(strategies.map(strat => [strat.name, strat] as [string, DeviceSimulatorStrategy]));
-
+        
         // Wait for the user to log in and then reload the simulators
         appStateService.currentUser
             .pipe(
@@ -65,8 +68,33 @@ export class DeviceSimulatorService {
             )
             .toPromise()
             .then(() => this.reloadSimulators());
-    }
 
+        this.route.events.pipe(
+            filter(event => event instanceof ActivationEnd),
+            map((event: ActivationEnd) => event.snapshot.url),
+            map(url => {
+                console.log('event registered');
+                if (url.length >= 2 && url[0].path === 'application') {
+                    return url[1].path;
+                } else {
+                    return undefined;
+                }
+            }),
+
+        ).subscribe(appId => {
+            // console.log('app Id' + app);
+            this.currentAppID = appId;
+        });
+    }
+    get(){
+        return null;
+    }
+    setCurrentAppId(appId){
+        this.currentAppID = appId;
+    }
+    getCurrentAppId() {
+        return this.currentAppID;
+    }
     async reloadSimulators() {
         this.simulatorInstances.forEach(simInstance => {
             if (simInstance.instance.isStarted()) {
@@ -75,17 +103,24 @@ export class DeviceSimulatorService {
         });
         this.simulatorInstances = [];
 
-        const simulatedDevices = (await this.inventoryService.list({ pageSize: 2000, query: 'has(simulators)' })).data;
-
-        simulatedDevices.forEach(device => {
+        // const simulatedDevices = (await this.inventoryService.list({ pageSize: 2000, query: 'has(simulators)' })).data;
+        const appServiceObj = (await this.appService.detail(this.currentAppID)).data as any;
+        const simulatedObject = appServiceObj.applicationBuilder.simulators;
+        if(simulatedObject){
+            simulatedObject.forEach(simulatorConfig => {
+                this.createInstance(simulatorConfig.id, simulatorConfig.type, simulatorConfig.name, simulatorConfig.config.deviceId, simulatorConfig.config);
+            });
+        }
+      
+       /*  simulatedDevices.forEach(device => {
             device.simulators.forEach(simulatorConfig => {
                 this.createInstance(simulatorConfig.id, simulatorConfig.type, simulatorConfig.name, device.id, simulatorConfig.config);
             });
-        });
+        }); */
     }
 
     createInstance(id: number, strategyName: string, instanceName: string, deviceId: string, config: any): DeviceSimulator {
-        const deviceHandle = new DeviceHandle();
+        const deviceHandle = new DeviceHandle(this.inventoryService,this.measurementService, deviceId);
 
         const strategy = this.strategiesByName.get(strategyName);
         if (!strategy) {
@@ -104,12 +139,22 @@ export class DeviceSimulatorService {
         }
         this.simulatorInstances = this.simulatorInstances.filter(x => x.id !== simulator.id);
 
-        const deviceSimulatorList = (await this.inventoryService.detail(simulator.deviceId)).data.simulators
+        let appServiceData  = (await this.appService.detail(this.currentAppID)).data as any ;
+        const simulators = appServiceData.applicationBuilder.simulators
             .filter(x => x.id !== simulator.id);
+        
+        appServiceData.applicationBuilder.simulators = simulators.length > 0 ? simulators : null
+       
+        await this.appService.update({
+            id: this.currentAppID,
+            applicationBuilder: appServiceData.applicationBuilder
+        } as any);
+       /*  const deviceSimulatorList = (await this.inventoryService.detail(simulator.deviceId)).data.simulators
+            .filter(x => x.id !== simulator.id); */
 
-        await this.inventoryService.update({
+       /*  await this.inventoryService.update({
             id: simulator.deviceId,
             simulators: deviceSimulatorList.length > 0 ? deviceSimulatorList : null
-        });
+        }); */
     }
 }

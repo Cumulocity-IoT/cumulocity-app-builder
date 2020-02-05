@@ -21,26 +21,72 @@ import {
     ComponentFactoryResolver,
     Injector,
     ViewChild,
-    ViewContainerRef
+    ViewContainerRef,
+    OnInit,
+    ComponentFactory
 } from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap/modal';
 import {
     DeviceSimulatorInstance,
     DeviceSimulatorService,
+    DeviceSimulatorStrategy,
 } from "../device-simulator/device-simulator.service";
-import {InventoryService} from '@c8y/client';
+import {InventoryService, ApplicationService} from '@c8y/client';
 
 @Component({
     templateUrl: './edit-simulator-modal.component.html'
 })
-export class EditSimulatorModalComponent {
+export class EditSimulatorModalComponent  implements OnInit{
     busy: boolean = false;
 
     @ViewChild("configWrapper", { read: ViewContainerRef }) configWrapper: ViewContainerRef;
+    selectedStrategy: DeviceSimulatorStrategy;
+    config: any;
+    simulator: any;
+    constructor(public bsModalRef: BsModalRef, private deviceSimulatorService: DeviceSimulatorService,
+         private resolver: ComponentFactoryResolver, private injector: Injector, 
+         private appService: ApplicationService) {
 
-    simulator: DeviceSimulatorInstance;
+    }
 
-    constructor(public bsModalRef: BsModalRef, private deviceSimulatorService: DeviceSimulatorService, private resolver: ComponentFactoryResolver, private injector: Injector, private inventoryService: InventoryService) {
+    ngOnInit() {
+        console.log('test');
+        this.simulator = this.config.instance;
+        this.openSimulatorConfig();
+    }
+    openSimulatorConfig() {
 
+        const metadata = Reflect.getMetadata('simulationStrategy', this.config.simulatorClass)[0];
+
+        this.configWrapper.clear();
+
+        if (metadata.configComponent != null) {
+            const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(metadata.configComponent);
+            const componentRef = this.configWrapper.createComponent(factory);
+            componentRef.instance.config = this.simulator.config;
+        }
+    }
+    async saveAndClose() {
+        
+        this.busy = true;
+        let appServiceData = (await this.appService.detail(this.deviceSimulatorService.getCurrentAppId())).data as any;
+
+        let simulators = appServiceData.applicationBuilder.simulators
+            .filter(x => x.id !== this.config.id);
+        simulators.push({
+            id: this.config.id,
+            name: this.simulator.instanceName,
+            type: this.config.name,
+            config: this.simulator.config
+        });
+         console.log(simulators);
+
+        appServiceData.applicationBuilder.simulators = simulators.length > 0 ? simulators : null
+
+        await this.appService.update({
+            id: this.deviceSimulatorService.getCurrentAppId(),
+            applicationBuilder: appServiceData.applicationBuilder
+        } as any);
+        this.bsModalRef.hide();
     }
 }

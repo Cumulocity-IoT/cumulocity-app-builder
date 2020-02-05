@@ -1,3 +1,6 @@
+import { InventoryService, MeasurementService } from '@c8y/client';
+import { DeviceSimulatorConfigModule } from 'device-simulator-config/device-simulator-config.module';
+
 /*
 * Copyright (c) 2019 Software AG, Darmstadt, Germany and/or its licensors
 *
@@ -16,12 +19,43 @@
 * limitations under the License.
  */
 
+interface valueType {
+    type?: string,
+    [key: string]: any
+}
+
 export class DeviceHandle {
-    sendMeasurement(value: any) {
-        console.log(`Sending measurement: ${JSON.stringify(value)}`);
+    constructor(private inventoryService: InventoryService, private measurementService: MeasurementService, private deviceId: any) {}
+
+    sendMeasurement(config: any) {
+        let value: valueType = {};
+        value.type = config.type;
+        value[config.type] = {
+            simulator_measurement: { value: parseFloat(config.value), unit: config.unit }
+        }
+        this.measurementService.create({
+            source: {id: this.deviceId},
+            time: new Date().toISOString(),
+            ...value
+        });
     }
 
     updateManagedObject(value: any) {
+        /* value = {
+            gpsLocation: {
+                lat: 1,
+                lng: 1
+            }
+        }
+
+        value = {
+            name: "hello"
+        }
+ */
         console.log(`Updating ManagedObject: ${JSON.stringify(value)}`);
+        /* this.inventoryService.update({
+            id: DeviceSimulatorConfigModule,
+            ...value
+        }) */
     }
 }

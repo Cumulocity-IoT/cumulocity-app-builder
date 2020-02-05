@@ -18,7 +18,7 @@
 
 import {HOOK_NAVIGATOR_NODES, NavigatorNode, NavigatorNodeFactory, _, CoreModule} from "@c8y/ngx-components";
 import {Injectable, ModuleWithProviders, NgModule} from "@angular/core";
-import {RouterModule} from "@angular/router";
+import {RouterModule, Router, ActivationEnd} from "@angular/router";
 import {DeviceSimulatorConfigComponent} from "./device-simulator-config.component";
 import {CommonModule} from "@angular/common";
 import {NewSimulatorModalComponent} from "./new-simulator-modal.component";
@@ -27,6 +27,7 @@ import {ContribNgForInModule} from "@angular-contrib/common";
 import {BsDropdownModule} from "ngx-bootstrap";
 import { ButtonsModule } from 'ngx-bootstrap/buttons';
 import {EditSimulatorModalComponent} from "./edit-simulator-modal.component";
+import { DeviceSimulatorService } from '../device-simulator/device-simulator.service';
 
 @Injectable()
 class DeviceSimulatorConfigNavigation implements NavigatorNodeFactory {
@@ -38,7 +39,8 @@ class DeviceSimulatorConfigNavigation implements NavigatorNodeFactory {
             priority: 0
         })
     ];
-
+    
+    //TODO: Not in use for now
     get() {
         return this.nodes;
     }
@@ -67,6 +69,10 @@ class DeviceSimulatorConfigNavigation implements NavigatorNodeFactory {
     entryComponents: [
         NewSimulatorModalComponent,
         EditSimulatorModalComponent
+    ],
+    providers: [
+        DeviceSimulatorService,
+        { provide: HOOK_NAVIGATOR_NODES, useExisting: DeviceSimulatorService, multi: true },
     ]
 })
 export class DeviceSimulatorConfigModule {
