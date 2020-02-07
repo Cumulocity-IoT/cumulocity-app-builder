@@ -17,6 +17,9 @@
  */
 
 import {DeviceHandle} from "./device-handle";
+import { InjectionToken } from '@angular/core';
+
+export const HOOK_SIMULATION_STRATEGY = new InjectionToken('SimulationStrategy');
 
 export abstract class DeviceSimulator {
     constructor(public instanceName: string, protected config: any, protected device: DeviceHandle) {}

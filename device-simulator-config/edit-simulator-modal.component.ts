@@ -79,7 +79,6 @@ export class EditSimulatorModalComponent  implements OnInit{
             type: this.config.name,
             config: this.simulator.config
         });
-         console.log(simulators);
 
         appServiceData.applicationBuilder.simulators = simulators.length > 0 ? simulators : null
 

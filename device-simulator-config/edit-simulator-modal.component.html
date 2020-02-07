@@ -13,13 +13,13 @@
         <div class="form-group">
             <label for="name"><span>Name</span></label>
             <input type="text" class="form-control" id="name" name="name"
-                placeholder="e.g. My First Simulator (required)" disabled
+                placeholder="e.g. My First Simulator (required)" 
                 [(ngModel)]="simulator.instanceName">
         </div>
           <div class="form-group">
               <label for="deviceId"><span>Device ID</span></label>
               <input type="text" class="form-control" id="deviceId" name="deviceId" placeholder="e.g. 12345 (required)"
-                  disabled [(ngModel)]="simulator.config.deviceId">
+                  [(ngModel)]="simulator.config.deviceId">
           </div>
         <ng-container #configWrapper></ng-container>
     </form>

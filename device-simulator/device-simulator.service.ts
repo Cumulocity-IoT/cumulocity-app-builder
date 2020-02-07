@@ -17,9 +17,8 @@
  */
 
 import {Inject, Injectable, Type} from "@angular/core";
-import {DeviceSimulator} from "./device-simulator";
+import {DeviceSimulator, HOOK_SIMULATION_STRATEGY} from "./device-simulator";
 import {DeviceHandle} from "./device-handle";
-import {HOOK_SIMULATION_STRATEGY} from "../simulation-strategies/fixed-value/fixed-value.simulation-strategy.module";
 import {SimulationStrategyMetadata} from "./simulation-strategy.decorator";
 import {InventoryService, MeasurementService, ApplicationService} from "@c8y/client";
 import {AppStateService, NavigatorNodeFactory} from "@c8y/ngx-components";
@@ -44,8 +43,9 @@ export class DeviceSimulatorService implements NavigatorNodeFactory {
     readonly strategiesByName: Map<string, DeviceSimulatorStrategy>;
     simulatorInstances: DeviceSimulatorInstance[] = [];
     currentAppID : string | undefined;
+    currentUserDetails:any;
     constructor(@Inject(HOOK_SIMULATION_STRATEGY) simulationStrategies: Type<DeviceSimulator>[], private inventoryService: InventoryService, 
-        appStateService: AppStateService, private measurementService: MeasurementService,
+        private appStateService: AppStateService, private measurementService: MeasurementService,
         private route: Router, private appService: ApplicationService) {
         const strategies = simulationStrategies.map(simulatorClass => {
             const metadata: SimulationStrategyMetadata = Reflect.getMetadata('simulationStrategy', simulatorClass)[0];
@@ -65,9 +65,13 @@ export class DeviceSimulatorService implements NavigatorNodeFactory {
             .pipe(
                 filter(user => user != null),
                 first()
+
             )
             .toPromise()
-            .then(() => this.reloadSimulators());
+            .then((user) => {
+                this.currentUserDetails = user;
+                this.reloadSimulators()
+            });
 
         this.route.events.pipe(
             filter(event => event instanceof ActivationEnd),
@@ -107,8 +111,11 @@ export class DeviceSimulatorService implements NavigatorNodeFactory {
         const appServiceObj = (await this.appService.detail(this.currentAppID)).data as any;
         const simulatedObject = appServiceObj.applicationBuilder.simulators;
         if(simulatedObject){
-            simulatedObject.forEach(simulatorConfig => {
+           /*  simulatedObject.forEach(simulatorConfig => {
                 this.createInstance(simulatorConfig.id, simulatorConfig.type, simulatorConfig.name, simulatorConfig.config.deviceId, simulatorConfig.config);
+            }); */
+            simulatedObject.forEach(simulatorConfig => {
+                this.createInstance(simulatorConfig, appServiceObj.applicationBuilder.simulatorsLock);
             });
         }
       
@@ -119,17 +126,35 @@ export class DeviceSimulatorService implements NavigatorNodeFactory {
         }); */
     }
 
-    createInstance(id: number, strategyName: string, instanceName: string, deviceId: string, config: any): DeviceSimulator {
-        const deviceHandle = new DeviceHandle(this.inventoryService,this.measurementService, deviceId);
+    // createInstance(id: number, strategyName: string, instanceName: string, deviceId: string, config: any): DeviceSimulator {
+    createInstance(simulatorConfig: any, simulatorLock: any): DeviceSimulator {
+        const deviceHandle = new DeviceHandle(this.inventoryService, this.measurementService, 
+            simulatorConfig, this.appService, this.currentAppID, this.currentUserDetails);
 
-        const strategy = this.strategiesByName.get(strategyName);
+        const strategy = this.strategiesByName.get(simulatorConfig.type);
         if (!strategy) {
-            throw new Error(`Could not find Simulator Strategy: ${strategyName}`);
+            throw new Error(`Could not find Simulator Strategy: ${simulatorConfig.type}`);
         }
 
-        const instance = new strategy.simulatorClass(instanceName, config, deviceHandle);
-
-        this.simulatorInstances.push(Object.assign({}, strategy, {id, instance, deviceId}));
+        const instance = new strategy.simulatorClass(simulatorConfig.name, simulatorConfig.config, deviceHandle);
+        let isLocked = false;
+        if (simulatorLock){
+            isLocked = (simulatorLock.isLocked && simulatorLock.lockedBy !== this.currentUserDetails.id);
+        }
+         this.simulatorInstances.push(
+            Object.assign({}, 
+            strategy, 
+            { 
+                id: simulatorConfig.id, 
+                instance, 
+                deviceId: simulatorConfig.config.deviceId,
+                isLocked: isLocked,
+                lockedBy: (isLocked ? simulatorLock.lockedDisplayName : ''),
+                lockedOn: (isLocked ? simulatorLock.lockedOn : '')
+            }));
+        if (simulatorConfig.config.isSimulatorStarted && isLocked && simulatorLock.lockedBy === this.currentUserDetails.id){
+            instance.start();
+        }
         return instance;
     }
 
@@ -149,12 +174,5 @@ export class DeviceSimulatorService implements NavigatorNodeFactory {
             id: this.currentAppID,
             applicationBuilder: appServiceData.applicationBuilder
         } as any);
-       /*  const deviceSimulatorList = (await this.inventoryService.detail(simulator.deviceId)).data.simulators
-            .filter(x => x.id !== simulator.id); */
-
-       /*  await this.inventoryService.update({
-            id: simulator.deviceId,
-            simulators: deviceSimulatorList.length > 0 ? deviceSimulatorList : null
-        }); */
     }
 }

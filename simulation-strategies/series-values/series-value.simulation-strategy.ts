@@ -16,19 +16,25 @@
 * limitations under the License.
  */
 
-import {FixedValueSimulationStrategyConfigComponent} from "./fixed-value.config.component";
+import {SeriesValueSimulationStrategyConfigComponent} from "./series-value.config.component";
 import {SimulationStrategy} from "../../device-simulator/simulation-strategy.decorator";
 import {DeviceIntervalSimulator} from "../../device-simulator/device-interval-simulator";
 
 @SimulationStrategy({
-    name: "Fixed Value",
-    icon: "minus",
-    description: "Simulates a flat line",
-    configComponent: FixedValueSimulationStrategyConfigComponent
+    name: "Series Value",
+    icon: "bar-chart",
+    description: "Simulates a line based on Series of values",
+    configComponent: SeriesValueSimulationStrategyConfigComponent
 })
-export class FixedValueSimulationStrategy extends DeviceIntervalSimulator {
+export class SeriesValueSimulationStrategy extends DeviceIntervalSimulator {
     protected interval = 1000;
+    measurementCounter = 0;
     onTick() {
-        this.device.sendMeasurement(this.config, this.config.value);
+        let measurementValue = this.config.value.split(',');
+        if (measurementValue.length === this.measurementCounter) {
+            this.measurementCounter = 0;
+        }
+        this.device.sendMeasurement(this.config, measurementValue[this.measurementCounter]);
+        this.measurementCounter++;
     }
 }
