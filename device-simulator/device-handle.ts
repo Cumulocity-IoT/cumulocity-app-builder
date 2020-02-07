@@ -1,5 +1,6 @@
-import { InventoryService, MeasurementService } from '@c8y/client';
+import { InventoryService, MeasurementService, ApplicationService } from '@c8y/client';
 import { DeviceSimulatorConfigModule } from 'device-simulator-config/device-simulator-config.module';
+import { AppStateService } from '@c8y/ngx-components';
 
 /*
 * Copyright (c) 2019 Software AG, Darmstadt, Germany and/or its licensors
@@ -25,21 +26,65 @@ interface valueType {
 }
 
 export class DeviceHandle {
-    constructor(private inventoryService: InventoryService, private measurementService: MeasurementService, private deviceId: any) {}
-
-    sendMeasurement(config: any) {
+    constructor(private inventoryService: InventoryService, private measurementService: MeasurementService, private simulatorConfig: any,
+        private appService: ApplicationService, private appId: any, private currentUserDetails: any) {}
+   
+    sendMeasurement(config: any, mValue:any) {
+        
         let value: valueType = {};
         value.type = config.type;
         value[config.type] = {
-            simulator_measurement: { value: parseFloat(config.value), unit: config.unit }
+            simulator_measurement: { value: parseFloat(mValue), unit: config.unit }
         }
+       
         this.measurementService.create({
-            source: {id: this.deviceId},
+            source: { id: this.simulatorConfig.config.deviceId},
             time: new Date().toISOString(),
             ...value
         });
     }
 
+    async updateLockAndStatus(simulatorStatus:boolean){
+        let appServiceData = (await this.appService.detail(this.appId)).data as any;
+        
+        let simulators = appServiceData.applicationBuilder.simulators
+            .filter(x => x.id !== this.simulatorConfig.id);
+        this.simulatorConfig.config.isSimulatorStarted = simulatorStatus;
+        console.log(this.currentUserDetails);
+        simulators.push({
+            id: this.simulatorConfig.id,
+            name: this.simulatorConfig.name,
+            type: this.simulatorConfig.type,
+            config: this.simulatorConfig.config
+        });
+        let simulatorsLock = appServiceData.applicationBuilder.simulatorsLock;
+        if(simulatorStatus){
+            simulatorsLock = {
+                isLocked: true,
+                lockedBy: this.currentUserDetails.id,
+                lockedOn: new Date().toISOString(),
+                lockedDisplayName: this.currentUserDetails.userName
+		    }
+        } else {
+            let simulatorsStatus = simulators
+                .filter(x => x.config.isSimulatorStarted === true);
+            if (simulatorsStatus.length === 0)    {
+                simulatorsLock = {
+                    isLocked: false,
+                    lockedBy: '',
+                    lockedOn: '',
+                    lockedDisplayName: ''
+                }
+            }
+        }
+        appServiceData.applicationBuilder.simulators = simulators.length > 0 ? simulators : null
+        appServiceData.applicationBuilder.simulatorsLock = simulatorsLock;
+
+        await this.appService.update({
+            id: this.appId,
+            applicationBuilder: appServiceData.applicationBuilder
+        } as any);
+    }
     updateManagedObject(value: any) {
         /* value = {
             gpsLocation: {

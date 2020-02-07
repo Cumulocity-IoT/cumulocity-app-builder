@@ -38,6 +38,7 @@ import {CustomWidgetsModule} from "./custom-widgets/custom-widgets.module";
 import {Location} from "@angular/common";
 import {filter, first, map, startWith, tap, withLatestFrom} from "rxjs/operators";
 import {IUser} from '@c8y/client';
+import { SeriesValueSimulationStrategyModule } from './simulation-strategies/series-values/series-value.simulation-strategy.module';
 
 @NgModule({
   declarations: [
@@ -69,6 +70,7 @@ import {IUser} from '@c8y/client';
     BrandingModule.forRoot(),
     DeviceSimulatorConfigModule,
     FixedValueSimulationStrategyModule,
+    SeriesValueSimulationStrategyModule,
     MarkdownModule.forRoot(),
     NgUpgradeModule,
     // Upgrade module must be the last

@@ -17,12 +17,12 @@
  */
 
 import {InjectionToken, NgModule} from "@angular/core";
-import {FixedValueSimulationStrategyConfigComponent} from "./fixed-value.config.component";
-import {SimulationStrategy} from "../../device-simulator/simulation-strategy.decorator";
-import {FixedValueSimulationStrategy} from "./fixed-value.simulation-strategy";
+import {SeriesValueSimulationStrategyConfigComponent} from "./series-value.config.component";
+import {SeriesValueSimulationStrategy} from "./series-value.simulation-strategy";
 import {CommonModule} from "@angular/common";
 import {FormsModule} from "@angular/forms";
 import { HOOK_SIMULATION_STRATEGY } from '../../device-simulator/device-simulator';
+
 
 @NgModule({
     imports: [
@@ -30,16 +30,16 @@ import { HOOK_SIMULATION_STRATEGY } from '../../device-simulator/device-simulato
         FormsModule
     ],
     declarations: [
-        FixedValueSimulationStrategyConfigComponent
+        SeriesValueSimulationStrategyConfigComponent
     ],
     exports: [
-        FixedValueSimulationStrategyConfigComponent
+        SeriesValueSimulationStrategyConfigComponent
     ],
     entryComponents: [
-        FixedValueSimulationStrategyConfigComponent
+        SeriesValueSimulationStrategyConfigComponent
     ],
     providers: [
-        { provide: HOOK_SIMULATION_STRATEGY, useValue: FixedValueSimulationStrategy, multi: true }
+        { provide: HOOK_SIMULATION_STRATEGY, useValue: SeriesValueSimulationStrategy, multi: true }
     ]
 })
-export class FixedValueSimulationStrategyModule {}
+export class SeriesValueSimulationStrategyModule {}

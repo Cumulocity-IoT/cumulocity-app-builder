@@ -6,7 +6,7 @@
         </a>
     </div>
     <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3" *ngFor="let sim of deviceSimulatorSvc.simulatorInstances">
-        <div class="card">
+        <div class="card" >
             <div class="dropdown card-actions" dropdown (click)="$event.stopPropagation()">
                 <button title="Settings" class="dropdown-toggle c8y-dropdown" dropdownToggle type="button">
                     <i c8yIcon="ellipsis-v"></i>
@@ -33,17 +33,28 @@
                 </div>
             </div>
             <div class="card-block row" style="margin-bottom: 5px;">
-                <div class="col-xs-6">
+                <div class="col-xs-6" *ngIf="!sim.isLocked">
                     <label class="c8y-switch">
                         <input type="checkbox" [ngModel]="sim.instance.isStarted()" (ngModelChange)="$event ? sim.instance.start() : sim.instance.stop()"/>
                         <span></span>
                         {{sim.instance.isStarted() ? 'Running' : 'Paused'}}
                     </label>
                 </div>
+                 <div class="col-xs-6" *ngIf="sim.isLocked">
+                     <i c8yIcon="lock"
+                         style="font-size: 30px;"></i>{{sim.instance.config.isSimulatorStarted ? 'Running' : 'Paused'}}
+                 </div>
                 <div class="col-xs-6 text-right">
                     <p class="text-truncate"><small class="text-muted">Type: {{sim.name}}</small></p>
-                    <p class="text-truncate"><small class="text-muted">Device: {{sim.deviceId}}</small></p>
+                    <p class="text-truncate"><small class="text-muted">Device: {{sim.instance.config.deviceId}}</small></p>
+                   
                 </div>
+                 <div class="row col-xs-12" *ngIf="sim.isLocked">
+                     <p class="text-truncate"><small class="text-muted">Locked By :
+                             {{sim.lockedBy}}</small></p>
+                    <p class="text-truncate"><small class="text-muted">Locked On:
+                            {{sim.lockedOn | date:'d MMMM yyyy HH:mm'}}</small></p>
+                 </div>
             </div>
         </div>
     </div>

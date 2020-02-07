@@ -96,25 +96,22 @@ export class NewSimulatorModalComponent implements OnInit{
         const simulators = appServiceData.applicationBuilder.simulators || [];
         const simulatorId = Math.floor(Math.random() * 1000000);
         this.newConfig.deviceId = this.deviceId;
-        simulators.push({
+        this.newConfig.isSimulatorStarted = false;
+        const newSimulatorObject = {
             id: simulatorId,
             name: this.simulatorName,
             type: this.selectedStrategy.name,
             config: this.newConfig
-        });
-        /* await this.inventoryService.update({
-            id: this.deviceId,
-            simulators
-        }); */
-        console.log('app Id ==' + appId);
+        };
+        simulators.push(newSimulatorObject);
         appServiceData.applicationBuilder.simulators = simulators;
         console.log(appServiceData);
         await this.appService.update({
             id: appId,
             applicationBuilder: appServiceData.applicationBuilder
         } as any);
-
-        this.deviceSimulatorService.createInstance(simulatorId, this.selectedStrategy.name, this.simulatorName, this.deviceId, this.newConfig);
+        
+        this.deviceSimulatorService.createInstance(newSimulatorObject, null);
 
         this.bsModalRef.hide();
     }

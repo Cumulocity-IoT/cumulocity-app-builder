@@ -24,9 +24,9 @@ import {Component} from "@angular/core";
             <label for="type"><span>Type</span></label>
             <input type="text" class="form-control" id="type" name="type" placeholder="e.g. temparature_measurement (required)" required autofocus [(ngModel)]="config.type">
         </div>
-       <div class="form-group">
+        <div class="form-group">
             <label for="value"><span>Value</span></label>
-            <input type="number" class="form-control" id="value" name="value" placeholder="e.g. 15(required)" required [(ngModel)]="config.value">
+            <input type="text" class="form-control" id="value" name="value" placeholder="e.g. 15,20,30 (required)" required [(ngModel)]="config.value">
         </div> 
         <div class="form-group">
             <label for="unit"><span>Unit</span></label>
@@ -38,6 +38,6 @@ import {Component} from "@angular/core";
         </div>  
     `
 })
-export class FixedValueSimulationStrategyConfigComponent {
+export class SeriesValueSimulationStrategyConfigComponent {
     config: any;
 }
