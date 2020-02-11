@@ -24,6 +24,7 @@ import {InventoryService, MeasurementService, ApplicationService} from "@c8y/cli
 import {AppStateService, NavigatorNodeFactory} from "@c8y/ngx-components";
 import {filter, first, mapTo, map} from "rxjs/operators";
 import { Router, ActivationEnd, NavigationEnd } from '@angular/router';
+import { SimulationLockService } from './simulation-lock-service';
 
 export interface DeviceSimulatorStrategy {
     name: string,
@@ -44,9 +45,11 @@ export class DeviceSimulatorService implements NavigatorNodeFactory {
     simulatorInstances: DeviceSimulatorInstance[] = [];
     currentAppID : string | undefined;
     currentUserDetails:any;
+    intervalLockTracker: any;
+    lockTrackerInterval = 5000;
     constructor(@Inject(HOOK_SIMULATION_STRATEGY) simulationStrategies: Type<DeviceSimulator>[], private inventoryService: InventoryService, 
         private appStateService: AppStateService, private measurementService: MeasurementService,
-        private route: Router, private appService: ApplicationService) {
+        private route: Router, private appService: ApplicationService, private simulatorLockService: SimulationLockService) {
         const strategies = simulationStrategies.map(simulatorClass => {
             const metadata: SimulationStrategyMetadata = Reflect.getMetadata('simulationStrategy', simulatorClass)[0];
             return {
@@ -108,15 +111,19 @@ export class DeviceSimulatorService implements NavigatorNodeFactory {
         this.simulatorInstances = [];
 
         // const simulatedDevices = (await this.inventoryService.list({ pageSize: 2000, query: 'has(simulators)' })).data;
+        this.intervalLockTracker = setInterval(() => this.updateLockTracker(), this.lockTrackerInterval);
+
         const appServiceObj = (await this.appService.detail(this.currentAppID)).data as any;
         const simulatedObject = appServiceObj.applicationBuilder.simulators;
         if(simulatedObject){
            /*  simulatedObject.forEach(simulatorConfig => {
                 this.createInstance(simulatorConfig.id, simulatorConfig.type, simulatorConfig.name, simulatorConfig.config.deviceId, simulatorConfig.config);
             }); */
+            const simulatorLock = await this.simulatorLockService.getLockDetails(this.currentAppID);
             simulatedObject.forEach(simulatorConfig => {
-                this.createInstance(simulatorConfig, appServiceObj.applicationBuilder.simulatorsLock);
+                this.createInstance(simulatorConfig, simulatorLock);
             });
+
         }
       
        /*  simulatedDevices.forEach(device => {
@@ -127,9 +134,9 @@ export class DeviceSimulatorService implements NavigatorNodeFactory {
     }
 
     // createInstance(id: number, strategyName: string, instanceName: string, deviceId: string, config: any): DeviceSimulator {
-    createInstance(simulatorConfig: any, simulatorLock: any): DeviceSimulator {
+    createInstance(simulatorConfig: any, lockTracker: any): DeviceSimulator {
         const deviceHandle = new DeviceHandle(this.inventoryService, this.measurementService, 
-            simulatorConfig, this.appService, this.currentAppID, this.currentUserDetails);
+            simulatorConfig, this.appService, this.currentAppID, this.currentUserDetails, this.simulatorLockService);
 
         const strategy = this.strategiesByName.get(simulatorConfig.type);
         if (!strategy) {
@@ -137,9 +144,10 @@ export class DeviceSimulatorService implements NavigatorNodeFactory {
         }
 
         const instance = new strategy.simulatorClass(simulatorConfig.name, simulatorConfig.config, deviceHandle);
-        let isLocked = false;
-        if (simulatorLock){
-            isLocked = (simulatorLock.isLocked && simulatorLock.lockedBy !== this.currentUserDetails.id);
+        let isActiveSession = this.simulatorLockService.isActiveSession();
+        if (lockTracker.length > 0 ){
+         //   isLocked = (simulatorLock.isLocked && simulatorLock.lockedBy !== this.currentUserDetails.id);
+            lockTracker = lockTracker[0].simulatorsLock;
         }
          this.simulatorInstances.push(
             Object.assign({}, 
@@ -148,11 +156,11 @@ export class DeviceSimulatorService implements NavigatorNodeFactory {
                 id: simulatorConfig.id, 
                 instance, 
                 deviceId: simulatorConfig.config.deviceId,
-                isLocked: isLocked,
-                lockedBy: (isLocked ? simulatorLock.lockedDisplayName : ''),
-                lockedOn: (isLocked ? simulatorLock.lockedOn : '')
+                isLocked: !isActiveSession && lockTracker.isLocked,
+                lockedBy: (!isActiveSession && lockTracker.isLocked ? lockTracker.lockedDisplayName : ''),
+                lockedOn: (!isActiveSession && lockTracker.isLocked ? lockTracker.lockedOn : '')
             }));
-        if (simulatorConfig.config.isSimulatorStarted && isLocked && simulatorLock.lockedBy === this.currentUserDetails.id){
+        if (simulatorConfig.config.isSimulatorStarted && (isActiveSession)){
             instance.start();
         }
         return instance;
@@ -174,5 +182,76 @@ export class DeviceSimulatorService implements NavigatorNodeFactory {
             id: this.currentAppID,
             applicationBuilder: appServiceData.applicationBuilder
         } as any);
+    }
+
+    async updateLockTracker() {
+        let lockTracker = await this.simulatorLockService.getLockDetails(this.currentAppID);
+        if (lockTracker.length > 0) {
+            lockTracker = lockTracker[0];
+            let simulatorsLock = lockTracker.simulatorsLock;
+            const lockTrackerDate = (new Date() as any) - (new Date(lockTracker.simulatorLockTracker) as any);
+            console.log("sec=" + lockTrackerDate / 1e3);
+            if (simulatorsLock.isLocked) {
+                if (Math.floor(lockTrackerDate / 1e3) > 30) {
+                    this.simulatorLockService.updateActiveSession(false);
+                    simulatorsLock = {
+                        isLocked: false,
+                        lockedBy: '',
+                        lockedOn: '',
+                        lockedDisplayName: ''
+                    }
+                    lockTracker.simulatorsLock = simulatorsLock;
+                    this.releaseLockFromInstance();
+                    this.inventoryService.update({
+                        ...lockTracker
+                    });
+
+                } else if (this.simulatorLockService.isActiveSession()) {
+                    lockTracker.simulatorLockTracker = new Date().toISOString();
+                    this.inventoryService.update({
+                        ...lockTracker
+                    });
+                } else {
+                    this.applyLockToInstance(simulatorsLock);
+                }
+
+            } else {
+                this.releaseLockFromInstance();
+            }
+        }
+    }
+
+    private async releaseLockFromInstance(){
+        this.updateRealtimeInstance(null);
+    }
+    private async applyLockToInstance(simulatorLock){
+       /*  this.simulatorInstances.forEach((instance: any) => {
+            instance.isLocked = true;
+            instance.lockedBy = simulatorLock.lockedDisplayName
+            instance.lockedOn = simulatorLock.lockedOn;
+        }); */
+        await this.updateRealtimeInstance(simulatorLock);
+    }
+
+    private async updateRealtimeInstance(simulatorLock){
+        let appServiceData = (await this.appService.detail(this.currentAppID)).data as any;
+        const simulators = appServiceData.applicationBuilder.simulators;
+        this.simulatorInstances.forEach((SMinstance: any) => {
+          //  console.log(SMinstance);
+            if (simulatorLock){
+                SMinstance.isLocked = true;
+                SMinstance.lockedBy = simulatorLock.lockedDisplayName
+                SMinstance.lockedOn = simulatorLock.lockedOn;
+            } else {
+                SMinstance.isLocked = false;
+                SMinstance.lockedBy = '';
+                SMinstance.lockedOn = '';
+            }
+            simulators.forEach(simulator => {
+                if (simulator.id === SMinstance.id) {
+                    SMinstance.instance.config = simulator.config;
+                }
+            });
+        });
     }
 }
