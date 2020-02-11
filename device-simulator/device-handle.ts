@@ -1,6 +1,7 @@
 import { InventoryService, MeasurementService, ApplicationService } from '@c8y/client';
 import { DeviceSimulatorConfigModule } from 'device-simulator-config/device-simulator-config.module';
 import { AppStateService } from '@c8y/ngx-components';
+import { SimulationLockService } from './simulation-lock-service';
 
 /*
 * Copyright (c) 2019 Software AG, Darmstadt, Germany and/or its licensors
@@ -27,7 +28,8 @@ interface valueType {
 
 export class DeviceHandle {
     constructor(private inventoryService: InventoryService, private measurementService: MeasurementService, private simulatorConfig: any,
-        private appService: ApplicationService, private appId: any, private currentUserDetails: any) {}
+        private appService: ApplicationService, private appId: any, private currentUserDetails: any,
+        private simulatorLockService: SimulationLockService) {}
    
     sendMeasurement(config: any, mValue:any) {
         
@@ -43,48 +45,26 @@ export class DeviceHandle {
             ...value
         });
     }
-
     async updateLockAndStatus(simulatorStatus:boolean){
         let appServiceData = (await this.appService.detail(this.appId)).data as any;
-        
         let simulators = appServiceData.applicationBuilder.simulators
             .filter(x => x.id !== this.simulatorConfig.id);
         this.simulatorConfig.config.isSimulatorStarted = simulatorStatus;
-        console.log(this.currentUserDetails);
+        this.simulatorLockService.updateLock(simulatorStatus, this.currentUserDetails, this.appId, simulators);
         simulators.push({
             id: this.simulatorConfig.id,
             name: this.simulatorConfig.name,
             type: this.simulatorConfig.type,
             config: this.simulatorConfig.config
         });
-        let simulatorsLock = appServiceData.applicationBuilder.simulatorsLock;
-        if(simulatorStatus){
-            simulatorsLock = {
-                isLocked: true,
-                lockedBy: this.currentUserDetails.id,
-                lockedOn: new Date().toISOString(),
-                lockedDisplayName: this.currentUserDetails.userName
-		    }
-        } else {
-            let simulatorsStatus = simulators
-                .filter(x => x.config.isSimulatorStarted === true);
-            if (simulatorsStatus.length === 0)    {
-                simulatorsLock = {
-                    isLocked: false,
-                    lockedBy: '',
-                    lockedOn: '',
-                    lockedDisplayName: ''
-                }
-            }
-        }
+       
         appServiceData.applicationBuilder.simulators = simulators.length > 0 ? simulators : null
-        appServiceData.applicationBuilder.simulatorsLock = simulatorsLock;
-
         await this.appService.update({
             id: this.appId,
             applicationBuilder: appServiceData.applicationBuilder
         } as any);
     }
+
     updateManagedObject(value: any) {
         /* value = {
             gpsLocation: {
