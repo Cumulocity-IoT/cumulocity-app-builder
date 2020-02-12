@@ -17,11 +17,11 @@
  */
 
 import {Injectable} from "@angular/core";
-import {_, AppStateService, NavigatorNode, NavigatorNodeFactory} from "@c8y/ngx-components";
+import {NavigatorNode, NavigatorNodeFactory} from "@c8y/ngx-components";
 import {BehaviorSubject, combineLatest, from, of} from "rxjs";
-import {ActivationEnd, Router} from "@angular/router";
-import {distinctUntilChanged, filter, first, map, mapTo, startWith, switchMap, tap} from "rxjs/operators";
+import {map, startWith, switchMap} from "rxjs/operators";
 import {ApplicationService} from "@c8y/client";
+import {AppIdService} from "../app-id.service";
 
 @Injectable()
 export class DashboardNavigation implements NavigatorNodeFactory {
@@ -29,29 +29,9 @@ export class DashboardNavigation implements NavigatorNodeFactory {
 
     private refreshSubject = new BehaviorSubject<void>(undefined);
 
-    constructor(private router: Router, private appService: ApplicationService, appStateService: AppStateService) {
-        // Have to use the router and manually extract path rather than using ActivatedRoute because this route may be an ng1 route
-        const appId = this.router.events.pipe(
-            filter(event => event instanceof ActivationEnd),
-            map((event: ActivationEnd) => event.snapshot.url),
-            map(url => {
-                if (url.length >= 2 && url[0].path === 'application') {
-                    return url[1].path;
-                } else {
-                    return undefined;
-                }
-            }),
-            distinctUntilChanged()
-        );
-
-        combineLatest(appId, this.refreshSubject).pipe(
+    constructor(private appIdService: AppIdService, private appService: ApplicationService) {
+        combineLatest(appIdService.appIdDelayedUntilAfterLogin$, this.refreshSubject).pipe(
             map(([appId]) => appId),
-            // Delay until after login - can't call appService.detail until logged in
-            switchMap(appId => appStateService.currentUser.pipe(
-                filter(user => user != null),
-                first(),
-                mapTo(appId)
-            )),
             switchMap(appId => {
                 if (appId) {
                     return from(this.appService.detail(appId))

@@ -19,9 +19,9 @@
 import {Injectable} from "@angular/core";
 import {AppStateService, NavigatorNode, NavigatorNodeFactory} from "@c8y/ngx-components";
 import {BehaviorSubject} from "rxjs";
-import {ActivationEnd, Router} from "@angular/router";
-import {distinctUntilChanged, filter, first, map, mapTo, startWith, switchMap} from "rxjs/operators";
+import {map, startWith} from "rxjs/operators";
 import {UserService} from "@c8y/client";
+import {AppIdService} from "./app-id.service";
 
 @Injectable()
 export class ConfigNavigationService {
@@ -58,7 +58,7 @@ export class ConfigNavigationService {
 @Injectable()
 export class Navigation implements NavigatorNodeFactory {
     nodes = new BehaviorSubject<NavigatorNode[]>([]);
-    constructor(private router: Router, private configNavService: ConfigNavigationService, appStateService: AppStateService, userService: UserService) {
+    constructor(appIdService: AppIdService, private configNavService: ConfigNavigationService, appStateService: AppStateService, userService: UserService) {
         configNavService.registerNewConfigListener((appId, configNode) => {
             configNode.add( new NavigatorNode({
                 label: 'Styling',
@@ -76,25 +76,8 @@ export class Navigation implements NavigatorNodeFactory {
             }));
         });
 
-        // Have to use the router and manually extract path rather than using ActivatedRoute because this route may be an ng1 route
-        this.router.events
+        appIdService.appIdDelayedUntilAfterLogin$
             .pipe(
-                filter(event => event instanceof ActivationEnd),
-                map((event: ActivationEnd) => event.snapshot.url),
-                map(url => {
-                    if (url.length >= 2 && url[0].path === 'application') {
-                        return url[1].path;
-                    } else {
-                        return undefined;
-                    }
-                }),
-                distinctUntilChanged(),
-                // Delay until after login
-                switchMap(url => appStateService.currentUser.pipe(
-                    filter(user => user != null),
-                    first(),
-                    mapTo(url)
-                )),
                 map(appId => {
                     if (appId) {
                         const configNode = new NavigatorNode({
