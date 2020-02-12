@@ -33,6 +33,7 @@ import { Timestamp } from 'rxjs/internal/operators/timestamp';
 import { ActivatedRoute, Router, ActivationEnd } from '@angular/router';
 import { map, filter, switchMap } from 'rxjs/operators';
 import { from, Observable } from 'rxjs';
+import { SimulationLockService } from '../device-simulator/simulation-lock-service';
 @Component({
     templateUrl: './new-simulator-modal.component.html'
 })
@@ -50,7 +51,7 @@ export class NewSimulatorModalComponent implements OnInit{
 
     constructor(public bsModalRef: BsModalRef, private deviceSimulatorService: DeviceSimulatorService, 
         private resolver: ComponentFactoryResolver, private injector: Injector, private inventoryService: InventoryService,
-        private appService: ApplicationService) {
+        private appService: ApplicationService, private simulatorLockService: SimulationLockService) {
        
         }
 
@@ -111,7 +112,8 @@ export class NewSimulatorModalComponent implements OnInit{
             applicationBuilder: appServiceData.applicationBuilder
         } as any);
         
-        this.deviceSimulatorService.createInstance(newSimulatorObject, null);
+        const simulatorLock = await this.simulatorLockService.getLockDetails(appId);
+        this.deviceSimulatorService.createInstance(newSimulatorObject, simulatorLock);
 
         this.bsModalRef.hide();
     }

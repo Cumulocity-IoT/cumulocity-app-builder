@@ -250,6 +250,9 @@ export class DeviceSimulatorService implements NavigatorNodeFactory {
             simulators.forEach(simulator => {
                 if (simulator.id === SMinstance.id) {
                     SMinstance.instance.config = simulator.config;
+                    if (!SMinstance.isLocked && SMinstance.instance.config.isSimulatorStarted){
+                        SMinstance.instance.start();
+                    }
                 }
             });
         });

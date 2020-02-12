@@ -49,20 +49,22 @@ export class DeviceHandle {
         let appServiceData = (await this.appService.detail(this.appId)).data as any;
         let simulators = appServiceData.applicationBuilder.simulators
             .filter(x => x.id !== this.simulatorConfig.id);
-        this.simulatorConfig.config.isSimulatorStarted = simulatorStatus;
         this.simulatorLockService.updateLock(simulatorStatus, this.currentUserDetails, this.appId, simulators);
-        simulators.push({
-            id: this.simulatorConfig.id,
-            name: this.simulatorConfig.name,
-            type: this.simulatorConfig.type,
-            config: this.simulatorConfig.config
-        });
-       
-        appServiceData.applicationBuilder.simulators = simulators.length > 0 ? simulators : null
-        await this.appService.update({
-            id: this.appId,
-            applicationBuilder: appServiceData.applicationBuilder
-        } as any);
+        if (!simulatorStatus || this.simulatorConfig.config.isSimulatorStarted !== simulatorStatus){
+            this.simulatorConfig.config.isSimulatorStarted = simulatorStatus
+            simulators.push({
+                id: this.simulatorConfig.id,
+                name: this.simulatorConfig.name,
+                type: this.simulatorConfig.type,
+                config: this.simulatorConfig.config
+            });
+
+            appServiceData.applicationBuilder.simulators = simulators.length > 0 ? simulators : null
+            await this.appService.update({
+                id: this.appId,
+                applicationBuilder: appServiceData.applicationBuilder
+            } as any);
+        }
     }
 
     updateManagedObject(value: any) {
