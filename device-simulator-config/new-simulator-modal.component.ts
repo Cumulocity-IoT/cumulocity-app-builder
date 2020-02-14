@@ -112,8 +112,8 @@ export class NewSimulatorModalComponent implements OnInit{
             applicationBuilder: appServiceData.applicationBuilder
         } as any);
         
-        const simulatorLock = await this.simulatorLockService.getLockDetails(appId);
-        this.deviceSimulatorService.createInstance(newSimulatorObject, simulatorLock);
+      //  const simulatorLock = await this.deviceSimulatorService.getLockDetails(appId);
+        this.deviceSimulatorService.createInstance(newSimulatorObject);
 
         this.bsModalRef.hide();
     }

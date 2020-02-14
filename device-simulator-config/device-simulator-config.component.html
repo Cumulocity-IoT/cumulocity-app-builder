@@ -1,13 +1,22 @@
 <div class="card-group interact-grid">
     <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3" style="min-height: 165px">
-        <a class="card add-card clickable" (click)="showCreateSimulatorDialog()">
+        <a  *ngIf="(!deviceSimulatorSvc.isLocked)" class="card add-card clickable" (click)="showCreateSimulatorDialog()">
             <i c8yIcon="plus-square"></i><br>
             Add Simulator
         </a>
+        <div *ngIf="deviceSimulatorSvc.isLocked" class="card add-card " (click)="showCreateSimulatorDialog()">
+           <div><i c8yIcon="lock"></i><br>
+            Locked
+            <p class="text-truncate"><small class="text-muted">Locked By :
+                    {{deviceSimulatorSvc.simulatorLockTrackerLiveData.simulatorsLock.lockedBy}}</small></p>
+            <p class="text-truncate"><small class="text-muted">Locked On:
+                    {{deviceSimulatorSvc.simulatorLockTrackerLiveData.simulatorsLock.lockedOn | date:'d MMMM yyyy HH:mm'}}</small></p>
+            </div>
+        </div>
     </div>
     <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3" *ngFor="let sim of deviceSimulatorSvc.simulatorInstances">
         <div class="card" >
-            <div class="dropdown card-actions" dropdown (click)="$event.stopPropagation()">
+            <div class="dropdown card-actions" dropdown (click)="$event.stopPropagation()" *ngIf="!(deviceSimulatorSvc.isLocked)">
                 <button title="Settings" class="dropdown-toggle c8y-dropdown" dropdownToggle type="button">
                     <i c8yIcon="ellipsis-v"></i>
                 </button>
@@ -33,14 +42,14 @@
                 </div>
             </div>
             <div class="card-block row" style="margin-bottom: 5px;">
-                <div class="col-xs-6" *ngIf="!sim.isLocked">
+                <div class="col-xs-6" *ngIf="!(deviceSimulatorSvc.isLocked)">
                     <label class="c8y-switch">
                         <input type="checkbox" [ngModel]="sim.instance.isStarted()" (ngModelChange)="$event ? sim.instance.start() : sim.instance.stop()"/>
                         <span></span>
                         {{sim.instance.isStarted() ? 'Running' : 'Paused'}}
                     </label>
                 </div>
-                 <div class="col-xs-6" *ngIf="sim.isLocked">
+                 <div class="col-xs-6" *ngIf="deviceSimulatorSvc.isLocked">
                      <i c8yIcon="lock"
                          style="font-size: 30px;"></i>{{sim.instance.config.isSimulatorStarted ? 'Running' : 'Paused'}}
                  </div>
@@ -49,11 +58,11 @@
                     <p class="text-truncate"><small class="text-muted">Device: {{sim.instance.config.deviceId}}</small></p>
                    
                 </div>
-                 <div class="row col-xs-12" *ngIf="sim.isLocked">
-                     <p class="text-truncate"><small class="text-muted">Locked By :
+                 <div class="row col-xs-12" *ngIf="deviceSimulatorSvc.isLocked">
+                    <!--  <p class="text-truncate"><small class="text-muted">Locked By :
                              {{sim.lockedBy}}</small></p>
                     <p class="text-truncate"><small class="text-muted">Locked On:
-                            {{sim.lockedOn | date:'d MMMM yyyy HH:mm'}}</small></p>
+                            {{sim.lockedOn | date:'d MMMM yyyy HH:mm'}}</small></p> -->
                  </div>
             </div>
         </div>
