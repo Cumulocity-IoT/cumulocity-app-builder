@@ -39,6 +39,7 @@ import {Location} from "@angular/common";
 import {filter, first, map, startWith, tap, withLatestFrom} from "rxjs/operators";
 import {IUser} from '@c8y/client';
 import { SeriesValueSimulationStrategyModule } from './simulation-strategies/series-values/series-value.simulation-strategy.module';
+import { RandomValueSimulationStrategyModule } from './simulation-strategies/random-values/random-value.simulation-strategy.module';
 
 @NgModule({
   declarations: [
@@ -71,6 +72,7 @@ import { SeriesValueSimulationStrategyModule } from './simulation-strategies/ser
     DeviceSimulatorConfigModule,
     FixedValueSimulationStrategyModule,
     SeriesValueSimulationStrategyModule,
+    RandomValueSimulationStrategyModule,
     MarkdownModule.forRoot(),
     NgUpgradeModule,
     // Upgrade module must be the last
