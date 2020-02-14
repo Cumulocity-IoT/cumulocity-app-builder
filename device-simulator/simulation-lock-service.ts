@@ -4,14 +4,7 @@ import { InventoryService } from '@c8y/ngx-components/api';
 @Injectable({ providedIn: "root" })
 export class SimulationLockService {
 
-    constructor(private inventoryService: InventoryService) {}
-
-    async getLockDetails(appId){
-        const query = {
-            applicationId: appId
-        }
-        return (await this.inventoryService.listQuery(query)).data as any;
-    }
+    constructor(private inventoryService: InventoryService) { }
 
     updateActiveSession(status){
         sessionStorage.setItem('isActiveSession', status);
