@@ -68,23 +68,23 @@ export class DeviceSimulatorService implements NavigatorNodeFactory {
         });
 
         this.strategiesByName = new Map(strategies.map(strat => [strat.name, strat] as [string, DeviceSimulatorStrategy]));
-        appStateService.currentUser
-            .pipe(
-                filter(user => user != null),
-                first()
-            )
-            .toPromise()
-            .then((user) => {
-                this.currentUserDetails = user;
-                this.reloadSimulators()
-            });
-
         appIdService.appIdDelayedUntilAfterLogin$.pipe(switchMap(appId => {
             if (appId != undefined) {
                 this.currentAppID = appId;
                 const query = {
                     applicationId: appId
                 }
+                appStateService.currentUser
+                    .pipe(
+                        filter(user => user != null),
+                        first()
+                    )
+                    .toPromise()
+                    .then((user) => {
+                        this.currentUserDetails = user;
+                        this.reloadSimulators()
+                    });
+
                 this.inventoryService.listQuery(query).
                 then((lockTracker : any) => {
                     if (lockTracker.data.length > 0) {
@@ -214,9 +214,9 @@ export class DeviceSimulatorService implements NavigatorNodeFactory {
         if (this.simulatorLockTrackerLiveData) {
             let simulatorsLock = this.simulatorLockTrackerLiveData.simulatorsLock;
             const lockTrackerDate = (new Date() as any) - (new Date(this.simulatorLockTrackerLiveData.simulatorLockTracker) as any);
-            console.log("sec=" + lockTrackerDate / 1e3);
+          //  console.log("sec=" + lockTrackerDate / 1e3);
             if (simulatorsLock.isLocked) {
-                if (Math.floor(lockTrackerDate / 1e3) > 30) {
+                if (Math.floor(lockTrackerDate / 1e3) > 10) {
                     this.simulatorLockService.updateActiveSession(false);
                     simulatorsLock = {
                         isLocked: false,

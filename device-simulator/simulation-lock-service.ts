@@ -18,7 +18,6 @@ export class SimulationLockService {
        }
        let isFirstRequest = false;
         let inventoryServiceData = (await this.inventoryService.listQuery( query)).data as any;
-        console.log(inventoryServiceData);
         if(inventoryServiceData.length === 0)
             isFirstRequest = true;
         else
