@@ -66,6 +66,13 @@ export class EditSimulatorModalComponent  implements OnInit{
             componentRef.instance.config = this.simulator.config;
         }
     }
+
+
+    /**
+     * Save simulator and close Modal dialog
+     *
+     * @memberof EditSimulatorModalComponent
+     */
     async saveAndClose() {
         
         this.busy = true;

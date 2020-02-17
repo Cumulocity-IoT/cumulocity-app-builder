@@ -68,12 +68,14 @@ export class DeviceSimulatorService implements NavigatorNodeFactory {
         });
 
         this.strategiesByName = new Map(strategies.map(strat => [strat.name, strat] as [string, DeviceSimulatorStrategy]));
+        // Subscribed AppID Service. Wait to get login completed and appId avaialbe via route event
         appIdService.appIdDelayedUntilAfterLogin$.pipe(switchMap(appId => {
             if (appId != undefined) {
                 this.currentAppID = appId;
                 const query = {
                     applicationId: appId
                 }
+                // Get current User and reload simulators when available
                 appStateService.currentUser
                     .pipe(
                         filter(user => user != null),
@@ -85,6 +87,8 @@ export class DeviceSimulatorService implements NavigatorNodeFactory {
                         this.reloadSimulators()
                     });
 
+                // get Application Object for given App ID
+                // Used in next step for realtime updates
                 this.inventoryService.listQuery(query).
                 then((lockTracker : any) => {
                     if (lockTracker.data.length > 0) {
@@ -93,12 +97,13 @@ export class DeviceSimulatorService implements NavigatorNodeFactory {
                             realtime: true
                         }).subscribe(lockTracker => {
                             this.simulatorLockTrackerLiveData = lockTracker;
-                         // console.log(this.simulatorLockTrackerLiveData);
                             this.isLocked = this.checkLocked();
+                           // console.log(lockTracker);
                         });
                     }
                 });
 
+                // appService list for realTime updates in simulators
                 return from(this.appService.list$({ pageSize: 100, withTotalPages: true }, {
                     hot: true,
                     realtime: true,
@@ -129,6 +134,13 @@ export class DeviceSimulatorService implements NavigatorNodeFactory {
         return this.currentAppID;
     }
 
+    
+    /**
+     * Check if simulators are locked or not
+     *
+     * @returns
+     * @memberof DeviceSimulatorService
+     */
     checkLocked(){
         this.isActiveSession = this.simulatorLockService.isActiveSession();
         if (this.simulatorLockTrackerLiveData)
@@ -136,6 +148,13 @@ export class DeviceSimulatorService implements NavigatorNodeFactory {
         else 
             return false;
     }
+
+    
+   /**
+    * Reload simulators on page refresh/load
+    *
+    * @memberof DeviceSimulatorService
+    */
    async reloadSimulators() {
         this.simulatorInstances.forEach(simInstance => {
             if (simInstance.instance.isStarted()) {
@@ -151,23 +170,21 @@ export class DeviceSimulatorService implements NavigatorNodeFactory {
             
         const simulatedObject = appServiceObj.applicationBuilder.simulators;
         if(simulatedObject){
-           /*  simulatedObject.forEach(simulatorConfig => {
-                this.createInstance(simulatorConfig.id, simulatorConfig.type, simulatorConfig.name, simulatorConfig.config.deviceId, simulatorConfig.config);
-            }); */
             simulatedObject.forEach(simulatorConfig => {
                 this.createInstance(simulatorConfig);
             });
+        } 
+     }
 
-        }
-      
-       /*  simulatedDevices.forEach(device => {
-            device.simulators.forEach(simulatorConfig => {
-                this.createInstance(simulatorConfig.id, simulatorConfig.type, simulatorConfig.name, device.id, simulatorConfig.config);
-            });
-        }); */
-    }
 
-    // createInstance(id: number, strategyName: string, instanceName: string, deviceId: string, config: any): DeviceSimulator {
+    /**
+     *
+     * Create simulator instances and store it in object.
+     * Also start simulator if session is active and simulator start flag is true
+     * @param {*} simulatorConfig
+     * @returns {DeviceSimulator}
+     * @memberof DeviceSimulatorService
+     */
     createInstance(simulatorConfig: any): DeviceSimulator {
         const deviceHandle = new DeviceHandle(this.inventoryService, this.measurementService, 
             simulatorConfig, this.appService, this.currentAppID, this.currentUserDetails, this.simulatorLockService);
@@ -192,6 +209,13 @@ export class DeviceSimulatorService implements NavigatorNodeFactory {
         return instance;
     }
 
+
+    /**
+     *
+     * Delete current simulator instance
+     * @param {DeviceSimulatorInstance} simulator
+     * @memberof DeviceSimulatorService
+     */
     async deleteInstance(simulator: DeviceSimulatorInstance) {
         if (simulator.instance.isStarted()) {
             simulator.instance.stop();
@@ -210,6 +234,13 @@ export class DeviceSimulatorService implements NavigatorNodeFactory {
         } as any);
     }
 
+
+    /**
+     * Check the lock status at every 5 seconds.
+     *  If lock timestand difference is >10 sec than lock will be released So other browser session can start simulation automatically
+     *
+     * @memberof DeviceSimulatorService
+     */
     async updateLockTracker() {
         if (this.simulatorLockTrackerLiveData) {
             let simulatorsLock = this.simulatorLockTrackerLiveData.simulatorsLock;
@@ -244,6 +275,14 @@ export class DeviceSimulatorService implements NavigatorNodeFactory {
             }
         }
     }
+
+    
+    /**
+     * Update realtime instance in case of lock is released on aquired by browser session
+     * Also update realtime status of simulators
+     * @private
+     * @memberof DeviceSimulatorService
+     */
     private async updateRealtimeInstance(){
         let appServiceData = this.appServiceLiveData
         const simulators = appServiceData.applicationBuilder.simulators;
@@ -252,6 +291,7 @@ export class DeviceSimulatorService implements NavigatorNodeFactory {
                 if (simulator.id === SMinstance.id) {
                     SMinstance.instance.config = simulator.config;
                     if (!this.checkLocked() && SMinstance.instance.config.isSimulatorStarted){
+                      //  console.log('starting simulator...');
                         SMinstance.instance.start();
                     }
                 }
