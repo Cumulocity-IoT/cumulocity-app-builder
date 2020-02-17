@@ -45,6 +45,14 @@ export class DeviceHandle {
             ...value
         });
     }
+
+
+    /**
+     * Updated simulator lock status.
+     * This method is called when browser session is active and simulator is started/stopped by user who have simulator rights
+     * @param {boolean} simulatorStatus
+     * @memberof DeviceHandle
+     */
     async updateLockAndStatus(simulatorStatus:boolean){
         let appServiceData = (await this.appService.detail(this.appId)).data as any;
         let simulators = appServiceData.applicationBuilder.simulators
@@ -67,22 +75,14 @@ export class DeviceHandle {
         }
     }
 
-    updateManagedObject(value: any) {
-        /* value = {
-            gpsLocation: {
-                lat: 1,
-                lng: 1
-            }
-        }
 
-        value = {
-            name: "hello"
-        }
- */
+    /**
+     *
+     * To be used in future
+     * @param {*} value
+     * @memberof DeviceHandle
+     */
+    updateManagedObject(value: any) {
         console.log(`Updating ManagedObject: ${JSON.stringify(value)}`);
-        /* this.inventoryService.update({
-            id: DeviceSimulatorConfigModule,
-            ...value
-        }) */
     }
 }

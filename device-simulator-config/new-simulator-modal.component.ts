@@ -71,6 +71,12 @@ export class NewSimulatorModalComponent implements OnInit{
         }
     }
 
+
+    /**
+     *
+     * Create Simulator and close Modal Dialog
+     * @memberof NewSimulatorModalComponent
+     */
     async saveAndClose() {
         this.busy = true;
 
@@ -112,9 +118,7 @@ export class NewSimulatorModalComponent implements OnInit{
             applicationBuilder: appServiceData.applicationBuilder
         } as any);
         
-      //  const simulatorLock = await this.deviceSimulatorService.getLockDetails(appId);
         this.deviceSimulatorService.createInstance(newSimulatorObject);
-
         this.bsModalRef.hide();
     }
 }
