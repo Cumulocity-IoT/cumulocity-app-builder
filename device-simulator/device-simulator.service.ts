@@ -21,9 +21,9 @@ import {DeviceSimulator, HOOK_SIMULATION_STRATEGY} from "./device-simulator";
 import {DeviceHandle} from "./device-handle";
 import {SimulationStrategyMetadata} from "./simulation-strategy.decorator";
 import { InventoryService, MeasurementService, ApplicationService, PagingStrategy, RealtimeAction} from "@c8y/client";
-import {AppStateService, NavigatorNodeFactory} from "@c8y/ngx-components";
-import {filter, first, mapTo, map, switchMap, tap} from "rxjs/operators";
-import { Router, ActivationEnd, NavigationEnd } from '@angular/router';
+import {AppStateService} from "@c8y/ngx-components";
+import {filter, first, switchMap } from "rxjs/operators";
+import { Router } from '@angular/router';
 import { SimulationLockService } from './simulation-lock-service';
 import { AppIdService } from '../app-id.service';
 import { from, of } from 'rxjs';
@@ -42,10 +42,9 @@ export interface DeviceSimulatorInstance extends DeviceSimulatorStrategy {
 }
 
 @Injectable({providedIn:"root"})
-export class DeviceSimulatorService implements NavigatorNodeFactory {
+export class DeviceSimulatorService {
     readonly strategiesByName: Map<string, DeviceSimulatorStrategy>;
     simulatorInstances: DeviceSimulatorInstance[] = [];
-    currentAppID : string | undefined;
     currentUserDetails:any;
     intervalLockTracker : any;
     lockTrackerInterval = 5000;
@@ -71,7 +70,6 @@ export class DeviceSimulatorService implements NavigatorNodeFactory {
         // Subscribed AppID Service. Wait to get login completed and appId avaialbe via route event
         appIdService.appIdDelayedUntilAfterLogin$.pipe(switchMap(appId => {
             if (appId != undefined) {
-                this.currentAppID = appId;
                 const query = {
                     applicationId: appId
                 }
@@ -119,21 +117,10 @@ export class DeviceSimulatorService implements NavigatorNodeFactory {
                 if (appServices == undefined) {
                     return;
                 }
-                let appServiceData = appServices.filter(x => x.id === this.currentAppID);
+                let appServiceData = appServices.filter(x => x.id === this.appIdService.getCurrentAppId());
                 this.appServiceLiveData = appServiceData[0];
             });
-
     }
-    get(){
-        return null;
-    }
-    setCurrentAppId(appId){
-        this.currentAppID = appId;
-    }
-    getCurrentAppId() {
-        return this.currentAppID;
-    }
-
     
     /**
      * Check if simulators are locked or not
@@ -166,7 +153,7 @@ export class DeviceSimulatorService implements NavigatorNodeFactory {
         this.intervalLockTracker = setInterval(() => this.updateLockTracker(), this.lockTrackerInterval);
         let appServiceObj = this.appServiceLiveData; // (await this.appService.detail(this.currentAppID)).data as any;
         if (!this.appServiceLiveData)
-            appServiceObj = (await this.appService.detail(this.currentAppID)).data as any;
+            appServiceObj = (await this.appService.detail(this.appIdService.getCurrentAppId())).data as any;
             
         const simulatedObject = appServiceObj.applicationBuilder.simulators;
         if(simulatedObject){
@@ -187,7 +174,7 @@ export class DeviceSimulatorService implements NavigatorNodeFactory {
      */
     createInstance(simulatorConfig: any): DeviceSimulator {
         const deviceHandle = new DeviceHandle(this.inventoryService, this.measurementService, 
-            simulatorConfig, this.appService, this.currentAppID, this.currentUserDetails, this.simulatorLockService);
+            simulatorConfig, this.appService, this.appIdService.getCurrentAppId(), this.currentUserDetails, this.simulatorLockService);
 
         const strategy = this.strategiesByName.get(simulatorConfig.type);
         if (!strategy) {
@@ -222,14 +209,14 @@ export class DeviceSimulatorService implements NavigatorNodeFactory {
         }
         this.simulatorInstances = this.simulatorInstances.filter(x => x.id !== simulator.id);
 
-        let appServiceData  = (await this.appService.detail(this.currentAppID)).data as any ;
+        let appServiceData  = (await this.appService.detail(this.appIdService.getCurrentAppId())).data as any ;
         const simulators = appServiceData.applicationBuilder.simulators
             .filter(x => x.id !== simulator.id);
         
         appServiceData.applicationBuilder.simulators = simulators.length > 0 ? simulators : null
        
         await this.appService.update({
-            id: this.currentAppID,
+            id: this.appIdService.getCurrentAppId(),
             applicationBuilder: appServiceData.applicationBuilder
         } as any);
     }
