@@ -18,13 +18,19 @@
 
 import {NgModule} from "@angular/core";
 import {downgradeInjectable} from "@angular/upgrade/static";
-import {InventoryService} from "@c8y/client";
+import {InventoryService, ApplicationService} from "@c8y/client";
 import {AppStateService} from "@c8y/ngx-components";
 import {DashboardController} from "./dashboard.controller";
 
 import './cumulocity.json';
 
 declare const angular: any;
+
+function hashToPathSegments(urlString: string): string[] {
+    const url = new URL(urlString);
+    const hash = url.hash;
+    return hash.replace('#/', '').split('/');
+}
 
 angular
     .module('framework', [])
@@ -42,21 +48,39 @@ angular
             });
         });
     }])
-    // Redirect all device/:deviceId, group/:groupId.... back to the cockpit
-    .run(['$rootScope', $rootScope => {
-        $rootScope.$on('$locationChangeStart', (event, next, current) => {
-            const url = new URL(next);
-            const hash = url.hash;
-            const pathSegments = hash.replace('#/', '').split('/');
-            if (pathSegments.length >= 1) {
-                if (['device', 'group', 'users', 'applications', 'subscribedApplications', 'tenants'].includes(pathSegments[0])) {
+    // Redirect all device/:deviceId, group/:groupId....
+    // If it's device or group then try to find an appropriate application builder dashboard, otherwise link to the cockpit
+    .run(['$rootScope', 'applicationService', ($rootScope, applicationService) => {
+        $rootScope.$on('$locationChangeStart', async (event, next, current) => {
+            const nextPathSegments = hashToPathSegments(next);
+            const currentPathSegments = hashToPathSegments(current);
+            if (nextPathSegments.length >= 1) {
+                // device/:deviceId or group/:groupId attempt to redirect inside the Application Builder
+                if (nextPathSegments.length >= 2 && ['device', 'group'].includes(nextPathSegments[0]) && currentPathSegments.length >= 2 && currentPathSegments[0] === 'application') {
                     event.preventDefault();
-                    window.location.assign(`/apps/cockpit/${hash}`);
+
+                    // Try to find an application builder dashboard with the device or group id
+                    const appId = currentPathSegments[1];
+                    const application = (await applicationService.detail(appId)).data;
+                    let matchingDashboard;
+                    if (application.applicationBuilder && application.applicationBuilder.dashboards) {
+                        matchingDashboard = application.applicationBuilder.dashboards.find(dashboard => dashboard.deviceId === nextPathSegments[1])
+                    }
+                    if (matchingDashboard) {
+                        window.location.hash = `/application/${appId}/dashboard/${matchingDashboard.id}/device/${matchingDashboard.deviceId}`;
+                    } else {
+                        window.location.assign(`/apps/cockpit/${new URL(next).hash}`);
+                    }
+                // Everything else redirects to the cockpit
+                } else if (['device', 'group', 'users', 'applications', 'subscribedApplications', 'tenants'].includes(nextPathSegments[0])) {
+                    event.preventDefault();
+                    window.location.assign(`/apps/cockpit/${new URL(next).hash}`);
                 }
             }
         });
     }])
     .factory('inventoryService', downgradeInjectable(InventoryService))
+    .factory('applicationService', downgradeInjectable(ApplicationService))
     .factory('appStateService', downgradeInjectable(AppStateService));
 
 angular
