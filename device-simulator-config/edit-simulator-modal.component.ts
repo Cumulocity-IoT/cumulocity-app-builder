@@ -32,6 +32,7 @@ import {
     DeviceSimulatorStrategy,
 } from "../device-simulator/device-simulator.service";
 import {InventoryService, ApplicationService} from '@c8y/client';
+import {AppIdService} from "../app-id.service";
 
 @Component({
     templateUrl: './edit-simulator-modal.component.html'
@@ -45,7 +46,7 @@ export class EditSimulatorModalComponent  implements OnInit{
     simulator: any;
     constructor(public bsModalRef: BsModalRef, private deviceSimulatorService: DeviceSimulatorService,
          private resolver: ComponentFactoryResolver, private injector: Injector, 
-         private appService: ApplicationService) {
+         private appService: ApplicationService, private appIdService: AppIdService) {
 
     }
 
@@ -76,7 +77,7 @@ export class EditSimulatorModalComponent  implements OnInit{
     async saveAndClose() {
         
         this.busy = true;
-        let appServiceData = (await this.appService.detail(this.deviceSimulatorService.getCurrentAppId())).data as any;
+        let appServiceData = (await this.appService.detail(this.appIdService.getCurrentAppId())).data as any;
 
         let simulators = appServiceData.applicationBuilder.simulators
             .filter(x => x.id !== this.config.id);
@@ -90,7 +91,7 @@ export class EditSimulatorModalComponent  implements OnInit{
         appServiceData.applicationBuilder.simulators = simulators.length > 0 ? simulators : null
 
         await this.appService.update({
-            id: this.deviceSimulatorService.getCurrentAppId(),
+            id: this.appIdService.getCurrentAppId(),
             applicationBuilder: appServiceData.applicationBuilder
         } as any);
         this.bsModalRef.hide();

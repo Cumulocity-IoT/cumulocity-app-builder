@@ -34,6 +34,7 @@ import { ActivatedRoute, Router, ActivationEnd } from '@angular/router';
 import { map, filter, switchMap } from 'rxjs/operators';
 import { from, Observable } from 'rxjs';
 import { SimulationLockService } from '../device-simulator/simulation-lock-service';
+import {AppIdService} from "../app-id.service";
 @Component({
     templateUrl: './new-simulator-modal.component.html'
 })
@@ -51,9 +52,7 @@ export class NewSimulatorModalComponent implements OnInit{
 
     constructor(public bsModalRef: BsModalRef, private deviceSimulatorService: DeviceSimulatorService, 
         private resolver: ComponentFactoryResolver, private injector: Injector, private inventoryService: InventoryService,
-        private appService: ApplicationService, private simulatorLockService: SimulationLockService) {
-       
-        }
+        private appService: ApplicationService, private appIdService: AppIdService) {}
 
     ngOnInit() {
     }
@@ -93,7 +92,7 @@ export class NewSimulatorModalComponent implements OnInit{
         }
         this.deviceId = device.id;
         
-        const appId = this.deviceSimulatorService.getCurrentAppId();
+        const appId = this.appIdService.getCurrentAppId();
         let appServiceData;
         if(appId){
             appServiceData = (await this.appService.detail(appId)).data;
