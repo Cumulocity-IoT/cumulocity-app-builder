@@ -1,7 +1,5 @@
 import { InventoryService, MeasurementService, ApplicationService } from '@c8y/client';
-import { DeviceSimulatorConfigModule } from 'device-simulator-config/device-simulator-config.module';
-import { AppStateService } from '@c8y/ngx-components';
-import { SimulationLockService } from './simulation-lock-service';
+import { SimulationLockService } from './simulation-lock.service';
 
 /*
 * Copyright (c) 2019 Software AG, Darmstadt, Germany and/or its licensors
@@ -50,16 +48,14 @@ export class DeviceHandle {
     /**
      * Updated simulator lock status.
      * This method is called when browser session is active and simulator is started/stopped by user who have simulator rights
-     * @param {boolean} simulatorStatus
-     * @memberof DeviceHandle
+     * @param {boolean} simulatorStarted
      */
-    async updateLockAndStatus(simulatorStatus:boolean){
+    async updateSimulatorStatus(simulatorStarted: boolean){
         let appServiceData = (await this.appService.detail(this.appId)).data as any;
         let simulators = appServiceData.applicationBuilder.simulators
             .filter(x => x.id !== this.simulatorConfig.id);
-        this.simulatorLockService.updateLock(simulatorStatus, this.currentUserDetails, this.appId, simulators);
-        if (!simulatorStatus || this.simulatorConfig.config.isSimulatorStarted !== simulatorStatus){
-            this.simulatorConfig.config.isSimulatorStarted = simulatorStatus
+        if (!simulatorStarted || this.simulatorConfig.config.isSimulatorStarted !== simulatorStarted){
+            this.simulatorConfig.config.isSimulatorStarted = simulatorStarted
             simulators.push({
                 id: this.simulatorConfig.id,
                 name: this.simulatorConfig.name,
@@ -80,7 +76,6 @@ export class DeviceHandle {
      *
      * To be used in future
      * @param {*} value
-     * @memberof DeviceHandle
      */
     updateManagedObject(value: any) {
         console.log(`Updating ManagedObject: ${JSON.stringify(value)}`);

@@ -39,8 +39,7 @@ class DeviceSimulatorConfigNavigation implements NavigatorNodeFactory {
             priority: 0
         })
     ];
-    
-    //TODO: Not in use for now
+
     get() {
         return this.nodes;
     }
@@ -71,8 +70,7 @@ class DeviceSimulatorConfigNavigation implements NavigatorNodeFactory {
         EditSimulatorModalComponent
     ],
     providers: [
-        DeviceSimulatorService,
-        { provide: HOOK_NAVIGATOR_NODES, useExisting: DeviceSimulatorService, multi: true },
+        DeviceSimulatorService
     ]
 })
 export class DeviceSimulatorConfigModule {
