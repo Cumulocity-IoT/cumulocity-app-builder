@@ -29,11 +29,6 @@ import { BsModalRef } from 'ngx-bootstrap/modal';
 import {WizardComponent} from "../wizard/wizard.component";
 import {DeviceSimulatorService, DeviceSimulatorStrategy} from "../device-simulator/device-simulator.service";
 import {InventoryService, ApplicationService} from '@c8y/client';
-import { Timestamp } from 'rxjs/internal/operators/timestamp';
-import { ActivatedRoute, Router, ActivationEnd } from '@angular/router';
-import { map, filter, switchMap } from 'rxjs/operators';
-import { from, Observable } from 'rxjs';
-import { SimulationLockService } from '../device-simulator/simulation-lock-service';
 import {AppIdService} from "../app-id.service";
 @Component({
     templateUrl: './new-simulator-modal.component.html'

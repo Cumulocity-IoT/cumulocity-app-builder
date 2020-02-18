@@ -20,13 +20,12 @@ import {Inject, Injectable, Type} from "@angular/core";
 import {DeviceSimulator, HOOK_SIMULATION_STRATEGY} from "./device-simulator";
 import {DeviceHandle} from "./device-handle";
 import {SimulationStrategyMetadata} from "./simulation-strategy.decorator";
-import { InventoryService, MeasurementService, ApplicationService, PagingStrategy, RealtimeAction} from "@c8y/client";
+import { InventoryService, MeasurementService, ApplicationService, IApplication} from "@c8y/client";
 import {AppStateService} from "@c8y/ngx-components";
-import {filter, first, switchMap } from "rxjs/operators";
 import { Router } from '@angular/router';
-import { SimulationLockService } from './simulation-lock-service';
+import { SimulationLockService } from './simulation-lock.service';
 import { AppIdService } from '../app-id.service';
-import { from, of } from 'rxjs';
+import { combineLatest } from 'rxjs';
 
 export interface DeviceSimulatorStrategy {
     name: string,
@@ -45,16 +44,11 @@ export interface DeviceSimulatorInstance extends DeviceSimulatorStrategy {
 export class DeviceSimulatorService {
     readonly strategiesByName: Map<string, DeviceSimulatorStrategy>;
     simulatorInstances: DeviceSimulatorInstance[] = [];
-    currentUserDetails:any;
-    intervalLockTracker : any;
-    lockTrackerInterval = 5000;
-    appServiceLiveData : any;
-    simulatorLockTrackerLiveData : any;
-    isActiveSession = false;
-    isLocked = this.checkLocked();
-    constructor(@Inject(HOOK_SIMULATION_STRATEGY) simulationStrategies: Type<DeviceSimulator>[], private inventoryService: InventoryService, 
+    constructor(
+        @Inject(HOOK_SIMULATION_STRATEGY) simulationStrategies: Type<DeviceSimulator>[], private inventoryService: InventoryService,
         private appStateService: AppStateService, private appIdService: AppIdService, private measurementService: MeasurementService,
-        private route: Router, private appService: ApplicationService, private simulatorLockService: SimulationLockService) {
+        private route: Router, private appService: ApplicationService, private simulatorLockService: SimulationLockService
+    ) {
         const strategies = simulationStrategies.map(simulatorClass => {
             const metadata: SimulationStrategyMetadata = Reflect.getMetadata('simulationStrategy', simulatorClass)[0];
             return {
@@ -67,114 +61,61 @@ export class DeviceSimulatorService {
         });
 
         this.strategiesByName = new Map(strategies.map(strat => [strat.name, strat] as [string, DeviceSimulatorStrategy]));
-        // Subscribed AppID Service. Wait to get login completed and appId avaialbe via route event
-        appIdService.appIdDelayedUntilAfterLogin$.pipe(switchMap(appId => {
-            if (appId != undefined) {
-                const query = {
-                    applicationId: appId
-                }
-                // Get current User and reload simulators when available
-                appStateService.currentUser
-                    .pipe(
-                        filter(user => user != null),
-                        first()
-                    )
-                    .toPromise()
-                    .then((user) => {
-                        this.currentUserDetails = user;
-                        this.reloadSimulators()
-                    });
 
-                // get Application Object for given App ID
-                // Used in next step for realtime updates
-                this.inventoryService.listQuery(query).
-                then((lockTracker : any) => {
-                    if (lockTracker.data.length > 0) {
-                        this.inventoryService.detail$(lockTracker.data[0].id, {
-                            hot: true,
-                            realtime: true
-                        }).subscribe(lockTracker => {
-                            this.simulatorLockTrackerLiveData = lockTracker;
-                            this.isLocked = this.checkLocked();
-                           // console.log(lockTracker);
-                        });
-                    }
-                });
-
-                // appService list for realTime updates in simulators
-                return from(this.appService.list$({ pageSize: 100, withTotalPages: true }, {
-                    hot: true,
-                    realtime: true,
-                    pagingStrategy: PagingStrategy.ALL,
-                    realtimeAction: RealtimeAction.FULL,
-                    pagingDelay: 0.1
-                }));
-             } else {
-                    return of(undefined);
+        combineLatest(
+            appIdService.appIdDelayedUntilAfterLogin$,
+            simulatorLockService.lockStatus$
+        ).subscribe(([appId, {isLocked, isLockOwned, lockStatus}]) => {
+            if (appId == undefined) {
+                this.clearSimulators()
+            } else {
+                if (isLockOwned) {
+                    this.reloadSimulators(appId);
+                } else if (!isLocked) {
+                    this.clearSimulators();
+                    this.simulatorLockService.takeLock();
+                } else {
+                    this.clearSimulators();
                 }
-            })).
-            subscribe(async appServices => {
-                if (appServices == undefined) {
-                    return;
-                }
-                let appServiceData = appServices.filter(x => x.id === this.appIdService.getCurrentAppId());
-                this.appServiceLiveData = appServiceData[0];
-            });
+            }
+        });
     }
     
     /**
-     * Check if simulators are locked or not
-     *
-     * @returns
-     * @memberof DeviceSimulatorService
+     * Reload simulators on page refresh/load
      */
-    checkLocked(){
-        this.isActiveSession = this.simulatorLockService.isActiveSession();
-        if (this.simulatorLockTrackerLiveData)
-            return (!this.isActiveSession && this.simulatorLockTrackerLiveData.simulatorsLock.isLocked);
-        else 
-            return false;
+    async reloadSimulators(appId: string) {
+       this.clearSimulators();
+
+        const app = (await this.appService.detail(appId)).data as IApplication & {applicationBuilder: any};
+        if(app.applicationBuilder && app.applicationBuilder.simulators){
+            app.applicationBuilder.simulators.forEach(simulatorConfig => {
+                this.createInstance(simulatorConfig);
+            });
+        } 
     }
 
-    
-   /**
-    * Reload simulators on page refresh/load
-    *
-    * @memberof DeviceSimulatorService
-    */
-   async reloadSimulators() {
+    clearSimulators() {
         this.simulatorInstances.forEach(simInstance => {
             if (simInstance.instance.isStarted()) {
                 simInstance.instance.stop();
             }
         });
         this.simulatorInstances = [];
-
-        this.intervalLockTracker = setInterval(() => this.updateLockTracker(), this.lockTrackerInterval);
-        let appServiceObj = this.appServiceLiveData; // (await this.appService.detail(this.currentAppID)).data as any;
-        if (!this.appServiceLiveData)
-            appServiceObj = (await this.appService.detail(this.appIdService.getCurrentAppId())).data as any;
-            
-        const simulatedObject = appServiceObj.applicationBuilder.simulators;
-        if(simulatedObject){
-            simulatedObject.forEach(simulatorConfig => {
-                this.createInstance(simulatorConfig);
-            });
-        } 
-     }
+    }
 
 
     /**
      *
      * Create simulator instances and store it in object.
-     * Also start simulator if session is active and simulator start flag is true
+     * Also start simulator if simulator start flag is true
      * @param {*} simulatorConfig
      * @returns {DeviceSimulator}
      * @memberof DeviceSimulatorService
      */
     createInstance(simulatorConfig: any): DeviceSimulator {
-        const deviceHandle = new DeviceHandle(this.inventoryService, this.measurementService, 
-            simulatorConfig, this.appService, this.appIdService.getCurrentAppId(), this.currentUserDetails, this.simulatorLockService);
+        const deviceHandle = new DeviceHandle(this.inventoryService, this.measurementService,
+            simulatorConfig, this.appService, this.appIdService.getCurrentAppId(), this.appStateService.currentUser, this.simulatorLockService);
 
         const strategy = this.strategiesByName.get(simulatorConfig.type);
         if (!strategy) {
@@ -183,106 +124,17 @@ export class DeviceSimulatorService {
 
         const instance = new strategy.simulatorClass(simulatorConfig.name, simulatorConfig.config, deviceHandle);
          this.simulatorInstances.push(
-            Object.assign({}, 
-            strategy, 
-            { 
-                id: simulatorConfig.id, 
-                instance, 
+            Object.assign({},
+            strategy,
+            {
+                id: simulatorConfig.id,
+                instance,
                 deviceId: simulatorConfig.config.deviceId,
            }));
-        if (simulatorConfig.config.isSimulatorStarted && (this.isActiveSession)){
+        if (simulatorConfig.config.isSimulatorStarted){
             instance.start();
         }
         return instance;
     }
 
-
-    /**
-     *
-     * Delete current simulator instance
-     * @param {DeviceSimulatorInstance} simulator
-     * @memberof DeviceSimulatorService
-     */
-    async deleteInstance(simulator: DeviceSimulatorInstance) {
-        if (simulator.instance.isStarted()) {
-            simulator.instance.stop();
-        }
-        this.simulatorInstances = this.simulatorInstances.filter(x => x.id !== simulator.id);
-
-        let appServiceData  = (await this.appService.detail(this.appIdService.getCurrentAppId())).data as any ;
-        const simulators = appServiceData.applicationBuilder.simulators
-            .filter(x => x.id !== simulator.id);
-        
-        appServiceData.applicationBuilder.simulators = simulators.length > 0 ? simulators : null
-       
-        await this.appService.update({
-            id: this.appIdService.getCurrentAppId(),
-            applicationBuilder: appServiceData.applicationBuilder
-        } as any);
-    }
-
-
-    /**
-     * Check the lock status at every 5 seconds.
-     *  If lock timestand difference is >10 sec than lock will be released So other browser session can start simulation automatically
-     *
-     * @memberof DeviceSimulatorService
-     */
-    async updateLockTracker() {
-        if (this.simulatorLockTrackerLiveData) {
-            let simulatorsLock = this.simulatorLockTrackerLiveData.simulatorsLock;
-            const lockTrackerDate = (new Date() as any) - (new Date(this.simulatorLockTrackerLiveData.simulatorLockTracker) as any);
-          //  console.log("sec=" + lockTrackerDate / 1e3);
-            if (simulatorsLock.isLocked) {
-                if (Math.floor(lockTrackerDate / 1e3) > 10) {
-                    this.simulatorLockService.updateActiveSession(false);
-                    simulatorsLock = {
-                        isLocked: false,
-                        lockedBy: '',
-                        lockedOn: '',
-                        lockedDisplayName: ''
-                    }
-                    this.simulatorLockTrackerLiveData.simulatorsLock = simulatorsLock;
-                    this.updateRealtimeInstance();
-                    this.inventoryService.update({
-                        ...this.simulatorLockTrackerLiveData
-                    });
-
-                } else if (this.simulatorLockService.isActiveSession()) {
-                    this.simulatorLockTrackerLiveData.simulatorLockTracker = new Date().toISOString();
-                    this.inventoryService.update({
-                        ...this.simulatorLockTrackerLiveData
-                    });
-                } else {
-                    this.updateRealtimeInstance();
-                }
-
-            } else {
-                this.updateRealtimeInstance();
-            }
-        }
-    }
-
-    
-    /**
-     * Update realtime instance in case of lock is released on aquired by browser session
-     * Also update realtime status of simulators
-     * @private
-     * @memberof DeviceSimulatorService
-     */
-    private async updateRealtimeInstance(){
-        let appServiceData = this.appServiceLiveData
-        const simulators = appServiceData.applicationBuilder.simulators;
-        this.simulatorInstances.forEach((SMinstance: any) => {
-            simulators.forEach(simulator => {
-                if (simulator.id === SMinstance.id) {
-                    SMinstance.instance.config = simulator.config;
-                    if (!this.checkLocked() && SMinstance.instance.config.isSimulatorStarted){
-                      //  console.log('starting simulator...');
-                        SMinstance.instance.start();
-                    }
-                }
-            });
-        });
-    }
 }

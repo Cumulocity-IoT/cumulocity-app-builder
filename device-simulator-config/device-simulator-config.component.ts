@@ -22,6 +22,7 @@ import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import {NewSimulatorModalComponent} from "./new-simulator-modal.component";
 import {EditSimulatorModalComponent} from "./edit-simulator-modal.component";
 import {InventoryService} from '@c8y/client';
+import {SimulationLockService} from "../device-simulator/simulation-lock.service";
 
 @Component({
     templateUrl: './device-simulator-config.component.html'
@@ -29,7 +30,7 @@ import {InventoryService} from '@c8y/client';
 export class DeviceSimulatorConfigComponent {
     bsModalRef: BsModalRef;
 
-    constructor(private deviceSimulatorSvc: DeviceSimulatorService, private modalService: BsModalService, private inventoryService: InventoryService) {}
+    constructor(private simulatorLockService: SimulationLockService, private deviceSimulatorSvc: DeviceSimulatorService, private modalService: BsModalService, private inventoryService: InventoryService) {}
 
     showCreateSimulatorDialog() {
         this.bsModalRef = this.modalService.show(NewSimulatorModalComponent, { class: 'c8y-wizard' });
