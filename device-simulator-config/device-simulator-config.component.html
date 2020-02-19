@@ -1,6 +1,6 @@
-<div class="card-group interact-grid">
+<div class="card-group interact-grid" *ngIf="lockStatus$ | async as lockStatus">
     <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3" style="min-height: 165px">
-        <a  *ngIf="simulatorLockService.isLockOwned$ | async else locked" class="card add-card clickable" (click)="showCreateSimulatorDialog()">
+        <a  *ngIf="lockStatus.isLockOwned else locked" class="card add-card clickable" (click)="showCreateSimulatorDialog()">
             <i c8yIcon="plus-square"></i><br>
             Add Simulator
         </a>
@@ -9,26 +9,28 @@
                <i c8yIcon="lock"></i><br>
                 Locked
                 <p class="text-truncate"><small class="text-muted">Locked By :
-                        {{(simulatorLockService.lockStatus$ | async)?.lockStatus.lockedBy}}</small></p>
+                        {{lockStatus.lockStatus.lockedBy}}</small></p>
                 <p class="text-truncate"><small class="text-muted">Locked On:
-                        {{(simulatorLockService.lockStatus$ | async)?.lockStatus.lockedOn | date:'d MMMM yyyy HH:mm'}}</small></p>
+                        {{lockStatus.lockStatus.lockedOn | date:'d MMMM yyyy HH:mm'}}</small></p>
             </div>
         </ng-template>
     </div>
-    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3" *ngFor="let sim of deviceSimulatorSvc.simulatorInstances">
-        <div class="card" >
-            <div class="dropdown card-actions" dropdown (click)="$event.stopPropagation()" *ngIf="simulatorLockService.isLockOwned$ | async">
+    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3" *ngFor="let simulatorId in deviceSimulatorSvc.simulatorConfigById">
+        <ng-container *ngIf="deviceSimulatorSvc.simulatorConfigById.get(simulatorId) as simulatorConfig">
+        <ng-container *ngIf="deviceSimulatorSvc.strategiesByName.get(simulatorConfig.type) as simulationStrategy">
+        <div class="card">
+            <div class="dropdown card-actions" dropdown (click)="$event.stopPropagation()" *ngIf="lockStatus.isLockOwned">
                 <button title="Settings" class="dropdown-toggle c8y-dropdown" dropdownToggle type="button">
                     <i c8yIcon="ellipsis-v"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-right" *dropdownMenu role="menu">
                     <li role="menuitem">
-                        <a class="dropdown-item clickable" (click)="showEditSimulatorDialog(sim)">
+                        <a class="dropdown-item clickable" (click)="showEditSimulatorDialog(simulatorConfig)">
                             <i c8yIcon="edit"></i> Edit
                         </a>
                     </li>
                     <li role="menuitem">
-                        <a class="dropdown-item clickable" (click)="deviceSimulatorSvc.deleteInstance(sim)">
+                        <a class="dropdown-item clickable" (click)="deviceSimulatorSvc.deleteSimulator(simulatorConfig)">
                             <i c8yIcon="times"></i> Remove
                         </a>
                     </li>
@@ -36,27 +38,29 @@
             </div>
             <div class="card-header separator">
                 <div class="card-icon">
-                    <i [c8yIcon]="sim.icon"></i>
+                    <i [c8yIcon]="simulationStrategy.icon"></i>
                 </div>
-                <div class="text-truncate card-title" [title]="sim.instance.instanceName">
-                    {{sim.instance.instanceName}}
+                <div class="text-truncate card-title" [title]="simulatorConfig.name">
+                    {{simulatorConfig.name}}
                 </div>
             </div>
             <div class="card-block row" style="margin-bottom: 5px;">
                 <div class="col-xs-6">
                     <label class="c8y-switch">
-                        <input type="checkbox" [disabled]="!(simulatorLockService.isLockOwned$ | async)" [ngModel]="sim.instance.isStarted()" (ngModelChange)="$event ? sim.instance.start() : sim.instance.stop()"/>
+                        <input type="checkbox" [disabled]="!lockStatus.isLockOwned" [ngModel]="simulatorConfig.started" (ngModelChange)="deviceSimulatorSvc.changeSimulatorStarted(simulatorConfig, $event)"/>
                         <span></span>
-                        {{sim.instance.isStarted() ? 'Running' : 'Paused'}}
+                        {{simulatorConfig.started ? 'Running' : 'Paused'}}
                     </label>
                 </div>
                 <div class="col-xs-6 text-right">
-                    <p class="text-truncate"><small class="text-muted">Type: {{sim.name}}</small></p>
-                    <p class="text-truncate"><small class="text-muted">Device: {{sim.instance.config.deviceId}}</small></p>
+                    <p class="text-truncate"><small class="text-muted">Type: {{simulationStrategy.name}}</small></p>
+                    <p class="text-truncate" *ngIf="simulatorConfig.config?.deviceId as deviceId"><small class="text-muted">Device: {{deviceId}}</small></p>
                    
                 </div>
             </div>
         </div>
+        </ng-container>
+        </ng-container>
     </div>
 </div>
 

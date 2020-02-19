@@ -33,6 +33,7 @@
     "@ng-reactive/async-input": "0.0.1",
     "@ng-select/ng-select": "^2.20.5",
     "angular": "1.6.9",
+    "clone-deep": "^4.0.1",
     "core-js": "^2.6.2",
     "css.escape": "^1.5.1",
     "d3-color": "^1.4.0",

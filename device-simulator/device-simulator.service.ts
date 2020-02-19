@@ -23,11 +23,12 @@ import {SimulationStrategyMetadata} from "./simulation-strategy.decorator";
 import { InventoryService, MeasurementService, ApplicationService, IApplication, PagingStrategy, RealtimeAction} from "@c8y/client";
 import {AppStateService} from "@c8y/ngx-components";
 import { Router } from '@angular/router';
-import { SimulationLockService } from './simulation-lock.service';
+import {LOCK_TIMEOUT, SimulationLockService} from './simulation-lock.service';
 import { AppIdService } from '../app-id.service';
-import {combineLatest, from, merge, NEVER} from 'rxjs';
-import {distinctUntilChanged, filter, flatMap, mapTo, switchMap, withLatestFrom} from "rxjs/operators";
+import {from, interval, merge, of, Subscription} from 'rxjs';
+import {distinctUntilChanged, filter, flatMap, map, switchMap, tap, withLatestFrom} from "rxjs/operators";
 import * as deepEqual from "fast-deep-equal";
+import * as cloneDeep from "clone-deep";
 
 export interface DeviceSimulatorStrategy {
     name: string,
@@ -42,10 +43,22 @@ export interface DeviceSimulatorInstance extends DeviceSimulatorStrategy {
     deviceId: string
 }
 
+export interface SimulatorConfig {
+    id: number,
+    name: string,
+    type: string,
+    config: any,
+    started?: boolean
+}
+
 @Injectable({providedIn:"root"})
 export class DeviceSimulatorService {
     readonly strategiesByName: Map<string, DeviceSimulatorStrategy>;
     simulatorInstances: DeviceSimulatorInstance[] = [];
+    simulatorConfigById = new Map<number, SimulatorConfig>();
+    lockRefreshSubscription = new Subscription();
+    private initialized = false;
+
     constructor(
         @Inject(HOOK_SIMULATION_STRATEGY) simulationStrategies: Type<DeviceSimulator>[], private inventoryService: InventoryService,
         private appStateService: AppStateService, private appIdService: AppIdService, private measurementService: MeasurementService,
@@ -63,16 +76,21 @@ export class DeviceSimulatorService {
         });
 
         this.strategiesByName = new Map(strategies.map(strat => [strat.name, strat] as [string, DeviceSimulatorStrategy]));
+    }
 
-        const lockStatusOrAppIdChanges$ = combineLatest(
-            appIdService.appIdDelayedUntilAfterLogin$,
-            simulatorLockService.lockStatus$
-        );
+    initialize(): void {
+        if (this.initialized) {
+            return;
+        }
+        this.initialized = true;
 
-        const simulatorConfigChanges$ = appIdService.appIdDelayedUntilAfterLogin$.pipe(
-            switchMap((appId) => {
+        // Listen for any of appId, simulatorConfig, or lockStatus changes and then reload or clear the simulators
+        this.appIdService.appIdDelayedUntilAfterLogin$.pipe(
+            switchMap(appId => {
                 if (appId) {
-                    return this.appService.list$({pageSize: 100, withTotalPages: true}, {
+                    const lockStatusChanges$ = this.simulatorLockService.lockStatus$(appId);
+
+                    const simulatorConfigChanges$ = this.appService.list$({pageSize: 100, withTotalPages: true}, {
                         hot: true,
                         realtime: true,
                         pagingStrategy: PagingStrategy.ALL,
@@ -81,48 +99,76 @@ export class DeviceSimulatorService {
                     }).pipe(
                         flatMap(applications => from(applications)),
                         filter(application => application.id === appId),
+                        map((application: IApplication & { applicationBuilder: any })  => application.applicationBuilder.simulators || []),
+                        map(simulatorConfigs => cloneDeep(simulatorConfigs)), // The list$ command reuses existing objects so we want to clone to be able to detect differences
                         // Check to see if the simulator config has changed
-                        distinctUntilChanged((prev: IApplication & { applicationBuilder?: any }, curr: IApplication & { applicationBuilder?: any }) => {
-                            return deepEqual(prev.applicationBuilder != undefined ? prev.applicationBuilder.simulators : [], curr.applicationBuilder != undefined ? curr.applicationBuilder.simulators : []);
-                        }),
-                        mapTo(appId)
+                        distinctUntilChanged((prev, curr) => deepEqual(prev, curr))
                     );
-                } else {
-                    return NEVER;
-                }
-            }),
-            withLatestFrom(simulatorLockService.lockStatus$)
-        );
 
-        // If any of the appId, the simulatorConfig, or the lockStatus change then we need to reload or clear the simulators
-        merge(lockStatusOrAppIdChanges$, simulatorConfigChanges$).subscribe(([appId, {isLocked, isLockOwned, lockStatus}]) => {
-            if (appId == undefined) {
-                this.clearSimulators()
-            } else {
-                if (isLockOwned) {
-                    this.reloadSimulators(appId);
-                } else if (!isLocked) {
-                    this.clearSimulators();
-                    this.simulatorLockService.takeLock(); // After successfully taking the lock we'll get a lockStatus change so the simulators will be reloaded automatically
+                    return merge(
+                        this.appIdService.appIdDelayedUntilAfterLogin$.pipe(
+                            tap((appId) => { console.debug("AppID changed:", appId); })
+                        ),
+                        lockStatusChanges$.pipe(
+                            tap((lockStatus) => { console.debug("Lock status changed:", lockStatus); })
+                        ),
+                        simulatorConfigChanges$.pipe(
+                            tap((simulatorConfigs) => { console.debug("Simulator config changed:", simulatorConfigs); })
+                        )
+                    ).pipe(
+                        withLatestFrom(lockStatusChanges$),
+                        map(([_, lockStatus]) => ({appId, isLocked: lockStatus.isLocked, isLockOwned: lockStatus.isLockOwned}))
+                    )
                 } else {
+                    // If there's no app id then we just say that it's locked and we don't own the lock....
+                    return of({appId: undefined, isLocked: true, isLockOwned: false});
+                }
+            })
+        ).subscribe(({appId, isLocked, isLockOwned}) => {
+            this.lockRefreshSubscription.unsubscribe();
+            if (appId == undefined) {
+                console.debug("No appId: Clearing simulators");
+                this.clearSimulators();
+                this.simulatorConfigById.clear();
+            } else {
+                const simulatorConfigLoaded = this.loadSimulatorConfig(appId);
+                if (isLockOwned) {
+                    console.debug("Lock owned: Creating/Recreating simulators");
+                    simulatorConfigLoaded.then(() => this.reloadSimulators(appId));
+                    // Refresh the lock every LOCK_TIMEOUT/2
+                    this.lockRefreshSubscription = interval(LOCK_TIMEOUT/2).subscribe(() => this.simulatorLockService.refreshLock(appId))
+                } else if (!isLocked) {
+                    console.debug("Unlocked: Clearing simulators and attempting to take lock");
+                    this.clearSimulators();
+                    this.simulatorLockService.takeLock(appId); // After successfully taking the lock we'll get a lockStatus change so the simulators will be reloaded automatically
+                } else {
+                    console.debug("Locked: Clearing simulators");
                     this.clearSimulators();
                 }
             }
         });
     }
-    
+
+    async loadSimulatorConfig(appId: string) {
+        this.simulatorConfigById.clear();
+
+        const app = (await this.appService.detail(appId)).data as IApplication & {applicationBuilder: any};
+        if (app.applicationBuilder.simulators) {
+            for (let simulatorConfig of app.applicationBuilder.simulators as SimulatorConfig[]) {
+                this.simulatorConfigById.set(simulatorConfig.id, simulatorConfig);
+            }
+        }
+    }
+
     /**
      * Reload simulators on page refresh/load
      */
     async reloadSimulators(appId: string) {
        this.clearSimulators();
 
-        const app = (await this.appService.detail(appId)).data as IApplication & {applicationBuilder: any};
-        if(app.applicationBuilder && app.applicationBuilder.simulators){
-            app.applicationBuilder.simulators.forEach(simulatorConfig => {
-                this.createInstance(simulatorConfig);
-            });
-        } 
+       for (let simulatorConfig of this.simulatorConfigById.values()) {
+           this.createInstance(simulatorConfig);
+       }
     }
 
     clearSimulators() {
@@ -134,6 +180,35 @@ export class DeviceSimulatorService {
         this.simulatorInstances = [];
     }
 
+    async changeSimulatorStarted(simulatorConfig: SimulatorConfig, started: boolean) {
+        simulatorConfig.started = started;
+        const appId = this.appIdService.getCurrentAppId();
+        const app = (await this.appService.detail(appId)).data as IApplication & {applicationBuilder: {simulators?: SimulatorConfig[]}};
+        if (app.applicationBuilder.simulators != undefined) {
+            const matchingIndex = app.applicationBuilder.simulators.findIndex(currentSimConfig => currentSimConfig.id === simulatorConfig.id);
+            if (matchingIndex > -1) {
+                app.applicationBuilder.simulators[matchingIndex] = simulatorConfig;
+            }
+        }
+        await this.appService.update({
+            id: appId,
+            applicationBuilder: app.applicationBuilder
+        } as IApplication);
+        // No need to do anything apart from update the simulator config - this automatically refreshes the simulators
+    }
+
+    async deleteSimulator(simulatorConfig: SimulatorConfig) {
+        const appId = this.appIdService.getCurrentAppId();
+        const app = (await this.appService.detail(appId)).data as IApplication & {applicationBuilder: {simulators?: SimulatorConfig[]}};
+        if (app.applicationBuilder.simulators != undefined) {
+            app.applicationBuilder.simulators = app.applicationBuilder.simulators.filter(currentSimConfig => currentSimConfig.id !== simulatorConfig.id);
+        }
+        await this.appService.update({
+            id: appId,
+            applicationBuilder: app.applicationBuilder
+        } as IApplication);
+        // No need to do anything apart from update the simulator config - this automatically refreshes the simulators
+    }
 
     /**
      *
@@ -143,9 +218,11 @@ export class DeviceSimulatorService {
      * @returns {DeviceSimulator}
      * @memberof DeviceSimulatorService
      */
-    createInstance(simulatorConfig: any): DeviceSimulator {
-        const deviceHandle = new DeviceHandle(this.inventoryService, this.measurementService,
-            simulatorConfig, this.appService, this.appIdService.getCurrentAppId(), this.appStateService.currentUser, this.simulatorLockService);
+    createInstance(simulatorConfig: SimulatorConfig): DeviceSimulator | undefined {
+        if (!simulatorConfig.started){
+            return undefined;
+        }
+        const deviceHandle = new DeviceHandle(this.inventoryService, this.measurementService, simulatorConfig);
 
         const strategy = this.strategiesByName.get(simulatorConfig.type);
         if (!strategy) {
@@ -153,17 +230,13 @@ export class DeviceSimulatorService {
         }
 
         const instance = new strategy.simulatorClass(simulatorConfig.name, simulatorConfig.config, deviceHandle);
-         this.simulatorInstances.push(
-            Object.assign({},
-            strategy,
-            {
-                id: simulatorConfig.id,
-                instance,
-                deviceId: simulatorConfig.config.deviceId,
-           }));
-        if (simulatorConfig.config.isSimulatorStarted){
-            instance.start();
-        }
+        this.simulatorInstances.push({
+            ...strategy,
+            id: simulatorConfig.id,
+            instance,
+            deviceId: simulatorConfig.config.deviceId
+        });
+        instance.start();
         return instance;
     }
 
