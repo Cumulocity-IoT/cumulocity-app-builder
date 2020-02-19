@@ -69,12 +69,6 @@ export class EditSimulatorModalComponent implements OnInit {
         }
     }
 
-
-    /**
-     * Save simulator and close Modal dialog
-     *
-     * @memberof EditSimulatorModalComponent
-     */
     async saveAndClose() {
         this.busy = true;
         let app = (await this.appService.detail(this.appIdService.getCurrentAppId())).data as any;

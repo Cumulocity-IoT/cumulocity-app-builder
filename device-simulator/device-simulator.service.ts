@@ -142,9 +142,6 @@ export class DeviceSimulatorService {
         }
     }
 
-    /**
-     * Reload simulators on page refresh/load
-     */
     async reloadSimulators() {
        this.clearSimulators();
 
@@ -192,14 +189,6 @@ export class DeviceSimulatorService {
         // No need to do anything apart from update the simulator config - this automatically refreshes the simulators
     }
 
-    /**
-     *
-     * Create simulator instances and store it in object.
-     * Also start simulator if simulator start flag is true
-     * @param {*} simulatorConfig
-     * @returns {DeviceSimulator}
-     * @memberof DeviceSimulatorService
-     */
     createInstance(simulatorConfig: SimulatorConfig): DeviceSimulator | undefined {
         if (!simulatorConfig.started){
             return undefined;

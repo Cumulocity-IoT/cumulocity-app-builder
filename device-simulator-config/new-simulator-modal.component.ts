@@ -64,11 +64,6 @@ export class NewSimulatorModalComponent {
         }
     }
 
-    /**
-     *
-     * Create Simulator and close Modal Dialog
-     * @memberof NewSimulatorModalComponent
-     */
     async saveAndClose() {
         this.busy = true;
 
@@ -105,7 +100,7 @@ export class NewSimulatorModalComponent {
         };
         simulators.push(newSimulatorObject);
         appServiceData.applicationBuilder.simulators = simulators;
-        console.log(appServiceData);
+
         await this.appService.update({
             id: appId,
             applicationBuilder: appServiceData.applicationBuilder
