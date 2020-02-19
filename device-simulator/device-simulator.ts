@@ -16,14 +16,11 @@
 * limitations under the License.
  */
 
-import {DeviceHandle} from "./device-handle";
 import { InjectionToken } from '@angular/core';
 
-export const HOOK_SIMULATION_STRATEGY = new InjectionToken('SimulationStrategy');
+export const HOOK_SIMULATION_STRATEGY_FACTORY = new InjectionToken('SimulationStrategy');
 
 export abstract class DeviceSimulator {
-    constructor(public instanceName: string, protected config: any, protected device: DeviceHandle) {}
-
     start() {
         this.onStart();
     }
@@ -35,6 +32,4 @@ export abstract class DeviceSimulator {
     abstract onStop();
     abstract isStarted(): boolean;
     onReset() {};
-
-    updateConfig(config: any) {};
 }

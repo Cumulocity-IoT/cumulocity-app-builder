@@ -16,9 +16,16 @@
 * limitations under the License.
  */
 
-import {SeriesValueSimulationStrategyConfigComponent} from "./series-value.config.component";
+import {
+    SeriesValueSimulationStrategyConfig,
+    SeriesValueSimulationStrategyConfigComponent
+} from "./series-value.config.component";
 import {SimulationStrategy} from "../../device-simulator/simulation-strategy.decorator";
 import {DeviceIntervalSimulator} from "../../device-simulator/device-interval-simulator";
+import {Injectable} from "@angular/core";
+import {SimulationStrategyFactory} from "../../device-simulator/simulation-strategy";
+import {MeasurementService} from "@c8y/client";
+import {SimulatorConfig} from "../../device-simulator/device-simulator.service";
 
 @SimulationStrategy({
     name: "Series Value",
@@ -27,14 +34,50 @@ import {DeviceIntervalSimulator} from "../../device-simulator/device-interval-si
     configComponent: SeriesValueSimulationStrategyConfigComponent
 })
 export class SeriesValueSimulationStrategy extends DeviceIntervalSimulator {
-    protected interval = 1000;
+    constructor(private measurementService: MeasurementService, private config: SeriesValueSimulationStrategyConfig) {
+        super();
+    }
+
+    values: number[] = [];
     measurementCounter = 0;
+
+    protected get interval() {
+        return this.config.interval;
+    }
+
+    onStart() {
+        this.values = this.config.value.split(',').map(value => parseFloat(value.trim()));
+        super.onStart();
+    }
+
     onTick() {
-        let measurementValue = this.config.value.split(',');
-        if (measurementValue.length === this.measurementCounter) {
+        if (this.measurementCounter >= this.values.length) {
             this.measurementCounter = 0;
         }
-        this.device.sendMeasurement(this.config, measurementValue[this.measurementCounter]);
-        this.measurementCounter++;
+
+        this.measurementService.create({
+            sourceId: this.config.deviceId,
+            [this.config.fragment]: {
+                [this.config.series]: {
+                    value: this.values[this.measurementCounter++],
+                    ...this.config.unit && {unit: this.config.unit}
+                }
+            }
+        });
+    }
+}
+
+@Injectable()
+export class SeriesValueSimulationStrategyFactory extends SimulationStrategyFactory<SeriesValueSimulationStrategy> {
+    constructor(private measurementService: MeasurementService) {
+        super();
+    }
+
+    createInstance(config: SimulatorConfig<SeriesValueSimulationStrategyConfig>): SeriesValueSimulationStrategy {
+        return new SeriesValueSimulationStrategy(this.measurementService, config.config);
+    }
+
+    getSimulatorClass(): typeof SeriesValueSimulationStrategy {
+        return SeriesValueSimulationStrategy;
     }
 }

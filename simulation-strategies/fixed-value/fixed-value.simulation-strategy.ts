@@ -16,9 +16,16 @@
 * limitations under the License.
  */
 
-import {FixedValueSimulationStrategyConfigComponent} from "./fixed-value.config.component";
+import {
+    FixedValueSimulationStrategyConfig,
+    FixedValueSimulationStrategyConfigComponent
+} from "./fixed-value.config.component";
 import {SimulationStrategy} from "../../device-simulator/simulation-strategy.decorator";
 import {DeviceIntervalSimulator} from "../../device-simulator/device-interval-simulator";
+import {Injectable} from "@angular/core";
+import {SimulationStrategyFactory} from "../../device-simulator/simulation-strategy";
+import {SimulatorConfig} from "../../device-simulator/device-simulator.service";
+import { MeasurementService } from "@c8y/client";
 
 @SimulationStrategy({
     name: "Fixed Value",
@@ -27,8 +34,38 @@ import {DeviceIntervalSimulator} from "../../device-simulator/device-interval-si
     configComponent: FixedValueSimulationStrategyConfigComponent
 })
 export class FixedValueSimulationStrategy extends DeviceIntervalSimulator {
-    protected interval = 1000;
+    constructor(private measurementService: MeasurementService, private config: FixedValueSimulationStrategyConfig) {
+        super();
+    }
+
+    protected get interval() {
+        return this.config.interval;
+    }
+
     onTick() {
-        this.device.sendMeasurement(this.config, this.config.value);
+        this.measurementService.create({
+            sourceId: this.config.deviceId,
+            [this.config.fragment]: {
+                [this.config.series]: {
+                    value: this.config.value,
+                    ...this.config.unit && {unit: this.config.unit}
+                }
+            }
+        });
+    }
+}
+
+@Injectable()
+export class FixedValueSimulationStrategyFactory extends SimulationStrategyFactory<FixedValueSimulationStrategy> {
+    constructor(private measurementService: MeasurementService) {
+        super();
+    }
+
+    createInstance(config: SimulatorConfig<FixedValueSimulationStrategyConfig>): FixedValueSimulationStrategy {
+        return new FixedValueSimulationStrategy(this.measurementService, config.config);
+    }
+
+    getSimulatorClass(): typeof FixedValueSimulationStrategy {
+        return FixedValueSimulationStrategy;
     }
 }

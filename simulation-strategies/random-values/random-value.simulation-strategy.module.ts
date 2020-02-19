@@ -18,10 +18,10 @@
 
 import {NgModule} from "@angular/core";
 import {RandomValueSimulationStrategyConfigComponent} from "./random-value.config.component";
-import {RandomValueSimulationStrategy} from "./random-value.simulation-strategy";
+import {RandomValueSimulationStrategyFactory} from "./random-value.simulation-strategy";
 import {CommonModule} from "@angular/common";
 import {FormsModule} from "@angular/forms";
-import { HOOK_SIMULATION_STRATEGY } from '../../device-simulator/device-simulator';
+import { HOOK_SIMULATION_STRATEGY_FACTORY } from '../../device-simulator/device-simulator';
 
 
 @NgModule({
@@ -39,7 +39,7 @@ import { HOOK_SIMULATION_STRATEGY } from '../../device-simulator/device-simulato
         RandomValueSimulationStrategyConfigComponent
     ],
     providers: [
-        { provide: HOOK_SIMULATION_STRATEGY, useValue: RandomValueSimulationStrategy, multi: true }
+        { provide: HOOK_SIMULATION_STRATEGY_FACTORY, useClass: RandomValueSimulationStrategyFactory, multi: true },
     ]
 })
 export class RandomValueSimulationStrategyModule {}

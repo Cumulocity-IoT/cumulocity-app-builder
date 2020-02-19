@@ -17,31 +17,55 @@
  */
 
 import {Component} from "@angular/core";
+import {SimulationStrategyConfigComponent} from "../../device-simulator/simulation-strategy";
+
+export interface RandomValueSimulationStrategyConfig {
+    deviceId: string,
+    fragment: string,
+    series: string,
+    minValue: number,
+    maxValue: number,
+    unit: string,
+    interval: number
+}
 
 @Component({
-    template: `        
-      <div class="form-group">
-            <label for="type"><span>Type</span></label>
-            <input type="text" class="form-control" id="type" name="type" placeholder="e.g. temparature_measurement (required)" required autofocus [(ngModel)]="config.type">
+    template: `
+        <div class="form-group">
+            <label for="fragment"><span>Fragment</span></label>
+            <input type="text" class="form-control" id="fragment" name="fragment" placeholder="e.g. temperature_measurement (required)" required autofocus [(ngModel)]="config.fragment">
+        </div>
+        <div class="form-group">
+            <label for="series"><span>Series</span></label>
+            <input type="text" class="form-control" id="series" name="series" placeholder="e.g. T (required)" required autofocus [(ngModel)]="config.series">
         </div>
         <div class="form-group">
             <label for="minvalue"><span>Minimum Value</span></label>
-            <input type="number" class="form-control" id="minvalue" name="minvalue" placeholder="e.g. 15 (required)" required [(ngModel)]="config.minValue">
+            <input type="number" class="form-control" id="minvalue" name="minvalue" placeholder="e.g. 10 (required)" required [(ngModel)]="config.minValue">
         </div> 
         <div class="form-group">
             <label for="maxvalue"><span>Maximum Value</span></label>
-            <input type="number" class="form-control" id="maxvalue" name="maxvalue" placeholder="e.g. 10 (required)" required [(ngModel)]="config.maxValue">
+            <input type="number" class="form-control" id="maxvalue" name="maxvalue" placeholder="e.g. 20 (required)" required [(ngModel)]="config.maxValue">
         </div> 
         <div class="form-group">
             <label for="unit"><span>Unit</span></label>
-            <input type="text" class="form-control" id="unit" name="unit" placeholder="e.g. C (required)" required [(ngModel)]="config.unit">
+            <input type="text" class="form-control" id="unit" name="unit" placeholder="e.g. C (optional)" [(ngModel)]="config.unit">
         </div> 
          <div class="form-group">
-            <label for="interval"><span>Interval(in ms)</span></label>
-            <input type="number" class="form-control" id="interval" name="interval" placeholder="e.g. default 1000 ms (optional)" required [(ngModel)]="config.interval">
+            <label for="interval"><span>Interval (ms)</span></label>
+            <input type="number" class="form-control" id="interval" name="interval" placeholder="e.g. 5000 (required)" required [(ngModel)]="config.interval">
         </div>
     `
 })
-export class RandomValueSimulationStrategyConfigComponent {
-    config: any;
+export class RandomValueSimulationStrategyConfigComponent extends SimulationStrategyConfigComponent {
+    config: RandomValueSimulationStrategyConfig;
+
+    initializeConfig() {
+        this.config.fragment = "temperature_measurement";
+        this.config.series = "T";
+        this.config.minValue = 10;
+        this.config.maxValue = 20;
+        this.config.unit = "C";
+        this.config.interval = 5000;
+    }
 }
