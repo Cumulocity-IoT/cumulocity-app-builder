@@ -27,23 +27,21 @@ import {
 } from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap/modal';
 import {
-    DeviceSimulatorInstance,
     DeviceSimulatorService,
-    DeviceSimulatorStrategy,
+    DeviceSimulatorStrategy, SimulatorConfig,
 } from "../device-simulator/device-simulator.service";
-import {InventoryService, ApplicationService} from '@c8y/client';
+import {ApplicationService} from '@c8y/client';
 import {AppIdService} from "../app-id.service";
 
 @Component({
     templateUrl: './edit-simulator-modal.component.html'
 })
-export class EditSimulatorModalComponent  implements OnInit{
+export class EditSimulatorModalComponent implements OnInit {
     busy: boolean = false;
 
     @ViewChild("configWrapper", { read: ViewContainerRef }) configWrapper: ViewContainerRef;
     selectedStrategy: DeviceSimulatorStrategy;
-    config: any;
-    simulator: any;
+    simulatorConfig: SimulatorConfig;
     constructor(public bsModalRef: BsModalRef, private deviceSimulatorService: DeviceSimulatorService,
          private resolver: ComponentFactoryResolver, private injector: Injector, 
          private appService: ApplicationService, private appIdService: AppIdService) {
@@ -51,20 +49,24 @@ export class EditSimulatorModalComponent  implements OnInit{
     }
 
     ngOnInit() {
-        console.log('test');
-        this.simulator = this.config.instance;
         this.openSimulatorConfig();
     }
     openSimulatorConfig() {
+        this.selectedStrategy = this.deviceSimulatorService.strategiesByName.get(this.simulatorConfig.type);
+        if (this.selectedStrategy == undefined) {
+            console.error("Unknown simulator strategy:", this.simulatorConfig.type);
+            this.bsModalRef.hide();
+            return;
+        }
 
-        const metadata = Reflect.getMetadata('simulationStrategy', this.config.simulatorClass)[0];
+        const metadata = Reflect.getMetadata('simulationStrategy', this.selectedStrategy.simulatorClass)[0];
 
         this.configWrapper.clear();
 
         if (metadata.configComponent != null) {
             const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(metadata.configComponent);
             const componentRef = this.configWrapper.createComponent(factory);
-            componentRef.instance.config = this.simulator.config;
+            componentRef.instance.config = this.simulatorConfig.config;
         }
     }
 
@@ -75,24 +77,21 @@ export class EditSimulatorModalComponent  implements OnInit{
      * @memberof EditSimulatorModalComponent
      */
     async saveAndClose() {
-        
         this.busy = true;
-        let appServiceData = (await this.appService.detail(this.appIdService.getCurrentAppId())).data as any;
+        let app = (await this.appService.detail(this.appIdService.getCurrentAppId())).data as any;
 
-        let simulators = appServiceData.applicationBuilder.simulators
-            .filter(x => x.id !== this.config.id);
-        simulators.push({
-            id: this.config.id,
-            name: this.simulator.instanceName,
-            type: this.config.name,
-            config: this.simulator.config
-        });
+        let matchingIndex = app.applicationBuilder.simulators
+            .findIndex(x => x.id == this.simulatorConfig.id);
 
-        appServiceData.applicationBuilder.simulators = simulators.length > 0 ? simulators : null
+        if (matchingIndex > -1) {
+            app.applicationBuilder.simulators[matchingIndex] = this.simulatorConfig;
+        } else {
+            app.applicationBuilder.simulators.push(this.simulatorConfig)
+        }
 
         await this.appService.update({
-            id: this.appIdService.getCurrentAppId(),
-            applicationBuilder: appServiceData.applicationBuilder
+            id: app.id,
+            applicationBuilder: app.applicationBuilder
         } as any);
         this.bsModalRef.hide();
     }

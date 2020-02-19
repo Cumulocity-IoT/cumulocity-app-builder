@@ -17,7 +17,10 @@
  */
 
 import {Component} from '@angular/core';
-import {DeviceSimulatorInstance, DeviceSimulatorService} from "../device-simulator/device-simulator.service";
+import {
+    DeviceSimulatorService,
+    SimulatorConfig
+} from "../device-simulator/device-simulator.service";
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import {NewSimulatorModalComponent} from "./new-simulator-modal.component";
 import {EditSimulatorModalComponent} from "./edit-simulator-modal.component";
@@ -44,9 +47,7 @@ export class DeviceSimulatorConfigComponent {
         this.bsModalRef = this.modalService.show(NewSimulatorModalComponent, { class: 'c8y-wizard' });
     }
 
-    async showEditSimulatorDialog(simulator: DeviceSimulatorInstance) {
-        const simConfig = (await this.inventoryService.detail(simulator.deviceId)).data;
-
-        this.bsModalRef = this.modalService.show(EditSimulatorModalComponent, { class: 'c8y-wizard', initialState: { config: simulator } })
+    async showEditSimulatorDialog(simulatorConfig: SimulatorConfig) {
+        this.bsModalRef = this.modalService.show(EditSimulatorModalComponent, { class: 'c8y-wizard', initialState: { simulatorConfig } })
     }
 }

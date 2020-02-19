@@ -16,9 +16,8 @@
 * limitations under the License.
  */
 
-import {InjectionToken, NgModule} from "@angular/core";
+import {NgModule} from "@angular/core";
 import {FixedValueSimulationStrategyConfigComponent} from "./fixed-value.config.component";
-import {SimulationStrategy} from "../../device-simulator/simulation-strategy.decorator";
 import {FixedValueSimulationStrategy} from "./fixed-value.simulation-strategy";
 import {CommonModule} from "@angular/common";
 import {FormsModule} from "@angular/forms";

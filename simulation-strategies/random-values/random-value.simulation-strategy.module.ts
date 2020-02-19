@@ -16,7 +16,7 @@
 * limitations under the License.
  */
 
-import {InjectionToken, NgModule} from "@angular/core";
+import {NgModule} from "@angular/core";
 import {RandomValueSimulationStrategyConfigComponent} from "./random-value.config.component";
 import {RandomValueSimulationStrategy} from "./random-value.simulation-strategy";
 import {CommonModule} from "@angular/common";
