@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { InventoryService } from '@c8y/ngx-components/api';
 import {AppStateService} from "@c8y/ngx-components";
 import * as delay from "delay";
-import {BehaviorSubject, from, interval, NEVER, Observable, ReplaySubject, Subject} from "rxjs";
+import {BehaviorSubject, from, interval, NEVER, ReplaySubject} from "rxjs";
 import {distinctUntilChanged, flatMap, map, startWith, switchMap} from "rxjs/operators";
 
 const LOCK_TIMEOUT = 10000; // Milliseconds
@@ -152,6 +152,7 @@ export class SimulationLockService {
     }
 
     async updateLockStatus(lockStatus: LockStatus): Promise<void> {
+        // TODO: possible optimisation - cache the lock managedObject Id so that we don't have to make an extra get request to find it
         const response = await this.inventoryService.list({query: 'has(AppBuilder_LockStatus)'});
         if (response.data.length > 0) {
             await this.inventoryService.update({

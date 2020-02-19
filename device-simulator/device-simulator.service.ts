@@ -20,12 +20,14 @@ import {Inject, Injectable, Type} from "@angular/core";
 import {DeviceSimulator, HOOK_SIMULATION_STRATEGY} from "./device-simulator";
 import {DeviceHandle} from "./device-handle";
 import {SimulationStrategyMetadata} from "./simulation-strategy.decorator";
-import { InventoryService, MeasurementService, ApplicationService, IApplication} from "@c8y/client";
+import { InventoryService, MeasurementService, ApplicationService, IApplication, PagingStrategy, RealtimeAction} from "@c8y/client";
 import {AppStateService} from "@c8y/ngx-components";
 import { Router } from '@angular/router';
 import { SimulationLockService } from './simulation-lock.service';
 import { AppIdService } from '../app-id.service';
-import { combineLatest } from 'rxjs';
+import {combineLatest, from, merge, NEVER} from 'rxjs';
+import {distinctUntilChanged, filter, flatMap, mapTo, switchMap, withLatestFrom} from "rxjs/operators";
+import * as deepEqual from "fast-deep-equal";
 
 export interface DeviceSimulatorStrategy {
     name: string,
@@ -62,10 +64,38 @@ export class DeviceSimulatorService {
 
         this.strategiesByName = new Map(strategies.map(strat => [strat.name, strat] as [string, DeviceSimulatorStrategy]));
 
-        combineLatest(
+        const lockStatusOrAppIdChanges$ = combineLatest(
             appIdService.appIdDelayedUntilAfterLogin$,
             simulatorLockService.lockStatus$
-        ).subscribe(([appId, {isLocked, isLockOwned, lockStatus}]) => {
+        );
+
+        const simulatorConfigChanges$ = appIdService.appIdDelayedUntilAfterLogin$.pipe(
+            switchMap((appId) => {
+                if (appId) {
+                    return this.appService.list$({pageSize: 100, withTotalPages: true}, {
+                        hot: true,
+                        realtime: true,
+                        pagingStrategy: PagingStrategy.ALL,
+                        realtimeAction: RealtimeAction.FULL,
+                        pagingDelay: 0
+                    }).pipe(
+                        flatMap(applications => from(applications)),
+                        filter(application => application.id === appId),
+                        // Check to see if the simulator config has changed
+                        distinctUntilChanged((prev: IApplication & { applicationBuilder?: any }, curr: IApplication & { applicationBuilder?: any }) => {
+                            return deepEqual(prev.applicationBuilder != undefined ? prev.applicationBuilder.simulators : [], curr.applicationBuilder != undefined ? curr.applicationBuilder.simulators : []);
+                        }),
+                        mapTo(appId)
+                    );
+                } else {
+                    return NEVER;
+                }
+            }),
+            withLatestFrom(simulatorLockService.lockStatus$)
+        );
+
+        // If any of the appId, the simulatorConfig, or the lockStatus change then we need to reload or clear the simulators
+        merge(lockStatusOrAppIdChanges$, simulatorConfigChanges$).subscribe(([appId, {isLocked, isLockOwned, lockStatus}]) => {
             if (appId == undefined) {
                 this.clearSimulators()
             } else {
@@ -73,7 +103,7 @@ export class DeviceSimulatorService {
                     this.reloadSimulators(appId);
                 } else if (!isLocked) {
                     this.clearSimulators();
-                    this.simulatorLockService.takeLock();
+                    this.simulatorLockService.takeLock(); // After successfully taking the lock we'll get a lockStatus change so the simulators will be reloaded automatically
                 } else {
                     this.clearSimulators();
                 }

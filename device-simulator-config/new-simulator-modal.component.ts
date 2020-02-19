@@ -45,7 +45,7 @@ export class NewSimulatorModalComponent implements OnInit{
     deviceId: string | undefined;
     simulatorName: string = '';
 
-    constructor(public bsModalRef: BsModalRef, private deviceSimulatorService: DeviceSimulatorService, 
+    constructor(public bsModalRef: BsModalRef, private deviceSimulatorService: DeviceSimulatorService,
         private resolver: ComponentFactoryResolver, private injector: Injector, private inventoryService: InventoryService,
         private appService: ApplicationService, private appIdService: AppIdService) {}
 
@@ -111,8 +111,9 @@ export class NewSimulatorModalComponent implements OnInit{
             id: appId,
             applicationBuilder: appServiceData.applicationBuilder
         } as any);
-        
-        this.deviceSimulatorService.createInstance(newSimulatorObject);
+
+        // No need to ask the device simulator to create the new instance - this will be automatically picked up after the appService.update(...)
+
         this.bsModalRef.hide();
     }
 }
