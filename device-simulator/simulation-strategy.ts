@@ -17,30 +17,22 @@
  */
 
 import {DeviceSimulator} from "./device-simulator";
+import {SimulatorConfig} from "./device-simulator.service";
+import {SimulationStrategyMetadata} from "./simulation-strategy.decorator";
+import { Type } from "@angular/core";
 
-export abstract class DeviceIntervalSimulator extends DeviceSimulator {
-    protected abstract get interval();
+export abstract class SimulationStrategyConfigComponent {
+    abstract config: any;
 
-    private started = false;
-    private intervalHandle;
+    abstract initializeConfig(): void
+}
 
-    abstract onTick();
+export abstract class SimulationStrategyFactory<T extends DeviceSimulator = DeviceSimulator> {
+    abstract createInstance(config: SimulatorConfig): T;
 
-    onStart() {
-        if (this.started) throw Error("Simulator already started");
-        console.log("Device Simulator started");
-        this.intervalHandle = setInterval(() => this.onTick(), this.interval);
-        this.started = true;
-    }
+    abstract getSimulatorClass(): Type<T>;
 
-    onStop() {
-        if (!this.started) throw Error("Simulator already stopped");
-        clearInterval(this.intervalHandle);
-        console.log("Device Simulator stopped");
-        this.started = false;
-    }
-
-    isStarted(): boolean {
-        return this.started;
+    getSimulatorMetadata(): SimulationStrategyMetadata {
+        return Reflect.getMetadata('simulationStrategy', this.getSimulatorClass())[0] as SimulationStrategyMetadata;
     }
 }

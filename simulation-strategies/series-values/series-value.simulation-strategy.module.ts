@@ -18,10 +18,10 @@
 
 import {NgModule} from "@angular/core";
 import {SeriesValueSimulationStrategyConfigComponent} from "./series-value.config.component";
-import {SeriesValueSimulationStrategy} from "./series-value.simulation-strategy";
+import {SeriesValueSimulationStrategyFactory} from "./series-value.simulation-strategy";
 import {CommonModule} from "@angular/common";
 import {FormsModule} from "@angular/forms";
-import { HOOK_SIMULATION_STRATEGY } from '../../device-simulator/device-simulator';
+import { HOOK_SIMULATION_STRATEGY_FACTORY } from '../../device-simulator/device-simulator';
 
 
 @NgModule({
@@ -39,7 +39,7 @@ import { HOOK_SIMULATION_STRATEGY } from '../../device-simulator/device-simulato
         SeriesValueSimulationStrategyConfigComponent
     ],
     providers: [
-        { provide: HOOK_SIMULATION_STRATEGY, useValue: SeriesValueSimulationStrategy, multi: true }
+        { provide: HOOK_SIMULATION_STRATEGY_FACTORY, useClass: SeriesValueSimulationStrategyFactory, multi: true },
     ]
 })
 export class SeriesValueSimulationStrategyModule {}

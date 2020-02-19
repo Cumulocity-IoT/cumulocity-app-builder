@@ -16,10 +16,8 @@
 * limitations under the License.
  */
 
-import {Inject, Injectable, Type} from "@angular/core";
-import {DeviceSimulator, HOOK_SIMULATION_STRATEGY} from "./device-simulator";
-import {DeviceHandle} from "./device-handle";
-import {SimulationStrategyMetadata} from "./simulation-strategy.decorator";
+import {Inject, Injectable} from "@angular/core";
+import {DeviceSimulator, HOOK_SIMULATION_STRATEGY_FACTORY} from "./device-simulator";
 import { InventoryService, MeasurementService, ApplicationService, IApplication, PagingStrategy, RealtimeAction} from "@c8y/client";
 import {AppStateService} from "@c8y/ngx-components";
 import { Router } from '@angular/router';
@@ -29,53 +27,37 @@ import {from, interval, merge, of, Subscription} from 'rxjs';
 import {distinctUntilChanged, filter, flatMap, map, switchMap, tap, withLatestFrom} from "rxjs/operators";
 import * as deepEqual from "fast-deep-equal";
 import * as cloneDeep from "clone-deep";
+import {SimulationStrategyFactory} from "./simulation-strategy";
 
-export interface DeviceSimulatorStrategy {
-    name: string,
-    icon: string,
-    description?: string,
-    simulatorClass: Type<DeviceSimulator>
-}
-
-export interface DeviceSimulatorInstance extends DeviceSimulatorStrategy {
+export interface DeviceSimulatorInstance {
     id: number,
+    type: string,
     instance: DeviceSimulator,
     deviceId: string
 }
 
-export interface SimulatorConfig {
+export interface SimulatorConfig<T=any> {
     id: number,
     name: string,
     type: string,
-    config: any,
+    config: T,
     started?: boolean
 }
 
 @Injectable({providedIn:"root"})
 export class DeviceSimulatorService {
-    readonly strategiesByName: Map<string, DeviceSimulatorStrategy>;
+    readonly strategyFactoryByName: Map<string, SimulationStrategyFactory>;
     simulatorInstances: DeviceSimulatorInstance[] = [];
     simulatorConfigById = new Map<number, SimulatorConfig>();
     lockRefreshSubscription = new Subscription();
     private initialized = false;
 
     constructor(
-        @Inject(HOOK_SIMULATION_STRATEGY) simulationStrategies: Type<DeviceSimulator>[], private inventoryService: InventoryService,
+        @Inject(HOOK_SIMULATION_STRATEGY_FACTORY) simulationStrategyFactories: SimulationStrategyFactory[], private inventoryService: InventoryService,
         private appStateService: AppStateService, private appIdService: AppIdService, private measurementService: MeasurementService,
         private route: Router, private appService: ApplicationService, private simulatorLockService: SimulationLockService
     ) {
-        const strategies = simulationStrategies.map(simulatorClass => {
-            const metadata: SimulationStrategyMetadata = Reflect.getMetadata('simulationStrategy', simulatorClass)[0];
-            return {
-                name: metadata.name,
-                icon: metadata.icon,
-                description: metadata.description,
-                configComponent: metadata.configComponent,
-                simulatorClass
-            }
-        });
-
-        this.strategiesByName = new Map(strategies.map(strat => [strat.name, strat] as [string, DeviceSimulatorStrategy]));
+        this.strategyFactoryByName = new Map(simulationStrategyFactories.map(factory => [factory.getSimulatorMetadata().name, factory] as [string, SimulationStrategyFactory]));
     }
 
     initialize(): void {
@@ -134,7 +116,7 @@ export class DeviceSimulatorService {
                 const simulatorConfigLoaded = this.loadSimulatorConfig(appId);
                 if (isLockOwned) {
                     console.debug("Lock owned: Creating/Recreating simulators");
-                    simulatorConfigLoaded.then(() => this.reloadSimulators(appId));
+                    simulatorConfigLoaded.then(() => this.reloadSimulators());
                     // Refresh the lock every LOCK_TIMEOUT/2
                     this.lockRefreshSubscription = interval(LOCK_TIMEOUT/2).subscribe(() => this.simulatorLockService.refreshLock(appId))
                 } else if (!isLocked) {
@@ -163,7 +145,7 @@ export class DeviceSimulatorService {
     /**
      * Reload simulators on page refresh/load
      */
-    async reloadSimulators(appId: string) {
+    async reloadSimulators() {
        this.clearSimulators();
 
        for (let simulatorConfig of this.simulatorConfigById.values()) {
@@ -222,17 +204,16 @@ export class DeviceSimulatorService {
         if (!simulatorConfig.started){
             return undefined;
         }
-        const deviceHandle = new DeviceHandle(this.inventoryService, this.measurementService, simulatorConfig);
 
-        const strategy = this.strategiesByName.get(simulatorConfig.type);
-        if (!strategy) {
+        const strategyFactory = this.strategyFactoryByName.get(simulatorConfig.type);
+        if (!strategyFactory) {
             throw new Error(`Could not find Simulator Strategy: ${simulatorConfig.type}`);
         }
 
-        const instance = new strategy.simulatorClass(simulatorConfig.name, simulatorConfig.config, deviceHandle);
+        const instance = strategyFactory.createInstance(simulatorConfig);
         this.simulatorInstances.push({
-            ...strategy,
             id: simulatorConfig.id,
+            type: simulatorConfig.type,
             instance,
             deviceId: simulatorConfig.config.deviceId
         });

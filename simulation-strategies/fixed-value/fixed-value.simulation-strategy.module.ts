@@ -18,10 +18,10 @@
 
 import {NgModule} from "@angular/core";
 import {FixedValueSimulationStrategyConfigComponent} from "./fixed-value.config.component";
-import {FixedValueSimulationStrategy} from "./fixed-value.simulation-strategy";
+import {FixedValueSimulationStrategyFactory} from "./fixed-value.simulation-strategy";
 import {CommonModule} from "@angular/common";
 import {FormsModule} from "@angular/forms";
-import { HOOK_SIMULATION_STRATEGY } from '../../device-simulator/device-simulator';
+import { HOOK_SIMULATION_STRATEGY_FACTORY } from '../../device-simulator/device-simulator';
 
 @NgModule({
     imports: [
@@ -38,7 +38,7 @@ import { HOOK_SIMULATION_STRATEGY } from '../../device-simulator/device-simulato
         FixedValueSimulationStrategyConfigComponent
     ],
     providers: [
-        { provide: HOOK_SIMULATION_STRATEGY, useValue: FixedValueSimulationStrategy, multi: true }
+        { provide: HOOK_SIMULATION_STRATEGY_FACTORY, useClass: FixedValueSimulationStrategyFactory, multi: true }
     ]
 })
 export class FixedValueSimulationStrategyModule {}

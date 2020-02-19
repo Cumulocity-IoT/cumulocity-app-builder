@@ -17,12 +17,26 @@
  */
 
 import {Component} from "@angular/core";
+import {SimulationStrategyConfigComponent} from "../../device-simulator/simulation-strategy";
+
+export interface SeriesValueSimulationStrategyConfig {
+    deviceId: string,
+    fragment: string,
+    series: string,
+    value: string
+    unit: string,
+    interval: number
+}
 
 @Component({
-    template: `        
-         <div class="form-group">
-            <label for="type"><span>Type</span></label>
-            <input type="text" class="form-control" id="type" name="type" placeholder="e.g. temparature_measurement (required)" required autofocus [(ngModel)]="config.type">
+    template: `
+        <div class="form-group">
+            <label for="fragment"><span>Fragment</span></label>
+            <input type="text" class="form-control" id="fragment" name="fragment" placeholder="e.g. temperature_measurement (required)" required autofocus [(ngModel)]="config.fragment">
+        </div>
+        <div class="form-group">
+            <label for="series"><span>Series</span></label>
+            <input type="text" class="form-control" id="series" name="series" placeholder="e.g. T (required)" required autofocus [(ngModel)]="config.series">
         </div>
         <div class="form-group">
             <label for="value"><span>Value</span></label>
@@ -30,14 +44,22 @@ import {Component} from "@angular/core";
         </div> 
         <div class="form-group">
             <label for="unit"><span>Unit</span></label>
-            <input type="text" class="form-control" id="unit" name="unit" placeholder="e.g. C (required)" required [(ngModel)]="config.unit">
+            <input type="text" class="form-control" id="unit" name="unit" placeholder="e.g. C (optional)" [(ngModel)]="config.unit">
         </div> 
          <div class="form-group">
-            <label for="interval"><span>Interval(in ms)</span></label>
-            <input type="number" class="form-control" id="interval" name="interval" placeholder="e.g. default 1000 ms (optional)" required [(ngModel)]="config.interval">
+            <label for="interval"><span>Interval (ms)</span></label>
+            <input type="number" class="form-control" id="interval" name="interval" placeholder="e.g. 5000 (required)" required [(ngModel)]="config.interval">
         </div>  
     `
 })
-export class SeriesValueSimulationStrategyConfigComponent {
-    config: any;
+export class SeriesValueSimulationStrategyConfigComponent extends SimulationStrategyConfigComponent {
+    config: SeriesValueSimulationStrategyConfig;
+
+    initializeConfig() {
+        this.config.fragment = "temperature_measurement";
+        this.config.series = "T";
+        this.config.value = "10, 20, 30";
+        this.config.unit = "C";
+        this.config.interval = 5000;
+    }
 }

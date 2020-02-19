@@ -16,8 +16,6 @@
 * limitations under the License.
  */
 
-import {DeviceSimulator} from "./device-simulator";
-
 export interface SimulationStrategyMetadata {
     name: string,
     icon: string,
@@ -26,7 +24,7 @@ export interface SimulationStrategyMetadata {
 }
 
 export function SimulationStrategy(config: SimulationStrategyMetadata) {
-    return function(target: typeof DeviceSimulator) {
+    return function(target: any) {
         Reflect.defineMetadata('simulationStrategy', [config], target);
     }
 }

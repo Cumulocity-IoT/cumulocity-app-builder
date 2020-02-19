@@ -19,28 +19,28 @@
 import {
     Component,
     ComponentFactory,
-    ComponentFactoryResolver,
+    ComponentFactoryResolver, ComponentRef,
     Injector,
     ViewChild,
-    ViewContainerRef,
-    OnInit
+    ViewContainerRef
 } from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap/modal';
 import {WizardComponent} from "../wizard/wizard.component";
-import {DeviceSimulatorService, DeviceSimulatorStrategy} from "../device-simulator/device-simulator.service";
+import {DeviceSimulatorService} from "../device-simulator/device-simulator.service";
 import {InventoryService, ApplicationService} from '@c8y/client';
 import {AppIdService} from "../app-id.service";
+import {SimulationStrategyConfigComponent, SimulationStrategyFactory} from "../device-simulator/simulation-strategy";
 @Component({
     templateUrl: './new-simulator-modal.component.html'
 })
-export class NewSimulatorModalComponent implements OnInit{
+export class NewSimulatorModalComponent {
     busy: boolean = false;
 
     @ViewChild(WizardComponent) wizard: WizardComponent;
 
     @ViewChild("configWrapper", { read: ViewContainerRef }) configWrapper: ViewContainerRef;
 
-    selectedStrategy: DeviceSimulatorStrategy;
+    selectedStrategyFactory: SimulationStrategyFactory;
     newConfig: any;
     deviceId: string | undefined;
     simulatorName: string = '';
@@ -49,22 +49,20 @@ export class NewSimulatorModalComponent implements OnInit{
         private resolver: ComponentFactoryResolver, private injector: Injector, private inventoryService: InventoryService,
         private appService: ApplicationService, private appIdService: AppIdService) {}
 
-    ngOnInit() {
-    }
     openSimulatorConfig() {
         this.wizard.selectStep('config');
 
-        const metadata = Reflect.getMetadata('simulationStrategy', this.selectedStrategy.simulatorClass)[0];
+        const metadata = this.selectedStrategyFactory.getSimulatorMetadata();
 
         this.configWrapper.clear();
 
         if (metadata.configComponent != null) {
             const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(metadata.configComponent);
-            const componentRef = this.configWrapper.createComponent(factory);
+            const componentRef: ComponentRef<SimulationStrategyConfigComponent> = this.configWrapper.createComponent(factory);
             componentRef.instance.config = this.newConfig = {};
+            componentRef.instance.initializeConfig();
         }
     }
-
 
     /**
      *
@@ -73,6 +71,8 @@ export class NewSimulatorModalComponent implements OnInit{
      */
     async saveAndClose() {
         this.busy = true;
+
+        const metadata = this.selectedStrategyFactory.getSimulatorMetadata();
 
         let device;
         if (!this.deviceId) {
@@ -97,11 +97,10 @@ export class NewSimulatorModalComponent implements OnInit{
         const simulators = appServiceData.applicationBuilder.simulators || [];
         const simulatorId = Math.floor(Math.random() * 1000000);
         this.newConfig.deviceId = this.deviceId;
-        this.newConfig.isSimulatorStarted = false;
         const newSimulatorObject = {
             id: simulatorId,
             name: this.simulatorName,
-            type: this.selectedStrategy.name,
+            type: metadata.name,
             config: this.newConfig
         };
         simulators.push(newSimulatorObject);
