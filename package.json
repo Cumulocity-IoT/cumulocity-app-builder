@@ -37,6 +37,7 @@
     "css.escape": "^1.5.1",
     "d3-color": "^1.4.0",
     "delay": "^4.3.0",
+    "fast-deep-equal": "^3.1.1",
     "fontawesome": "4.7.2",
     "ngx-markdown": "^8.2.1",
     "rxjs": "~6.3.3",
