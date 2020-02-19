@@ -25,10 +25,11 @@ import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import {NewSimulatorModalComponent} from "./new-simulator-modal.component";
 import {EditSimulatorModalComponent} from "./edit-simulator-modal.component";
 import {InventoryService} from '@c8y/client';
-import {LockStatus, SimulationLockService} from "../device-simulator/simulation-lock.service";
+import {LOCK_TIMEOUT, LockStatus, SimulationLockService} from "../device-simulator/simulation-lock.service";
 import {AppIdService} from "../app-id.service";
 import {switchMap} from "rxjs/operators";
 import {Observable} from "rxjs";
+import * as delay from "delay";
 
 @Component({
     templateUrl: './device-simulator-config.component.html'
@@ -38,7 +39,9 @@ export class DeviceSimulatorConfigComponent {
 
     lockStatus$: Observable<{isLocked: boolean, isLockOwned: boolean, lockStatus: LockStatus}>;
 
-    constructor(private simulatorLockService: SimulationLockService, private deviceSimulatorSvc: DeviceSimulatorService, private modalService: BsModalService, private inventoryService: InventoryService, appIdService: AppIdService) {
+    isUnlocking = false;
+
+    constructor(private simulatorLockService: SimulationLockService, private deviceSimulatorSvc: DeviceSimulatorService, private modalService: BsModalService, private inventoryService: InventoryService, private appIdService: AppIdService) {
         this.lockStatus$ = appIdService.appIdDelayedUntilAfterLogin$
             .pipe(switchMap(appId => simulatorLockService.lockStatus$(appId)));
     }
@@ -49,5 +52,13 @@ export class DeviceSimulatorConfigComponent {
 
     async showEditSimulatorDialog(simulatorConfig: SimulatorConfig) {
         this.bsModalRef = this.modalService.show(EditSimulatorModalComponent, { class: 'c8y-wizard', initialState: { simulatorConfig } })
+    }
+
+    async forceUnlock() {
+        this.isUnlocking = true;
+        await this.simulatorLockService.forceTakeLock(this.appIdService.getCurrentAppId());
+        // Wait a bit extra to allow the UI to realise that we now own the lock
+        await delay(LOCK_TIMEOUT/2);
+        this.isUnlocking = false;
     }
 }
