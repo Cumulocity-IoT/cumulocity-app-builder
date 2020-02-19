@@ -22,7 +22,10 @@ import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import {NewSimulatorModalComponent} from "./new-simulator-modal.component";
 import {EditSimulatorModalComponent} from "./edit-simulator-modal.component";
 import {InventoryService} from '@c8y/client';
-import {SimulationLockService} from "../device-simulator/simulation-lock.service";
+import {LockStatus, SimulationLockService} from "../device-simulator/simulation-lock.service";
+import {AppIdService} from "../app-id.service";
+import {switchMap} from "rxjs/operators";
+import {Observable} from "rxjs";
 
 @Component({
     templateUrl: './device-simulator-config.component.html'
@@ -30,7 +33,12 @@ import {SimulationLockService} from "../device-simulator/simulation-lock.service
 export class DeviceSimulatorConfigComponent {
     bsModalRef: BsModalRef;
 
-    constructor(private simulatorLockService: SimulationLockService, private deviceSimulatorSvc: DeviceSimulatorService, private modalService: BsModalService, private inventoryService: InventoryService) {}
+    lockStatus$: Observable<{isLocked: boolean, isLockOwned: boolean, lockStatus: LockStatus}>;
+
+    constructor(private simulatorLockService: SimulationLockService, private deviceSimulatorSvc: DeviceSimulatorService, private modalService: BsModalService, private inventoryService: InventoryService, appIdService: AppIdService) {
+        this.lockStatus$ = appIdService.appIdDelayedUntilAfterLogin$
+            .pipe(switchMap(appId => simulatorLockService.lockStatus$(appId)));
+    }
 
     showCreateSimulatorDialog() {
         this.bsModalRef = this.modalService.show(NewSimulatorModalComponent, { class: 'c8y-wizard' });

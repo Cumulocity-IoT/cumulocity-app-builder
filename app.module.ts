@@ -40,6 +40,7 @@ import {filter, first, map, startWith, tap, withLatestFrom} from "rxjs/operators
 import {IUser} from '@c8y/client';
 import { SeriesValueSimulationStrategyModule } from './simulation-strategies/series-values/series-value.simulation-strategy.module';
 import { RandomValueSimulationStrategyModule } from './simulation-strategies/random-values/random-value.simulation-strategy.module';
+import {DeviceSimulatorService} from "./device-simulator/device-simulator.service";
 
 @NgModule({
   declarations: [
@@ -84,8 +85,10 @@ import { RandomValueSimulationStrategyModule } from './simulation-strategies/ran
   ]
 })
 export class AppModule extends HybridAppModule {
-  constructor(protected upgrade: NgUpgradeModule, router: Router, location: Location, appStateService: AppStateService) {
+  constructor(protected upgrade: NgUpgradeModule, router: Router, location: Location, appStateService: AppStateService, deviceSimulatorService: DeviceSimulatorService) {
     super();
+
+    deviceSimulatorService.initialize();
 
     // Fixes a bug where the router removes the hash when the user tries to navigate to an app and is not logged in
     appStateService.currentUser.pipe(filter(user => user != null)).pipe(

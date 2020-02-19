@@ -25,12 +25,9 @@ interface valueType {
 }
 
 export class DeviceHandle {
-    constructor(private inventoryService: InventoryService, private measurementService: MeasurementService, private simulatorConfig: any,
-        private appService: ApplicationService, private appId: any, private currentUserDetails: any,
-        private simulatorLockService: SimulationLockService) {}
+    constructor(private inventoryService: InventoryService, private measurementService: MeasurementService, private simulatorConfig: any) {}
    
     sendMeasurement(config: any, mValue:any) {
-        
         let value: valueType = {};
         value.type = config.type;
         value[config.type] = {
@@ -43,34 +40,6 @@ export class DeviceHandle {
             ...value
         });
     }
-
-
-    /**
-     * Updated simulator lock status.
-     * This method is called when browser session is active and simulator is started/stopped by user who have simulator rights
-     * @param {boolean} simulatorStarted
-     */
-    async updateSimulatorStatus(simulatorStarted: boolean){
-        let appServiceData = (await this.appService.detail(this.appId)).data as any;
-        let simulators = appServiceData.applicationBuilder.simulators
-            .filter(x => x.id !== this.simulatorConfig.id);
-        if (!simulatorStarted || this.simulatorConfig.config.isSimulatorStarted !== simulatorStarted){
-            this.simulatorConfig.config.isSimulatorStarted = simulatorStarted
-            simulators.push({
-                id: this.simulatorConfig.id,
-                name: this.simulatorConfig.name,
-                type: this.simulatorConfig.type,
-                config: this.simulatorConfig.config
-            });
-
-            appServiceData.applicationBuilder.simulators = simulators.length > 0 ? simulators : null
-            await this.appService.update({
-                id: this.appId,
-                applicationBuilder: appServiceData.applicationBuilder
-            } as any);
-        }
-    }
-
 
     /**
      *
