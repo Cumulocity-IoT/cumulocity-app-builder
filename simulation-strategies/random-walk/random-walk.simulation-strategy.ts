@@ -17,9 +17,9 @@
  */
 
 import {
-    RandomValueSimulationStrategyConfig,
-    RandomValueSimulationStrategyConfigComponent
-} from "./random-value.config.component";
+    RandomWalkSimulationStrategyConfig,
+    RandomWalkSimulationStrategyConfigComponent
+} from "./random-walk.config.component";
 import {SimulationStrategy} from "../../device-simulator/simulation-strategy.decorator";
 import {DeviceIntervalSimulator} from "../../device-simulator/device-interval-simulator";
 import {Injectable} from "@angular/core";
@@ -28,13 +28,15 @@ import {MeasurementService} from "@c8y/client";
 import {SimulatorConfig} from "../../device-simulator/device-simulator.service";
 
 @SimulationStrategy({
-    name: "Random Value",
-    icon: "random",
-    description: "Simulates a line based on Random values",
-    configComponent: RandomValueSimulationStrategyConfigComponent
+    name: "Random Walk",
+    icon: "line-chart",
+    description: "Simulates a value based on a random offset from the previous value",
+    configComponent: RandomWalkSimulationStrategyConfigComponent
 })
-export class RandomValueSimulationStrategy extends DeviceIntervalSimulator {
-    constructor(private measurementService: MeasurementService, private config: RandomValueSimulationStrategyConfig) {
+export class RandomWalkSimulationStrategy extends DeviceIntervalSimulator {
+    firstValue: boolean = true;
+    previousValue: number = 0;
+    constructor(private measurementService: MeasurementService, private config: RandomWalkSimulationStrategyConfig) {
         super();
     }
 
@@ -42,8 +44,26 @@ export class RandomValueSimulationStrategy extends DeviceIntervalSimulator {
         return this.config.interval * 1000;
     }
 
+    onStart() {
+        super.onStart();
+        this.firstValue = true;
+        this.previousValue = 0;
+    }
+
     onTick() {
-        const measurementValue = Math.floor(Math.random() * (this.config.maxValue - this.config.minValue + 1)) + this.config.minValue;
+        let measurementValue;
+        if (this.firstValue) {
+            measurementValue = this.config.startingValue;
+            this.firstValue = false;
+        } else {
+            const max = Math.max(this.config.minValue, this.config.maxValue);
+            const min = Math.min(this.config.minValue, this.config.maxValue);
+            const maxDelta = Math.abs(this.config.maxDelta);
+            const delta = maxDelta * 2 * Math.random() - maxDelta;
+            measurementValue = Math.min(Math.max(this.previousValue + delta, min), max);
+        }
+
+        this.previousValue = measurementValue;
 
         this.measurementService.create({
             sourceId: this.config.deviceId,
@@ -59,16 +79,16 @@ export class RandomValueSimulationStrategy extends DeviceIntervalSimulator {
 }
 
 @Injectable()
-export class RandomValueSimulationStrategyFactory extends SimulationStrategyFactory<RandomValueSimulationStrategy> {
+export class RandomWalkSimulationStrategyFactory extends SimulationStrategyFactory<RandomWalkSimulationStrategy> {
     constructor(private measurementService: MeasurementService) {
         super();
     }
 
-    createInstance(config: SimulatorConfig<RandomValueSimulationStrategyConfig>): RandomValueSimulationStrategy {
-        return new RandomValueSimulationStrategy(this.measurementService, config.config);
+    createInstance(config: SimulatorConfig<RandomWalkSimulationStrategyConfig>): RandomWalkSimulationStrategy {
+        return new RandomWalkSimulationStrategy(this.measurementService, config.config);
     }
 
-    getSimulatorClass(): typeof RandomValueSimulationStrategy {
-        return RandomValueSimulationStrategy;
+    getSimulatorClass(): typeof RandomWalkSimulationStrategy {
+        return RandomWalkSimulationStrategy;
     }
 }

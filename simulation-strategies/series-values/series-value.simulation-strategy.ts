@@ -28,21 +28,21 @@ import {MeasurementService} from "@c8y/client";
 import {SimulatorConfig} from "../../device-simulator/device-simulator.service";
 
 @SimulationStrategy({
-    name: "Series Value",
+    name: "Value Series",
     icon: "bar-chart",
     description: "Simulates a line based on Series of values",
     configComponent: SeriesValueSimulationStrategyConfigComponent
 })
 export class SeriesValueSimulationStrategy extends DeviceIntervalSimulator {
+    values: number[] = [];
+    measurementCounter = 0;
+
     constructor(private measurementService: MeasurementService, private config: SeriesValueSimulationStrategyConfig) {
         super();
     }
 
-    values: number[] = [];
-    measurementCounter = 0;
-
     protected get interval() {
-        return this.config.interval;
+        return this.config.interval * 1000;
     }
 
     onStart() {
@@ -57,6 +57,7 @@ export class SeriesValueSimulationStrategy extends DeviceIntervalSimulator {
 
         this.measurementService.create({
             sourceId: this.config.deviceId,
+            time: new Date(),
             [this.config.fragment]: {
                 [this.config.series]: {
                     value: this.values[this.measurementCounter++],

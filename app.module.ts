@@ -31,16 +31,14 @@ import {BrandingComponent} from "./branding/branding.component";
 import {BrandingModule} from "./branding/branding.module";
 import {BsDropdownModule} from 'ngx-bootstrap/dropdown';
 import {BrandingDirtyGuardService} from "./branding/branding-dirty-guard.service";
-import {FixedValueSimulationStrategyModule} from "./simulation-strategies/fixed-value/fixed-value.simulation-strategy.module";
 import {HelpComponent} from "./help/help.component";
 import {MarkdownModule} from "ngx-markdown";
 import {CustomWidgetsModule} from "./custom-widgets/custom-widgets.module";
 import {Location} from "@angular/common";
 import {filter, first, map, startWith, tap, withLatestFrom} from "rxjs/operators";
 import {IUser} from '@c8y/client';
-import { SeriesValueSimulationStrategyModule } from './simulation-strategies/series-values/series-value.simulation-strategy.module';
-import { RandomValueSimulationStrategyModule } from './simulation-strategies/random-values/random-value.simulation-strategy.module';
 import {DeviceSimulatorService} from "./device-simulator/device-simulator.service";
+import {SimulationStrategiesModule} from "./simulation-strategies/simulation-strategies.module";
 
 @NgModule({
   declarations: [
@@ -71,9 +69,7 @@ import {DeviceSimulatorService} from "./device-simulator/device-simulator.servic
     ApplicationModule,
     BrandingModule.forRoot(),
     DeviceSimulatorConfigModule,
-    FixedValueSimulationStrategyModule,
-    SeriesValueSimulationStrategyModule,
-    RandomValueSimulationStrategyModule,
+    SimulationStrategiesModule,
     MarkdownModule.forRoot(),
     NgUpgradeModule,
     // Upgrade module must be the last

@@ -17,11 +17,12 @@
  */
 
 import {NgModule} from "@angular/core";
-import {FixedValueSimulationStrategyConfigComponent} from "./fixed-value.config.component";
-import {FixedValueSimulationStrategyFactory} from "./fixed-value.simulation-strategy";
+import {RandomWalkSimulationStrategyConfigComponent} from "./random-walk.config.component";
+import {RandomWalkSimulationStrategyFactory} from "./random-walk.simulation-strategy";
 import {CommonModule} from "@angular/common";
 import {FormsModule} from "@angular/forms";
 import { HOOK_SIMULATION_STRATEGY_FACTORY } from '../../device-simulator/device-simulator';
+
 
 @NgModule({
     imports: [
@@ -29,16 +30,16 @@ import { HOOK_SIMULATION_STRATEGY_FACTORY } from '../../device-simulator/device-
         FormsModule
     ],
     declarations: [
-        FixedValueSimulationStrategyConfigComponent
+        RandomWalkSimulationStrategyConfigComponent
     ],
     exports: [
-        FixedValueSimulationStrategyConfigComponent
+        RandomWalkSimulationStrategyConfigComponent
     ],
     entryComponents: [
-        FixedValueSimulationStrategyConfigComponent
+        RandomWalkSimulationStrategyConfigComponent
     ],
     providers: [
-        { provide: HOOK_SIMULATION_STRATEGY_FACTORY, useClass: FixedValueSimulationStrategyFactory, multi: true }
+        { provide: HOOK_SIMULATION_STRATEGY_FACTORY, useClass: RandomWalkSimulationStrategyFactory, multi: true },
     ]
 })
-export class FixedValueSimulationStrategyModule {}
+export class RandomWalkSimulationStrategyModule {}

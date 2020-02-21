@@ -52,8 +52,8 @@ export interface RandomValueSimulationStrategyConfig {
             <input type="text" class="form-control" id="unit" name="unit" placeholder="e.g. C (optional)" [(ngModel)]="config.unit">
         </div> 
          <div class="form-group">
-            <label for="interval"><span>Interval (ms)</span></label>
-            <input type="number" class="form-control" id="interval" name="interval" placeholder="e.g. 5000 (required)" required [(ngModel)]="config.interval">
+            <label for="interval"><span>Interval (seconds)</span></label>
+            <input type="number" class="form-control" id="interval" name="interval" placeholder="e.g. 5 (required)" required [(ngModel)]="config.interval">
         </div>
     `
 })
@@ -66,6 +66,6 @@ export class RandomValueSimulationStrategyConfigComponent extends SimulationStra
         this.config.minValue = 10;
         this.config.maxValue = 20;
         this.config.unit = "C";
-        this.config.interval = 5000;
+        this.config.interval = 5;
     }
 }

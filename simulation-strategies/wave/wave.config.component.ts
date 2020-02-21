@@ -19,11 +19,13 @@
 import {Component} from "@angular/core";
 import {SimulationStrategyConfigComponent} from "../../device-simulator/simulation-strategy";
 
-export interface SeriesValueSimulationStrategyConfig {
+export interface WaveSimulationStrategyConfig {
     deviceId: string,
     fragment: string,
     series: string,
-    value: string
+    waveType: 'sine' | 'sqr' | 'sqr-approx',
+    height: number,
+    wavelength: number,
     unit: string,
     interval: number
 }
@@ -39,9 +41,21 @@ export interface SeriesValueSimulationStrategyConfig {
             <input type="text" class="form-control" id="series" name="series" placeholder="e.g. T (required)" required autofocus [(ngModel)]="config.series">
         </div>
         <div class="form-group">
-            <label for="value"><span>Value</span></label>
-            <input type="text" class="form-control" id="value" name="value" placeholder="e.g. 15,20,30 (required)" required [(ngModel)]="config.value">
-        </div> 
+            <label for="value"><span>Wave Type</span></label>
+            <select class="form-control" id="value" name="value" [(ngModel)]="config.waveType">
+                <option value="sine">Sinusoid</option>
+                <option value="sqr">Square</option>
+                <option value="sqr-approx">Square (Approx)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="height"><span>Height</span></label>
+            <input type="text" class="form-control" id="height" name="height" placeholder="e.g. 10 (required)" required [(ngModel)]="config.height">
+        </div>
+        <div class="form-group">
+            <label for="wavelength"><span>Wavelength</span></label>
+            <input type="text" class="form-control" id="wavelength" name="wavelength" placeholder="e.g. 60 (required)" required [(ngModel)]="config.wavelength">
+        </div>
         <div class="form-group">
             <label for="unit"><span>Unit</span></label>
             <input type="text" class="form-control" id="unit" name="unit" placeholder="e.g. C (optional)" [(ngModel)]="config.unit">
@@ -52,13 +66,15 @@ export interface SeriesValueSimulationStrategyConfig {
         </div>  
     `
 })
-export class SeriesValueSimulationStrategyConfigComponent extends SimulationStrategyConfigComponent {
-    config: SeriesValueSimulationStrategyConfig;
+export class WaveSimulationStrategyConfigComponent extends SimulationStrategyConfigComponent {
+    config: WaveSimulationStrategyConfig;
 
     initializeConfig() {
         this.config.fragment = "temperature_measurement";
         this.config.series = "T";
-        this.config.value = "10, 20, 30";
+        this.config.waveType = 'sine';
+        this.config.height = 10;
+        this.config.wavelength = 60;
         this.config.unit = "C";
         this.config.interval = 5;
     }
