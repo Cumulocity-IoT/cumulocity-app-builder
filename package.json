@@ -23,6 +23,7 @@
     "@angular/http": "7.2.15",
     "@angular/platform-browser": "7.2.15",
     "@angular/platform-browser-dynamic": "7.2.15",
+    "@angular/platform-webworker-dynamic": "7.2.15",
     "@angular/router": "7.2.15",
     "@angular/upgrade": "7.2.15",
     "@c8y/ng1-modules": "1005.0.3",
@@ -32,6 +33,7 @@
     "@ng-select/ng-select": "^2.20.5",
     "angular": "1.6.9",
     "clone-deep": "^4.0.1",
+    "comlink": "^4.2.0",
     "core-js": "^2.6.2",
     "css.escape": "^1.5.1",
     "d3-color": "^1.4.0",
@@ -52,7 +54,8 @@
     "@c8y/cli": "1005.0.3",
     "@types/d3-color": "^1.2.2",
     "patch-package": "^6.2.0",
-    "typescript": "3.1.6"
+    "typescript": "3.1.6",
+    "worker-plugin": "^3.2.0"
   },
   "c8y": {
     "application": {
