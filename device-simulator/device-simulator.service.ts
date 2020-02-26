@@ -19,12 +19,12 @@
 import {Inject, Injectable} from "@angular/core";
 import {DeviceSimulator, HOOK_SIMULATION_STRATEGY_FACTORY} from "./device-simulator";
 import { InventoryService, MeasurementService, ApplicationService, IApplication, PagingStrategy, RealtimeAction} from "@c8y/client";
-import {AppStateService} from "@c8y/ngx-components";
+import {AppStateService, LoginService} from "@c8y/ngx-components";
 import { Router } from '@angular/router';
 import {LOCK_TIMEOUT, SimulationLockService} from './simulation-lock.service';
 import { AppIdService } from '../app-id.service';
 import {from, interval, merge, of, Subscription} from 'rxjs';
-import {distinctUntilChanged, filter, flatMap, map, switchMap, tap, withLatestFrom} from "rxjs/operators";
+import {distinctUntilChanged, filter, first, flatMap, map, switchMap, tap, withLatestFrom} from "rxjs/operators";
 import * as deepEqual from "fast-deep-equal";
 import * as cloneDeep from "clone-deep";
 import {SimulationStrategyFactory} from "./simulation-strategy";
@@ -51,11 +51,13 @@ export class DeviceSimulatorService {
     simulatorConfigById = new Map<number, SimulatorConfig>();
     lockRefreshSubscription = new Subscription();
     private initialized = false;
+    // @ts-ignore
+    worker = new Worker('./simulator.worker.ts', {type: 'module'});
 
     constructor(
         @Inject(HOOK_SIMULATION_STRATEGY_FACTORY) simulationStrategyFactories: SimulationStrategyFactory[], private inventoryService: InventoryService,
         private appStateService: AppStateService, private appIdService: AppIdService, private measurementService: MeasurementService,
-        private route: Router, private appService: ApplicationService, private simulatorLockService: SimulationLockService
+        private route: Router, private appService: ApplicationService, private simulatorLockService: SimulationLockService, private loginService: LoginService
     ) {
         this.strategyFactoryByName = new Map(simulationStrategyFactories.map(factory => [factory.getSimulatorMetadata().name, factory] as [string, SimulationStrategyFactory]));
     }
@@ -65,6 +67,19 @@ export class DeviceSimulatorService {
             return;
         }
         this.initialized = true;
+
+        // Set the worker's auth after the user logs in
+        this.appStateService.currentUser.pipe(filter(user => user != null), first()).subscribe(() => {
+            const token = localStorage.getItem(this.loginService.TOKEN_KEY) || sessionStorage.getItem(this.loginService.TOKEN_KEY);
+            const tfa = localStorage.getItem(this.loginService.TFATOKEN_KEY) || sessionStorage.getItem(this.loginService.TFATOKEN_KEY);
+            if (token) {
+                const auth = {
+                    token,
+                    tfa
+                };
+                this.worker.postMessage({auth});
+            }
+        });
 
         // Listen for any of appId, simulatorConfig, or lockStatus changes and then reload or clear the simulators
         this.appIdService.appIdDelayedUntilAfterLogin$.pipe(
