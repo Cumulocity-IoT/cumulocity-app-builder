@@ -55,7 +55,8 @@ export class ApplicationBuilderComponent {
                 catchError(() =>
                     from(this.appService.listByUser(appStateService.currentUser.value, { pageSize: 2000 }).then(res => res.data))
                 ),
-                map(apps => apps.filter(app => app.type === 'EXTERNAL' && app.hasOwnProperty('applicationBuilder')))
+                map(apps => apps.filter(app => app.hasOwnProperty('applicationBuilder'))),
+                map(apps => apps.sort((a, b) => a.id > b.id ? 1 : -1) )
             );
 
         this.userHasAdminRights = userService.hasRole(appStateService.currentUser.value, "ROLE_APPLICATION_MANAGEMENT_ADMIN")
