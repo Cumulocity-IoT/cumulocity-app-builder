@@ -8,14 +8,14 @@
         </a>
     </div>
     <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2" *ngFor="let app of applications | async">
-        <div class="card clickable" [routerLink]="'/application/' + app.id">
+        <div class="card clickable" (click)="openApp(app)">
             <div class="dropdown card-actions" dropdown (click)="$event.stopPropagation()" *ngIf="userHasAdminRights">
                 <button title="Settings" class="dropdown-toggle c8y-dropdown" dropdownToggle type="button">
                     <i c8yIcon="ellipsis-v"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-right" *dropdownMenu role="menu">
                     <li role="menuitem">
-                        <a [routerLink]="'/application/' + app.id + '/config'" class="dropdown-item">
+                        <a class="dropdown-item" (click)="openApp(app, '/config')">
                             <i c8yIcon="edit"></i> Edit
                         </a>
                     </li>
@@ -31,7 +31,7 @@
                 <p style="word-wrap: break-word;" class="e2e-appCardName">{{app.name}}</p>
             </div>
             <div class="card-actions-group">
-                <a [routerLink]="'/application/' + app.id" (click)="$event.stopPropagation()">
+                <a class="clickable">
                     <i c8yIcon="external-link"></i> Open
                 </a>
             </div>

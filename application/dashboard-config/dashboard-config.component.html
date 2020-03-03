@@ -31,6 +31,11 @@
                         <input type="text" class="form-control" id="name" name="name" placeholder="e.g. My First Application (required)" required [(ngModel)]="newAppName">
                     </div>
 
+                    <div class="form-group" *ngIf="app.contextPath != undefined">
+                        <label for="contextpath"><span>Context Path</span></label>
+                        <input type="text" class="form-control" id="contextpath" name="contextpath" placeholder="e.g. my-app (required)" required [(ngModel)]="newAppContextPath">
+                    </div>
+
                     <div class="form-group">
                         <label for="icon"><span>Icon</span></label>
                         <icon-selector id="icon" name="icon" [(value)]="newAppIcon"></icon-selector>

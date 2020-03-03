@@ -29,6 +29,8 @@ import {from, Observable} from "rxjs";
 import {AppStateService} from "@c8y/ngx-components";
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import {NewApplicationModalComponent} from "./new-application-modal.component";
+import {Router} from "@angular/router";
+import {contextPathFromURL} from "../utils/contextPathFromURL";
 
 @Component({
     templateUrl: './application-builder.component.html'
@@ -43,7 +45,7 @@ export class ApplicationBuilderComponent {
 
     bsModalRef: BsModalRef;
 
-    constructor(private appService: ApplicationService, private appStateService: AppStateService, private modalService: BsModalService, private userService: UserService) {
+    constructor(private router: Router, private appService: ApplicationService, private appStateService: AppStateService, private modalService: BsModalService, private userService: UserService) {
         this.applications = this.appService.list$({ pageSize: 100, withTotalPages: true }, {
             hot: true,
             pagingStrategy: PagingStrategy.ALL,
@@ -71,5 +73,13 @@ export class ApplicationBuilderComponent {
 
         // Refresh the applications list
         this.appStateService.currentUser.next(this.appStateService.currentUser.value);
+    }
+
+    openApp(app: IApplication & {applicationBuilder?: any}, subPath?: string) {
+        if (app.contextPath && app.contextPath != contextPathFromURL()) {
+            window.location = `/apps/${app.contextPath}/#/application/${app.id}${subPath || ''}` as any;
+        } else {
+            this.router.navigateByUrl(`/application/${app.id}${subPath || ''}`);
+        }
     }
 }
