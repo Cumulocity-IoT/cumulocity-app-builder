@@ -23,10 +23,11 @@ import {AppStateService} from "@c8y/ngx-components";
 import {DashboardController} from "./dashboard.controller";
 
 import './cumulocity.json';
+import {Router} from "@angular/router";
 
 declare const angular: any;
 
-function hashToPathSegments(urlString: string): string[] {
+function urlToHashPathSegments(urlString: string): string[] {
     const url = new URL(urlString);
     const hash = url.hash;
     return hash.replace('#/', '').split('/');
@@ -52,8 +53,8 @@ angular
     // If it's device or group then try to find an appropriate application builder dashboard, otherwise link to the cockpit
     .run(['$rootScope', 'applicationService', ($rootScope, applicationService) => {
         $rootScope.$on('$locationChangeStart', async (event, next, current) => {
-            const nextPathSegments = hashToPathSegments(next);
-            const currentPathSegments = hashToPathSegments(current);
+            const nextPathSegments = urlToHashPathSegments(next);
+            const currentPathSegments = urlToHashPathSegments(current);
             if (nextPathSegments.length >= 1) {
                 // device/:deviceId or group/:groupId attempt to redirect inside the Application Builder
                 if (nextPathSegments.length >= 2 && ['device', 'group'].includes(nextPathSegments[0]) && currentPathSegments.length >= 2 && currentPathSegments[0] === 'application') {
@@ -79,12 +80,19 @@ angular
             }
         });
     }])
+    .run(['$rootScope', 'applicationService', 'ngxRouter', ($rootScope, applicationService, ngxRouter) => {
+        $rootScope.$on('$locationChangeStart', async (event, next, current) => {
+            // Make sure that both angular and angularjs's routers are in sync... they seem to sometimes get out of sync.... bug?
+            if (next != current) {
+                const nextPathSegments = urlToHashPathSegments(next);
+                ngxRouter.navigate([`/${nextPathSegments.join('/')}`]);
+            }
+        });
+    }])
     .factory('inventoryService', downgradeInjectable(InventoryService))
     .factory('applicationService', downgradeInjectable(ApplicationService))
-    .factory('appStateService', downgradeInjectable(AppStateService));
-
-angular
-    .module('framework')
+    .factory('appStateService', downgradeInjectable(AppStateService))
+    .factory('ngxRouter', downgradeInjectable(Router))
     .component('frameworkDashboard', {
         template: `<c8y-dashboard-gridstack id="vm.dashboardId" is-frozen="false"/>`,
         controllerAs: 'vm',

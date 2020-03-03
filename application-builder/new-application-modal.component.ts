@@ -67,7 +67,7 @@ export class NewApplicationModalComponent {
         })).data;
         await this.appService.update({
             id: app.id,
-            externalUrl: `${window.location.pathname}?app=${app.id}#/application/${app.id}`,
+            externalUrl: `${window.location.pathname}#/application/${app.id}`,
             applicationBuilder: {
                 version: __VERSION__,
                 branding: {
