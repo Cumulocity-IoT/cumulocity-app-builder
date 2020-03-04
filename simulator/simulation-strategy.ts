@@ -17,9 +17,9 @@
  */
 
 import {DeviceSimulator} from "./device-simulator";
-import {SimulatorConfig} from "./device-simulator.service";
 import {SimulationStrategyMetadata} from "./simulation-strategy.decorator";
 import { Type } from "@angular/core";
+import { SimulatorConfig } from "./simulator-config";
 
 export abstract class SimulationStrategyConfigComponent {
     abstract config: any;

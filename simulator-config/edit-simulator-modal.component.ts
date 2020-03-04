@@ -26,11 +26,10 @@ import {
     ComponentFactory
 } from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap/modal';
-import {
-    DeviceSimulatorService, SimulatorConfig,
-} from "../device-simulator/device-simulator.service";
 import {ApplicationService} from '@c8y/client';
 import {AppIdService} from "../app-id.service";
+import {SimulatorConfig} from "../simulator/simulator-config";
+import {SimulationStrategiesService} from "../simulator/simulation-strategies.service";
 
 @Component({
     templateUrl: './edit-simulator-modal.component.html'
@@ -40,7 +39,7 @@ export class EditSimulatorModalComponent implements OnInit {
 
     @ViewChild("configWrapper", { read: ViewContainerRef }) configWrapper: ViewContainerRef;
     simulatorConfig: SimulatorConfig;
-    constructor(public bsModalRef: BsModalRef, private deviceSimulatorService: DeviceSimulatorService,
+    constructor(public bsModalRef: BsModalRef, private simulationStrategiesService: SimulationStrategiesService,
          private resolver: ComponentFactoryResolver, private injector: Injector, 
          private appService: ApplicationService, private appIdService: AppIdService) {
 
@@ -51,7 +50,7 @@ export class EditSimulatorModalComponent implements OnInit {
     }
 
     openSimulatorConfig() {
-        const strategyFactory = this.deviceSimulatorService.strategyFactoryByName.get(this.simulatorConfig.type);
+        const strategyFactory = this.simulationStrategiesService.strategiesByName.get(this.simulatorConfig.type);
         if (strategyFactory == undefined) {
             console.error("Unknown simulator strategy:", this.simulatorConfig.type);
             this.bsModalRef.hide();

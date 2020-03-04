@@ -46,13 +46,13 @@ export class ApplicationBuilderComponent {
     bsModalRef: BsModalRef;
 
     constructor(private router: Router, private appService: ApplicationService, private appStateService: AppStateService, private modalService: BsModalService, private userService: UserService) {
-        this.applications = this.appService.list$({ pageSize: 100, withTotalPages: true }, {
+        this.applications = from(this.appService.list$({ pageSize: 100, withTotalPages: true }, {
             hot: true,
             pagingStrategy: PagingStrategy.ALL,
             realtime: true,
             realtimeAction: RealtimeAction.FULL,
             pagingDelay: 0.1
-        })
+        }))
             .pipe(
                 catchError(() =>
                     from(this.appService.listByUser(appStateService.currentUser.value, { pageSize: 2000 }).then(res => res.data))

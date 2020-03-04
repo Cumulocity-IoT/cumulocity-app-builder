@@ -20,12 +20,12 @@ import {
     WaveSimulationStrategyConfig,
     WaveSimulationStrategyConfigComponent
 } from "./wave.config.component";
-import {SimulationStrategy} from "../../device-simulator/simulation-strategy.decorator";
-import {DeviceIntervalSimulator} from "../../device-simulator/device-interval-simulator";
+import {SimulationStrategy} from "../../simulator/simulation-strategy.decorator";
+import {DeviceIntervalSimulator} from "../../simulator/device-interval-simulator";
 import {Injectable} from "@angular/core";
-import {SimulationStrategyFactory} from "../../device-simulator/simulation-strategy";
+import {SimulationStrategyFactory} from "../../simulator/simulation-strategy";
 import {MeasurementService} from "@c8y/client";
-import {SimulatorConfig} from "../../device-simulator/device-simulator.service";
+import {SimulatorConfig} from "../../simulator/simulator-config";
 
 @SimulationStrategy({
     name: "Waveform",

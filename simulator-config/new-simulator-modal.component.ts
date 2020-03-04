@@ -26,10 +26,11 @@ import {
 } from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap/modal';
 import {WizardComponent} from "../wizard/wizard.component";
-import {DeviceSimulatorService} from "../device-simulator/device-simulator.service";
 import {InventoryService, ApplicationService} from '@c8y/client';
 import {AppIdService} from "../app-id.service";
-import {SimulationStrategyConfigComponent, SimulationStrategyFactory} from "../device-simulator/simulation-strategy";
+import {SimulationStrategyConfigComponent, SimulationStrategyFactory} from "../simulator/simulation-strategy";
+import {SimulationStrategiesService} from "../simulator/simulation-strategies.service";
+
 @Component({
     templateUrl: './new-simulator-modal.component.html'
 })
@@ -45,9 +46,11 @@ export class NewSimulatorModalComponent {
     deviceId: string | undefined;
     simulatorName: string = '';
 
-    constructor(public bsModalRef: BsModalRef, private deviceSimulatorService: DeviceSimulatorService,
+    constructor(
+        public bsModalRef: BsModalRef, private simulationStrategiesService: SimulationStrategiesService,
         private resolver: ComponentFactoryResolver, private injector: Injector, private inventoryService: InventoryService,
-        private appService: ApplicationService, private appIdService: AppIdService) {}
+        private appService: ApplicationService, private appIdService: AppIdService
+    ) {}
 
     openSimulatorConfig() {
         this.wizard.selectStep('config');

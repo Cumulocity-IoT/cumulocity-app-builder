@@ -1,4 +1,3 @@
-import { Injectable } from '@angular/core';
 import { InventoryService } from '@c8y/ngx-components/api';
 import {AppStateService} from "@c8y/ngx-components";
 import * as delay from "delay";
@@ -9,7 +8,7 @@ import {
     map, shareReplay,
     startWith,
 } from "rxjs/operators";
-import {AppIdService} from "../app-id.service";
+import {Injectable} from "@angular/core";
 
 export const LOCK_TIMEOUT = 10000; // Milliseconds
 
@@ -19,15 +18,21 @@ export interface LockStatus {
     lockedOn: string
 }
 
-@Injectable({ providedIn: "root" })
+@Injectable()
 export class SimulationLockService {
     sessionId: number = Math.floor(Math.random() * 1000000000);
 
-    constructor(private inventoryService: InventoryService, private appStateService: AppStateService, appIdService: AppIdService) {}
+    lockManagedObjectIdCache = new Map<string, string>();
+    lockStatusObservableCache = new Map<string, Observable<{isLocked: boolean, isLockOwned: boolean, lockStatus: LockStatus}>>();
+
+    constructor(private inventoryService: InventoryService, private appStateService: AppStateService) {}
 
     lockStatus$(appId: string): Observable<{isLocked: boolean, isLockOwned: boolean, lockStatus: LockStatus}> {
+        if (this.lockStatusObservableCache.has(appId)) {
+            return this.lockStatusObservableCache.get(appId);
+        }
         // Poll the lock status every half LOCK_TIMEOUT to work out what the current state of the lock is
-        return interval(LOCK_TIMEOUT/2)
+        const lockStatus$ = interval(LOCK_TIMEOUT/2)
             .pipe(
                 startWith(0),
                 map(() => Date.now()),
@@ -55,8 +60,13 @@ export class SimulationLockService {
                     lockStatus,
                     isLockOwned: lockStatus != undefined && lockStatus.sessionId === this.sessionId
                 })),
-                shareReplay(1)
+                shareReplay({
+                    bufferSize: 1,
+                    refCount: true
+                } as any)
             );
+        this.lockStatusObservableCache.set(appId, lockStatus$);
+        return lockStatus$;
     }
 
     async forceTakeLock(appId: string): Promise<void> {
@@ -111,18 +121,22 @@ export class SimulationLockService {
     async getLockStatus(appId: string): Promise<LockStatus | undefined> {
         const response = await this.inventoryService.list({query: `has(AppBuilder_LockStatus) and applicationId eq '${appId}'`});
         if (response.data.length > 0) {
-            return response.data[0].AppBuilder_LockStatus;
+            const lockObject = response.data[0];
+            this.lockManagedObjectIdCache.set(appId, lockObject.id);
+            return lockObject.AppBuilder_LockStatus;
         } else {
             return undefined;
         }
     }
 
     async updateLockStatus(appId: string, lockStatus: LockStatus): Promise<void> {
-        // TODO: possible optimisation - cache the lock managedObject Id so that we don't have to make an extra get request to find it
-        const response = await this.inventoryService.list({query: `has(AppBuilder_LockStatus) and applicationId eq '${appId}'`});
-        if (response.data.length > 0) {
+        if (!this.lockManagedObjectIdCache.has(appId)) {
+            // Calling getLockStatus will update the lockManagedObjectIdCache allowing us to get the id (if it exists)
+            await this.getLockStatus(appId);
+        }
+        if (this.lockManagedObjectIdCache.has(appId)) {
             await this.inventoryService.update({
-                id: response.data[0].id,
+                id: this.lockManagedObjectIdCache.get(appId),
                 applicationId: appId,
                 AppBuilder_LockStatus: lockStatus
             });

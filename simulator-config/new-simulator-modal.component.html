@@ -12,8 +12,8 @@
         <hr style="margin:0;">
         <div class="modal-inner-scroll">
             <div class="c8y-wizard-list-nav">
-                <ng-container *ngFor="let strategyName in deviceSimulatorService.strategyFactoryByName">
-                    <a class="list-group-item clickable" *ngIf="deviceSimulatorService.strategyFactoryByName.get(strategyName) as strategyFactory" (click)="selectedStrategyFactory = strategyFactory; wizard.selectStep('device')">
+                <ng-container *ngFor="let strategyFactory of simulationStrategiesService.strategies">
+                    <a class="list-group-item clickable" (click)="selectedStrategyFactory = strategyFactory; wizard.selectStep('device')">
                     <ng-container *ngIf="strategyFactory.getSimulatorMetadata() as strategyMetadata">
                         <span class="list-group-icon">
                           <i [c8yIcon]="strategyMetadata.icon"></i>
