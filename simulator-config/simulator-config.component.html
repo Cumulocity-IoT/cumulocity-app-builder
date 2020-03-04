@@ -1,5 +1,6 @@
 <c8y-title>Simulators</c8y-title>
 
+<ng-container *ngIf="simulatorConfigById$ | async as simulatorConfigById">
 <div class="card-group interact-grid" *ngIf="lockStatus$ | async as lockStatus">
     <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3" style="min-height: 165px">
         <a  *ngIf="lockStatus.isLockOwned else locked" class="card add-card clickable" (click)="showCreateSimulatorDialog()">
@@ -9,18 +10,23 @@
         <ng-template #locked>
             <div class="card add-card">
                <i c8yIcon="lock"></i><br>
-                <span *ngIf="!isUnlocking else unlocking">Locked <small>(<a class="clickable" (click)="forceUnlock()">Force Unlock</a>)</small></span>
-                <ng-template #unlocking>Unlocking...</ng-template>
-                <p class="text-truncate"><small class="text-muted">Locked By :
-                        {{lockStatus.lockStatus.lockedBy}}</small></p>
-                <p class="text-truncate"><small class="text-muted">Locked On:
-                        {{lockStatus.lockStatus.lockedOn | date:'d MMMM yyyy HH:mm'}}</small></p>
+                <ng-container *ngIf="lockStatus.isLocked && lockStatus.lockStatus else gettingStatus">
+                    <span *ngIf="!isUnlocking else unlocking">Locked <small>(<a class="clickable" (click)="forceUnlock()">Force Unlock</a>)</small></span>
+                    <ng-template #unlocking>Unlocking...</ng-template>
+                    <p class="text-truncate"><small class="text-muted">Locked By :
+                            {{lockStatus.lockStatus.lockedBy}}</small></p>
+                    <p class="text-truncate"><small class="text-muted">Locked On:
+                            {{lockStatus.lockStatus.lockedOn | date:'d MMMM yyyy HH:mm'}}</small></p>
+                </ng-container>
+                <ng-template #gettingStatus>
+                    <span>Getting lock status...</span>
+                </ng-template>
             </div>
         </ng-template>
     </div>
-    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3" *ngFor="let simulatorId in deviceSimulatorSvc.simulatorConfigById">
-        <ng-container *ngIf="deviceSimulatorSvc.simulatorConfigById.get(simulatorId) as simulatorConfig">
-        <ng-container *ngIf="deviceSimulatorSvc.strategyFactoryByName.get(simulatorConfig.type) as simulationStrategyFactory">
+    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3" *ngFor="let simulatorId in simulatorConfigById">
+        <ng-container *ngIf="simulatorConfigById.get(simulatorId) as simulatorConfig">
+        <ng-container *ngIf="simulationStrategiesService.strategiesByName.get(simulatorConfig.type) as simulationStrategyFactory">
         <ng-container *ngIf="simulationStrategyFactory.getSimulatorMetadata() as simulationStrategyMetadata">
         <div class="card">
             <div class="dropdown card-actions" dropdown (click)="$event.stopPropagation()" *ngIf="lockStatus.isLockOwned">
@@ -34,7 +40,7 @@
                         </a>
                     </li>
                     <li role="menuitem">
-                        <a class="dropdown-item clickable" (click)="deviceSimulatorSvc.deleteSimulator(simulatorConfig)">
+                        <a class="dropdown-item clickable" (click)="deleteSimulator(simulatorConfig)">
                             <i c8yIcon="times"></i> Remove
                         </a>
                     </li>
@@ -51,7 +57,7 @@
             <div class="card-block row" style="margin-bottom: 5px;">
                 <div class="col-xs-6">
                     <label class="c8y-switch">
-                        <input type="checkbox" [disabled]="!lockStatus.isLockOwned" [ngModel]="simulatorConfig.started" (ngModelChange)="deviceSimulatorSvc.changeSimulatorStarted(simulatorConfig, $event)"/>
+                        <input type="checkbox" [disabled]="!lockStatus.isLockOwned" [ngModel]="simulatorConfig.started" (ngModelChange)="changeSimulatorStarted(simulatorConfig, $event)"/>
                         <span></span>
                         {{simulatorConfig.started ? 'Running' : 'Paused'}}
                     </label>
@@ -68,5 +74,6 @@
         </ng-container>
     </div>
 </div>
+</ng-container>
 
 

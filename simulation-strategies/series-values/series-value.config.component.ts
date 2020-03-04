@@ -17,7 +17,7 @@
  */
 
 import {Component} from "@angular/core";
-import {SimulationStrategyConfigComponent} from "../../device-simulator/simulation-strategy";
+import {SimulationStrategyConfigComponent} from "../../simulator/simulation-strategy";
 
 export interface SeriesValueSimulationStrategyConfig {
     deviceId: string,

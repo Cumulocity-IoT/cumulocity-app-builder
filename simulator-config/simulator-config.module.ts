@@ -18,8 +18,8 @@
 
 import {HOOK_NAVIGATOR_NODES, NavigatorNode, NavigatorNodeFactory, _, CoreModule} from "@c8y/ngx-components";
 import {Injectable, ModuleWithProviders, NgModule} from "@angular/core";
-import {RouterModule, Router, ActivationEnd} from "@angular/router";
-import {DeviceSimulatorConfigComponent} from "./device-simulator-config.component";
+import {RouterModule} from "@angular/router";
+import {SimulatorConfigComponent} from "./simulator-config.component";
 import {CommonModule} from "@angular/common";
 import {NewSimulatorModalComponent} from "./new-simulator-modal.component";
 import {WizardModule} from "../wizard/wizard.module";
@@ -27,7 +27,6 @@ import {ContribNgForInModule} from "@angular-contrib/common";
 import {BsDropdownModule} from "ngx-bootstrap";
 import { ButtonsModule } from 'ngx-bootstrap/buttons';
 import {EditSimulatorModalComponent} from "./edit-simulator-modal.component";
-import { DeviceSimulatorService } from '../device-simulator/device-simulator.service';
 
 @Injectable()
 class DeviceSimulatorConfigNavigation implements NavigatorNodeFactory {
@@ -51,7 +50,7 @@ class DeviceSimulatorConfigNavigation implements NavigatorNodeFactory {
         RouterModule.forChild([
             {
                 path: 'simulator-config',
-                component: DeviceSimulatorConfigComponent
+                component: SimulatorConfigComponent
             }
         ]),
         CoreModule,
@@ -61,7 +60,7 @@ class DeviceSimulatorConfigNavigation implements NavigatorNodeFactory {
         ButtonsModule.forRoot()
     ],
     declarations: [
-        DeviceSimulatorConfigComponent,
+        SimulatorConfigComponent,
         NewSimulatorModalComponent,
         EditSimulatorModalComponent
     ],
@@ -70,13 +69,12 @@ class DeviceSimulatorConfigNavigation implements NavigatorNodeFactory {
         EditSimulatorModalComponent
     ],
     providers: [
-        DeviceSimulatorService
     ]
 })
-export class DeviceSimulatorConfigModule {
+export class SimulatorConfigModule {
     static withNavigation(): ModuleWithProviders {
         return {
-            ngModule: DeviceSimulatorConfigModule,
+            ngModule: SimulatorConfigModule,
             providers: [
                 { provide: HOOK_NAVIGATOR_NODES, useClass: DeviceSimulatorConfigNavigation, multi: true}
             ]

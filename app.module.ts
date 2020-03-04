@@ -16,17 +16,17 @@
 * limitations under the License.
  */
 
-import { NgModule} from '@angular/core';
+import {NgModule} from '@angular/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {NavigationError, Router, RouterModule as NgRouterModule} from '@angular/router';
 import {UpgradeModule as NgUpgradeModule} from '@angular/upgrade/static';
-import {AppStateService, CoreModule, HOOK_NAVIGATOR_NODES, RouterModule} from '@c8y/ngx-components';
+import {AppStateService, CoreModule, HOOK_NAVIGATOR_NODES, LoginService, RouterModule} from '@c8y/ngx-components';
 import { UpgradeModule, HybridAppModule, UPGRADE_ROUTES } from '@c8y/ngx-components/upgrade';
-import {DeviceSimulatorConfigModule} from "./device-simulator-config/device-simulator-config.module";
+import {SimulatorConfigModule} from "./simulator-config/simulator-config.module";
 import {ApplicationBuilderModule} from "./application-builder/application-builder.module";
 import {ApplicationModule} from "./application/application.module";
 import {ConfigNavigationService, Navigation} from "./navigation";
-import {DeviceSimulatorConfigComponent} from "./device-simulator-config/device-simulator-config.component";
+import {SimulatorConfigComponent} from "./simulator-config/simulator-config.component";
 import {BrandingComponent} from "./branding/branding.component";
 import {BrandingModule} from "./branding/branding.module";
 import {BsDropdownModule} from 'ngx-bootstrap/dropdown';
@@ -37,8 +37,10 @@ import {CustomWidgetsModule} from "./custom-widgets/custom-widgets.module";
 import {Location} from "@angular/common";
 import {filter, first, map, startWith, tap, withLatestFrom} from "rxjs/operators";
 import {IUser} from '@c8y/client';
-import {DeviceSimulatorService} from "./device-simulator/device-simulator.service";
 import {SimulationStrategiesModule} from "./simulation-strategies/simulation-strategies.module";
+import {AppIdService} from "./app-id.service";
+import {SimulatorCommunicationService} from "./simulator/mainthread/simulator-communication.service";
+import {SimulationStrategiesService} from "./simulator/simulation-strategies.service";
 
 @NgModule({
   declarations: [
@@ -50,7 +52,7 @@ import {SimulationStrategiesModule} from "./simulation-strategies/simulation-str
     NgRouterModule.forRoot([
       {
         path: 'application/:applicationId/simulator-config',
-        component: DeviceSimulatorConfigComponent
+        component: SimulatorConfigComponent
       },
       {
         path: 'application/:applicationId/branding',
@@ -68,7 +70,7 @@ import {SimulationStrategiesModule} from "./simulation-strategies/simulation-str
     CustomWidgetsModule,
     ApplicationModule,
     BrandingModule.forRoot(),
-    DeviceSimulatorConfigModule,
+    SimulatorConfigModule,
     SimulationStrategiesModule,
     MarkdownModule.forRoot(),
     NgUpgradeModule,
@@ -77,14 +79,28 @@ import {SimulationStrategiesModule} from "./simulation-strategies/simulation-str
   ],
   providers: [
     {provide: HOOK_NAVIGATOR_NODES, useClass: Navigation, multi: true},
-    ConfigNavigationService
+    ConfigNavigationService,
+    SimulatorCommunicationService,
+    SimulationStrategiesService
   ]
 })
 export class AppModule extends HybridAppModule {
-  constructor(protected upgrade: NgUpgradeModule, router: Router, location: Location, appStateService: AppStateService, deviceSimulatorService: DeviceSimulatorService) {
+  constructor(protected upgrade: NgUpgradeModule, router: Router, location: Location, appStateService: AppStateService, loginService: LoginService, simSvc: SimulatorCommunicationService, appIdService: AppIdService) {
     super();
 
-    deviceSimulatorService.initialize();
+    // Pass the app state to the worker from the main thread (Initially and every time it changes)
+    appStateService.currentUser.subscribe(async (user) => {
+      if (user != null) {
+        const token = localStorage.getItem(loginService.TOKEN_KEY) || sessionStorage.getItem(loginService.TOKEN_KEY);
+        const tfa = localStorage.getItem(loginService.TFATOKEN_KEY) || sessionStorage.getItem(loginService.TFATOKEN_KEY);
+        if (token) {
+          return await simSvc.simulator.setUserAndCredentials(user, {token, tfa});
+        }
+      }
+      return await simSvc.simulator.setUserAndCredentials(user, {});
+    });
+    appStateService.currentTenant.subscribe(async (tenant) => await simSvc.simulator.setTenant(tenant));
+    appIdService.appId$.subscribe(async (appId) => await simSvc.simulator.setAppId(appId));
 
     // Fixes a bug where the router removes the hash when the user tries to navigate to an app and is not logged in
     appStateService.currentUser.pipe(filter(user => user != null)).pipe(
