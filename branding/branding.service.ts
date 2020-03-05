@@ -20,6 +20,8 @@ import {Injectable} from "@angular/core";
 import * as fa from "fontawesome";
 import * as d3 from "d3-color";
 
+declare const FontFace: any;
+
 @Injectable()
 export class BrandingService {
     appGeneral: HTMLStyleElement;
@@ -37,19 +39,8 @@ export class BrandingService {
 
         this.favicon = document.head.querySelector('[rel=icon]');
 
-
-        if ((document as any).fonts) {
-            this.fontAwesomeLoaded = new Promise(resolve => {
-                function check() {
-                    setTimeout(() => {
-                        if ((document as any).fonts.check('16px FontAwesome')) {
-                            resolve();
-                        } else {
-                            check();
-                        }
-                    }, 100);
-                }
-            });
+        if (typeof FontFace != 'undefined') {
+            this.fontAwesomeLoaded = new FontFace('FontAwesome', 'url(./fontawesome-webfont.woff2)').load();
         } else {
             this.fontAwesomeLoaded = Promise.resolve();
         }
