@@ -13,7 +13,7 @@ module.exports = function config(env) {
                 window: '(typeof window !== "undefined" ? window : typeof self !== "undefined" ? self : commonjsGlobal)'
             }),
             new WorkerPlugin({
-                plugins: ['AngularCompilerPlugin']
+                plugins: ['AngularCompilerPlugin', 'CumulocityPlugin']
             })
         ]
     }
