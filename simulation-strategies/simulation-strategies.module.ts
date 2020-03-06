@@ -21,13 +21,15 @@ import {SeriesValueSimulationStrategyModule} from "./series-values/series-value.
 import {RandomValueSimulationStrategyModule} from "./random-values/random-value.simulation-strategy.module";
 import {RandomWalkSimulationStrategyModule} from "./random-walk/random-walk.simulation-strategy.module";
 import {WaveSimulationStrategyModule} from "./wave/wave.simulation-strategy.module";
+import {FirmwareUpdateSimulationStrategyModule} from "./firmware-update/firmware-update.simulation-strategy.module";
 
 @NgModule({
     imports: [
         SeriesValueSimulationStrategyModule,
         RandomValueSimulationStrategyModule,
         RandomWalkSimulationStrategyModule,
-        WaveSimulationStrategyModule
+        WaveSimulationStrategyModule,
+        FirmwareUpdateSimulationStrategyModule
     ]
 })
 export class SimulationStrategiesModule {}

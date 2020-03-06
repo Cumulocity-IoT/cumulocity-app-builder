@@ -21,15 +21,23 @@ import { InjectionToken } from '@angular/core';
 export const HOOK_SIMULATION_STRATEGY_FACTORY = new InjectionToken('SimulationStrategy');
 
 export abstract class DeviceSimulator {
+    started = false;
+
     start() {
+        if (this.started) throw Error("Simulator already started");
+        this.started = true;
         this.onStart();
     }
     stop() {
+        if (!this.started) throw Error("Simulator already stopped");
+        this.started = false;
         this.onStop();
     }
 
     abstract onStart();
     abstract onStop();
-    abstract isStarted(): boolean;
+    isStarted() {
+        return this.started
+    };
     onReset() {};
 }
