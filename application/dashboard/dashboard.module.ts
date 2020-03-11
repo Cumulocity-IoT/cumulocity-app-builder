@@ -51,7 +51,7 @@ angular
     }])
     // Redirect all device/:deviceId, group/:groupId....
     // If it's device or group then try to find an appropriate application builder dashboard, otherwise link to the cockpit
-    .run(['$rootScope', 'applicationService', ($rootScope, applicationService) => {
+    .run(['$rootScope', 'applicationService', 'inventoryService', 'ngxRouter', ($rootScope, applicationService, inventoryService, ngxRouter) => {
         $rootScope.$on('$locationChangeStart', async (event, next, current) => {
             const nextPathSegments = urlToHashPathSegments(next);
             const currentPathSegments = urlToHashPathSegments(current);
@@ -64,25 +64,38 @@ angular
                     const appId = currentPathSegments[1];
                     const application = (await applicationService.detail(appId)).data;
                     let matchingDashboard;
+                    // Try to find the dashboard in the general config
                     if (application.applicationBuilder && application.applicationBuilder.dashboards) {
                         matchingDashboard = application.applicationBuilder.dashboards.find(dashboard => dashboard.deviceId === nextPathSegments[1])
                     }
                     if (matchingDashboard) {
                         window.location.hash = `/application/${appId}/dashboard/${matchingDashboard.id}/device/${matchingDashboard.deviceId}`;
+                        return;
                     } else {
-                        window.location.assign(`/apps/cockpit/${new URL(next).hash}`);
+                        // Couldn't find in general config, try to find the dashboard in the group templates
+                        if (application.applicationBuilder && application.applicationBuilder.dashboards) {
+                            for (const groupTemplateDashboard of application.applicationBuilder.dashboards.filter(db => db.groupTemplate)) {
+                                const childAssets = (await inventoryService.childAssetsList(groupTemplateDashboard.deviceId, {pageSize: 2000, query: 'has(c8y_IsDevice)'})).data;
+                                const matchingDevice = childAssets.find(device => device.id === nextPathSegments[1]);
+                                if (matchingDevice) {
+                                    window.location.hash = `/application/${appId}/dashboard/${groupTemplateDashboard.id}/device/${matchingDevice.id}`;
+                                    return;
+                                }
+                            }
+                        }
                     }
-                // Everything else redirects to the cockpit
+                    // Failed to find a matching dashboard, redirect to the cockpit
+                    window.location.assign(`/apps/cockpit/${new URL(next).hash}`);
                 } else if (['device', 'group', 'users', 'applications', 'subscribedApplications', 'tenants'].includes(nextPathSegments[0])) {
+                    // Everything else redirects to the cockpit
                     event.preventDefault();
                     window.location.assign(`/apps/cockpit/${new URL(next).hash}`);
+                    return;
                 }
             }
-        });
-    }])
-    .run(['$rootScope', 'applicationService', 'ngxRouter', ($rootScope, applicationService, ngxRouter) => {
-        $rootScope.$on('$locationChangeStart', async (event, next, current) => {
-            // Make sure that both angular and angularjs's routers are in sync... they seem to sometimes get out of sync.... bug?
+
+            // Also make sure that both angular and angularjs's routers are in sync... they seem to sometimes get out of sync.... bug?
+            // only do this if we're not redirecting otherwise it blocks the redirect
             if (next != current) {
                 const nextPathSegments = urlToHashPathSegments(next);
                 ngxRouter.navigate([`/${nextPathSegments.join('/')}`]);
@@ -94,9 +107,18 @@ angular
     .factory('appStateService', downgradeInjectable(AppStateService))
     .factory('ngxRouter', downgradeInjectable(Router))
     .component('frameworkDashboard', {
-        template: `<c8y-dashboard-gridstack id="vm.dashboardId" is-frozen="false"/>`,
+        template: `
+            <c8y-ui-action-bar-set ng-if="vm.isGroupTemplate">
+                <button title="{{'Add widget to dashboard' | translate}}" class="btn btn-link" ng-click="vm.editGroupTemplate()">
+                    <i c8y-icon="pencil"></i> <translate>Edit Group Template</translate>
+                </button>
+            </c8y-ui-action-bar-set>
+            <c8y-dashboard-gridstack id="vm.dashboardId" predefined-read-only="vm.predefinedReadonly" default-children="vm.defaultChildren" is-frozen="false"/>
+        `,
         controllerAs: 'vm',
         controller: [
+            '$scope',
+            '$cacheFactory',
             '$routeParams',
             'c8yTitle',
             'inventoryService',

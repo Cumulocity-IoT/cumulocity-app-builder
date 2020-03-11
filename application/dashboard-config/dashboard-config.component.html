@@ -51,7 +51,7 @@
         <div class="col">{{item.value.name}}</div>
         <div class="col">{{item.value.id}}</div>
         <div class="col"><i [c8yIcon]="item.value.icon"></i> {{item.value.icon}}</div>
-        <div class="col">{{item.value.deviceId || '-'}}</div>
+        <div class="col">{{item.value.groupTemplate ? 'Children of: ' : ''}}{{item.value.deviceId || '-'}}</div>
         <div>
             <button class="btn btn-default" (click)="showEditDashboardDialog(app, app.applicationBuilder.dashboards, index)">Edit</button>
             <button class="btn btn-default" (click)="deleteDashboard(app, app.applicationBuilder.dashboards, index)">Delete</button>
@@ -76,9 +76,9 @@
                         <div class="sortable-grid-header">
                             <div class="drag-handle invisible"><i class="fa custom-icon-drag-handle"></i></div>
                             <div class="col">Path</div>
-                            <div class="col">ID</div>
+                            <div class="col">Dashboard ID</div>
                             <div class="col">Icon</div>
-                            <div class="col">Device</div>
+                            <div class="col">Device(s)</div>
                             <div class="invisible"><button class="btn btn-default">Edit</button><button class="btn btn-default">Delete</button></div>
                         </div>
                         <bs-sortable

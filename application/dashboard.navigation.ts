@@ -19,8 +19,8 @@
 import {Injectable} from "@angular/core";
 import {NavigatorNode, NavigatorNodeFactory} from "@c8y/ngx-components";
 import {BehaviorSubject, combineLatest, from, of} from "rxjs";
-import {map, startWith, switchMap} from "rxjs/operators";
-import {ApplicationService} from "@c8y/client";
+import {flatMap, map, startWith, switchMap} from "rxjs/operators";
+import {ApplicationService, InventoryService} from "@c8y/client";
 import {AppIdService} from "../app-id.service";
 
 @Injectable()
@@ -29,7 +29,7 @@ export class DashboardNavigation implements NavigatorNodeFactory {
 
     private refreshSubject = new BehaviorSubject<void>(undefined);
 
-    constructor(private appIdService: AppIdService, private appService: ApplicationService) {
+    constructor(private appIdService: AppIdService, private appService: ApplicationService, private inventoryService: InventoryService) {
         combineLatest(appIdService.appIdDelayedUntilAfterLogin$, this.refreshSubject).pipe(
             map(([appId]) => appId),
             switchMap(appId => {
@@ -38,7 +38,7 @@ export class DashboardNavigation implements NavigatorNodeFactory {
                         .pipe(
                             map(res => res.data as any),
                             map(application => application.applicationBuilder.dashboards),
-                            map(dashboards => this.dashboardsToNavNodes(appId, dashboards))
+                            flatMap(dashboards => from(this.dashboardsToNavNodes(appId, dashboards)))
                         );
                 } else {
                     return of([]);
@@ -58,8 +58,9 @@ export class DashboardNavigation implements NavigatorNodeFactory {
         return this.nodes;
     }
 
-    dashboardsToNavNodes(appId: string, dashboards: {name: string, icon: string, id: string, deviceId?: string}[]): NavigatorNode[] {
-        const hierarchy = dashboards.reduce((acc, dashboard, i) => {
+    async dashboardsToNavNodes(appId: string, dashboards: {name: string, icon: string, id: string, deviceId?: string, groupTemplate?: { groupId: string }}[]): Promise<NavigatorNode[]> {
+        const hierarchy =  {children: {}, node: new NavigatorNode({})};//dashboards.reduce((acc, dashboard, i) => {
+        for(const [i, dashboard] of dashboards.entries()) {
             const path = dashboard.name.split('/').filter(pathSegment => pathSegment != '');
             const currentHierarchyNode = path.reduce((parent, segment, j) => {
                 if (!parent.children[segment] || j == path.length - 1) {
@@ -75,17 +76,34 @@ export class DashboardNavigation implements NavigatorNodeFactory {
                     };
                 }
                 return parent.children[segment];
-            }, acc);
+            }, hierarchy);
 
-            if (dashboard.deviceId) {
+            if (dashboard.groupTemplate) {
+                const childAssets = (await this.inventoryService.childAssetsList(dashboard.deviceId, {pageSize: 2000, query: 'has(c8y_IsDevice)'})).data;
+                for (const device of childAssets) {
+                    const nodeName = device.name || device.id;
+                    const navNode = new NavigatorNode({
+                        label: nodeName,
+                        icon: dashboard.icon,
+                        priority: dashboards.length - i + 1000,
+                        path: `/application/${appId}/dashboard/${dashboard.id}/device/${device.id}`
+                    });
+                    currentHierarchyNode.node.add(navNode);
+                    currentHierarchyNode.children[nodeName] = {
+                        children: {},
+                        node: navNode
+                    };
+                }
+                currentHierarchyNode.node.icon = 'c8y-group';
+            } else if (dashboard.deviceId) {
                 currentHierarchyNode.node.path = `/application/${appId}/dashboard/${dashboard.id}/device/${dashboard.deviceId}`;
+                currentHierarchyNode.node.icon = dashboard.icon;
             } else {
                 currentHierarchyNode.node.path = `/application/${appId}/dashboard/${dashboard.id}`;
+                currentHierarchyNode.node.icon = dashboard.icon;
             }
-            currentHierarchyNode.node.icon = dashboard.icon;
             currentHierarchyNode.node.priority = dashboards.length - i + 1000;
-            return acc;
-        }, {children: {}, node: new NavigatorNode({})} as any);
+        }
 
         return hierarchy.node.children;
     }

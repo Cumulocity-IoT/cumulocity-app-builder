@@ -29,7 +29,7 @@ import {WELCOME_DASHBOARD_TEMPLATE} from "./dashboard-templates";
 export class NewDashboardModalComponent {
     busy = false;
 
-    creationMode: 'blank' | 'template' | 'existing' | 'clone' = 'blank';
+    creationMode: 'blank' | 'template' | 'existing' | 'clone' | 'group-template' = 'blank';
 
     dashboardId: string = '12598412';
     dashboardName: string = '';
@@ -72,6 +72,10 @@ export class NewDashboardModalComponent {
                 await this.addClonedDashboard(this.app, this.dashboardName, this.dashboardId, this.dashboardIcon);
                 break;
             }
+            case "group-template": {
+                await this.addNewDashboard(this.app, this.dashboardName, this.dashboardIcon, true);
+                break;
+            }
             default: {
                 throw Error(`Unknown dashboard creation mode: ${this.creationMode}`);
             }
@@ -105,32 +109,38 @@ export class NewDashboardModalComponent {
         this.navigation.refresh();
     }
 
-    async addNewDashboard(application, name: string, icon: string) {
+    async addNewDashboard(application, name: string, icon: string, isGroupTemplate: boolean = false) {
         await this.addTemplateDashboard(application, name, icon, {
             children: {},
             name,
             icon,
             global: true,
             priority: 10000
-        });
+        }, isGroupTemplate);
     }
 
     async addTemplateDashboardByTemplateName(application, name: string, icon: string, templateName: 'welcome') {
         const template = {
-            'welcome': WELCOME_DASHBOARD_TEMPLATE
+            welcome: WELCOME_DASHBOARD_TEMPLATE
         }[templateName];
 
         await this.addTemplateDashboard(application, name, icon, template);
     }
 
-    async addTemplateDashboard(application, name: string, icon: string, template: any) {
+    async addTemplateDashboard(application, name: string, icon: string, template: any, isGroupTemplate: boolean = false) {
         const dashboardManagedObject = (await this.inventoryService.create({
             "c8y_Dashboard": {
                 ...template,
                 name,
                 icon,
-                "global": true
-            }
+                global: true
+            },
+            ...(isGroupTemplate ? {
+                applicationBuilder_groupTemplate: {
+                    groupId: this.deviceId,
+                    templateDeviceId: "NO_DEVICE_TEMPLATE_ID"
+                }
+            } : {})
         })).data;
         application.applicationBuilder.dashboards = [
             ...application.applicationBuilder.dashboards || [],
@@ -138,7 +148,8 @@ export class NewDashboardModalComponent {
                 id: dashboardManagedObject.id,
                 name,
                 icon,
-                ...(this.deviceId != '' ? { deviceId: this.deviceId } : {})
+                ...(this.deviceId != '' ? { deviceId: this.deviceId } : {}),
+                ...(isGroupTemplate ? { groupTemplate: true } : {})
             }
         ];
         await this.appService.update({

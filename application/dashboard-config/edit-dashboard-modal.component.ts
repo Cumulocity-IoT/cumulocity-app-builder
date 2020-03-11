@@ -30,6 +30,7 @@ import {Subject} from "rxjs";
 export class EditDashboardModalComponent {
     busy = false;
 
+    dashboardType: 'standard'|'group-template' = 'standard';
     dashboardName: string = '';
     dashboardIcon: string = 'th';
     deviceId: string = '';

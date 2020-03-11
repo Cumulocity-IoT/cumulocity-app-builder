@@ -35,7 +35,10 @@ interface DashboardConfig {
     id: string,
     name: string,
     icon: string,
-    deviceId?: string
+    deviceId?: string,
+    groupTemplate: {
+        groupId: string
+    }
 }
 
 @Component({
@@ -159,7 +162,21 @@ export class DashboardConfigComponent implements OnDestroy {
 
     showEditDashboardDialog(app, dashboards: DashboardConfig[],index: number) {
         const dashboard = dashboards[index];
-        this.bsModalRef = this.modalService.show(EditDashboardModalComponent, { class: 'c8y-wizard', initialState: { app, index, dashboardName: dashboard.name, dashboardIcon: dashboard.icon, deviceId: dashboard.deviceId } });
+        this.bsModalRef = this.modalService.show(EditDashboardModalComponent, {
+            class: 'c8y-wizard',
+            initialState: {
+                app,
+                index,
+                dashboardName: dashboard.name,
+                dashboardIcon: dashboard.icon,
+                deviceId: dashboard.deviceId,
+                ...(dashboard.groupTemplate ? {
+                    dashboardType: 'group-template'
+                } : {
+                    dashboardType: 'standard'
+                })
+            }
+        });
     }
 
     ngOnDestroy(): void {
