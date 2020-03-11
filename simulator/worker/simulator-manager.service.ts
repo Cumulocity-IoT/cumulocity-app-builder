@@ -71,7 +71,7 @@ export class SimulatorManagerService {
                     );
 
                     return merge(
-                        this.appIdService.appIdDelayedUntilAfterLogin$.pipe(
+                        of(appId).pipe(
                             tap((appId) => { console.debug("AppID changed:", appId); })
                         ),
                         lockStatusChanges$.pipe(
