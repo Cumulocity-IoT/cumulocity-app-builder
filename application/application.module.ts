@@ -16,7 +16,7 @@
 * limitations under the License.
  */
 
-import {CoreModule, HOOK_NAVIGATOR_NODES} from "@c8y/ngx-components";
+import {CoreModule, HOOK_NAVIGATOR_NODES, HOOK_TABS} from "@c8y/ngx-components";
 import {Injectable, NgModule} from "@angular/core";
 
 import {
@@ -42,6 +42,8 @@ import {AlarmsModule} from "./alarms/alarms.module";
 import {IconSelectorModule} from "../icon-selector/icon-selector.module";
 import {EditDashboardModalComponent} from "./dashboard-config/edit-dashboard-modal.component";
 import {TooltipModule} from "ngx-bootstrap";
+import {DashboardTabs} from "./dashboard.tabs";
+import {smartRulesAvailabilityProvider} from "./smart-rules-availability.upgraded-provider";
 
 @Injectable()
 class RedirectToFirstDashboard implements CanActivate {
@@ -109,6 +111,9 @@ class RedirectToFirstDashboard implements CanActivate {
         { provide: HOOK_NAVIGATOR_NODES, useExisting: DashboardNavigation, multi: true},
         //{ provide: HOOK_NAVIGATOR_NODES, useClass: DashboardConfigNavigation, multi: true},
         RedirectToFirstDashboard,
+        DashboardTabs,
+        { provide: HOOK_TABS, useExisting: DashboardTabs, multi: true},
+        smartRulesAvailabilityProvider
     ]
 })
 export class ApplicationModule {}

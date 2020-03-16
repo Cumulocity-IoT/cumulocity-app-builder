@@ -22,6 +22,7 @@ import {ApplicationService, InventoryService} from '@c8y/client';
 import {WizardComponent} from "../../wizard/wizard.component";
 import {DashboardNavigation} from "../dashboard.navigation";
 import {WELCOME_DASHBOARD_TEMPLATE} from "./dashboard-templates";
+import {DashboardTabs} from "../dashboard.tabs";
 
 @Component({
     templateUrl: './new-dashboard-modal.component.html'
@@ -35,6 +36,7 @@ export class NewDashboardModalComponent {
     dashboardName: string = '';
     dashboardIcon: string = 'th';
     deviceId: string = '';
+    tabGroup: string = '';
 
     dashboardTemplate: 'welcome' = 'welcome';
 
@@ -42,7 +44,7 @@ export class NewDashboardModalComponent {
 
     @ViewChild(WizardComponent) wizard: WizardComponent;
 
-    constructor(public bsModalRef: BsModalRef, private appService: ApplicationService, private inventoryService: InventoryService, private navigation: DashboardNavigation) {}
+    constructor(public bsModalRef: BsModalRef, private appService: ApplicationService, private inventoryService: InventoryService, private navigation: DashboardNavigation, private tabs: DashboardTabs) {}
 
     showId() {
         switch(this.creationMode) {
@@ -57,23 +59,23 @@ export class NewDashboardModalComponent {
         this.busy = true;
         switch(this.creationMode) {
             case "blank": {
-                await this.addNewDashboard(this.app, this.dashboardName, this.dashboardIcon);
+                await this.addNewDashboard(this.app, this.dashboardName, this.dashboardIcon, this.tabGroup);
                 break;
             }
             case "template": {
-                await this.addTemplateDashboardByTemplateName(this.app, this.dashboardName, this.dashboardIcon, this.dashboardTemplate);
+                await this.addTemplateDashboardByTemplateName(this.app, this.dashboardName, this.dashboardIcon, this.dashboardTemplate, this.tabGroup);
                 break;
             }
             case "existing": {
-                await this.addExistingDashboard(this.app, this.dashboardName, this.dashboardId, this.dashboardIcon);
+                await this.addExistingDashboard(this.app, this.dashboardName, this.dashboardId, this.dashboardIcon, this.tabGroup);
                 break;
             }
             case "clone": {
-                await this.addClonedDashboard(this.app, this.dashboardName, this.dashboardId, this.dashboardIcon);
+                await this.addClonedDashboard(this.app, this.dashboardName, this.dashboardId, this.dashboardIcon, this.tabGroup);
                 break;
             }
             case "group-template": {
-                await this.addNewDashboard(this.app, this.dashboardName, this.dashboardIcon, true);
+                await this.addNewDashboard(this.app, this.dashboardName, this.dashboardIcon, this.tabGroup, true);
                 break;
             }
             default: {
@@ -83,22 +85,23 @@ export class NewDashboardModalComponent {
         this.bsModalRef.hide()
     }
 
-    async addClonedDashboard(application, name: string, dashboardId: string, icon: string) {
+    async addClonedDashboard(application, name: string, dashboardId: string, icon: string, tabGroup: string) {
         const dashboardManagedObject = (await this.inventoryService.detail(dashboardId)).data;
 
         const template = dashboardManagedObject.c8y_Dashboard;
 
-        await this.addTemplateDashboard(application, name, icon, template);
+        await this.addTemplateDashboard(application, name, icon, template, tabGroup);
     }
 
-    async addExistingDashboard(application, name: string, dashboardId: string, icon: string) {
+    async addExistingDashboard(application, name: string, dashboardId: string, icon: string, tabGroup: string) {
         application.applicationBuilder.dashboards = [
             ...application.applicationBuilder.dashboards || [],
             {
                 id: dashboardId,
                 name,
                 icon,
-                ...(this.deviceId != '' ? { deviceId: this.deviceId } : {})
+                ...(this.deviceId != '' ? { deviceId: this.deviceId } : {}),
+                tabGroup
             }
         ];
         await this.appService.update({
@@ -107,27 +110,28 @@ export class NewDashboardModalComponent {
         } as any);
 
         this.navigation.refresh();
+        this.tabs.refresh();
     }
 
-    async addNewDashboard(application, name: string, icon: string, isGroupTemplate: boolean = false) {
+    async addNewDashboard(application, name: string, icon: string, tabGroup: string, isGroupTemplate: boolean = false) {
         await this.addTemplateDashboard(application, name, icon, {
             children: {},
             name,
             icon,
             global: true,
             priority: 10000
-        }, isGroupTemplate);
+        }, tabGroup, isGroupTemplate);
     }
 
-    async addTemplateDashboardByTemplateName(application, name: string, icon: string, templateName: 'welcome') {
+    async addTemplateDashboardByTemplateName(application, name: string, icon: string, templateName: 'welcome', tabGroup: string) {
         const template = {
             welcome: WELCOME_DASHBOARD_TEMPLATE
         }[templateName];
 
-        await this.addTemplateDashboard(application, name, icon, template);
+        await this.addTemplateDashboard(application, name, icon, template, tabGroup);
     }
 
-    async addTemplateDashboard(application, name: string, icon: string, template: any, isGroupTemplate: boolean = false) {
+    async addTemplateDashboard(application, name: string, icon: string, template: any, tabGroup: string, isGroupTemplate: boolean = false) {
         const dashboardManagedObject = (await this.inventoryService.create({
             "c8y_Dashboard": {
                 ...template,
@@ -148,6 +152,7 @@ export class NewDashboardModalComponent {
                 id: dashboardManagedObject.id,
                 name,
                 icon,
+                tabGroup,
                 ...(this.deviceId != '' ? { deviceId: this.deviceId } : {}),
                 ...(isGroupTemplate ? { groupTemplate: true } : {})
             }
@@ -158,5 +163,6 @@ export class NewDashboardModalComponent {
         } as any);
 
         this.navigation.refresh();
+        this.tabs.refresh();
     }
 }

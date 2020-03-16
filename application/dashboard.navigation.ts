@@ -58,7 +58,7 @@ export class DashboardNavigation implements NavigatorNodeFactory {
         return this.nodes;
     }
 
-    async dashboardsToNavNodes(appId: string, dashboards: {name: string, icon: string, id: string, deviceId?: string, groupTemplate?: { groupId: string }}[]): Promise<NavigatorNode[]> {
+    async dashboardsToNavNodes(appId: string, dashboards: {name: string, tabGroup: string, icon: string, id: string, deviceId?: string, groupTemplate?: { groupId: string }}[]): Promise<NavigatorNode[]> {
         const hierarchy =  {children: {}, node: new NavigatorNode({})};//dashboards.reduce((acc, dashboard, i) => {
         for(const [i, dashboard] of dashboards.entries()) {
             const path = dashboard.name.split('/').filter(pathSegment => pathSegment != '');
@@ -86,8 +86,12 @@ export class DashboardNavigation implements NavigatorNodeFactory {
                         label: nodeName,
                         icon: dashboard.icon,
                         priority: dashboards.length - i + 1000,
-                        path: `/application/${appId}/dashboard/${dashboard.id}/device/${device.id}`
                     });
+                    if (dashboard.tabGroup) {
+                        navNode.path = `/application/${appId}/tabgroup/${device.id}/dashboard/${dashboard.id}/device/${device.id}`;
+                    } else {
+                        navNode.path = `/application/${appId}/dashboard/${dashboard.id}/device/${device.id}`;
+                    }
                     currentHierarchyNode.node.add(navNode);
                     currentHierarchyNode.children[nodeName] = {
                         children: {},
@@ -96,10 +100,18 @@ export class DashboardNavigation implements NavigatorNodeFactory {
                 }
                 currentHierarchyNode.node.icon = 'c8y-group';
             } else if (dashboard.deviceId) {
-                currentHierarchyNode.node.path = `/application/${appId}/dashboard/${dashboard.id}/device/${dashboard.deviceId}`;
+                if (dashboard.tabGroup) {
+                    currentHierarchyNode.node.path = `/application/${appId}/tabgroup/${dashboard.tabGroup}/dashboard/${dashboard.id}/device/${dashboard.deviceId}`;
+                } else {
+                    currentHierarchyNode.node.path = `/application/${appId}/dashboard/${dashboard.id}/device/${dashboard.deviceId}`;
+                }
                 currentHierarchyNode.node.icon = dashboard.icon;
             } else {
-                currentHierarchyNode.node.path = `/application/${appId}/dashboard/${dashboard.id}`;
+                if (dashboard.tabGroup) {
+                    currentHierarchyNode.node.path = `/application/${appId}/tabgroup/${dashboard.tabGroup}/dashboard/${dashboard.id}`;
+                } else {
+                    currentHierarchyNode.node.path = `/application/${appId}/dashboard/${dashboard.id}`;
+                }
                 currentHierarchyNode.node.icon = dashboard.icon;
             }
             currentHierarchyNode.node.priority = dashboards.length - i + 1000;

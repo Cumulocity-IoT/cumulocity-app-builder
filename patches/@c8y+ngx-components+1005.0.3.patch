@@ -1,5 +1,5 @@
 diff --git a/node_modules/@c8y/ngx-components/fesm5/c8y-ngx-components-upgrade.js b/node_modules/@c8y/ngx-components/fesm5/c8y-ngx-components-upgrade.js
-index 55bdee8..0f8fd35 100644
+index 55bdee8..0d6551a 100644
 --- a/node_modules/@c8y/ngx-components/fesm5/c8y-ngx-components-upgrade.js
 +++ b/node_modules/@c8y/ngx-components/fesm5/c8y-ngx-components-upgrade.js
 @@ -269,7 +269,7 @@ var DashboardBridgeService = /** @class */ (function () {
@@ -11,6 +11,49 @@ index 55bdee8..0f8fd35 100644
          componentDefinitions.forEach((/**
           * @param {?} cmp
           * @return {?}
+@@ -950,24 +950,24 @@ var Ng1ActionFactoryService = /** @class */ (function () {
+      * @return {?}
+      */
+     function (tabs) {
+-        /**
+-         * This function is doing the same process as function redirect in the file
+-         * modules/core/ui/navigation/tabs.provider.js
+-         * That function  is not run because bridge.service.ts overrides the method addTab where the redirect() was called.
+-         * @type {?}
+-         */
+-        var redirectedTab = tabs.find((/**
+-         * @param {?} tab
+-         * @return {?}
+-         */
+-        function (tab) { return tab.redirectedTo; }));
+-        var _a = __read(tabs, 1), topPriorityTab = _a[0];
+-        if (redirectedTab && !topPriorityTab.redirectedTo) {
+-            this.$location.replace();
+-            this.$location.path(topPriorityTab.path);
+-            topPriorityTab.redirectedTo = true;
+-            redirectedTab.redirectedTo = false;
+-        }
++        // /**
++        //  * This function is doing the same process as function redirect in the file
++        //  * modules/core/ui/navigation/tabs.provider.js
++        //  * That function  is not run because bridge.service.ts overrides the method addTab where the redirect() was called.
++        //  * @type {?}
++        //  */
++        // var redirectedTab = tabs.find((/**
++        //  * @param {?} tab
++        //  * @return {?}
++        //  */
++        // function (tab) { return tab.redirectedTo; }));
++        // var _a = __read(tabs, 1), topPriorityTab = _a[0];
++        // if (redirectedTab && !topPriorityTab.redirectedTo) {
++        //     this.$location.replace();
++        //     this.$location.path(topPriorityTab.path);
++        //     topPriorityTab.redirectedTo = true;
++        //     redirectedTab.redirectedTo = false;
++        // }
+     };
+     /**
+      * @return {?}
 @@ -1679,7 +1679,7 @@ var DashboardUpgradeModule = /** @class */ (function () {
                      declarations: [WidgetComponent],
                      entryComponents: [WidgetComponent],

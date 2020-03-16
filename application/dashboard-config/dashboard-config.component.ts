@@ -30,10 +30,12 @@ import {AppIdService} from "../../app-id.service";
 import {UpdateableAlert} from "../../utils/UpdateableAlert";
 import * as delay from "delay";
 import {contextPathFromURL} from "../../utils/contextPathFromURL";
+import {DashboardTabs} from "../dashboard.tabs";
 
 interface DashboardConfig {
     id: string,
     name: string,
+    tabGroup: string,
     icon: string,
     deviceId?: string,
     groupTemplate: {
@@ -59,7 +61,7 @@ export class DashboardConfigComponent implements OnDestroy {
     constructor(
         private appIdService: AppIdService, private appService: ApplicationService, private appStateService: AppStateService,
         private brandingService: BrandingService, private inventoryService: InventoryService, private navigation: DashboardNavigation,
-        private modalService: BsModalService, private alertService: AlertService
+        private modalService: BsModalService, private alertService: AlertService, private tabs: DashboardTabs
     ) {
         this.app = this.appIdService.appIdDelayedUntilAfterLogin$.pipe(
             switchMap(appId => from(
@@ -77,6 +79,7 @@ export class DashboardConfigComponent implements OnDestroy {
             .subscribe(async app => {
                 await this.appService.update(app);
                 this.navigation.refresh();
+                this.tabs.refresh();
             });
     }
 
@@ -89,6 +92,7 @@ export class DashboardConfigComponent implements OnDestroy {
         } as any);
 
         this.navigation.refresh();
+        this.tabs.refresh();
     }
 
     async reorderDashboards(app, newDashboardsOrder) {
@@ -170,6 +174,7 @@ export class DashboardConfigComponent implements OnDestroy {
                 dashboardName: dashboard.name,
                 dashboardIcon: dashboard.icon,
                 deviceId: dashboard.deviceId,
+                tabGroup: dashboard.tabGroup,
                 ...(dashboard.groupTemplate ? {
                     dashboardType: 'group-template'
                 } : {

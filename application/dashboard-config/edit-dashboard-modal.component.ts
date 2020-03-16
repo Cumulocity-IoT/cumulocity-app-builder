@@ -23,6 +23,7 @@ import {WizardComponent} from "../../wizard/wizard.component";
 import {DashboardNavigation} from "../dashboard.navigation";
 import {WELCOME_DASHBOARD_TEMPLATE} from "./dashboard-templates";
 import {Subject} from "rxjs";
+import {DashboardTabs} from "../dashboard.tabs";
 
 @Component({
     templateUrl: './edit-dashboard-modal.component.html'
@@ -34,6 +35,7 @@ export class EditDashboardModalComponent {
     dashboardName: string = '';
     dashboardIcon: string = 'th';
     deviceId: string = '';
+    tabGroup: string = '';
 
     index: number = 0;
 
@@ -41,13 +43,14 @@ export class EditDashboardModalComponent {
 
     @ViewChild(WizardComponent) wizard: WizardComponent;
 
-    constructor(public bsModalRef: BsModalRef, private appService: ApplicationService, private inventoryService: InventoryService, private navigation: DashboardNavigation) {}
+    constructor(public bsModalRef: BsModalRef, private appService: ApplicationService, private inventoryService: InventoryService, private navigation: DashboardNavigation, private tabs: DashboardTabs) {}
 
     async save() {
         this.busy = true;
 
         const dashboard = this.app.applicationBuilder.dashboards[this.index];
         dashboard.name = this.dashboardName;
+        dashboard.tabGroup = this.tabGroup;
         dashboard.icon = this.dashboardIcon;
         dashboard.deviceId = this.deviceId;
 
@@ -57,5 +60,6 @@ export class EditDashboardModalComponent {
         } as any);
         this.bsModalRef.hide();
         this.navigation.refresh();
+        this.tabs.refresh();
     }
 }

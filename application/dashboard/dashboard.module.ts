@@ -36,11 +36,12 @@ function urlToHashPathSegments(urlString: string): string[] {
 angular
     .module('framework', [])
     .config(['c8yViewsProvider', c8yViewsProvider => {
-        const paths = [
-            'application/:applicationId/dashboard/:frameworkDashboardId',
-            'application/:applicationId/dashboard/:frameworkDashboardId/device/:deviceId'
-        ];
-        paths.forEach((path) => {
+        [
+            'application/:applicationId/tabgroup/:tabGroup/dashboard/:frameworkDashboardId/device/:deviceId',
+            'application/:applicationId/tabgroup/:tabGroup/dashboard/:frameworkDashboardId',
+            'application/:applicationId/dashboard/:frameworkDashboardId/device/:deviceId',
+            'application/:applicationId/dashboard/:frameworkDashboardId'
+        ].forEach((path) => {
             c8yViewsProvider.when(path, {
                 priority: 1000,
                 name: "Dashboard",
@@ -51,7 +52,7 @@ angular
     }])
     // Redirect all device/:deviceId, group/:groupId....
     // If it's device or group then try to find an appropriate application builder dashboard, otherwise link to the cockpit
-    .run(['$rootScope', 'applicationService', 'inventoryService', 'ngxRouter', ($rootScope, applicationService, inventoryService, ngxRouter) => {
+    .run(['$rootScope', 'applicationService', 'inventoryService', 'ngxRouter', '$location', ($rootScope, applicationService, inventoryService, ngxRouter, $location) => {
         $rootScope.$on('$locationChangeStart', async (event, next, current) => {
             const nextPathSegments = urlToHashPathSegments(next);
             const currentPathSegments = urlToHashPathSegments(current);
@@ -92,13 +93,6 @@ angular
                     window.location.assign(`/apps/cockpit/${new URL(next).hash}`);
                     return;
                 }
-            }
-
-            // Also make sure that both angular and angularjs's routers are in sync... they seem to sometimes get out of sync.... bug?
-            // only do this if we're not redirecting otherwise it blocks the redirect
-            if (next != current) {
-                const nextPathSegments = urlToHashPathSegments(next);
-                ngxRouter.navigate([`/${nextPathSegments.join('/')}`]);
             }
         });
     }])

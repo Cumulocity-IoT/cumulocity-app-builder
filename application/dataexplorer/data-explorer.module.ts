@@ -24,16 +24,21 @@ import './cumulocity.json';
 
 angular.module("c8y.cockpit.dataPointExplorerUI", ["c8y.cockpit.dataPointExplorer"])
     .config(["c8yViewsProvider", "gettext", (c8yViewsProvider, gettext) => {
-        c8yViewsProvider.when("application/:applicationId/dashboard/:frameworkDashboardId/device/:deviceId", {
-            icon: "bar-chart",
-            name: gettext("Data explorer"),
-            priority: 1,
-            templateUrl: "./data-explorer.html",
-            controller: ['c8yTitle', c8yTitle => {
-                c8yTitle.changeTitle({
-                    title: gettext('Data Explorer')
-                });
-            }]
+        [
+            "application/:applicationId/tabgroup/:tabGroup/dashboard/:frameworkDashboardId/device/:deviceId/dataexplorer",
+            "application/:applicationId/dashboard/:frameworkDashboardId/device/:deviceId/dataexplorer"
+        ].forEach(urlPattern => {
+            c8yViewsProvider.when(urlPattern, {
+                icon: "bar-chart",
+                name: gettext("Data explorer"),
+                priority: 1,
+                templateUrl: "./data-explorer.html",
+                controller: ['c8yTitle', c8yTitle => {
+                    c8yTitle.changeTitle({
+                        title: gettext('Data Explorer')
+                    });
+                }]
+            });
         });
     }]);
 
