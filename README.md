@@ -11,6 +11,44 @@ The Application Builder for Cumulocity provides a simple, coding-free way to cre
 5. Select **Upload web application**
 6. Select the Zip you downloaded earlier
 
+# Build Instructions
+**Note:** It is only necessary to follow these instructions if you are modifying/extending the Application Builder (such as adding custom widgets), otherwise see the [Installation Guide](#Installation).
+
+**Requirements:**
+* Git
+* NodeJS (release builds are currently built with `v10.19.0`)
+* NPM (Included with NodeJS)
+
+**Instructions**
+1. Clone the repository: 
+```
+git clone https://github.com/SoftwareAG/cumulocity-app-builder.git
+```
+2. Change directory: 
+```
+cd cumulocity-app-builder
+```
+2. (Optional) Checkout a specific version: 
+```
+git checkout v1.1.0
+```
+3. Install the dependencies: 
+```
+npm install
+```
+4. (Optional) Local development server: 
+```
+npm start
+```
+5. Build the app: 
+```
+npm run build
+```
+6. Deploy the app: 
+```
+npm run deploy
+```
+
 # Quickstart
 
 This guide will teach you how to create your first application using the Application Builder.
