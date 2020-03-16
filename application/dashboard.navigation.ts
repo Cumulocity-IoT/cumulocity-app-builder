@@ -22,6 +22,7 @@ import {BehaviorSubject, combineLatest, from, of} from "rxjs";
 import {flatMap, map, startWith, switchMap} from "rxjs/operators";
 import {ApplicationService, InventoryService} from "@c8y/client";
 import {AppIdService} from "../app-id.service";
+import {DashboardConfig} from "./dashboard-config/dashboard-config.component";
 
 @Injectable()
 export class DashboardNavigation implements NavigatorNodeFactory {
@@ -58,9 +59,12 @@ export class DashboardNavigation implements NavigatorNodeFactory {
         return this.nodes;
     }
 
-    async dashboardsToNavNodes(appId: string, dashboards: {name: string, tabGroup: string, icon: string, id: string, deviceId?: string, groupTemplate?: { groupId: string }}[]): Promise<NavigatorNode[]> {
+    async dashboardsToNavNodes(appId: string, dashboards: DashboardConfig[]): Promise<NavigatorNode[]> {
         const hierarchy =  {children: {}, node: new NavigatorNode({})};//dashboards.reduce((acc, dashboard, i) => {
         for(const [i, dashboard] of dashboards.entries()) {
+            if (['no-nav', 'hidden'].includes(dashboard.visibility)) {
+                continue;
+            }
             const path = dashboard.name.split('/').filter(pathSegment => pathSegment != '');
             const currentHierarchyNode = path.reduce((parent, segment, j) => {
                 if (!parent.children[segment] || j == path.length - 1) {

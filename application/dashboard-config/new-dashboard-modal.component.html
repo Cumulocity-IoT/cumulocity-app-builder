@@ -98,6 +98,15 @@
                     <input type="text" class="form-control" id="name" name="name" placeholder="e.g. Some Folder/My First Application (required)" required [autofocus]="!showId()" [(ngModel)]="dashboardName">
                 </div>
 
+                <div class="form-group">
+                    <label for="visibility"><span>Visibility</span></label>
+                    <select name="visibility" id="visibility" [(ngModel)]="dashboardVisibility">
+                        <option value="">Navigation and Tabs</option>
+                        <option value="no-nav">Tabs Only</option>
+                        <option value="hidden">Hidden</option>
+                    </select>
+                </div>
+
                 <div class="form-group" *ngIf="creationMode !== 'group-template' else groupTemplateTabGroup">
                     <label for="tabgroup"><span>Tab Group</span></label>
                     <input type="text" class="form-control" id="tabgroup" name="tabgroup" placeholder="e.g. TabGroup1" [(ngModel)]="tabGroup">
@@ -105,7 +114,7 @@
                 <ng-template #groupTemplateTabGroup>
                 <div class="form-group">
                     <label for="tabgroup"><span>Tab Group</span></label>
-                    <select [(ngModel)]="tabGroup">
+                    <select name="tabgroup" id="tabgroup" [(ngModel)]="tabGroup">
                         <option value="deviceId">Device ID</option>
                         <option value="">None</option>
                     </select>

@@ -140,12 +140,10 @@ export class DashboardTabs implements TabFactory {
 
     async dashboardsToTabsMap(appId: string, dashboards: any[]): Promise<Map<string, Tab[]>> {
         const tabsByTabGroup = new Map<string, Tab[]>();
-        let i = -1;
-        for (const dashboard of dashboards) {
-            i++;
+        for (const [i, dashboard] of dashboards.entries()) {
             const dashboardPath = dashboard.name.split('/');
             const dashboardName = dashboardPath[dashboardPath.length-1];
-            if (!dashboard.tabGroup) {
+            if (!dashboard.tabGroup || dashboard.visibility == 'hidden') {
                 continue;
             }
             if (dashboard.groupTemplate) {

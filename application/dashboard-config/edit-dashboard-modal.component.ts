@@ -36,6 +36,7 @@ export class EditDashboardModalComponent {
     dashboardIcon: string = 'th';
     deviceId: string = '';
     tabGroup: string = '';
+    dashboardVisibility: '' | 'hidden' | 'no-nav' = '';
 
     index: number = 0;
 
@@ -50,6 +51,7 @@ export class EditDashboardModalComponent {
 
         const dashboard = this.app.applicationBuilder.dashboards[this.index];
         dashboard.name = this.dashboardName;
+        dashboard.visibility = this.dashboardVisibility;
         dashboard.tabGroup = this.tabGroup;
         dashboard.icon = this.dashboardIcon;
         dashboard.deviceId = this.deviceId;

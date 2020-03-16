@@ -32,9 +32,10 @@ import * as delay from "delay";
 import {contextPathFromURL} from "../../utils/contextPathFromURL";
 import {DashboardTabs} from "../dashboard.tabs";
 
-interface DashboardConfig {
+export interface DashboardConfig {
     id: string,
     name: string,
+    visibility?: '' | 'hidden' | 'no-nav',
     tabGroup: string,
     icon: string,
     deviceId?: string,
@@ -172,6 +173,7 @@ export class DashboardConfigComponent implements OnDestroy {
                 app,
                 index,
                 dashboardName: dashboard.name,
+                dashboardVisibility: dashboard.visibility || '',
                 dashboardIcon: dashboard.icon,
                 deviceId: dashboard.deviceId,
                 tabGroup: dashboard.tabGroup,
