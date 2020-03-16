@@ -60,14 +60,14 @@ export class DashboardNavigation implements NavigatorNodeFactory {
     }
 
     async dashboardsToNavNodes(appId: string, dashboards: DashboardConfig[]): Promise<NavigatorNode[]> {
-        const hierarchy =  {children: {}, node: new NavigatorNode({})};//dashboards.reduce((acc, dashboard, i) => {
+        const hierarchy =  {children: {}, node: new NavigatorNode({})};
         for(const [i, dashboard] of dashboards.entries()) {
             if (['no-nav', 'hidden'].includes(dashboard.visibility)) {
                 continue;
             }
             const path = dashboard.name.split('/').filter(pathSegment => pathSegment != '');
             const currentHierarchyNode = path.reduce((parent, segment, j) => {
-                if (!parent.children[segment] || j == path.length - 1) {
+                if (!parent.children[segment] || (j == path.length - 1 && !dashboard.groupTemplate)) {
                     const navNode = new NavigatorNode({
                         label: segment,
                         icon: 'c8y-group',
