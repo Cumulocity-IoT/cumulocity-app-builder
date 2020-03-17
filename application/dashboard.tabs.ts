@@ -156,6 +156,7 @@ export class DashboardTabs implements TabFactory {
                     tabs.push({
                         path: `/application/${appId}/tabgroup/${device.id}/dashboard/${dashboard.id}/device/${device.id}`,
                         label: dashboardName,
+                        icon: dashboard.icon,
                         priority: dashboards.length - i + 1000
                     });
                 }
@@ -172,6 +173,7 @@ export class DashboardTabs implements TabFactory {
                 tabsByTabGroup.get(dashboard.tabGroup).push({
                     path,
                     label: dashboardName,
+                    icon: dashboard.icon,
                     priority: dashboards.length - i + 1000
                 });
             }
