@@ -29,7 +29,7 @@ import 'core-js/es7/reflect';
  */
 import 'zone.js/dist/zone';  // Included with Angular CLI.
 
-import {Client, CookieAuth, AlarmService, ApplicationService, AuditService, FetchClient, DeviceRegistrationBulkService, DeviceRegistrationService, EventService, InventoryService, InventoryRoleService, InventoryBinaryService, MeasurementService, OperationService, UserRoleService, OperationBulkService, TenantSecurityOptionsService, SystemOptionsService, TenantOptionsService, Realtime, TenantService, UserService, UserGroupService} from "@c8y/client";
+import {Client, CookieAuth, AlarmService, ApplicationService, AuditService, FetchClient, DeviceRegistrationBulkService, DeviceRegistrationService, EventService, InventoryService, InventoryRoleService, InventoryBinaryService, MeasurementService, OperationService, UserRoleService, OperationBulkService, TenantSecurityOptionsService, SystemOptionsService, TenantOptionsService, Realtime, TenantService, UserService, UserGroupService, IdentityService} from "@c8y/client";
 import { SimulationStrategiesModule } from "../../simulation-strategies/simulation-strategies.module";
 import {ApplicationRef, DoBootstrap, NgModule} from "@angular/core";
 import {platformWorkerAppDynamic} from "@angular/platform-webworker-dynamic";
@@ -73,6 +73,7 @@ const client = new Client(new CookieAuth());
         {provide: UserService, useValue: client.user},
         {provide: UserGroupService, useValue: client.userGroup},
         {provide: UserRoleService, useValue: client.userRole},
+        {provide: IdentityService, useValue: client.identity},
 
         {provide: AppStateService, useClass: WorkerAppStateService},
         {provide: AppIdService, useClass: WorkerAppIdService},
