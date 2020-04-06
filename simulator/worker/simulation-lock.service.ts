@@ -39,9 +39,14 @@ export class SimulationLockService {
                 flatMap(currentTime => {
                     return from(
                         this.getLockStatus(appId)
+                            .catch(() => this.getLockStatus(appId)) // If we get a failure, then retry once
                             .then(lockStatus => ({
                                 isLocked: this._checkLock(currentTime, lockStatus),
                                 lockStatus
+                            }))
+                            .catch(() => ({ // Multiple failures to get lock status. We'll act like the lock is taken by someone else
+                                isLocked: true,
+                                lockStatus: undefined
                             }))
                     );
                 }),
