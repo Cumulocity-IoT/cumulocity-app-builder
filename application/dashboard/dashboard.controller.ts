@@ -85,6 +85,8 @@ export class DashboardController {
         this.defaultChildren = undefined;
         this.predefinedReadonly = false;
         this.$scope.$$childHead.isInMemory = false;
+        this.$scope.$$childHead.isFrozen = false;
+        this.$scope.$$childHead.children = {};
 
         this.$cacheFactory.get('dashboards').remove(this.dashboard.id);
         this.dashboardId = this.dashboard.id;
