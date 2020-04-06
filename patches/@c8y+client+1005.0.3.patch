@@ -1,3 +1,16 @@
+diff --git a/node_modules/@c8y/client/lib/bundles/client.umd.js b/node_modules/@c8y/client/lib/bundles/client.umd.js
+index 8610c03..2453511 100644
+--- a/node_modules/@c8y/client/lib/bundles/client.umd.js
++++ b/node_modules/@c8y/client/lib/bundles/client.umd.js
+@@ -17228,7 +17228,7 @@
+ 	        if (application.type === ApplicationType_1.ApplicationType.EXTERNAL) {
+ 	            return application.externalUrl;
+ 	        }
+-	        return "/apps/" + (application.public ? 'public/' : '') + application.contextPath;
++	        return "/apps/" + (application.public ? 'public/' : '') + application.contextPath + '/';
+ 	    };
+ 	    return ApplicationService;
+ 	}(core.Service));
 diff --git a/node_modules/@c8y/client/lib/src/core/ObservableList.d.ts b/node_modules/@c8y/client/lib/src/core/ObservableList.d.ts
 index d4c3197..78804da 100644
 --- a/node_modules/@c8y/client/lib/src/core/ObservableList.d.ts
