@@ -16,7 +16,7 @@
 * limitations under the License.
  */
 
-import { Component } from '@angular/core';
+import {Component, isDevMode} from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap/modal';
 import {ApplicationService, ApplicationAvailability, ApplicationType, FetchClient, InventoryService} from '@c8y/client';
 import {AlertService, AppStateService} from "@c8y/ngx-components";
@@ -90,7 +90,19 @@ export class NewApplicationModalComponent {
             },
         };
 
+        // If the appPath option has been set then we copy the full AppBuilder into a new application
         if (this.appPath) {
+            // Check if we're debugging or on localhost - copying the AppBuilder won't work when debugging on localhost
+            // (it'll either copy the currently deployed version of the AppBuilder or fail...)
+            if (isDevMode()) {
+                this.alertService.danger("Can't create an application with a custom path when running in Development Mode. Deploy the Application Builder first, or create one without a custom path.");
+                return;
+            }
+            const currentHost = window.location.host.split(':')[0];
+            if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
+                this.alertService.warning("Creating an application with a custom path may not work correct unless the Application Builder is deployed.");
+            }
+
             // find the application Builder's app
             const appList = (await this.appService.list({pageSize: 2000})).data;
             const appBuilder = appList.find(app => app.contextPath === contextPathFromURL());
