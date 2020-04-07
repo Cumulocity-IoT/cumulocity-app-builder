@@ -97,7 +97,7 @@ index 55bdee8..0d6551a 100644
      return $delegate;
  }
 diff --git a/node_modules/@c8y/ngx-components/fesm5/c8y-ngx-components.js b/node_modules/@c8y/ngx-components/fesm5/c8y-ngx-components.js
-index 9e86f1b..8db9a0b 100644
+index 9e86f1b..ff49b76 100644
 --- a/node_modules/@c8y/ngx-components/fesm5/c8y-ngx-components.js
 +++ b/node_modules/@c8y/ngx-components/fesm5/c8y-ngx-components.js
 @@ -1497,7 +1497,7 @@ var NavigatorNode = /** @class */ (function () {
@@ -118,3 +118,12 @@ index 9e86f1b..8db9a0b 100644
           * @param {?} __0
           * @return {?}
           */
+@@ -11402,7 +11402,7 @@ var NavigatorNodeComponent = /** @class */ (function () {
+             open = !this.node.open;
+         }
+         else {
+-            open = this.routerLinkActive && this.routerLinkActive.isActive ? true : !this.node.open;
++            open = true;
+         }
+         if (open !== this.node.open) {
+             this.expandCollapse(open, false, (_a = {}, _a[from$$1] = true, _a.$event = $event, _a));
