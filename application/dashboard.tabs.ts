@@ -70,6 +70,13 @@ export class DashboardTabs implements TabFactory {
             .pipe(
                 withLatestFrom(currentTabGroup$, currentDeviceId$),
                 map(([[tabsByTabGroup, currentUrl], currentTabGroup, currentDeviceId]) => {
+                    // Remove the /smartrules, /alarms, /dataexplorer suffix
+                    const splitUrl = currentUrl.split('/');
+                    if (['smartrules', 'alarms', 'dataexplorer'].includes(splitUrl[splitUrl.length-1])) {
+                        splitUrl.pop();
+                        currentUrl = splitUrl.join('/');
+                    }
+
                     if (tabsByTabGroup.has(currentTabGroup)) {
                         if (currentDeviceId) {
                             return [
@@ -100,12 +107,6 @@ export class DashboardTabs implements TabFactory {
     }
 
     getDeviceTabs(baseUrl: string) {
-        const splitUrl = baseUrl.split('/');
-        if (['smartrules', 'alarms', 'dataexplorer'].includes(splitUrl[splitUrl.length-1])) {
-            splitUrl.pop();
-            baseUrl = splitUrl.join('/');
-        }
-
         const tabs = [];
         if (this.c8ySmartRulesAvailability.shouldShowLocalSmartRules()) {
             tabs.push({
