@@ -24,11 +24,6 @@ import 'core-js/es6/reflect';
 import 'reflect-metadata'
 import 'core-js/es7/reflect';
 
-/***************************************************************************************************
- * Zone JS is required by default for Angular itself.
- */
-import 'zone.js/dist/zone';  // Included with Angular CLI.
-
 import {Client, CookieAuth, AlarmService, ApplicationService, AuditService, FetchClient, DeviceRegistrationBulkService, DeviceRegistrationService, EventService, InventoryService, InventoryRoleService, InventoryBinaryService, MeasurementService, OperationService, UserRoleService, OperationBulkService, TenantSecurityOptionsService, SystemOptionsService, TenantOptionsService, Realtime, TenantService, UserService, UserGroupService, IdentityService} from "@c8y/client";
 import { SimulationStrategiesModule } from "../../simulation-strategies/simulation-strategies.module";
 import {ApplicationRef, DoBootstrap, NgModule} from "@angular/core";
@@ -96,4 +91,6 @@ export class SimulatorWorkerModule implements DoBootstrap {
     ngDoBootstrap(appRef: ApplicationRef): void {}
 }
 
-platformWorkerAppDynamic().bootstrapModule(SimulatorWorkerModule);
+platformWorkerAppDynamic().bootstrapModule(SimulatorWorkerModule, {
+    ngZone: 'noop' // don't need to use zones. We're not doing anything with UI change detection.
+});
