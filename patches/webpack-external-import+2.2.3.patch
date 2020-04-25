@@ -1,0 +1,35 @@
+diff --git a/node_modules/webpack-external-import/webpack/index.js b/node_modules/webpack-external-import/webpack/index.js
+index 28bbe74..fd0f984 100644
+--- a/node_modules/webpack-external-import/webpack/index.js
++++ b/node_modules/webpack-external-import/webpack/index.js
+@@ -115,18 +115,18 @@ function () {
+ 
+       chunkSplitting.interleave = interleaveConfig(this.opts);
+ 
+-      if (options.mode === "production") {
+-        chunkSplitting.vendors = {
+-          name: "".concat(this.opts.manifestName, "-vendors"),
+-          test: /node_modules/,
+-          priority: -10,
+-          enforce: true,
+-          maxSize: 50000
+-        };
+-        Object.assign(chunkSplitting["default"], {
+-          maxSize: 50000
+-        });
+-      }
++      // if (options.mode === "production") {
++      //   chunkSplitting.vendors = {
++      //     name: "".concat(this.opts.manifestName, "-vendors"),
++      //     test: /node_modules/,
++      //     priority: -10,
++      //     enforce: true,
++      //     maxSize: 50000
++      //   };
++      //   Object.assign(chunkSplitting["default"], {
++      //     maxSize: 50000
++      //   });
++      // }
+ 
+       Object.assign(options.optimization || {}, {
+         namedChunks: true,

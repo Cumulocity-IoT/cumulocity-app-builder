@@ -20,7 +20,13 @@ import {NgModule} from '@angular/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {NavigationError, Router, RouterModule as NgRouterModule} from '@angular/router';
 import {UpgradeModule as NgUpgradeModule} from '@angular/upgrade/static';
-import {AppStateService, CoreModule, HOOK_NAVIGATOR_NODES, LoginService, RouterModule} from '@c8y/ngx-components';
+import {
+  AppStateService,
+  CoreModule,
+  HOOK_NAVIGATOR_NODES,
+  LoginService,
+  RouterModule
+} from '@c8y/ngx-components';
 import { UpgradeModule, HybridAppModule, UPGRADE_ROUTES } from '@c8y/ngx-components/upgrade';
 import {SimulatorConfigModule} from "./simulator-config/simulator-config.module";
 import {ApplicationBuilderModule} from "./application-builder/application-builder.module";
@@ -41,6 +47,8 @@ import {SimulationStrategiesModule} from "./simulation-strategies/simulation-str
 import {AppIdService} from "./app-id.service";
 import {SimulatorCommunicationService} from "./simulator/mainthread/simulator-communication.service";
 import {SimulationStrategiesService} from "./simulator/simulation-strategies.service";
+import {AsyncWidgetLoaderModule} from "./async-widget/async-widget-loader.module";
+import {WidgetInstallerModule} from "./widget-installer/widget-installer.module";
 
 @NgModule({
   declarations: [
@@ -73,6 +81,8 @@ import {SimulationStrategiesService} from "./simulator/simulation-strategies.ser
     SimulatorConfigModule,
     SimulationStrategiesModule,
     MarkdownModule.forRoot(),
+    AsyncWidgetLoaderModule,
+    WidgetInstallerModule,
     NgUpgradeModule,
     // Upgrade module must be the last
     UpgradeModule

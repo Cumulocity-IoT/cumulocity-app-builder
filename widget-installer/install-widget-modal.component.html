@@ -1,0 +1,22 @@
+<div class="modal-header text-center bg-primary">
+    <div style="font-size: 62px;">
+        <span c8yIcon="puzzle-piece"></span>
+    </div>
+    <h4 class="text-uppercase" style="margin:0; letter-spacing: 0.15em;">Install Widget</h4>
+</div>
+<div class="c8y-wizard-nav">
+    <span>Upload</span>
+</div>
+<hr style="margin:0;">
+<div class="modal-inner-scroll">
+    <form class="c8y-wizard-form" name="installWidgetForm">
+        <div class="form-group">
+            <label for="widgetFile"><span>Upload a Widget Zip file</span></label>
+            <input type="file" class="form-control" id="widgetFile" name="widgetFile" (change)="widgetFile = $event.target.files">
+        </div>
+    </form>
+</div>
+<div class="c8y-wizard-footer">
+    <button class="btn btn-default" [disabled]="busy" (click)="bsModalRef.hide()">Cancel</button>
+    <button class="btn btn-primary" [disabled]="busy || !widgetFile?.length" (click)="upload()">Upload</button>
+</div>

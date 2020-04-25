@@ -1,3 +1,686 @@
+diff --git a/node_modules/@c8y/ng1-modules/dashboard2/dashboard.service.js b/node_modules/@c8y/ng1-modules/dashboard2/dashboard.service.js
+index 6e89bfa..711690f 100644
+--- a/node_modules/@c8y/ng1-modules/dashboard2/dashboard.service.js
++++ b/node_modules/@c8y/ng1-modules/dashboard2/dashboard.service.js
+@@ -1 +1,676 @@
+-"use strict";function _slicedToArray(n,e){return _arrayWithHoles(n)||_iterableToArrayLimit(n,e)||_nonIterableRest()}function _nonIterableRest(){throw new TypeError("Invalid attempt to destructure non-iterable instance")}function _iterableToArrayLimit(n,e){if(Symbol.iterator in Object(n)||"[object Arguments]"===Object.prototype.toString.call(n)){var t=[],r=!0,o=!1,i=void 0;try{for(var a,c=n[Symbol.iterator]();!(r=(a=c.next()).done)&&(t.push(a.value),!e||t.length!==e);r=!0);}catch(n){o=!0,i=n}finally{try{r||null==c.return||c.return()}finally{if(o)throw i}}return t}}function _arrayWithHoles(n){if(Array.isArray(n))return n}!function(){function dn(n,e,o,i,a,c,u,d,l,t,r,s,f,h,p,g,v){var m=n("dashboards"),b=n("dashboardLists"),y="c8y_Dashboard",C={welcome:{icon:"cloud",name:p.getString("Welcome")},home:{icon:"home",name:p.getString("Home")}};function x(n){return _.map(n,function(n){return _.assign(_.get(n,y,{}),{id:n.id})})}function R(n){var e=n||{},t=_.assign(_.get(e,y,{}),{id:e.id},function(n){var t=/^c8y_Dashboard!(.+)$/;return _.pickBy(n,function(n,e){return t.test(e)})}(e));return _.set(t,"global",!!_.get(e,"c8y_Global")),function(n){var e=["templateUrl","configTemplateUrl"],t=_.map(n.children,function(n){return c.all(_.map(e,_.partial(U,n)))});return c.all(t).then(function(){return n})}(t).then(D)}function D(e){return e.children?function(n){return r.list().then(function(e){return _(n).mapValues(function(n){return T(n,e,!1)}).value()})}(e.children).then(function(n){return e.children=n,e}):e}function T(n,e,t){var r=_.cloneDeep(n),o=_.find(e,function(n){var e=n.name&&n.name===r.name,t=n.templateUrl&&n.templateUrl===r.templateUrl;return e||t});if(o){var i=o.replaceWith;return i&&(r.config=u.invoke(i.config,void 0,{oldConfig:r.config}),o=_.find(e,{name:i.component})),r.name=o.name,o.transformConfigWithContext&&(r.componentTransformConfigWithContext=o.transformConfigWithContext),o.widgetComponent?(r.widgetComponent=o.widgetComponent,delete r.templateUrl):r.templateUrl=o.templateUrl,o.configComponent?(r.configComponent=o.configComponent,delete r.configTemplateUrl):r.configTemplateUrl=o.configTemplateUrl,r}return t?null:r}function E(e){return s.canAdminMOs([e]).then(function(n){return n||(e.isFrozen=!n),e.readOnly=!n,e})}function I(n){return _.get(n,"isFrozen")}function A(n){return L(n,!0)}function O(n){return L(n,!1)}function L(n,e){return n.isFrozen=e,un.saveAndWait(n).then(dn.clearCacheList)}function U(e,t){var n=e[t];return f.verifyPluginViewPath(n).then(function(n){return e[t]=n,e})}function w(t){return function(n){var e=_.isObjectLike(n)?n.id:n;return[y,t,e].join("!")}}var P=w("device"),N=w("group"),S=w("name"),W=w("type");function k(n){return m.put($(n),_.cloneDeep(n))}function $(n){return _.isObjectLike(n)?n.id:n}function j(n,e){var t,r=_.assign(n||{},{fragmentType:e||y}),o=l.list(r).then(x);return e&&!n&&(t=b.get(e),o.then(function(n){0<n.length&&b.put(e,n)})),t?c.when(t):o}function G(){b.removeAll(),e.$emit("dashboard:refresh")}function z(n,e,t){var r=m.get($(n)),o=!(t&&r)&&l.detail(n).then(d.getResData).then(R).then(E).then(k);return(r?c.when(r):o).then(V).then(M(e))}function M(t){return function(n){var e=n;return(e.deviceType||t)&&(e=function(n){return an().then(_.partial(H,n))}(_.cloneDeep(e))),e}}function H(n,e){return c.all(_.map(n.children,function(n){return function(e,n){var t=function(n){n.__target={id:e.id,name:e.name}};n&&(n.device={id:e.id,name:e.name},n.datapoints&&_.forEach(n.datapoints,t),n.alarmsEventsConfigs&&_.forEach(n.alarmsEventsConfigs,t),n.options&&n.options.dataPoints&&_.forEach(n.options.dataPoints,t),n.datapointsGauge&&_.forEach(n.datapointsGauge,t),n.datapointsLabels&&_.forEach(n.datapointsLabels,t));return n}(e,n.config)})).then(_.constant(n))}function V(t){return an().then(function(e){return c.all(_.map(t.children,function(n){return F(e,t,n)}))}).then(_.constant(t))}function F(t,r,e){var n=e.config||{},o=_.compact([e.transformConfigWithContext,e.componentTransformConfigWithContext]);return _.reduce(o,function(n,e){return n.then(function(n){return u.invoke(e,null,{config:n,context:t,dashboard:r})})},c.resolve(n)).then(function(n){return _.assign(e,{config:n})})}function B(n){return r.list().then(function(e){return _(n).map(function(n){return T(n,e,!0)}).compact().value()})}function Y(n,e,t){return _.forEach(n,function(n){n.__target=q(n.__target,e,t)}),n}function q(n,e,t){return n&&n.id===t.id&&_.assign(n,_.pick(e,["id","name"])),n}function J(n){var t=["id","creationContext","readOnly"],r=/^c8y_Dashboard!/,e=_.cloneDeep(n);e.global=!!e.deviceType||e.global;var o,i=e.id,a={id:i},c=i?"update":"createConfirm";a[y]=_.pickBy(e,function(n,e){return!r.test(e)&&!_.includes(t,e)}),function(n){n[y].global?_.assign(n,{c8y_Global:{}}):n[y].global||_.assign(n,{c8y_Global:null})}(a);var u=e.deviceType?{}:e.creationContext;return o=l[c](a,u),"update"==c&&(o=o.then(function(){return n})),"createConfirm"==c&&(o=o.then(d.getResData).then(R)),o.then(k)}function K(n,e,t,r){var o={id:t.id},i=n(e);return o[i]=r?null:{},m.get(i)&&m.remove(i),l.save(o)}function Q(n,e){return j(null,n(e))}function X(){if(un.forcedContext)return un.forcedContext;var t=null,r=null;return _.forEach(["report","device","group"],function(n){var e=_.get(o,"".concat(n,"Id"));e&&(t=n,r=e)}),{context:t,id:r}}function Z(n,e){var t={templateUrl:":::PLUGIN_PATH:::/dashboardWidget/config.html",controller:"DashboardWidgetConfigController",size:"lg",resolve:{dashboard:function(){return e||{}},component:function(){return n||{}},hideTarget:function(){return e&&e.deviceType}}};return i.open(t).result}function nn(n,r){var e={template:'<div ng-include="\':::PLUGIN_PATH:::/dashboard/new.html\'" ng-controller="DashboardEditCtrl"></div>',controller:["$scope","$uibModalInstance","config",function(n,e,t){n.dashboardId="new",n.modalInstance=e,n.config=t||{},n.creationContext=r}],size:"lg",resolve:{config:_.constant(n)}};return i.open(e).result}function en(n,e){return function(n){var e={templateUrl:":::PLUGIN_PATH:::/dashboard/select.html",controller:"DashboardSelectController",size:"lg",resolve:{config:_.constant(n)}};return i.open(e).result}(angular.extend({title:h("Select dashboard"),preventNew:!0,selectLabel:h("Select"),useReports:!0},e)).then(function(t){return n.templateUrl?rn(t,n):B([n]).then(function(n){var e=_slicedToArray(n,1)[0];return rn(t,e)})})}var tn={};function rn(n,e,t){var r=n.id||n;tn[r]=tn[r]||{children:[]};var o=tn[r],i=o.promise;return o.children.push({child:e,remove:t}),i||(o.promise=a(function(){return c.all({dashboard:z(n,!1,!0),contextObject:an()}).then(function(n){var t=n.dashboard,r=n.contextObject;return c.all(_.map(o.children,function(e){return(e.remove?c.resolve(e.child):F(r,t,e.child)).then(function(n){t.children=on(t.children||{},n,e.remove)})})).then(_.constant(t))}).then(J)}),(i=o.promise).finally(function(){delete tn[r]})),i}function on(n,e,t){return e.id||(e.id=String(Math.random()).substr(2)),t?delete n[e.id]:n[e.id]=e,function(n){var e=0;return _(n).sortBy("position").forEach(function(n){n.position=e,e+=1}),_.cloneDeep(n)}(n)}function an(){var e=X();return e.id?t.detailCached(e.id).then(d.getResData).then(function(n){return n||{id:e.id}}):c.when({})}var cn=[];var un={list:j,save:J,saveAndWait:_.partialRight(J,!0),detail:z,detailPredefinedReadOnly:function(n,e){var t={children:{},isFrozen:!0,readOnly:!0};return B(n).then(function(n){return _.forEach(n,function(n){on(t.children,n)}),t}).then(V).then(M(e))},named:function(e,r,o){var i=function(n){return J(n).then(_.partial(K,S,e)).then(d.getResData).then(function(n){return z(n,o)})};return j(null,S(e)).then(function(n){var e;if(n.length)e=z(_.head(n).id,o);else{var t={children:{}};e=B(r).then(function(n){return _.forEach(n,function(n){on(t.children,n)}),s.hasAnyRole(["ROLE_INVENTORY_ADMIN","ROLE_INVENTORY_CREATE"]).then(function(n){return!!n||c.reject()}).then(_.partial(i,t)).catch(_.partial(_.identity,t))})}return e})},isNamed:function(n){return _.some(_.keys(n),function(n){return/^c8y_Dashboard!name!/.test(n)})},remove:function(n){return m.remove($(n)),e.$emit("dashboard:remove",$(n)),l.remove(n)},isLocked:I,toggleLock:function(n){return I(n)?O(n):A(n)},lock:A,unlock:O,deviceAdd:_.partial(K,P),deviceRemove:_.partialRight(_.partial(K,P),!0),deviceList:_.partial(Q,P),deviceTypeAdd:_.partial(K,W),deviceTypeRemove:_.partialRight(_.partial(K,W),!0),deviceTypeList:function(n){return c.all([Q(P,n.id),Q(W,n.type)]).then(_.flattenDeep)},groupAdd:_.partial(K,N),groupRemove:_.partialRight(_.partial(K,N),!0),groupList:_.partial(Q,N),getContextObject:an,addDashboard:nn,copyDashboard:function(n){var e,t=function(n){var e=X(),r=e.id;function o(n){return n.__target.id!==r}if("device"!==e.context&&"group"!==e.context)return h("Only dashboards from devices or groups can be copied");if(!_.every(n.children,function(n){var e=n.config||{},t=!0;return e.device&&e.device.id!==r&&(t=!1),e.datapoints&&_.some(e.datapoints,o)&&(t=!1),t})){if("device"===e.context)return h("Only dashboards with widgets referencing the current device can be copied.");if("group"===e.context)return h("Only dashboards with widgets referencing the current group can be copied.")}return!1}(n);if(t)g.warning(t);else{cn=[];var r=X();cn.push({dashboard:_.cloneDeep(n),context:r}),"device"===r.context&&(e=h('Dashboard copied. Navigate to the desired device and select "Paste dashboard"')),"group"===r.context&&(e=h('Dashboard copied. Navigate to the desired group and select "Paste dashboard"')),g.success(e)}},pasteDashboard:function(){if(cn&&cn.length){if(!function(n){var e,t=X(),r=n.context.context;return t.context!==r&&("device"===r&&(e=h("Device dashboards can only be copied into a device.")),"group"===r&&(e=h("Group dashboards can only be copied into a group."))),e&&g.warning(e),!e}(_.last(cn)))return!1;var n=cn.pop(),t=n.dashboard,e=X(),r=un["".concat(e.context,"Add")];_.forEach(t,function(n,e){e.match(/!/)&&delete t[e]});var o=e.context;e.context===n.context.context&&["device","group"].includes(o)&&(t=function(n,i,a){var e=_.reduce(n.children,function(n,e){var t=e.id,r=e.config,o={device:function(n){return q(n,i,a)},datapoints:function(n){return Y(n,i,a)},datapointsGauge:function(n){return Y(n,i,a)},datapointsLabels:function(n){return Y(n,i,a)}};return r&&_.forEach(o,function(n,e){r[e]&&(r[e]=n(r[e]))}),n[t]=e,n},{});return n.children=e,n}(t,e,n.context)),t.creationContext=e,delete t.id;var i=J(t);return i.then(function(n){return r(e.id,n)}).finally(G),i}},dashboardToPaste:function(){var n=cn&&cn[0];return n&&n.dashboard},selectDashboard:nn,editCurrentDashboard:function(t){var n={template:'<div ng-include="\':::PLUGIN_PATH:::/dashboard/new.html\'" ng-controller="DashboardEditCtrl"></div>',controller:["$scope","$uibModalInstance",function(n,e){n.modalInstance=e,n.dashboardId=_.get(t,"dashboardId")}],size:"lg"};return i.open(n).result},editChildUI:Z,addChildUI:_.partial(Z,null),restoreDefaultChildren:function(t,n,r){return B(n).then(function(n){var e=t.children;return _.forEach(_.keys(e),function(n){on(e,e[n],!0)}),_.forEach(n,function(n){on(e,n)}),J(t).then(function(n){return z(n,r)})})},getContext:X,getContextPath:function(){var n=X(),e="";return"group"===n.context&&(e="/group/".concat(n.id)),"device"===n.context&&(e="/device/".concat(n.id)),e},appendChild:_.partialRight(rn,!1),updateChild:_.partialRight(rn,!1),removeChild:_.partialRight(rn,!0),clearCacheList:G,addWidgetToSelectedDashboard:en,addWidgetToSelectedDashboardInContext:function(n){return en(n,{inContext:!0,preventCreate:!0,useReports:!1})},addWidgetToSelectedReport:function(n){return en(n,{onlyReports:!0,useReports:!0,title:h("Select report"),preventCreate:!0})},getIconNameObj:function(n){var e={icon:n.icon||"th",name:n.name||p.getString("Dashboard")},t=function(n){var t=/^c8y_Dashboard!name!(.+?)[-_].+$/,e=_.pickBy(n,function(n,e){return t.test(e)}),r=_.keys(e);if(0<r.length){var o=r[0].match(t);return o[1]}return null}(n),r=d.getPluginService("c8yReports");if(t){var o=C[t];o&&(e.icon=o.icon||e.icon,e.name=o.name||e.name)}return"report"===t&&r&&(e=r.getReportFromDashboard(n).then(function(n){return _.pick(n,["icon","name"])})),c.resolve(e)},hasWritePermissions:function(n){return d.hasId(n)?s.canAdminMOs([n]):s.hasAnyRole(["ROLE_INVENTORY_ADMIN","ROLE_INVENTORY_CREATE"])},VERSION:2};return _.assign(un,v)}dn.$inject=["$cacheFactory","$rootScope","$routeParams","$uibModal","$timeout","$q","$injector","c8yBase","dashboardInventorySvc","c8yInventory","c8yComponents","c8yPermissions","c8yUiUtil","gettext","gettextCatalog","c8yAlert","c8yDashboardStyle"],angular.module("c8y.parts.dashboard2").factory("dashboardSvc",dn)}();
+\ No newline at end of file
++"use strict";
++function _slicedToArray(n, e) {
++    return _arrayWithHoles(n) || _iterableToArrayLimit(n, e) || _nonIterableRest()
++}
++function _nonIterableRest() {
++    throw new TypeError("Invalid attempt to destructure non-iterable instance")
++}
++function _iterableToArrayLimit(n, e) {
++    if (Symbol.iterator in Object(n) || "[object Arguments]" === Object.prototype.toString.call(n)) {
++        var t = []
++            , r = !0
++            , o = !1
++            , i = void 0;
++        try {
++            for (var a, c = n[Symbol.iterator](); !(r = (a = c.next()).done) && (t.push(a.value),
++            !e || t.length !== e); r = !0)
++                ;
++        } catch (n) {
++            o = !0,
++                i = n
++        } finally {
++            try {
++                r || null == c.return || c.return()
++            } finally {
++                if (o)
++                    throw i
++            }
++        }
++        return t
++    }
++}
++function _arrayWithHoles(n) {
++    if (Array.isArray(n))
++        return n
++}
++!function() {
++    function dn(n, e, o, i, a, c, u, d, l, t, r, s, f, h, p, g, v) {
++        var m = n("dashboards")
++            , b = n("dashboardLists")
++            , y = "c8y_Dashboard"
++            , C = {
++            welcome: {
++                icon: "cloud",
++                name: p.getString("Welcome")
++            },
++            home: {
++                icon: "home",
++                name: p.getString("Home")
++            }
++        };
++        function x(n) {
++            return _.map(n, function(n) {
++                return _.assign(_.get(n, y, {}), {
++                    id: n.id
++                })
++            })
++        }
++        function R(n) {
++            var e = n || {}
++                , t = _.assign(_.get(e, y, {}), {
++                id: e.id
++            }, function(n) {
++                var t = /^c8y_Dashboard!(.+)$/;
++                return _.pickBy(n, function(n, e) {
++                    return t.test(e)
++                })
++            }(e));
++            return _.set(t, "global", !!_.get(e, "c8y_Global")),
++                function(n) {
++                    var e = ["templateUrl", "configTemplateUrl"]
++                        , t = _.map(n.children, function(n) {
++                        return c.all(_.map(e, _.partial(U, n)))
++                    });
++                    return c.all(t).then(function() {
++                        return n
++                    })
++                }(t).then(D)
++        }
++        function D(e) {
++            return e.children ? function(n) {
++                return r.list().then(function(e) {
++                    return _(n).mapValues(function(n) {
++                        return T(n, e, !1)
++                    }).value()
++                })
++            }(e.children).then(function(n) {
++                return e.children = n,
++                    e
++            }) : e
++        }
++        function T(n, e, t) {
++            var r = _.cloneDeep(n)
++                , o = _.find(e, function(n) {
++                    return e = n.name && n.name === r.name
++                }) || _.find(e, function(n) {
++                        return n.templateUrl && n.templateUrl === r.templateUrl;
++                });
++            if (o) {
++                var i = o.replaceWith;
++                return i && (r.config = u.invoke(i.config, void 0, {
++                    oldConfig: r.config
++                }),
++                    o = _.find(e, {
++                        name: i.component
++                    })),
++                    r.name = o.name,
++                o.transformConfigWithContext && (r.componentTransformConfigWithContext = o.transformConfigWithContext),
++                    o.widgetComponent ? (r.widgetComponent = o.widgetComponent,
++                        delete r.templateUrl) : r.templateUrl = o.templateUrl,
++                    o.configComponent ? (r.configComponent = o.configComponent,
++                        delete r.configTemplateUrl) : r.configTemplateUrl = o.configTemplateUrl,
++                    r
++            }
++            return t ? null : r
++        }
++        function E(e) {
++            return s.canAdminMOs([e]).then(function(n) {
++                return n || (e.isFrozen = !n),
++                    e.readOnly = !n,
++                    e
++            })
++        }
++        function I(n) {
++            return _.get(n, "isFrozen")
++        }
++        function A(n) {
++            return L(n, !0)
++        }
++        function O(n) {
++            return L(n, !1)
++        }
++        function L(n, e) {
++            return n.isFrozen = e,
++                un.saveAndWait(n).then(dn.clearCacheList)
++        }
++        function U(e, t) {
++            var n = e[t];
++            return f.verifyPluginViewPath(n).then(function(n) {
++                return e[t] = n,
++                    e
++            })
++        }
++        function w(t) {
++            return function(n) {
++                var e = _.isObjectLike(n) ? n.id : n;
++                return [y, t, e].join("!")
++            }
++        }
++        var P = w("device")
++            , N = w("group")
++            , S = w("name")
++            , W = w("type");
++        function k(n) {
++            return m.put($(n), _.cloneDeep(n))
++        }
++        function $(n) {
++            return _.isObjectLike(n) ? n.id : n
++        }
++        function j(n, e) {
++            var t, r = _.assign(n || {}, {
++                fragmentType: e || y
++            }), o = l.list(r).then(x);
++            return e && !n && (t = b.get(e),
++                o.then(function(n) {
++                    0 < n.length && b.put(e, n)
++                })),
++                t ? c.when(t) : o
++        }
++        function G() {
++            b.removeAll(),
++                e.$emit("dashboard:refresh")
++        }
++        function z(n, e, t) {
++            var r = m.get($(n))
++                , o = !(t && r) && l.detail(n).then(d.getResData).then(R).then(E).then(k);
++            return (r ? c.when(r) : o).then(V).then(M(e))
++        }
++        function M(t) {
++            return function(n) {
++                var e = n;
++                return (e.deviceType || t) && (e = function(n) {
++                    return an().then(_.partial(H, n))
++                }(_.cloneDeep(e))),
++                    e
++            }
++        }
++        function H(n, e) {
++            return c.all(_.map(n.children, function(n) {
++                return function(e, n) {
++                    var t = function(n) {
++                        n.__target = {
++                            id: e.id,
++                            name: e.name
++                        }
++                    };
++                    n && (n.device = {
++                        id: e.id,
++                        name: e.name
++                    },
++                    n.datapoints && _.forEach(n.datapoints, t),
++                    n.alarmsEventsConfigs && _.forEach(n.alarmsEventsConfigs, t),
++                    n.options && n.options.dataPoints && _.forEach(n.options.dataPoints, t),
++                    n.datapointsGauge && _.forEach(n.datapointsGauge, t),
++                    n.datapointsLabels && _.forEach(n.datapointsLabels, t));
++                    return n
++                }(e, n.config)
++            })).then(_.constant(n))
++        }
++        function V(t) {
++            return an().then(function(e) {
++                return c.all(_.map(t.children, function(n) {
++                    return F(e, t, n)
++                }))
++            }).then(_.constant(t))
++        }
++        function F(t, r, e) {
++            var n = e.config || {}
++                , o = _.compact([e.transformConfigWithContext, e.componentTransformConfigWithContext]);
++            return _.reduce(o, function(n, e) {
++                return n.then(function(n) {
++                    return u.invoke(e, null, {
++                        config: n,
++                        context: t,
++                        dashboard: r
++                    })
++                })
++            }, c.resolve(n)).then(function(n) {
++                return _.assign(e, {
++                    config: n
++                })
++            })
++        }
++        function B(n) {
++            return r.list().then(function(e) {
++                return _(n).map(function(n) {
++                    return T(n, e, !0)
++                }).compact().value()
++            })
++        }
++        function Y(n, e, t) {
++            return _.forEach(n, function(n) {
++                n.__target = q(n.__target, e, t)
++            }),
++                n
++        }
++        function q(n, e, t) {
++            return n && n.id === t.id && _.assign(n, _.pick(e, ["id", "name"])),
++                n
++        }
++        function J(n) {
++            var t = ["id", "creationContext", "readOnly"]
++                , r = /^c8y_Dashboard!/
++                , e = _.cloneDeep(n);
++            e.global = !!e.deviceType || e.global;
++            var o, i = e.id, a = {
++                id: i
++            }, c = i ? "update" : "createConfirm";
++            a[y] = _.pickBy(e, function(n, e) {
++                return !r.test(e) && !_.includes(t, e)
++            }),
++                function(n) {
++                    n[y].global ? _.assign(n, {
++                        c8y_Global: {}
++                    }) : n[y].global || _.assign(n, {
++                        c8y_Global: null
++                    })
++                }(a);
++            var u = e.deviceType ? {} : e.creationContext;
++            return o = l[c](a, u),
++            "update" == c && (o = o.then(function() {
++                return n
++            })),
++            "createConfirm" == c && (o = o.then(d.getResData).then(R)),
++                o.then(k)
++        }
++        function K(n, e, t, r) {
++            var o = {
++                id: t.id
++            }
++                , i = n(e);
++            return o[i] = r ? null : {},
++            m.get(i) && m.remove(i),
++                l.save(o)
++        }
++        function Q(n, e) {
++            return j(null, n(e))
++        }
++        function X() {
++            if (un.forcedContext)
++                return un.forcedContext;
++            var t = null
++                , r = null;
++            return _.forEach(["report", "device", "group"], function(n) {
++                var e = _.get(o, "".concat(n, "Id"));
++                e && (t = n,
++                    r = e)
++            }),
++                {
++                    context: t,
++                    id: r
++                }
++        }
++        function Z(n, e) {
++            var t = {
++                templateUrl: "dashboard2/dashboardWidget/config.html",
++                controller: "DashboardWidgetConfigController",
++                size: "lg",
++                resolve: {
++                    dashboard: function() {
++                        return e || {}
++                    },
++                    component: function() {
++                        return n || {}
++                    },
++                    hideTarget: function() {
++                        return e && e.deviceType
++                    }
++                }
++            };
++            return i.open(t).result
++        }
++        function nn(n, r) {
++            var e = {
++                template: '<div ng-include="\'dashboard2/dashboard/new.html\'" ng-controller="DashboardEditCtrl"></div>',
++                controller: ["$scope", "$uibModalInstance", "config", function(n, e, t) {
++                    n.dashboardId = "new",
++                        n.modalInstance = e,
++                        n.config = t || {},
++                        n.creationContext = r
++                }
++                ],
++                size: "lg",
++                resolve: {
++                    config: _.constant(n)
++                }
++            };
++            return i.open(e).result
++        }
++        function en(n, e) {
++            return function(n) {
++                var e = {
++                    templateUrl: "dashboard2/dashboard/select.html",
++                    controller: "DashboardSelectController",
++                    size: "lg",
++                    resolve: {
++                        config: _.constant(n)
++                    }
++                };
++                return i.open(e).result
++            }(angular.extend({
++                title: h("Select dashboard"),
++                preventNew: !0,
++                selectLabel: h("Select"),
++                useReports: !0
++            }, e)).then(function(t) {
++                return n.templateUrl ? rn(t, n) : B([n]).then(function(n) {
++                    var e = _slicedToArray(n, 1)[0];
++                    return rn(t, e)
++                })
++            })
++        }
++        var tn = {};
++        function rn(n, e, t) {
++            var r = n.id || n;
++            tn[r] = tn[r] || {
++                children: []
++            };
++            var o = tn[r]
++                , i = o.promise;
++            return o.children.push({
++                child: e,
++                remove: t
++            }),
++            i || (o.promise = a(function() {
++                return c.all({
++                    dashboard: z(n, !1, !0),
++                    contextObject: an()
++                }).then(function(n) {
++                    var t = n.dashboard
++                        , r = n.contextObject;
++                    return c.all(_.map(o.children, function(e) {
++                        return (e.remove ? c.resolve(e.child) : F(r, t, e.child)).then(function(n) {
++                            t.children = on(t.children || {}, n, e.remove)
++                        })
++                    })).then(_.constant(t))
++                }).then(J)
++            }),
++                (i = o.promise).finally(function() {
++                    delete tn[r]
++                })),
++                i
++        }
++        function on(n, e, t) {
++            return e.id || (e.id = String(Math.random()).substr(2)),
++                t ? delete n[e.id] : n[e.id] = e,
++                function(n) {
++                    var e = 0;
++                    return _(n).sortBy("position").forEach(function(n) {
++                        n.position = e,
++                            e += 1
++                    }),
++                        _.cloneDeep(n)
++                }(n)
++        }
++        function an() {
++            var e = X();
++            return e.id ? t.detailCached(e.id).then(d.getResData).then(function(n) {
++                return n || {
++                    id: e.id
++                }
++            }) : c.when({})
++        }
++        var cn = [];
++        var un = {
++            list: j,
++            save: J,
++            saveAndWait: _.partialRight(J, !0),
++            detail: z,
++            detailPredefinedReadOnly: function(n, e) {
++                var t = {
++                    children: {},
++                    isFrozen: !0,
++                    readOnly: !0
++                };
++                return B(n).then(function(n) {
++                    return _.forEach(n, function(n) {
++                        on(t.children, n)
++                    }),
++                        t
++                }).then(V).then(M(e))
++            },
++            named: function(e, r, o) {
++                var i = function(n) {
++                    return J(n).then(_.partial(K, S, e)).then(d.getResData).then(function(n) {
++                        return z(n, o)
++                    })
++                };
++                return j(null, S(e)).then(function(n) {
++                    var e;
++                    if (n.length)
++                        e = z(_.head(n).id, o);
++                    else {
++                        var t = {
++                            children: {}
++                        };
++                        e = B(r).then(function(n) {
++                            return _.forEach(n, function(n) {
++                                on(t.children, n)
++                            }),
++                                s.hasAnyRole(["ROLE_INVENTORY_ADMIN", "ROLE_INVENTORY_CREATE"]).then(function(n) {
++                                    return !!n || c.reject()
++                                }).then(_.partial(i, t)).catch(_.partial(_.identity, t))
++                        })
++                    }
++                    return e
++                })
++            },
++            isNamed: function(n) {
++                return _.some(_.keys(n), function(n) {
++                    return /^c8y_Dashboard!name!/.test(n)
++                })
++            },
++            remove: function(n) {
++                return m.remove($(n)),
++                    e.$emit("dashboard:remove", $(n)),
++                    l.remove(n)
++            },
++            isLocked: I,
++            toggleLock: function(n) {
++                return I(n) ? O(n) : A(n)
++            },
++            lock: A,
++            unlock: O,
++            deviceAdd: _.partial(K, P),
++            deviceRemove: _.partialRight(_.partial(K, P), !0),
++            deviceList: _.partial(Q, P),
++            deviceTypeAdd: _.partial(K, W),
++            deviceTypeRemove: _.partialRight(_.partial(K, W), !0),
++            deviceTypeList: function(n) {
++                return c.all([Q(P, n.id), Q(W, n.type)]).then(_.flattenDeep)
++            },
++            groupAdd: _.partial(K, N),
++            groupRemove: _.partialRight(_.partial(K, N), !0),
++            groupList: _.partial(Q, N),
++            getContextObject: an,
++            addDashboard: nn,
++            copyDashboard: function(n) {
++                var e, t = function(n) {
++                    var e = X()
++                        , r = e.id;
++                    function o(n) {
++                        return n.__target.id !== r
++                    }
++                    if ("device" !== e.context && "group" !== e.context)
++                        return h("Only dashboards from devices or groups can be copied");
++                    if (!_.every(n.children, function(n) {
++                        var e = n.config || {}
++                            , t = !0;
++                        return e.device && e.device.id !== r && (t = !1),
++                        e.datapoints && _.some(e.datapoints, o) && (t = !1),
++                            t
++                    })) {
++                        if ("device" === e.context)
++                            return h("Only dashboards with widgets referencing the current device can be copied.");
++                        if ("group" === e.context)
++                            return h("Only dashboards with widgets referencing the current group can be copied.")
++                    }
++                    return !1
++                }(n);
++                if (t)
++                    g.warning(t);
++                else {
++                    cn = [];
++                    var r = X();
++                    cn.push({
++                        dashboard: _.cloneDeep(n),
++                        context: r
++                    }),
++                    "device" === r.context && (e = h('Dashboard copied. Navigate to the desired device and select "Paste dashboard"')),
++                    "group" === r.context && (e = h('Dashboard copied. Navigate to the desired group and select "Paste dashboard"')),
++                        g.success(e)
++                }
++            },
++            pasteDashboard: function() {
++                if (cn && cn.length) {
++                    if (!function(n) {
++                        var e, t = X(), r = n.context.context;
++                        return t.context !== r && ("device" === r && (e = h("Device dashboards can only be copied into a device.")),
++                        "group" === r && (e = h("Group dashboards can only be copied into a group."))),
++                        e && g.warning(e),
++                            !e
++                    }(_.last(cn)))
++                        return !1;
++                    var n = cn.pop()
++                        , t = n.dashboard
++                        , e = X()
++                        , r = un["".concat(e.context, "Add")];
++                    _.forEach(t, function(n, e) {
++                        e.match(/!/) && delete t[e]
++                    });
++                    var o = e.context;
++                    e.context === n.context.context && ["device", "group"].includes(o) && (t = function(n, i, a) {
++                        var e = _.reduce(n.children, function(n, e) {
++                            var t = e.id
++                                , r = e.config
++                                , o = {
++                                device: function(n) {
++                                    return q(n, i, a)
++                                },
++                                datapoints: function(n) {
++                                    return Y(n, i, a)
++                                },
++                                datapointsGauge: function(n) {
++                                    return Y(n, i, a)
++                                },
++                                datapointsLabels: function(n) {
++                                    return Y(n, i, a)
++                                }
++                            };
++                            return r && _.forEach(o, function(n, e) {
++                                r[e] && (r[e] = n(r[e]))
++                            }),
++                                n[t] = e,
++                                n
++                        }, {});
++                        return n.children = e,
++                            n
++                    }(t, e, n.context)),
++                        t.creationContext = e,
++                        delete t.id;
++                    var i = J(t);
++                    return i.then(function(n) {
++                        return r(e.id, n)
++                    }).finally(G),
++                        i
++                }
++            },
++            dashboardToPaste: function() {
++                var n = cn && cn[0];
++                return n && n.dashboard
++            },
++            selectDashboard: nn,
++            editCurrentDashboard: function(t) {
++                var n = {
++                    template: '<div ng-include="\'dashboard2/dashboard/new.html\'" ng-controller="DashboardEditCtrl"></div>',
++                    controller: ["$scope", "$uibModalInstance", function(n, e) {
++                        n.modalInstance = e,
++                            n.dashboardId = _.get(t, "dashboardId")
++                    }
++                    ],
++                    size: "lg"
++                };
++                return i.open(n).result
++            },
++            editChildUI: Z,
++            addChildUI: _.partial(Z, null),
++            restoreDefaultChildren: function(t, n, r) {
++                return B(n).then(function(n) {
++                    var e = t.children;
++                    return _.forEach(_.keys(e), function(n) {
++                        on(e, e[n], !0)
++                    }),
++                        _.forEach(n, function(n) {
++                            on(e, n)
++                        }),
++                        J(t).then(function(n) {
++                            return z(n, r)
++                        })
++                })
++            },
++            getContext: X,
++            getContextPath: function() {
++                var n = X()
++                    , e = "";
++                return "group" === n.context && (e = "/group/".concat(n.id)),
++                "device" === n.context && (e = "/device/".concat(n.id)),
++                    e
++            },
++            appendChild: _.partialRight(rn, !1),
++            updateChild: _.partialRight(rn, !1),
++            removeChild: _.partialRight(rn, !0),
++            clearCacheList: G,
++            addWidgetToSelectedDashboard: en,
++            addWidgetToSelectedDashboardInContext: function(n) {
++                return en(n, {
++                    inContext: !0,
++                    preventCreate: !0,
++                    useReports: !1
++                })
++            },
++            addWidgetToSelectedReport: function(n) {
++                return en(n, {
++                    onlyReports: !0,
++                    useReports: !0,
++                    title: h("Select report"),
++                    preventCreate: !0
++                })
++            },
++            getIconNameObj: function(n) {
++                var e = {
++                    icon: n.icon || "th",
++                    name: n.name || p.getString("Dashboard")
++                }
++                    , t = function(n) {
++                    var t = /^c8y_Dashboard!name!(.+?)[-_].+$/
++                        , e = _.pickBy(n, function(n, e) {
++                        return t.test(e)
++                    })
++                        , r = _.keys(e);
++                    if (0 < r.length) {
++                        var o = r[0].match(t);
++                        return o[1]
++                    }
++                    return null
++                }(n)
++                    , r = d.getPluginService("c8yReports");
++                if (t) {
++                    var o = C[t];
++                    o && (e.icon = o.icon || e.icon,
++                        e.name = o.name || e.name)
++                }
++                return "report" === t && r && (e = r.getReportFromDashboard(n).then(function(n) {
++                    return _.pick(n, ["icon", "name"])
++                })),
++                    c.resolve(e)
++            },
++            hasWritePermissions: function(n) {
++                return d.hasId(n) ? s.canAdminMOs([n]) : s.hasAnyRole(["ROLE_INVENTORY_ADMIN", "ROLE_INVENTORY_CREATE"])
++            },
++            VERSION: 2
++        };
++        return _.assign(un, v)
++    }
++    dn.$inject = ["$cacheFactory", "$rootScope", "$routeParams", "$uibModal", "$timeout", "$q", "$injector", "c8yBase", "dashboardInventorySvc", "c8yInventory", "c8yComponents", "c8yPermissions", "c8yUiUtil", "gettext", "gettextCatalog", "c8yAlert", "c8yDashboardStyle"],
++        angular.module("c8y.parts.dashboard2").factory("dashboardSvc", dn)
++}();
 diff --git a/node_modules/@c8y/ng1-modules/dashboard2/dashboard/dashboard.directive.js b/node_modules/@c8y/ng1-modules/dashboard2/dashboard/dashboard.directive.js
 index c09a3da..8234eb1 100644
 --- a/node_modules/@c8y/ng1-modules/dashboard2/dashboard/dashboard.directive.js
@@ -94,7 +777,7 @@ index 9b8c368..96fd222 100644
        </div>
  
 diff --git a/node_modules/@c8y/ng1-modules/dashboardUI/dashboardUi.provider.js b/node_modules/@c8y/ng1-modules/dashboardUI/dashboardUi.provider.js
-index 1f61cf5..9a7a9c9 100644
+index 1f61cf5..9d4132b 100644
 --- a/node_modules/@c8y/ng1-modules/dashboardUI/dashboardUi.provider.js
 +++ b/node_modules/@c8y/ng1-modules/dashboardUI/dashboardUi.provider.js
 @@ -1 +1 @@
@@ -103,7 +786,7 @@ index 1f61cf5..9a7a9c9 100644
 +"use strict";!function(){function t(t,a,d){i.$inject=["c8yPermissions","dashboardSvc"],c.$inject=["$route","dashboardSvc"],s.$inject=["$location","dashboardSvc","gettextCatalog","c8yUiUtil","c8yActions"];var o=_.map(["/device/:deviceId","/group/:groupId"],function(t){return"".concat(t,"/dashboard/:dashboardId")}),e=[/*{text:d("Add dashboard"),priority:2500,action:c,showIf:i,path:"/(device|group)/\\d+"}*/],n={template:'<c8y-dashboard-gridstack id="::vm.dashboardId"></c8y-dashboard-gridstack>',controllerAs:"vm",controller:["$routeParams",function(t){this.dashboardId=t.dashboardId}]};return{initUI:function(){e.forEach(t.addUrlAction),_.forEach(o,r)},$get:s};function r(t){a.when(t,n)}function c(d,o){var t=o.getContext(),e="".concat(t.context,"Add"),a=t.id;o.addDashboard({singleUseDashboards:!0},t).then(function(t){t&&(t.deviceType&&(a=t.deviceTypeValue,e="deviceTypeAdd"),function(t,a){o[e](t,a).then(function(){o.clearCacheList(),d.reload()})}(a,t))})}function i(t,a){var d=_.get(a.getContext(),"id");return t.canAdminMOs([d])}function s(o,a,d,e,n){return{addPasteAction:function(t){n.addAction({text:d.getString('Paste dashboard "{{name}}"',t),icon:"clipboard",showIf:i,action:function(){return a.pasteDashboard().then(r)}})},redirectToDashboard:r};function r(t){var a=e.getContext(),d=e.getContextPath(a);t.id&&(d+="/dashboard/".concat(t.id)),o.path(d)}}}t.$inject=["c8yActionsProvider","c8yViewsProvider","gettext"],angular.module("c8y.parts.dashboardUI").provider("c8yDashboardUi",t)}();
 \ No newline at end of file
 diff --git a/node_modules/@c8y/ng1-modules/deviceSelector/controllers/deviceSelectorComboCtrl.js b/node_modules/@c8y/ng1-modules/deviceSelector/controllers/deviceSelectorComboCtrl.js
-index 8530bf6..b74ce48 100644
+index 8530bf6..945939f 100644
 --- a/node_modules/@c8y/ng1-modules/deviceSelector/controllers/deviceSelectorComboCtrl.js
 +++ b/node_modules/@c8y/ng1-modules/deviceSelector/controllers/deviceSelectorComboCtrl.js
 @@ -1 +1,202 @@
@@ -313,7 +996,7 @@ index 8530bf6..b74ce48 100644
 +}();
 \ No newline at end of file
 diff --git a/node_modules/@c8y/ng1-modules/deviceSelector/controllers/deviceSelectorCtrl.js b/node_modules/@c8y/ng1-modules/deviceSelector/controllers/deviceSelectorCtrl.js
-index 5fd24cc..405f1be 100644
+index 5fd24cc..cc34cb2 100644
 --- a/node_modules/@c8y/ng1-modules/deviceSelector/controllers/deviceSelectorCtrl.js
 +++ b/node_modules/@c8y/ng1-modules/deviceSelector/controllers/deviceSelectorCtrl.js
 @@ -1 +1,52 @@
@@ -373,7 +1056,7 @@ index 5fd24cc..405f1be 100644
 +}]);
 \ No newline at end of file
 diff --git a/node_modules/@c8y/ng1-modules/deviceSelector/directives/deviceSelectorCombo.js b/node_modules/@c8y/ng1-modules/deviceSelector/directives/deviceSelectorCombo.js
-index 0aafe4f..bfe64ea 100644
+index 0aafe4f..b13e318 100644
 --- a/node_modules/@c8y/ng1-modules/deviceSelector/directives/deviceSelectorCombo.js
 +++ b/node_modules/@c8y/ng1-modules/deviceSelector/directives/deviceSelectorCombo.js
 @@ -1 +1,67 @@
@@ -448,7 +1131,7 @@ index 0aafe4f..bfe64ea 100644
 +]);
 \ No newline at end of file
 diff --git a/node_modules/@c8y/ng1-modules/devicemanagement-location/index.js b/node_modules/@c8y/ng1-modules/devicemanagement-location/index.js
-index cbf28b5..bdbd068 100644
+index cbf28b5..bdc2ba1 100644
 --- a/node_modules/@c8y/ng1-modules/devicemanagement-location/index.js
 +++ b/node_modules/@c8y/ng1-modules/devicemanagement-location/index.js
 @@ -1 +1 @@

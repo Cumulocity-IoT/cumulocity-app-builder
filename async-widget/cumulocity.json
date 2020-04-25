@@ -1,0 +1,6 @@
+{
+  "name": "AsyncWidgetLoader",
+  "ngModules": [
+    "async-widget"
+  ]
+}

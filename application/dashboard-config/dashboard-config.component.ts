@@ -31,6 +31,7 @@ import {UpdateableAlert} from "../../utils/UpdateableAlert";
 import * as delay from "delay";
 import {contextPathFromURL} from "../../utils/contextPathFromURL";
 import {DashboardTabs} from "../dashboard.tabs";
+import {WidgetInstallerService} from "../../widget-installer/widget-installer.service";
 
 export interface DashboardConfig {
     id: string,
@@ -62,7 +63,8 @@ export class DashboardConfigComponent implements OnDestroy {
     constructor(
         private appIdService: AppIdService, private appService: ApplicationService, private appStateService: AppStateService,
         private brandingService: BrandingService, private inventoryService: InventoryService, private navigation: DashboardNavigation,
-        private modalService: BsModalService, private alertService: AlertService, private tabs: DashboardTabs
+        private modalService: BsModalService, private alertService: AlertService, private tabs: DashboardTabs,
+        private widgetInstallerService: WidgetInstallerService
     ) {
         this.app = this.appIdService.appIdDelayedUntilAfterLogin$.pipe(
             switchMap(appId => from(

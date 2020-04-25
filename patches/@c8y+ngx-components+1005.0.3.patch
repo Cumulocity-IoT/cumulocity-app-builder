@@ -1,16 +1,28 @@
 diff --git a/node_modules/@c8y/ngx-components/fesm5/c8y-ngx-components-upgrade.js b/node_modules/@c8y/ngx-components/fesm5/c8y-ngx-components-upgrade.js
-index 55bdee8..0d6551a 100644
+index 55bdee8..157e353 100644
 --- a/node_modules/@c8y/ngx-components/fesm5/c8y-ngx-components-upgrade.js
 +++ b/node_modules/@c8y/ngx-components/fesm5/c8y-ngx-components-upgrade.js
-@@ -269,7 +269,7 @@ var DashboardBridgeService = /** @class */ (function () {
+@@ -267,9 +267,9 @@ var DashboardBridgeService = /** @class */ (function () {
+      * @param {?=} componentDefinitions
+      * @return {?}
       */
-     function (componentDefinitions) {
+-    function (componentDefinitions) {
++    function (componentDefinitions, isAsync) {
          var _this = this;
 -        if (componentDefinitions === void 0) { componentDefinitions = []; }
 +        if (componentDefinitions == null) { componentDefinitions = []; }
          componentDefinitions.forEach((/**
           * @param {?} cmp
           * @return {?}
+@@ -280,7 +280,7 @@ var DashboardBridgeService = /** @class */ (function () {
+             /** @type {?} */
+             var templateConfig = "<c8y-widget-config-downgrade\n        mode=\"config\"\n        componentid=\"" + cmp.id + "\"\n        [formref]=\"forms.componentForm\"\n        [config]=\"config\">\n      </c8y-widget-config-downgrade>";
+             /** @type {?} */
+-            var templateUrl = "widget-template-" + cmp.id + ".html";
++            var templateUrl = isAsync ? "async-widget-template.html" : "widget-template-" + cmp.id + ".html";
+             /** @type {?} */
+             var configTemplateUrl = cmp.configComponent ? "widget-template-config-" + cmp.id + ".html" : undefined;
+             /** @type {?} */
 @@ -950,24 +950,24 @@ var Ng1ActionFactoryService = /** @class */ (function () {
       * @return {?}
       */
@@ -54,16 +66,17 @@ index 55bdee8..0d6551a 100644
      };
      /**
       * @return {?}
-@@ -1679,7 +1679,7 @@ var DashboardUpgradeModule = /** @class */ (function () {
+@@ -1679,7 +1679,8 @@ var DashboardUpgradeModule = /** @class */ (function () {
                      declarations: [WidgetComponent],
                      entryComponents: [WidgetComponent],
                      // Uncoment the following line for demo
 -                    exports: [DashboardWidgetDemoModule],
 +                    // exports: [DashboardWidgetDemoModule],
++                    exports: [WidgetComponent],
                      providers: [
                          {
                              provide: DashboardBridgeService,
-@@ -1791,25 +1791,25 @@ function c8yAlertDecorator($delegate, $rootScope, $injector) {
+@@ -1791,25 +1792,25 @@ function c8yAlertDecorator($delegate, $rootScope, $injector) {
       * @return {?}
       */
      function transformAlert(alert) {
@@ -127,3 +140,14 @@ index 9e86f1b..ff49b76 100644
          }
          if (open !== this.node.open) {
              this.expandCollapse(open, false, (_a = {}, _a[from$$1] = true, _a.$event = $event, _a));
+diff --git a/node_modules/@c8y/ngx-components/upgrade/dashboard/dashboard-bridge.service.d.ts b/node_modules/@c8y/ngx-components/upgrade/dashboard/dashboard-bridge.service.d.ts
+index 75e492b..ca741bb 100644
+--- a/node_modules/@c8y/ngx-components/upgrade/dashboard/dashboard-bridge.service.d.ts
++++ b/node_modules/@c8y/ngx-components/upgrade/dashboard/dashboard-bridge.service.d.ts
+@@ -5,5 +5,5 @@ export declare class DashboardBridgeService {
+     constructor(ng1Injector: any, componentDefinitions: DynamicComponentDefinition[]);
+     readonly ng1Components: any;
+     readonly $templateCache: any;
+-    registerComponents(componentDefinitions?: any[]): void;
++    registerComponents(componentDefinitions?: any[], isAsync?: boolean): void;
+ }

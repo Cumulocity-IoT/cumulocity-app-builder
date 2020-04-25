@@ -37,7 +37,8 @@ angular.module("c8y.parts.alarmList", [])
         });
     }]);
 
-import '@c8y/ng1-modules/devicemanagement-alarmList/controllers/alarmList.js'
+// Use require rather than import to force that this is loaded after the above
+require('@c8y/ng1-modules/devicemanagement-alarmList/controllers/alarmList.js')
 
 @NgModule({})
 export class AlarmsModule {}
