@@ -22,8 +22,8 @@ import {SimulatorConfig} from "../simulator-config";
 import {SimulatorWorkerAPI} from "./simulator-worker-api.service";
 import {AppIdService} from "../../app-id.service";
 import {LOCK_TIMEOUT, SimulationLockService} from "./simulation-lock.service";
-import {switchMap, flatMap, map, filter, distinctUntilChanged, tap, withLatestFrom} from "rxjs/operators";
-import {from, interval, merge, of, Subscription} from "rxjs";
+import {switchMap, flatMap, map, filter, distinctUntilChanged, tap, withLatestFrom, catchError} from "rxjs/operators";
+import {from, interval, merge, NEVER, of, Subscription} from "rxjs";
 import * as deepEqual from "fast-deep-equal";
 import * as cloneDeep from "clone-deep";
 import {SimulationStrategiesService} from "../simulation-strategies.service";
@@ -62,6 +62,11 @@ export class SimulatorManagerService {
                         realtimeAction: RealtimeAction.FULL,
                         pagingDelay: 0
                     })).pipe(
+                        catchError((err) => {
+                            // TODO: not sure why we do this as a list all applications... seems like theres probably a better way to subscribe to just a single app change
+                            console.warn("The current user doesn't have access to the application list so can't detect simulator changes", err);
+                            return NEVER;
+                        }),
                         flatMap(applications => from(applications)),
                         filter(application => application.id === appId),
                         map((application: IApplication & { applicationBuilder: any })  => application.applicationBuilder.simulators || []),
