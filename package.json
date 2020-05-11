@@ -30,7 +30,8 @@
     "zone.js": "~0.9.1",
     "@c8y/ng1-modules": "1006.2.0",
     "angular": "1.6.9",
-    "@c8y/style": "1006.2.0"
+    "@c8y/style": "1006.2.0",
+    "ngx-bootstrap": "5.5.0"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "0.803.17",
