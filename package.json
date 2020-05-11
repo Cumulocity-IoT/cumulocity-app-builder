@@ -1,0 +1,55 @@
+{
+  "name": "app-builder",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "c8ycli server",
+    "build": "c8ycli build",
+    "deploy": "c8ycli deploy"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@angular/animations": "8.2.13",
+    "@angular/cdk": "8.2.3",
+    "@angular/common": "8.2.13",
+    "@angular/compiler": "8.2.13",
+    "@angular/core": "8.2.13",
+    "@angular/forms": "8.2.13",
+    "@angular/http": "7.2.15",
+    "@angular/platform-browser": "8.2.13",
+    "@angular/platform-browser-dynamic": "8.2.13",
+    "@angular/router": "8.2.13",
+    "@angular/upgrade": "8.2.13",
+    "@c8y/ngx-components": "1006.2.0",
+    "core-js": "^3.4.0",
+    "rxjs": "~6.4.0",
+    "url-search-params-polyfill": "6.0.0",
+    "zone.js": "~0.9.1",
+    "@c8y/ng1-modules": "1006.2.0",
+    "angular": "1.6.9",
+    "@c8y/style": "1006.2.0"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "0.803.17",
+    "@angular/compiler-cli": "8.2.13",
+    "@angular/language-service": "8.2.13",
+    "typescript": "3.5.3",
+    "@c8y/cli": "1006.2.0"
+  },
+  "c8y": {
+    "application": {
+      "name": "app-builder",
+      "contextPath": "app-builder",
+      "key": "app-builder-application-key",
+      "tabsHorizontal": true,
+      "upgrade": true,
+      "rightDrawer": true,
+      "sensorAppOneLink": "http://onelink.to/pca6qe",
+      "contentSecurityPolicy": "base-uri 'none'; default-src 'self' 'unsafe-inline' http: https: ws: wss:; connect-src 'self' *.billwerk.com http: https: ws: wss:;  script-src 'self' open.mapquestapi.com *.twitter.com *.twimg.com 'unsafe-inline' 'unsafe-eval' data:; style-src * 'unsafe-inline' blob:; img-src * data:; font-src * data:; frame-src *;"
+    },
+    "cli": {}
+  }
+}
