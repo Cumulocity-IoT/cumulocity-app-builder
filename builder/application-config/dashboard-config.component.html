@@ -1,0 +1,97 @@
+<c8y-title>Configuration</c8y-title>
+
+<ng-container *ngIf="app | async as app">
+    <c8y-action-bar-item [placement]="'right'">
+        <button class="btn btn-link" (click)="showCreateDashboardDialog(app)">
+            <i c8yIcon="plus-circle"></i> Add dashboard
+        </button>
+    </c8y-action-bar-item>
+
+    <div class="card-group">
+        <div class="col-xs-12 col-md-5">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-light" style="margin-top: 20px;" translate="">Application Configuration</h2>
+                </div>
+                <div class="card-block">
+                    <p>Here you can adjust the name, icon and navigation used in your application</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-md-7">
+            <div class="card">
+                <div class="card-header">
+                    <h4 translate>Details</h4>
+                </div>
+                <hr/>
+                <div class="card-block">
+
+                    <div class="form-group">
+                        <label for="name"><span>Name</span></label>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="e.g. My First Application (required)" required [(ngModel)]="newAppName">
+                    </div>
+
+                    <div class="form-group" *ngIf="app.contextPath != undefined">
+                        <label for="contextpath"><span>Context Path</span></label>
+                        <input type="text" class="form-control" id="contextpath" name="contextpath" placeholder="e.g. my-app (required)" required [(ngModel)]="newAppContextPath">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="icon"><span>Icon</span></label>
+                        <icon-selector id="icon" name="icon" [(value)]="newAppIcon"></icon-selector>
+                    </div>
+                    <button class="btn btn-primary" (click)="saveAppChanges(app)">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <ng-template #itemTemplate let-item="item" let-index="index">
+        <div class="drag-handle"><i class="fa custom-icon-drag-handle"></i></div>
+        <div class="col">{{item.value.name}}</div>
+        <div class="col">{{item.value.id}}</div>
+        <div class="col"><i [c8yIcon]="item.value.icon"></i> {{item.value.icon}}</div>
+        <div class="col">{{item.value.groupTemplate ? 'Children of: ' : ''}}{{item.value.deviceId || '-'}}</div>
+        <div>
+            <button class="btn btn-default" (click)="showEditDashboardDialog(app, app.applicationBuilder.dashboards, index)">Edit</button>
+            <button class="btn btn-default" (click)="deleteDashboard(app, app.applicationBuilder.dashboards, index)">Delete</button>
+        </div>
+    </ng-template>
+
+    <div class="card-group">
+        <div class="col-xs-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 translate>Dashboards</h4>
+                </div>
+                <hr/>
+                <div class="card-block">
+                    <div class="c8y-empty-state text-center" style="flex-direction: column; align-items: center;" *ngIf="!app.applicationBuilder.dashboards?.length">
+                        <h1 c8yIcon="c8y-chart" class="c8y-icon-duocolor" style="font-size: 90px;"></h1>
+                        <h3>No dashboards to list.</h3>
+                        <p>Please add dashboards to this application.</p>
+                        <button class="btn btn-primary" style="margin-top: 10px;" (click)="showCreateDashboardDialog(app)">Add dashboard</button>
+                    </div>
+                    <ng-container *ngIf="app.applicationBuilder.dashboards?.length">
+                        <div class="sortable-grid-header">
+                            <div class="drag-handle invisible"><i class="fa custom-icon-drag-handle"></i></div>
+                            <div class="col">Path</div>
+                            <div class="col">Dashboard ID</div>
+                            <div class="col">Icon</div>
+                            <div class="col">Device(s)</div>
+                            <div class="invisible"><button class="btn btn-default">Edit</button><button class="btn btn-default">Delete</button></div>
+                        </div>
+                        <bs-sortable
+                            [ngModel]="app.applicationBuilder.dashboards"
+                            [itemTemplate]="itemTemplate"
+                            itemClass="sortable-item"
+                            itemActiveClass="sortable-item-active"
+                            wrapperClass="sortable-grid"
+                            (onChange)="reorderDashboards(app, $event)"
+                        ></bs-sortable>
+                    </ng-container>
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-container>

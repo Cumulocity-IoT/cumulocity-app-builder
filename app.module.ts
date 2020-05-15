@@ -4,6 +4,7 @@ import { RouterModule as NgRouterModule } from '@angular/router';
 import { UpgradeModule as NgUpgradeModule } from '@angular/upgrade/static';
 import { CoreModule, RouterModule } from '@c8y/ngx-components';
 import { DashboardUpgradeModule, UpgradeModule, HybridAppModule, UPGRADE_ROUTES } from '@c8y/ngx-components/upgrade';
+import {BuilderModule} from "./builder/builder.module";
 
 @NgModule({
   imports: [
@@ -11,10 +12,13 @@ import { DashboardUpgradeModule, UpgradeModule, HybridAppModule, UPGRADE_ROUTES 
     UpgradeModule,
     BrowserAnimationsModule,
     RouterModule.forRoot(),
-    NgRouterModule.forRoot([...UPGRADE_ROUTES], { enableTracing: false, useHash: true }),
+    NgRouterModule.forRoot([
+        ...UPGRADE_ROUTES
+    ], { enableTracing: false, useHash: true }),
     CoreModule.forRoot(),
     NgUpgradeModule,
-    DashboardUpgradeModule
+    DashboardUpgradeModule,
+    BuilderModule
   ]
 })
 export class AppModule extends HybridAppModule {
