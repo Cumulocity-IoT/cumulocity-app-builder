@@ -14,6 +14,7 @@ import {
     AppBuilderConfigNavigationRegistrationService,
     AppBuilderConfigNavigationService
 } from "./navigation/app-builder-config-navigation.service";
+import {BrandingComponent} from "./branding/branding.component";
 
 @NgModule({
     imports: [
@@ -22,6 +23,9 @@ import {
             {
                 path: 'application/:applicationId/config',
                 component: DashboardConfigComponent
+            }, {
+                path: 'application/:applicationId/branding',
+                component: BrandingComponent
             }
         ]),
         CoreModule,
