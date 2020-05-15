@@ -25,7 +25,7 @@ type IApplicationBuilderApplication = IApplication & {
         <ng-container [ngSwitch]="deviceDetail">
             <div *ngSwitchCase="'smartrules'">Smart Rules</div>
             <div *ngSwitchCase="'alarms'">Alarms</div>
-            <div *ngSwitchCase="'data_explorer'">Data Explorer</div>
+            <legacy-data-explorer *ngSwitchCase="'data_explorer'">Data Explorer</legacy-data-explorer>
             <div *ngSwitchCase="'location'">Location</div>
             <dashboard-by-id *ngSwitchDefault [dashboardId]="dashboardId" [context]="context"></dashboard-by-id>
         </ng-container>
