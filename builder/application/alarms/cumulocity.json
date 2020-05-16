@@ -1,0 +1,14 @@
+{
+  "name": "Alarm management",
+  "ngModules": [
+    "c8y.parts.alarmList"
+  ],
+  "imports": [
+    "core/smartRules"
+  ],
+  "category": "Alarm",
+  "icon": "bell",
+  "color": "#F2DF0F",
+  "description": "Monitor alarms from all device in a common place. Simplify cooperation of monitoring personell with personalized alarm acknowledgment. Filter alarms based on their severity. View alarm details and jump directly to the impacted device. Contributes to the navigator and provides seperate views to browser alarms.",
+  "folderName": "alarmList"
+}

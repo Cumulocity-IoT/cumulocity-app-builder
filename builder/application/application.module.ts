@@ -6,6 +6,7 @@ import {CoreModule} from "@c8y/ngx-components";
 import {AppBuilderSmartRulesComponent} from "./app-builder-smart-rules.component";
 import {LegacyDataExplorerComponent} from "./dataexplorer/legacy-data-explorer.component";
 import {LegacySmartRulesComponent} from "./smartrules/legacy-smart-rules.component";
+import {LegacyAlarmsComponent} from "./alarms/legacy-alarms.component";
 
 @Injectable({
     providedIn: 'root',
@@ -64,7 +65,8 @@ export class DeviceContextDataResolverService implements Resolve<{context: strin
         AppBuilderContextDashboardComponent,
         AppBuilderSmartRulesComponent,
         LegacyDataExplorerComponent,
-        LegacySmartRulesComponent
+        LegacySmartRulesComponent,
+        LegacyAlarmsComponent,
     ]
 })
 export class ApplicationModule {}
