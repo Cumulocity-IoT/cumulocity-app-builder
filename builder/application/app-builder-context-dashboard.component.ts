@@ -73,7 +73,7 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
             this.tabs = tabs;
             if (this.deviceId) {
                 tabs.push({
-                    label: 'Smart Rules',
+                    label: 'Smart rules',
                     icon: 'asterisk',
                     priority: 3,
                     path: this.createDeviceTabPath('smartrules')
@@ -83,7 +83,7 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
                     priority: 2,
                     path: this.createDeviceTabPath('alarms')
                 }, {
-                    label: 'Data Explorer',
+                    label: 'Data explorer',
                     icon: 'bar-chart',
                     priority: 1,
                     path: this.createDeviceTabPath('data_explorer')

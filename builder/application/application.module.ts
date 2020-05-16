@@ -5,6 +5,7 @@ import {DashboardByIdModule} from "../../dashboard-by-id/dashboard-by-id.module"
 import {CoreModule} from "@c8y/ngx-components";
 import {AppBuilderSmartRulesComponent} from "./app-builder-smart-rules.component";
 import {LegacyDataExplorerComponent} from "./dataexplorer/legacy-data-explorer.component";
+import {LegacySmartRulesComponent} from "./smartrules/legacy-smart-rules.component";
 
 @Injectable({
     providedIn: 'root',
@@ -62,7 +63,8 @@ export class DeviceContextDataResolverService implements Resolve<{context: strin
     declarations: [
         AppBuilderContextDashboardComponent,
         AppBuilderSmartRulesComponent,
-        LegacyDataExplorerComponent
+        LegacyDataExplorerComponent,
+        LegacySmartRulesComponent
     ]
 })
 export class ApplicationModule {}

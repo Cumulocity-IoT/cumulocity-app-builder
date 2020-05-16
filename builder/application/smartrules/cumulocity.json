@@ -1,0 +1,13 @@
+{
+  "name": "Smart Rules UI",
+  "ngModules": [
+    "c8y.smartRulesUI",
+    "c8y.cockpit.config"
+  ],
+  "category": "Realtime analytics",
+  "description": "Adds Smart Rules UI elements like navigator item and views.",
+  "imports": [
+    "core/smartRules"
+  ],
+  "folderName": "smartRulesUI"
+}
