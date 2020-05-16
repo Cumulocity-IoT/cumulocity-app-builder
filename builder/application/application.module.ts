@@ -7,6 +7,7 @@ import {AppBuilderSmartRulesComponent} from "./app-builder-smart-rules.component
 import {LegacyDataExplorerComponent} from "./dataexplorer/legacy-data-explorer.component";
 import {LegacySmartRulesComponent} from "./smartrules/legacy-smart-rules.component";
 import {LegacyAlarmsComponent} from "./alarms/legacy-alarms.component";
+import {smartRulesAvailabilityProvider} from "./smartrules/smart-rules-availability.upgraded-provider";
 
 @Injectable({
     providedIn: 'root',
@@ -67,6 +68,9 @@ export class DeviceContextDataResolverService implements Resolve<{context: strin
         LegacyDataExplorerComponent,
         LegacySmartRulesComponent,
         LegacyAlarmsComponent,
+    ],
+    providers: [
+        smartRulesAvailabilityProvider
     ]
 })
 export class ApplicationModule {}

@@ -1,9 +1,10 @@
-import {Component, OnDestroy} from "@angular/core";
+import {Component, Inject, OnDestroy} from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
 import {Subscription} from "rxjs";
 import {ContextDashboardType} from "@c8y/ngx-components/context-dashboard";
 import { InventoryService, ApplicationService, IApplication } from "@c8y/client";
 import {last} from "lodash-es";
+import {SMART_RULES_AVAILABILITY_TOKEN} from "./smartrules/smart-rules-availability.upgraded-provider";
 
 type IApplicationBuilderApplication = IApplication & {
     applicationBuilder: {
@@ -52,7 +53,7 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
 
     subscriptions = new Subscription();
 
-    constructor(private activatedRoute: ActivatedRoute, private inventoryService: InventoryService, private applicationService: ApplicationService) {
+    constructor(private activatedRoute: ActivatedRoute, private inventoryService: InventoryService, private applicationService: ApplicationService, @Inject(SMART_RULES_AVAILABILITY_TOKEN) private c8ySmartRulesAvailability: any) {
         this.subscriptions.add(this.activatedRoute.paramMap.subscribe(async paramMap => {
             // Always defined
             this.applicationId = paramMap.get('applicationId');
@@ -71,12 +72,15 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
             const tabs = [];
             this.tabs = tabs;
             if (this.deviceId) {
+                if (this.c8ySmartRulesAvailability.shouldShowLocalSmartRules()) {
+                    tabs.push({
+                        label: 'Smart rules',
+                        icon: 'asterisk',
+                        priority: 3,
+                        path: this.createDeviceTabPath('smartrules')
+                    })
+                }
                 tabs.push({
-                    label: 'Smart rules',
-                    icon: 'asterisk',
-                    priority: 3,
-                    path: this.createDeviceTabPath('smartrules')
-                }, {
                     label: 'Alarms',
                     icon: 'bell',
                     priority: 2,
@@ -86,7 +90,7 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
                     icon: 'bar-chart',
                     priority: 1,
                     path: this.createDeviceTabPath('data_explorer')
-                })
+                });
             }
             if (this.tabGroup) {
                 const app = (await this.applicationService.detail(this.applicationId)).data as IApplicationBuilderApplication;
