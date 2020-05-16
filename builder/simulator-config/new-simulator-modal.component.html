@@ -1,0 +1,114 @@
+<wizard activeStepId="menu">
+    <wizard-step stepId="menu">
+        <div class="modal-header text-center bg-primary">
+            <div style="font-size: 62px;">
+                <span c8yIcon="c8y-simulator"></span>
+            </div>
+            <h4 class="text-uppercase" style="margin:0; letter-spacing: 0.15em;">Add Simulator</h4>
+        </div>
+        <div class="c8y-wizard-nav">
+            <span>Select Type</span>
+        </div>
+        <hr style="margin:0;">
+        <div class="modal-inner-scroll">
+            <div class="c8y-wizard-list-nav">
+                <ng-container *ngFor="let strategyFactory of simulationStrategiesService.strategies">
+                    <a class="list-group-item clickable" (click)="selectedStrategyFactory = strategyFactory; wizard.selectStep('device')">
+                    <ng-container *ngIf="strategyFactory.getSimulatorMetadata() as strategyMetadata">
+                        <span class="list-group-icon">
+                          <i [c8yIcon]="strategyMetadata.icon"></i>
+                        </span>
+                        <span>{{strategyMetadata.name}}</span>
+                    </ng-container>
+                    </a>
+                </ng-container>
+            </div>
+        </div>
+        <div class="c8y-wizard-footer">
+            <button class="btn btn-default" (click)="bsModalRef.hide()">Cancel</button>
+        </div>
+    </wizard-step>
+    <wizard-step stepId="device">
+        <div class="modal-header text-center bg-primary">
+            <div style="font-size: 62px;">
+                <span c8yIcon="c8y-simulator"></span>
+            </div>
+            <h4 class="text-uppercase" style="margin:0; letter-spacing: 0.15em;">Add Simulator</h4>
+        </div>
+        <div class="c8y-wizard-nav">
+            <span>Select Device</span>
+        </div>
+        <hr style="margin:0;">
+        <div class="modal-inner-scroll">
+            <div class="c8y-wizard-list-nav">
+                <a class="list-group-item clickable" (click)="deviceId = undefined; openSimulatorConfig()">
+                    <span class="list-group-icon">
+                      <i c8yIcon="plus-circle"></i>
+                    </span>
+                    <span>New Device</span>
+                </a>
+                <a class="list-group-item clickable" (click)="wizard.selectStep('select-device')">
+                    <span class="list-group-icon">
+                      <i c8yIcon="c8y-device"></i>
+                    </span>
+                    <span>Existing Device</span>
+                </a>
+            </div>
+        </div>
+        <div class="c8y-wizard-footer">
+            <button class="btn btn-default" (click)="wizard.selectStep('menu')">Back</button>
+            <button class="btn btn-default" (click)="bsModalRef.hide()">Cancel</button>
+        </div>
+    </wizard-step>
+    <wizard-step stepId="select-device">
+        <div class="modal-header text-center bg-primary">
+            <div style="font-size: 62px;">
+                <span c8yIcon="c8y-simulator"></span>
+            </div>
+            <h4 class="text-uppercase" style="margin:0; letter-spacing: 0.15em;">Add Simulator</h4>
+        </div>
+        <div class="c8y-wizard-nav">
+            <span>Select Device</span>
+        </div>
+        <hr style="margin:0;">
+        <div class="modal-inner-scroll">
+            <form class="c8y-wizard-form" name="newSimulatorForm">
+                <div class="form-group">
+                    <label for="deviceId"><span>Device ID</span></label>
+                    <input type="text" class="form-control" id="deviceId" name="deviceId" placeholder="e.g. 12345 (required)" required autofocus [(ngModel)]="deviceId">
+                </div>
+            </form>
+        </div>
+        <div class="c8y-wizard-footer">
+            <button class="btn btn-default" (click)="wizard.selectStep('device')">Back</button>
+            <button class="btn btn-default" (click)="bsModalRef.hide()">Cancel</button>
+            <button class="btn btn-primary" (click)="openSimulatorConfig()">Next <i c8yIcon="chevron-right"></i> </button>
+        </div>
+    </wizard-step>
+    <wizard-step stepId="config">
+        <div class="modal-header text-center bg-primary">
+            <div style="font-size: 62px;">
+                <span c8yIcon="c8y-simulator"></span>
+            </div>
+            <h4 class="text-uppercase" style="margin:0; letter-spacing: 0.15em;">Add Simulator</h4>
+        </div>
+        <div class="c8y-wizard-nav">
+            <span>{{selectedStrategyFactory ? selectedStrategyFactory.getSimulatorMetadata().name : ''}} Simulator Config</span>
+        </div>
+        <hr style="margin:0;">
+        <div class="modal-inner-scroll">
+            <form class="c8y-wizard-form" name="newSimulatorForm">
+                <div class="form-group">
+                    <label for="name"><span>Name</span></label>
+                    <input type="text" class="form-control" id="name" name="name" placeholder="e.g. My First Simulator (required)" required autofocus [(ngModel)]="simulatorName">
+                </div>
+                <ng-container #configWrapper></ng-container>
+            </form>
+        </div>
+        <div class="c8y-wizard-footer">
+            <button class="btn btn-default" (click)="wizard.selectStep('device')">Back</button>
+            <button class="btn btn-default" (click)="bsModalRef.hide()">Cancel</button>
+            <button class="btn btn-primary" [disabled]="busy" (click)="saveAndClose()">Save</button>
+        </div>
+    </wizard-step>
+</wizard>

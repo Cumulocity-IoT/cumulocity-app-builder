@@ -4,7 +4,7 @@ import {RouterModule} from "@angular/router";
 import {DashboardConfigComponent} from "./application-config/dashboard-config.component";
 import {EditDashboardModalComponent} from "./application-config/edit-dashboard-modal.component";
 import {NewDashboardModalComponent} from "./application-config/new-dashboard-modal.component";
-import {CoreModule, HOOK_NAVIGATOR_NODES} from "@c8y/ngx-components";
+import {AppStateService, CoreModule, HOOK_NAVIGATOR_NODES, LoginService} from "@c8y/ngx-components";
 import {IconSelectorModule} from "../icon-selector/icon-selector.module";
 import {SortableModule, TooltipModule} from "ngx-bootstrap";
 import {WizardModule} from "../wizard/wizard.module";
@@ -15,6 +15,10 @@ import {
     AppBuilderConfigNavigationService
 } from "./navigation/app-builder-config-navigation.service";
 import {BrandingComponent} from "./branding/branding.component";
+import {SimulatorConfigModule} from "./simulator-config/simulator-config.module";
+import {SimulatorCommunicationService} from "./simulator/mainthread/simulator-communication.service";
+import {AppIdService} from "./app-id.service";
+import {SimulatorConfigComponent} from "./simulator-config/simulator-config.component";
 
 @NgModule({
     imports: [
@@ -26,6 +30,9 @@ import {BrandingComponent} from "./branding/branding.component";
             }, {
                 path: 'application/:applicationId/branding',
                 component: BrandingComponent
+            }, {
+                path: 'application/:applicationId/simulator-config',
+                component: SimulatorConfigComponent
             }
         ]),
         CoreModule,
@@ -33,7 +40,8 @@ import {BrandingComponent} from "./branding/branding.component";
         SortableModule.forRoot(),
         WizardModule,
         TooltipModule.forRoot(),
-        BrandingModule.forRoot()
+        BrandingModule.forRoot(),
+        SimulatorConfigModule
     ],
     declarations: [
         DashboardConfigComponent,
@@ -52,4 +60,20 @@ import {BrandingComponent} from "./branding/branding.component";
         { provide: HOOK_NAVIGATOR_NODES, useExisting: AppBuilderConfigNavigationService, multi: true},
     ]
 })
-export class BuilderModule {}
+export class BuilderModule {
+    constructor(appStateService: AppStateService, loginService: LoginService, simSvc: SimulatorCommunicationService, appIdService: AppIdService) {
+        // Pass the app state to the worker from the main thread (Initially and every time it changes)
+        appStateService.currentUser.subscribe(async (user) => {
+            if (user != null) {
+                const token = localStorage.getItem(loginService.TOKEN_KEY) || sessionStorage.getItem(loginService.TOKEN_KEY);
+                const tfa = localStorage.getItem(loginService.TFATOKEN_KEY) || sessionStorage.getItem(loginService.TFATOKEN_KEY);
+                if (token) {
+                    return await simSvc.simulator.setUserAndCredentials(user, {token, tfa});
+                }
+            }
+            return await simSvc.simulator.setUserAndCredentials(user, {});
+        });
+        appStateService.currentTenant.subscribe(async (tenant) => await simSvc.simulator.setTenant(tenant));
+        appIdService.appId$.subscribe(async (appId) => await simSvc.simulator.setAppId(appId));
+    }
+}

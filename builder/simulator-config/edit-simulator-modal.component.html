@@ -1,0 +1,30 @@
+<div class="modal-header text-center bg-primary">
+    <div style="font-size: 62px;">
+        <span c8yIcon="c8y-simulator"></span>
+    </div>
+    <h4 class="text-uppercase" style="margin:0; letter-spacing: 0.15em;">Add Simulator</h4>
+</div>
+<div class="c8y-wizard-nav">
+    <span>{{''}} Simulator Config</span>
+</div>
+<hr style="margin:0;">
+<div class="modal-inner-scroll">
+    <form class="c8y-wizard-form" name="newSimulatorForm">
+        <div class="form-group">
+            <label for="name"><span>Name</span></label>
+            <input type="text" class="form-control" id="name" name="name"
+                placeholder="e.g. My First Simulator (required)" 
+                [(ngModel)]="simulatorConfig.name">
+        </div>
+          <div class="form-group">
+              <label for="deviceId"><span>Device ID</span></label>
+              <input type="text" class="form-control" id="deviceId" name="deviceId" placeholder="e.g. 12345 (required)"
+                  [(ngModel)]="simulatorConfig.config.deviceId">
+          </div>
+        <ng-container #configWrapper></ng-container>
+    </form>
+</div>
+<div class="c8y-wizard-footer">
+    <button class="btn btn-default" (click)="bsModalRef.hide()">Cancel</button>
+    <button class="btn btn-primary" [disabled]="busy" (click)="saveAndClose()">Save</button>
+</div>
