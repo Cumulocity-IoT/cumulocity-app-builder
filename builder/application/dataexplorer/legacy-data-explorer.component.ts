@@ -23,11 +23,21 @@ declare const angular: any;
 import './cumulocity.json';
 
 angular.module("c8y.cockpit.dataPointExplorerUI", ["c8y.cockpit.dataPointExplorer"])
-    .component('legacyDataExplorer', {
-        template: require("@c8y/ng1-modules/dataPointExplorer/views/explorer.html").default,
-        controller: "c8yDataPointExplorerCtrl"
-    });
-
+    // Use a directive rather than a component so that we can hack the $routeParams before the template is constructed
+    .directive('legacyDataExplorer', ['$routeParams', 'c8yUiUtil', function ($routeParams, c8yUiUtil) {
+        const context = c8yUiUtil.getContext();
+        if (context.context === 'device') {
+            $routeParams.deviceId = context.id;
+        } else if (context.context != null) {
+            $routeParams.groupId = context.id;
+        }
+        return {
+            restrict: 'E',
+            template: require("@c8y/ng1-modules/dataPointExplorer/views/explorer.html").default,
+            controller: "c8yDataPointExplorerCtrl",
+            controllerAs: '$ctrl'
+        }
+    }]);
 
 @Directive({
     selector: 'legacy-data-explorer'

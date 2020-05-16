@@ -23,10 +23,9 @@ type IApplicationBuilderApplication = IApplication & {
         <c8y-tab *ngFor="let tab of tabs" [icon]="tab.icon" [label]="tab.label" [path]="tab.path" [priority]="tab.priority"></c8y-tab>
        
         <ng-container [ngSwitch]="deviceDetail">
-            <div *ngSwitchCase="'smartrules'">Smart Rules</div>
-            <legacy-alarms *ngSwitchCase="'alarms'">Alarms</legacy-alarms>
-            <legacy-data-explorer *ngSwitchCase="'data_explorer'">Data Explorer</legacy-data-explorer>
-            <div *ngSwitchCase="'location'">Location</div>
+            <legacy-smart-rules *ngSwitchCase="'smartrules'"></legacy-smart-rules>
+            <legacy-alarms *ngSwitchCase="'alarms'"></legacy-alarms>
+            <legacy-data-explorer *ngSwitchCase="'data_explorer'"></legacy-data-explorer>
             <dashboard-by-id *ngSwitchDefault [dashboardId]="dashboardId" [context]="context"></dashboard-by-id>
         </ng-container>
     `
@@ -87,11 +86,6 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
                     icon: 'bar-chart',
                     priority: 1,
                     path: this.createDeviceTabPath('data_explorer')
-                }, {
-                    label: 'Location',
-                    icon: 'location-arrow',
-                    priority: 0,
-                    path: this.createDeviceTabPath('location')
                 })
             }
             if (this.tabGroup) {
