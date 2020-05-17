@@ -8,6 +8,7 @@ import {BuilderModule} from "./builder/builder.module";
 import {filter, first, map, startWith, tap, withLatestFrom} from "rxjs/operators";
 import { IUser } from '@c8y/client';
 import {SimulationStrategiesModule} from "./simulation-strategies/simulation-strategies.module";
+import {CustomWidgetsModule} from "./custom-widgets/custom-widgets.module";
 
 @NgModule({
   imports: [
@@ -22,7 +23,8 @@ import {SimulationStrategiesModule} from "./simulation-strategies/simulation-str
     NgUpgradeModule,
     DashboardUpgradeModule,
     BuilderModule,
-    SimulationStrategiesModule
+    SimulationStrategiesModule,
+    CustomWidgetsModule
   ]
 })
 export class AppModule extends HybridAppModule {
