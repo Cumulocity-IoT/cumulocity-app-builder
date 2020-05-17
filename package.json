@@ -57,6 +57,7 @@
       "name": "app-builder",
       "contextPath": "app-builder",
       "key": "app-builder-application-key",
+      "brandingEntry": "./ui-assets/index.less",
       "tabsHorizontal": true,
       "upgrade": true,
       "rightDrawer": true,
