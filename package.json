@@ -35,7 +35,7 @@
     "core-js": "^3.4.0",
     "d3-color": "^1.4.1",
     "delay": "^4.3.0",
-    "fontawesome": "^5.6.3",
+    "fontawesome": "4.7.2",
     "lodash-es": "^4.0.0",
     "ngx-bootstrap": "5.5.0",
     "ngx-markdown": "^8.2.2",
