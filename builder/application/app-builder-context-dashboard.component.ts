@@ -2,21 +2,10 @@ import {Component, Inject, OnDestroy} from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
 import {Subscription} from "rxjs";
 import {ContextDashboardType} from "@c8y/ngx-components/context-dashboard";
-import { InventoryService, ApplicationService, IApplication } from "@c8y/client";
+import { InventoryService, ApplicationService } from "@c8y/client";
 import {last} from "lodash-es";
 import {SMART_RULES_AVAILABILITY_TOKEN} from "./smartrules/smart-rules-availability.upgraded-provider";
-
-type IApplicationBuilderApplication = IApplication & {
-    applicationBuilder: {
-        dashboards: {
-            id: string,
-            name: string,
-            tabGroup?: string,
-            visibility?: '' | 'hidden' | 'no-nav',
-            icon: string
-        }[]
-    }
-}
+import {IApplicationBuilderApplication} from "../iapplication-builder-application";
 
 @Component({
     selector: 'app-builder-context-dashboard',
