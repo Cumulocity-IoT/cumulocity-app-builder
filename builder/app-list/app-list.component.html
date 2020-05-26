@@ -1,0 +1,40 @@
+<c8y-title>Applications</c8y-title>
+
+<div class="card-group interact-grid">
+    <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2" style="min-height: 194px;" *ngIf="userHasAdminRights">
+        <a class="card add-card clickable" (click)="createAppWizard()">
+            <i c8yIcon="plus-square"></i><br>
+            Add application
+        </a>
+    </div>
+    <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2" *ngFor="let app of applications | async">
+        <div class="card clickable" (click)="openApp(app)">
+            <div class="dropdown card-actions" dropdown (click)="$event.stopPropagation()" *ngIf="userHasAdminRights">
+                <button title="Settings" class="dropdown-toggle c8y-dropdown" dropdownToggle type="button">
+                    <i c8yIcon="ellipsis-v"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-right" *dropdownMenu role="menu">
+                    <li role="menuitem">
+                        <a class="dropdown-item" (click)="openApp(app, '/config')">
+                            <i c8yIcon="edit"></i> Edit
+                        </a>
+                    </li>
+                    <li role="menuitem">
+                        <a (click)="deleteApplication(app.id)" class="dropdown-item clickable">
+                            <i c8yIcon="times"></i> Remove
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-block text-center" style="margin-bottom: 5px;">
+                <h1 style="margin: 15px 0 10px; font-size: 42px;"><c8y-app-icon [app]="app"></c8y-app-icon></h1>
+                <p style="word-wrap: break-word;" class="e2e-appCardName">{{app.name}}</p>
+            </div>
+            <div class="card-actions-group">
+                <a class="clickable">
+                    <i c8yIcon="external-link"></i> Open
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -38,6 +38,7 @@
     "fontawesome": "^5.6.3",
     "lodash-es": "^4.0.0",
     "ngx-bootstrap": "5.5.0",
+    "ngx-markdown": "^8.2.2",
     "rxjs": "~6.4.0",
     "url-search-params-polyfill": "6.0.0",
     "worker-plugin": "^4.0.3",

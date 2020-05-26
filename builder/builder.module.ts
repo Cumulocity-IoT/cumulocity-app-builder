@@ -19,20 +19,38 @@ import {SimulatorConfigModule} from "./simulator-config/simulator-config.module"
 import {SimulatorCommunicationService} from "./simulator/mainthread/simulator-communication.service";
 import {AppIdService} from "./app-id.service";
 import {SimulatorConfigComponent} from "./simulator-config/simulator-config.component";
+import {AppListModule, RedirectToDefaultApplicationOrBuilder} from "./app-list/app-list.module";
+import {HelpComponent} from "./help/help.component";
+import {MarkdownModule} from "ngx-markdown";
+import {BrandingDirtyGuardService} from "./branding/branding-dirty-guard.service";
+import {AppListComponent} from "./app-list/app-list.component";
 
 @NgModule({
     imports: [
         ApplicationModule,
         RouterModule.forChild([
             {
+                path: 'application-builder',
+                component: AppListComponent
+            },
+            {
+                path: '',
+                pathMatch: 'full',
+                canActivate: [RedirectToDefaultApplicationOrBuilder],
+                children: []
+            }, {
                 path: 'application/:applicationId/config',
                 component: DashboardConfigComponent
             }, {
                 path: 'application/:applicationId/branding',
-                component: BrandingComponent
+                component: BrandingComponent,
+                canDeactivate: [BrandingDirtyGuardService]
             }, {
                 path: 'application/:applicationId/simulator-config',
                 component: SimulatorConfigComponent
+            }, {
+                path: 'help',
+                component: HelpComponent
             }
         ]),
         CoreModule,
@@ -41,12 +59,15 @@ import {SimulatorConfigComponent} from "./simulator-config/simulator-config.comp
         WizardModule,
         TooltipModule.forRoot(),
         BrandingModule.forRoot(),
-        SimulatorConfigModule
+        SimulatorConfigModule,
+        AppListModule,
+        MarkdownModule.forRoot()
     ],
     declarations: [
         DashboardConfigComponent,
         NewDashboardModalComponent,
-        EditDashboardModalComponent
+        EditDashboardModalComponent,
+        HelpComponent
     ],
     entryComponents: [
         NewDashboardModalComponent,
