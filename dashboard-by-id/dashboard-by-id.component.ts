@@ -1,6 +1,6 @@
 import {Component, Inject, Input, OnChanges, OnInit, Renderer2, SimpleChanges} from "@angular/core";
-import {InventoryService, UserService} from "@c8y/client";
-import {AlertService, AppStateService, DashboardChange, DashboardChildChange} from "@c8y/ngx-components";
+import {InventoryService} from "@c8y/client";
+import {AlertService, DashboardChange, DashboardChildChange} from "@c8y/ngx-components";
 import {BsModalService} from "ngx-bootstrap";
 import {ContextDashboardComponent} from "./context-dashboard.component";
 import {WidgetService} from "./widget.service";
@@ -53,14 +53,12 @@ export class DashboardByIdComponent extends ContextDashboardComponent implements
         contextDashboardService: ContextDashboardService,
         alert: AlertService,
         renderer: Renderer2,
-        user: UserService,
-        appState: AppStateService,
         @Inject(CONTEXT_DASHBOARD_CONFIG) moduleConfig,
         widgetService: WidgetService,
         bsModal: BsModalService,
         private inventoryService: InventoryService,
     ) {
-        super(route, router, contextDashboardService, alert, renderer, user, appState, moduleConfig, widgetService, bsModal);
+        super(route, router, contextDashboardService, alert, renderer, moduleConfig, widgetService, bsModal);
         // @ts-ignore
         this.dataSub = new Subscription();
     }
@@ -88,6 +86,6 @@ export class DashboardByIdComponent extends ContextDashboardComponent implements
 
     // The parent class seems to have the wrong type for this argument so we change the type.... maybe it's a bug in c8y?
     update_patched($event: DashboardChange) {
-        super.update($event as any as DashboardChildChange);
+        return super.updateDashboardChildren($event as any as DashboardChildChange);
     }
 }
