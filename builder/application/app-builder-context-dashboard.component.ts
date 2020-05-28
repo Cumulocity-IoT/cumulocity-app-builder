@@ -16,7 +16,10 @@ import {IApplicationBuilderApplication} from "../iapplication-builder-applicatio
             <legacy-smart-rules *ngSwitchCase="'smartrules'"></legacy-smart-rules>
             <legacy-alarms *ngSwitchCase="'alarms'"></legacy-alarms>
             <legacy-data-explorer *ngSwitchCase="'data_explorer'"></legacy-data-explorer>
-            <dashboard-by-id *ngSwitchDefault [dashboardId]="dashboardId" [context]="context"></dashboard-by-id>
+            <ng-container *ngSwitchDefault>
+                <c8y-title><h1>Dashboard</h1></c8y-title>
+                <dashboard-by-id  [dashboardId]="dashboardId" [context]="context"></dashboard-by-id>
+            </ng-container>
         </ng-container>
     `
 })
@@ -66,19 +69,19 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
                         label: 'Smart rules',
                         icon: 'asterisk',
                         priority: 3,
-                        path: this.createDeviceTabPath('smartrules')
+                        path: this.createDeviceTabPath(this.dashboardId, 'smartrules')
                     })
                 }
                 tabs.push({
                     label: 'Alarms',
                     icon: 'bell',
                     priority: 2,
-                    path: this.createDeviceTabPath('alarms')
+                    path: this.createDeviceTabPath(this.dashboardId, 'alarms')
                 }, {
                     label: 'Data explorer',
                     icon: 'bar-chart',
                     priority: 1,
-                    path: this.createDeviceTabPath('data_explorer')
+                    path: this.createDeviceTabPath(this.dashboardId, 'data_explorer')
                 });
             }
             if (this.tabGroup) {
@@ -101,7 +104,7 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
                         label: last(dashboard.name.split(/[/\\]/)),
                         icon: dashboard.icon,
                         priority: 1000,
-                        path: this.createDeviceTabPath()
+                        path: this.createDeviceTabPath(dashboard.id)
                     });
                 } else {
                     // If for some reason the user has navigated to a dashboard that isn't part of the app then add the tab anyway
@@ -110,7 +113,7 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
                         label: 'Dashboard',
                         icon: 'th',
                         priority: 1000,
-                        path: this.createDeviceTabPath()
+                        path: this.createDeviceTabPath(this.dashboardId)
                     });
                 }
             }
@@ -121,12 +124,13 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
         this.subscriptions.unsubscribe();
     }
 
-    createDeviceTabPath(deviceDetail?: string) {
+    createDeviceTabPath(dashboardId: string, deviceDetail?: string) {
         let path = `/application/${this.applicationId}`;
         if (this.tabGroup) {
             path += `/tabgroup/${this.tabGroup}`;
         }
-        path += `/device/${this.deviceId}`
+        path += `/dashboard/${dashboardId}`;
+        path += `/device/${this.deviceId}`;
         if (deviceDetail) {
             path += `/${deviceDetail}`;
         }
