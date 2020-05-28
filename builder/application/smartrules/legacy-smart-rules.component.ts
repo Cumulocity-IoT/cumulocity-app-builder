@@ -34,7 +34,11 @@ angular.module("c8y.smartRulesUI", ["c8y.smartRules"])
         return {
             restrict: 'E',
             template: require("@c8y/ng1-modules/smartRules/views/list.html").default,
-            controller: function() {},
+            controller: ['c8yTitle', 'gettext', (c8yTitle, gettext) => {
+                c8yTitle.changeTitle({
+                    title: gettext('Smart Rules')
+                });
+            }],
             controllerAs: '$ctrl'
         }
     }]);
