@@ -41,7 +41,8 @@ export interface DashboardConfig {
 }
 
 @Component({
-    templateUrl: './dashboard-config.component.html'
+    templateUrl: './dashboard-config.component.html',
+    styleUrls: ['./dashboard-config.component.less']
 })
 export class DashboardConfigComponent implements OnDestroy {
     newAppName: string;
