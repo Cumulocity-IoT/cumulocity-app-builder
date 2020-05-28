@@ -16,10 +16,7 @@ import {IApplicationBuilderApplication} from "../iapplication-builder-applicatio
             <legacy-smart-rules *ngSwitchCase="'smartrules'"></legacy-smart-rules>
             <legacy-alarms *ngSwitchCase="'alarms'"></legacy-alarms>
             <legacy-data-explorer *ngSwitchCase="'data_explorer'"></legacy-data-explorer>
-            <ng-container *ngSwitchDefault>
-                <c8y-title><h1>Dashboard</h1></c8y-title>
-                <dashboard-by-id  [dashboardId]="dashboardId" [context]="context"></dashboard-by-id>
-            </ng-container>
+            <dashboard-by-id *ngSwitchDefault [dashboardId]="dashboardId" [context]="context"></dashboard-by-id>
         </ng-container>
     `
 })
