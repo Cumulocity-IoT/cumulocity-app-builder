@@ -1,0 +1,65 @@
+diff --git a/node_modules/@c8y/ngx-components/bundles/c8y-ngx-components-upgrade.umd.js b/node_modules/@c8y/ngx-components/bundles/c8y-ngx-components-upgrade.umd.js
+index 440fb9d..d7db5cc 100644
+--- a/node_modules/@c8y/ngx-components/bundles/c8y-ngx-components-upgrade.umd.js
++++ b/node_modules/@c8y/ngx-components/bundles/c8y-ngx-components-upgrade.umd.js
+@@ -952,7 +952,7 @@
+                     configCmp = "<ng-include src=\"'" + widgetConfig.settings.configTemplateUrl + "'\"></ng-include>";
+                 }
+             }
+-            element.innerHTML = "\n    <ng-form name=\"forms.componentForm\">\n      <div class=\"form-group\"\n        ng-if=\"!settings.noDeviceTarget\"\n        ng-style=\"{height: settings.hideTarget && '0', overflow: 'hidden'}\"\n      >\n        <label translate>" + ngxComponents.gettext('Target assets or devices') + "</label>\n        <c8y-device-selector-combo parent=\"rootId\"\n          selected-child-device=\"config.device\"\n          groups-selectable=\"settings.groupsSelectable\"\n        ></c8y-device-selector-combo>\n      </div>\n      " + configCmp + "\n    </ng-form>";
++            element.innerHTML = "\n    <ng-form name=\"forms.componentForm\">\n      <div class=\"form-group\"\n        ng-if=\"!settings.noDeviceTarget\"\n        ng-style=\"{height: settings.hideTarget && '0', overflow: 'hidden'}\"\n      >\n        <label translate>" + ngxComponents.gettext('Target assets or devices') + "</label>\n        <c8y-device-selector-combo initial-selection=\"rootId\"\n          selected-child-device=\"config.device\"\n          groups-selectable=\"settings.groupsSelectable\"\n        ></c8y-device-selector-combo>\n      </div>\n      " + configCmp + "\n    </ng-form>";
+             scope.$watch('forms.componentForm.$invalid', function (formStatus) {
+                 _this.contextDashboardService.formDisabled = formStatus;
+             });
+diff --git a/node_modules/@c8y/ngx-components/esm2015/upgrade/dashboard/dashboard-bridge.service.js b/node_modules/@c8y/ngx-components/esm2015/upgrade/dashboard/dashboard-bridge.service.js
+index ec854ba..9fc6c26 100644
+--- a/node_modules/@c8y/ngx-components/esm2015/upgrade/dashboard/dashboard-bridge.service.js
++++ b/node_modules/@c8y/ngx-components/esm2015/upgrade/dashboard/dashboard-bridge.service.js
+@@ -109,7 +109,7 @@ let DashboardBridgeService = class DashboardBridgeService {
+         ng-style="{height: settings.hideTarget && '0', overflow: 'hidden'}"
+       >
+         <label translate>${gettext('Target assets or devices')}</label>
+-        <c8y-device-selector-combo parent="rootId"
++        <c8y-device-selector-combo initial-selection="rootId"
+           selected-child-device="config.device"
+           groups-selectable="settings.groupsSelectable"
+         ></c8y-device-selector-combo>
+diff --git a/node_modules/@c8y/ngx-components/esm5/upgrade/dashboard/dashboard-bridge.service.js b/node_modules/@c8y/ngx-components/esm5/upgrade/dashboard/dashboard-bridge.service.js
+index 59444a1..36bbcf1 100644
+--- a/node_modules/@c8y/ngx-components/esm5/upgrade/dashboard/dashboard-bridge.service.js
++++ b/node_modules/@c8y/ngx-components/esm5/upgrade/dashboard/dashboard-bridge.service.js
+@@ -129,7 +129,7 @@ var DashboardBridgeService = /** @class */ (function () {
+                 configCmp = "<ng-include src=\"'" + widgetConfig.settings.configTemplateUrl + "'\"></ng-include>";
+             }
+         }
+-        element.innerHTML = "\n    <ng-form name=\"forms.componentForm\">\n      <div class=\"form-group\"\n        ng-if=\"!settings.noDeviceTarget\"\n        ng-style=\"{height: settings.hideTarget && '0', overflow: 'hidden'}\"\n      >\n        <label translate>" + gettext('Target assets or devices') + "</label>\n        <c8y-device-selector-combo parent=\"rootId\"\n          selected-child-device=\"config.device\"\n          groups-selectable=\"settings.groupsSelectable\"\n        ></c8y-device-selector-combo>\n      </div>\n      " + configCmp + "\n    </ng-form>";
++        element.innerHTML = "\n    <ng-form name=\"forms.componentForm\">\n      <div class=\"form-group\"\n        ng-if=\"!settings.noDeviceTarget\"\n        ng-style=\"{height: settings.hideTarget && '0', overflow: 'hidden'}\"\n      >\n        <label translate>" + gettext('Target assets or devices') + "</label>\n        <c8y-device-selector-combo initial-selection=\"rootId\"\n          selected-child-device=\"config.device\"\n          groups-selectable=\"settings.groupsSelectable\"\n        ></c8y-device-selector-combo>\n      </div>\n      " + configCmp + "\n    </ng-form>";
+         scope.$watch('forms.componentForm.$invalid', function (formStatus) {
+             _this.contextDashboardService.formDisabled = formStatus;
+         });
+diff --git a/node_modules/@c8y/ngx-components/fesm2015/c8y-ngx-components-upgrade.js b/node_modules/@c8y/ngx-components/fesm2015/c8y-ngx-components-upgrade.js
+index 8d508c2..f32ff9f 100644
+--- a/node_modules/@c8y/ngx-components/fesm2015/c8y-ngx-components-upgrade.js
++++ b/node_modules/@c8y/ngx-components/fesm2015/c8y-ngx-components-upgrade.js
+@@ -702,7 +702,7 @@ let DashboardBridgeService = class DashboardBridgeService {
+         ng-style="{height: settings.hideTarget && '0', overflow: 'hidden'}"
+       >
+         <label translate>${gettext('Target assets or devices')}</label>
+-        <c8y-device-selector-combo parent="rootId"
++        <c8y-device-selector-combo initial-selection="rootId"
+           selected-child-device="config.device"
+           groups-selectable="settings.groupsSelectable"
+         ></c8y-device-selector-combo>
+diff --git a/node_modules/@c8y/ngx-components/fesm5/c8y-ngx-components-upgrade.js b/node_modules/@c8y/ngx-components/fesm5/c8y-ngx-components-upgrade.js
+index 2f58bc6..8e7c827 100644
+--- a/node_modules/@c8y/ngx-components/fesm5/c8y-ngx-components-upgrade.js
++++ b/node_modules/@c8y/ngx-components/fesm5/c8y-ngx-components-upgrade.js
+@@ -765,7 +765,7 @@ var DashboardBridgeService = /** @class */ (function () {
+                 configCmp = "<ng-include src=\"'" + widgetConfig.settings.configTemplateUrl + "'\"></ng-include>";
+             }
+         }
+-        element.innerHTML = "\n    <ng-form name=\"forms.componentForm\">\n      <div class=\"form-group\"\n        ng-if=\"!settings.noDeviceTarget\"\n        ng-style=\"{height: settings.hideTarget && '0', overflow: 'hidden'}\"\n      >\n        <label translate>" + gettext('Target assets or devices') + "</label>\n        <c8y-device-selector-combo parent=\"rootId\"\n          selected-child-device=\"config.device\"\n          groups-selectable=\"settings.groupsSelectable\"\n        ></c8y-device-selector-combo>\n      </div>\n      " + configCmp + "\n    </ng-form>";
++        element.innerHTML = "\n    <ng-form name=\"forms.componentForm\">\n      <div class=\"form-group\"\n        ng-if=\"!settings.noDeviceTarget\"\n        ng-style=\"{height: settings.hideTarget && '0', overflow: 'hidden'}\"\n      >\n        <label translate>" + gettext('Target assets or devices') + "</label>\n        <c8y-device-selector-combo initial-selection=\"rootId\"\n          selected-child-device=\"config.device\"\n          groups-selectable=\"settings.groupsSelectable\"\n        ></c8y-device-selector-combo>\n      </div>\n      " + configCmp + "\n    </ng-form>";
+         scope.$watch('forms.componentForm.$invalid', function (formStatus) {
+             _this.contextDashboardService.formDisabled = formStatus;
+         });
