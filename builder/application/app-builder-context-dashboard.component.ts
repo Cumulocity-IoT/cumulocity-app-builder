@@ -2,10 +2,11 @@ import {Component, Inject, OnDestroy} from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
 import {Subscription} from "rxjs";
 import {ContextDashboardType} from "@c8y/ngx-components/context-dashboard";
-import { InventoryService, ApplicationService } from "@c8y/client";
+import { InventoryService, ApplicationService, UserService } from "@c8y/client";
 import {last} from "lodash-es";
 import {SMART_RULES_AVAILABILITY_TOKEN} from "./smartrules/smart-rules-availability.upgraded-provider";
 import {IApplicationBuilderApplication} from "../iapplication-builder-application";
+import {AppStateService} from "@c8y/ngx-components";
 
 @Component({
     selector: 'app-builder-context-dashboard',
@@ -16,7 +17,7 @@ import {IApplicationBuilderApplication} from "../iapplication-builder-applicatio
             <legacy-smart-rules *ngSwitchCase="'smartrules'"></legacy-smart-rules>
             <legacy-alarms *ngSwitchCase="'alarms'"></legacy-alarms>
             <legacy-data-explorer *ngSwitchCase="'data_explorer'"></legacy-data-explorer>
-            <dashboard-by-id *ngSwitchDefault [dashboardId]="dashboardId" [context]="context"></dashboard-by-id>
+            <dashboard-by-id *ngSwitchDefault [dashboardId]="dashboardId" [context]="context" [disabled]="disabled"></dashboard-by-id>
         </ng-container>
     `
 })
@@ -33,6 +34,8 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
         type: ContextDashboardType
     }> = {}
 
+    disabled = true;
+
     tabs: {
         label: string,
         icon: string,
@@ -42,7 +45,14 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
 
     subscriptions = new Subscription();
 
-    constructor(private activatedRoute: ActivatedRoute, private inventoryService: InventoryService, private applicationService: ApplicationService, @Inject(SMART_RULES_AVAILABILITY_TOKEN) private c8ySmartRulesAvailability: any) {
+    constructor(
+        private activatedRoute: ActivatedRoute,
+        private inventoryService: InventoryService,
+        private applicationService: ApplicationService,
+        @Inject(SMART_RULES_AVAILABILITY_TOKEN) private c8ySmartRulesAvailability: any,
+        private userService: UserService,
+        private appStateService: AppStateService
+    ) {
         this.subscriptions.add(this.activatedRoute.paramMap.subscribe(async paramMap => {
             // Always defined
             this.applicationId = paramMap.get('applicationId');
@@ -55,6 +65,11 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
             this.context = {
                 id: this.deviceId
             }
+
+            // The user may have simulator access (INVENTORY_ADMIN)
+            // but we don't necessarily want them messing with the dashboards unless they have app edit permissions
+            // A security hole but not a major one
+            this.disabled = !userService.hasAllRoles(appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN","ROLE_APPLICATION_MANAGEMENT_ADMIN"]);
 
             // TODO: check to see if applicationId + dashboardId/tabGroup has changed we don't need to reset the tabs if they haven't - it'll stop the flashing
 
@@ -142,5 +157,9 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
             path += `/device/${this.deviceId}`
         }
         return path;
+    }
+
+    isDashboardDisabled() {
+        return
     }
 }

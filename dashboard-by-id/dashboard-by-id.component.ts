@@ -46,6 +46,8 @@ export class DashboardByIdComponent extends ContextDashboardComponent implements
         name: string,
         type: ContextDashboardType
     }> = {}
+    // Don't want to override the base implementation of disabled hence the '2'
+    @Input('disabled') disabled2: boolean;
 
     constructor(
         route: ActivatedRoute,
@@ -73,6 +75,9 @@ export class DashboardByIdComponent extends ContextDashboardComponent implements
             this.widgets = [];
             this.dashboard = undefined;
             await this.loadDashboardId(this.dashboardId);
+        }
+        if (changes.disabled2) {
+            this.disabled = this.disabled2;
         }
     }
 
