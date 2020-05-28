@@ -21,6 +21,7 @@ import { BsModalRef } from 'ngx-bootstrap/modal';
 import {ApplicationService, InventoryService} from '@c8y/client';
 import {WizardComponent} from "../../wizard/wizard.component";
 import {AppBuilderNavigationService} from "../navigation/app-builder-navigation.service";
+import {IApplicationBuilderApplication} from "../iapplication-builder-application";
 
 @Component({
     templateUrl: './edit-dashboard-modal.component.html'
@@ -37,7 +38,7 @@ export class EditDashboardModalComponent {
 
     index: number = 0;
 
-    app: any;
+    app: IApplicationBuilderApplication;
 
     @ViewChild(WizardComponent, {static: true}) wizard: WizardComponent;
 
@@ -47,6 +48,16 @@ export class EditDashboardModalComponent {
         this.busy = true;
 
         const dashboard = this.app.applicationBuilder.dashboards[this.index];
+
+        const dashboardManagedObject = (await this.inventoryService.detail(dashboard.id)).data;
+        if (dashboardManagedObject.c8y_Dashboard.name === dashboard.name) {
+            dashboardManagedObject.c8y_Dashboard.name = this.dashboardName;
+            await this.inventoryService.update({
+                id: dashboard.id,
+                c8y_Dashboard: dashboardManagedObject.c8y_Dashboard
+            });
+        }
+
         dashboard.name = this.dashboardName;
         dashboard.visibility = this.dashboardVisibility;
         dashboard.tabGroup = this.tabGroup;
