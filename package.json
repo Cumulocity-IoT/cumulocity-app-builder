@@ -1,7 +1,7 @@
 {
   "name": "app-builder",
   "version": "1.2.0-rc.1",
-  "description": "",
+  "description": "Application builder for Cumulocity (written by Software AG Global Presales)",
   "main": "index.ts",
   "scripts": {
     "start": "c8ycli server --env.extraWebpackConfig=./extra-webpack.config.js",
@@ -10,8 +10,8 @@
     "postinstall": "patch-package && patch-package --patch-dir node_modules/cumulocity-runtime-widget-loader/patches"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Richard Peach - Software AG, Global Presales",
+  "license": "Apache 2.0",
   "dependencies": {
     "@angular/animations": "8.2.13",
     "@angular/cdk": "8.2.3",
