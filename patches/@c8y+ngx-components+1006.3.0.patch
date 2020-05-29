@@ -11,32 +11,6 @@ index 440fb9d..d7db5cc 100644
              scope.$watch('forms.componentForm.$invalid', function (formStatus) {
                  _this.contextDashboardService.formDisabled = formStatus;
              });
-diff --git a/node_modules/@c8y/ngx-components/bundles/c8y-ngx-components.umd.js b/node_modules/@c8y/ngx-components/bundles/c8y-ngx-components.umd.js
-index 66ed92c..1322ee4 100644
---- a/node_modules/@c8y/ngx-components/bundles/c8y-ngx-components.umd.js
-+++ b/node_modules/@c8y/ngx-components/bundles/c8y-ngx-components.umd.js
-@@ -735,7 +735,7 @@
-             ? rxjs.of([])
-             : rxjs.defer(function () {
-                 var factoryObservables = resolveInjectedFactories(factories).map(function (f) {
--                    return toObservable(Array.isArray(f) ? f : f.get(getActivatedRoute(router)), withFirstEmpty);
-+                    return toObservable(f.get === undefined ? f : f.get(getActivatedRoute(router)), withFirstEmpty);
-                 });
-                 return rxjs.combineLatest.apply(void 0, __spread(factoryObservables));
-             }).pipe(operators.map(function (results) { return sortByPriority([].concat.apply([], __spread(results))); }));
-diff --git a/node_modules/@c8y/ngx-components/esm2015/core/common/extension-hooks.js b/node_modules/@c8y/ngx-components/esm2015/core/common/extension-hooks.js
-index 4e580db..4ccd1b2 100644
---- a/node_modules/@c8y/ngx-components/esm2015/core/common/extension-hooks.js
-+++ b/node_modules/@c8y/ngx-components/esm2015/core/common/extension-hooks.js
-@@ -10,7 +10,7 @@ export function fromFactories(factories, router, withFirstEmpty = true) {
-         ? of([])
-         : defer(() => {
-             const factoryObservables = resolveInjectedFactories(factories).map(f => {
--                return toObservable(Array.isArray(f) ? f : f.get(getActivatedRoute(router)), withFirstEmpty);
-+                return toObservable(f.get === undefined ? f : f.get(getActivatedRoute(router)), withFirstEmpty);
-             });
-             return combineLatest(...factoryObservables);
-         }).pipe(map(results => sortByPriority([].concat(...results))));
 diff --git a/node_modules/@c8y/ngx-components/esm2015/upgrade/dashboard/dashboard-bridge.service.js b/node_modules/@c8y/ngx-components/esm2015/upgrade/dashboard/dashboard-bridge.service.js
 index ec854ba..9fc6c26 100644
 --- a/node_modules/@c8y/ngx-components/esm2015/upgrade/dashboard/dashboard-bridge.service.js
@@ -50,19 +24,6 @@ index ec854ba..9fc6c26 100644
            selected-child-device="config.device"
            groups-selectable="settings.groupsSelectable"
          ></c8y-device-selector-combo>
-diff --git a/node_modules/@c8y/ngx-components/esm5/core/common/extension-hooks.js b/node_modules/@c8y/ngx-components/esm5/core/common/extension-hooks.js
-index ef898ef..48e0c2c 100644
---- a/node_modules/@c8y/ngx-components/esm5/core/common/extension-hooks.js
-+++ b/node_modules/@c8y/ngx-components/esm5/core/common/extension-hooks.js
-@@ -12,7 +12,7 @@ export function fromFactories(factories, router, withFirstEmpty) {
-         ? of([])
-         : defer(function () {
-             var factoryObservables = resolveInjectedFactories(factories).map(function (f) {
--                return toObservable(Array.isArray(f) ? f : f.get(getActivatedRoute(router)), withFirstEmpty);
-+                return toObservable(f.get === undefined ? f : f.get(getActivatedRoute(router)), withFirstEmpty);
-             });
-             return combineLatest.apply(void 0, tslib_1.__spread(factoryObservables));
-         }).pipe(map(function (results) { return sortByPriority([].concat.apply([], tslib_1.__spread(results))); }));
 diff --git a/node_modules/@c8y/ngx-components/esm5/upgrade/dashboard/dashboard-bridge.service.js b/node_modules/@c8y/ngx-components/esm5/upgrade/dashboard/dashboard-bridge.service.js
 index 59444a1..36bbcf1 100644
 --- a/node_modules/@c8y/ngx-components/esm5/upgrade/dashboard/dashboard-bridge.service.js
@@ -89,19 +50,6 @@ index 8d508c2..f32ff9f 100644
            selected-child-device="config.device"
            groups-selectable="settings.groupsSelectable"
          ></c8y-device-selector-combo>
-diff --git a/node_modules/@c8y/ngx-components/fesm2015/c8y-ngx-components.js b/node_modules/@c8y/ngx-components/fesm2015/c8y-ngx-components.js
-index caf5ca3..081f4f0 100644
---- a/node_modules/@c8y/ngx-components/fesm2015/c8y-ngx-components.js
-+++ b/node_modules/@c8y/ngx-components/fesm2015/c8y-ngx-components.js
-@@ -553,7 +553,7 @@ function fromFactories(factories, router, withFirstEmpty = true) {
-         ? of([])
-         : defer(() => {
-             const factoryObservables = resolveInjectedFactories(factories).map(f => {
--                return toObservable(Array.isArray(f) ? f : f.get(getActivatedRoute(router)), withFirstEmpty);
-+                return toObservable(f.get === undefined ? f : f.get(getActivatedRoute(router)), withFirstEmpty);
-             });
-             return combineLatest(...factoryObservables);
-         }).pipe(map(results => sortByPriority([].concat(...results))));
 diff --git a/node_modules/@c8y/ngx-components/fesm5/c8y-ngx-components-upgrade.js b/node_modules/@c8y/ngx-components/fesm5/c8y-ngx-components-upgrade.js
 index 2f58bc6..8e7c827 100644
 --- a/node_modules/@c8y/ngx-components/fesm5/c8y-ngx-components-upgrade.js
@@ -115,16 +63,3 @@ index 2f58bc6..8e7c827 100644
          scope.$watch('forms.componentForm.$invalid', function (formStatus) {
              _this.contextDashboardService.formDisabled = formStatus;
          });
-diff --git a/node_modules/@c8y/ngx-components/fesm5/c8y-ngx-components.js b/node_modules/@c8y/ngx-components/fesm5/c8y-ngx-components.js
-index ddf3491..75071e3 100644
---- a/node_modules/@c8y/ngx-components/fesm5/c8y-ngx-components.js
-+++ b/node_modules/@c8y/ngx-components/fesm5/c8y-ngx-components.js
-@@ -554,7 +554,7 @@ function fromFactories(factories, router, withFirstEmpty) {
-         ? of([])
-         : defer(function () {
-             var factoryObservables = resolveInjectedFactories(factories).map(function (f) {
--                return toObservable(Array.isArray(f) ? f : f.get(getActivatedRoute(router)), withFirstEmpty);
-+                return toObservable(f.get === undefined ? f : f.get(getActivatedRoute(router)), withFirstEmpty);
-             });
-             return combineLatest.apply(void 0, __spread(factoryObservables));
-         }).pipe(map(function (results) { return sortByPriority([].concat.apply([], __spread(results))); }));

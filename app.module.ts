@@ -9,6 +9,7 @@ import {filter, first, map, startWith, tap, withLatestFrom} from "rxjs/operators
 import { IUser } from '@c8y/client';
 import {SimulationStrategiesModule} from "./simulation-strategies/simulation-strategies.module";
 import {CustomWidgetsModule} from "./custom-widgets/custom-widgets.module";
+import {RuntimeWidgetInstallerModule, RuntimeWidgetLoaderService} from "cumulocity-runtime-widget-loader";
 
 @NgModule({
   imports: [
@@ -24,11 +25,12 @@ import {CustomWidgetsModule} from "./custom-widgets/custom-widgets.module";
     DashboardUpgradeModule,
     BuilderModule,
     SimulationStrategiesModule,
-    CustomWidgetsModule
+    CustomWidgetsModule,
+    RuntimeWidgetInstallerModule
   ]
 })
 export class AppModule extends HybridAppModule {
-    constructor(protected upgrade: NgUpgradeModule, appStateService: AppStateService, router: Router) {
+    constructor(protected upgrade: NgUpgradeModule, appStateService: AppStateService, router: Router, private runtimeWidgetLoaderService: RuntimeWidgetLoaderService) {
         super();
 
         // Fixes a bug where the router removes the hash when the user tries to navigate to an app and is not logged in
@@ -49,5 +51,11 @@ export class AppModule extends HybridAppModule {
             filter(([, event]: [IUser, NavigationError | null]) => event != null),
             map(([, event]: [IUser, NavigationError]) => event)
         ).subscribe(event => router.navigateByUrl(event.url));
+    }
+
+    ngDoBootstrap(): void {
+        super.ngDoBootstrap();
+        // Only do this after bootstrapping so that angularJs is loaded
+        this.runtimeWidgetLoaderService.loadRuntimeWidgets();
     }
 }

@@ -7,17 +7,27 @@ import {last} from "lodash-es";
 import {SMART_RULES_AVAILABILITY_TOKEN} from "./smartrules/smart-rules-availability.upgraded-provider";
 import {IApplicationBuilderApplication} from "../iapplication-builder-application";
 import {AppStateService} from "@c8y/ngx-components";
+import {RuntimeWidgetInstallerModalService} from "cumulocity-runtime-widget-loader";
 
 @Component({
     selector: 'app-builder-context-dashboard',
     template: `
-        <c8y-tab *ngFor="let tab of tabs" [icon]="tab.icon" [label]="tab.label" [path]="tab.path" [priority]="tab.priority"></c8y-tab>
-       
+        <c8y-tab *ngFor="let tab of tabs" [icon]="tab.icon" [label]="tab.label" [path]="tab.path"
+                 [priority]="tab.priority"></c8y-tab>
+
         <ng-container [ngSwitch]="deviceDetail">
             <legacy-smart-rules *ngSwitchCase="'smartrules'"></legacy-smart-rules>
             <legacy-alarms *ngSwitchCase="'alarms'"></legacy-alarms>
             <legacy-data-explorer *ngSwitchCase="'data_explorer'"></legacy-data-explorer>
-            <dashboard-by-id *ngSwitchDefault [dashboardId]="dashboardId" [context]="context" [disabled]="disabled"></dashboard-by-id>
+            <ng-container *ngSwitchDefault>
+                <c8y-action-bar-item priority="0" placement="more" *ngIf="hasAdminRights()">
+                    <li>
+                        <button (click)="showInstallModal()"><i c8yIcon="upload"></i> Install widget</button>
+                    </li>
+                </c8y-action-bar-item>
+                <dashboard-by-id [dashboardId]="dashboardId" [context]="context"
+                                 [disabled]="disabled"></dashboard-by-id>
+            </ng-container>
         </ng-container>
     `
 })
@@ -51,7 +61,8 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
         private applicationService: ApplicationService,
         @Inject(SMART_RULES_AVAILABILITY_TOKEN) private c8ySmartRulesAvailability: any,
         private userService: UserService,
-        private appStateService: AppStateService
+        private appStateService: AppStateService,
+        private runtimeWidgetInstallerModalService: RuntimeWidgetInstallerModalService
     ) {
         this.subscriptions.add(this.activatedRoute.paramMap.subscribe(async paramMap => {
             // Always defined
@@ -159,7 +170,11 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
         return path;
     }
 
-    isDashboardDisabled() {
-        return
+    showInstallModal() {
+        this.runtimeWidgetInstallerModalService.show();
+    }
+
+    hasAdminRights() {
+        return this.userService.hasAllRoles(this.appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN","ROLE_APPLICATION_MANAGEMENT_ADMIN"]);
     }
 }
