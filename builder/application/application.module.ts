@@ -37,6 +37,7 @@ import {LegacyAlarmsComponent} from "./alarms/legacy-alarms.component";
 import {smartRulesAvailabilityProvider} from "./smartrules/smart-rules-availability.upgraded-provider";
 import {ApplicationService, InventoryService} from "@c8y/client";
 import {IApplicationBuilderApplication} from "../iapplication-builder-application";
+import {GroupTemplateDashboardModule} from "./group-template-dashboard/group-template-dashboard.module";
 
 @Injectable({
     providedIn: 'root',
@@ -135,7 +136,8 @@ export class RedirectToFirstDashboardOrConfig implements CanActivate {
             }))
         ]),
         DashboardByIdModule,
-        CoreModule
+        CoreModule,
+        GroupTemplateDashboardModule
     ],
     declarations: [
         AppBuilderContextDashboardComponent,

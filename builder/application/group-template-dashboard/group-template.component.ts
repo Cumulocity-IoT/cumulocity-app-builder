@@ -17,10 +17,12 @@
  */
 import {Component, Inject, Input, OnChanges, OnInit, Renderer2, SimpleChanges} from "@angular/core";
 import {InventoryService} from "@c8y/client";
-import {AlertService, DashboardChange, DashboardChildChange} from "@c8y/ngx-components";
+import {
+    AlertService,
+    DashboardChange,
+    DashboardChildChange
+} from "@c8y/ngx-components";
 import {BsModalService} from "ngx-bootstrap";
-import {ContextDashboardComponent} from "./context-dashboard.component";
-import {WidgetService} from "./widget.service";
 import {
     CONTEXT_DASHBOARD_CONFIG,
     ContextDashboardService,
@@ -28,17 +30,19 @@ import {
 } from "@c8y/ngx-components/context-dashboard";
 import {ActivatedRoute, Router} from "@angular/router";
 import {Subscription} from "rxjs";
+import {ContextDashboardComponent} from "../../../dashboard-by-id/context-dashboard.component";
+import {WidgetService} from "../../../dashboard-by-id/widget.service";
 
 @Component({
-    selector: 'dashboard-by-id',
+    selector: 'group-template-dashboard',
     template: `
         <c8y-widgets-dashboard [context]="context" 
                                [widgets]="widgets"
                                [settings]="{
                                 isLoading: isLoading,
-                                isFrozen: dashboard?.isFrozen,
+                                isFrozen: frozen,
                                 isDisabled: disabled,
-                                canDelete: canDelete,
+                                canDelete: false,
                                 translateWidgetTitle: dashboard?.translateWidgetTitle,
                                 allowFullscreen: true,
                                 title: dashboard?.name,
@@ -51,13 +55,13 @@ import {Subscription} from "rxjs";
                                (onDeleteWidget)="deleteWidget($event)" 
                                (onChangeStart)="addDashboardClassToBody()"
                                (onChangeEnd)="removeDashboardClassFromBody()" 
-                               (onEditDashboard)="editDashboard()"
-                               (onDeleteDashboard)="deleteDashboard()">
+                               (onEditDashboard)="editDashboard()">
         </c8y-widgets-dashboard>
     `
 })
-export class DashboardByIdComponent extends ContextDashboardComponent implements OnChanges, OnInit {
+export class GroupTemplateComponent extends ContextDashboardComponent implements OnChanges, OnInit {
     @Input() dashboardId;
+    @Input() deviceId;
     @Input() context: Partial<{
         id: string,
         name: string,
@@ -65,6 +69,8 @@ export class DashboardByIdComponent extends ContextDashboardComponent implements
     }> = {}
     // Don't want to override the base implementation of disabled hence the '2'
     @Input('disabled') disabled2: boolean;
+
+    frozen = true;
 
     constructor(
         route: ActivatedRoute,
@@ -87,28 +93,48 @@ export class DashboardByIdComponent extends ContextDashboardComponent implements
     }
 
     async ngOnChanges(changes: SimpleChanges) {
-        if (changes.dashboardId) {
+        if (changes.dashboardId || changes.deviceId) {
             this.isLoading = true;
             this.widgets = [];
             this.mo = undefined;
             this.dashboard = undefined;
-            await this.loadDashboardId(this.dashboardId);
+            if (this.dashboardId && this.deviceId) {
+                await this.loadDashboardId(this.dashboardId, this.deviceId);
+            }
         }
         if (changes.disabled2) {
             this.disabled = this.disabled2;
         }
     }
 
-    async loadDashboardId(dashboardId: string) {
+    async loadDashboardId(dashboardId: string, deviceId: string) {
         const result = await this.inventoryService.detail(dashboardId);
         this.mo = result.data;
         this.dashboard = this.mo.c8y_Dashboard;
+        this.dashboard.children = this.fillTemplate(this.dashboard.children, this.mo.applicationBuilder_groupTemplate.templateDeviceId, deviceId);
         // @ts-ignore
         await this.onLoad();
     }
 
+    fillTemplate(template, oldDeviceId, newDeviceId) {
+        return JSON.parse(JSON.stringify(template, undefined, 1).replace(new RegExp(`([\\\\/\\s",{}:;=()\\[\\]#\`>]|^)(${oldDeviceId})([\\\\/\\s",{}:;=()\\[\\]#\`<]|$)`, 'g'), (a,b,c,d) => (b || '') + newDeviceId + (d || '')));
+    }
+
     // The parent class seems to have the wrong type for this argument so we change the type.... maybe it's a bug in c8y?
     update_patched($event: DashboardChange) {
+        debugger;
         return super.updateDashboardChildren($event as any as DashboardChildChange);
+    }
+
+    async toggleFreeze() {
+        await this.inventoryService.update({
+            id: this.dashboardId,
+            c8y_Dashboard: this.dashboard,
+            applicationBuilder_groupTemplate: {
+                ...this.mo.applicationBuilder_groupTemplate,
+                templateDeviceId: this.deviceId
+            }
+        });
+        this.frozen = !this.frozen;
     }
 }

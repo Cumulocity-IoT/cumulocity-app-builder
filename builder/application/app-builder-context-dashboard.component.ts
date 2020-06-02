@@ -42,8 +42,13 @@ import {RuntimeWidgetInstallerModalService} from "cumulocity-runtime-widget-load
                         <button (click)="showInstallModal()"><i c8yIcon="upload"></i> Install widget</button>
                     </li>
                 </c8y-action-bar-item>
-                <dashboard-by-id [dashboardId]="dashboardId" [context]="context"
-                                 [disabled]="disabled"></dashboard-by-id>
+                <ng-container [ngSwitch]="isGroupTemplate">
+                    <dashboard-by-id *ngSwitchCase="false" [dashboardId]="dashboardId" [context]="context"
+                                     [disabled]="disabled"></dashboard-by-id>
+                    <group-template-dashboard *ngSwitchCase="true" [dashboardId]="dashboardId" [deviceId]="this.deviceId" [context]="context"
+                                     [disabled]="disabled"></group-template-dashboard>
+                    <ng-container *ngSwitchCase="undefined"><!--Loading--></ng-container>
+                </ng-container>
             </ng-container>
         </ng-container>
     `
@@ -54,6 +59,8 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
     tabGroup?: string
     deviceId?: string
     deviceDetail?: string
+
+    isGroupTemplate?: boolean;
 
     context: Partial<{
         id: string,
@@ -94,6 +101,8 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
                 id: this.deviceId
             }
 
+            this.isGroupTemplate = undefined;
+
             // The user may have simulator access (INVENTORY_ADMIN)
             // but we don't necessarily want them messing with the dashboards unless they have app edit permissions
             // A security hole but not a major one
@@ -124,8 +133,16 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
                     path: this.createDeviceTabPath(this.dashboardId, 'data_explorer')
                 });
             }
+
+            const app = (await this.applicationService.detail(this.applicationId)).data as IApplicationBuilderApplication;
+            const dashboard = app.applicationBuilder.dashboards
+                .find(dashboard => dashboard.id === this.dashboardId);
+
+            if (!dashboard) {
+                console.warn(`Dashboard: ${this.dashboardId} isn't part of application: ${this.applicationId}`);
+            }
+
             if (this.tabGroup) {
-                const app = (await this.applicationService.detail(this.applicationId)).data as IApplicationBuilderApplication;
                 const dashboardsInTabgroup = app.applicationBuilder.dashboards
                     .filter(dashboard => dashboard.tabGroup === this.tabGroup && dashboard.visibility !== 'hidden')
                 tabs.push(...dashboardsInTabgroup.map((dashboard, i) => ({
@@ -136,9 +153,6 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
                 })));
             }
             if (this.deviceId && !this.tabGroup) {
-                const app = (await this.applicationService.detail(this.applicationId)).data as IApplicationBuilderApplication;
-                const dashboard = app.applicationBuilder.dashboards
-                    .find(dashboard => dashboard.id === this.dashboardId);
                 if (dashboard) {
                     tabs.push({
                         label: last(dashboard.name.split(/[/\\]/)),
@@ -148,7 +162,6 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
                     });
                 } else {
                     // If for some reason the user has navigated to a dashboard that isn't part of the app then add the tab anyway
-                    console.warn(`Dashboard: ${this.dashboardId} isn't part of application: ${this.applicationId}`);
                     tabs.push({
                         label: 'Dashboard',
                         icon: 'th',
@@ -157,6 +170,8 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
                     });
                 }
             }
+
+            this.isGroupTemplate = (dashboard && dashboard.groupTemplate) || false;
         }));
     }
 
