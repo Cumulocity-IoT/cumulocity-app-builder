@@ -33,7 +33,7 @@
     "angular": "1.6.9",
     "comlink": "^4.3.0",
     "core-js": "^3.4.0",
-    "cumulocity-runtime-widget-loader": "^1006.3.0-2",
+    "cumulocity-runtime-widget-loader": "1006.3.0-1.1",
     "d3-color": "^1.4.1",
     "delay": "^4.3.0",
     "fontawesome": "4.7.2",
