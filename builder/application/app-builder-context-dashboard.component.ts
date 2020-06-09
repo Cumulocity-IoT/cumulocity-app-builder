@@ -138,18 +138,36 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
             const dashboard = app.applicationBuilder.dashboards
                 .find(dashboard => dashboard.id === this.dashboardId);
 
+            this.isGroupTemplate = (dashboard && dashboard.groupTemplate) || false;
+
             if (!dashboard) {
                 console.warn(`Dashboard: ${this.dashboardId} isn't part of application: ${this.applicationId}`);
             }
 
             if (this.tabGroup) {
                 const dashboardsInTabgroup = app.applicationBuilder.dashboards
-                    .filter(dashboard => dashboard.tabGroup === this.tabGroup && dashboard.visibility !== 'hidden')
-                tabs.push(...dashboardsInTabgroup.map((dashboard, i) => ({
-                    label: last(dashboard.name.split(/[/\\]/)),
-                    icon: dashboard.icon,
-                    priority: dashboardsInTabgroup.length - i + 1000,
-                    path: this.createTabGroupTabPath(dashboard.id)
+                    .filter(dashboard => (dashboard.tabGroup === this.tabGroup || (dashboard && dashboard.groupTemplate && dashboard.tabGroup === 'deviceId')) && dashboard.visibility !== 'hidden')
+                tabs.push(...await Promise.all(dashboardsInTabgroup.map(async (dashboard, i) => {
+                    const isGroupTemplate = (dashboard && dashboard.groupTemplate) || false;
+                    if (isGroupTemplate) {
+                        const childAssets = (await this.inventoryService.childAssetsList(dashboard.deviceId, {pageSize: 2000, query: 'has(c8y_IsDevice)'})).data;
+                        const matchingDevice = childAssets.find(device => device.id === this.tabGroup);
+                        if (matchingDevice) {
+                            return {
+                                label: last(dashboard.name.split(/[/\\]/)),
+                                icon: dashboard.icon,
+                                priority: dashboardsInTabgroup.length - i + 1000,
+                                path: this.createTabGroupTabPath(dashboard.id, matchingDevice.id)
+                            }
+                        }
+                    } else {
+                        return {
+                            label: last(dashboard.name.split(/[/\\]/)),
+                            icon: dashboard.icon,
+                            priority: dashboardsInTabgroup.length - i + 1000,
+                            path: this.createTabGroupTabPath(dashboard.id, dashboard.deviceId)
+                        }
+                    }
                 })));
             }
             if (this.deviceId && !this.tabGroup) {
@@ -170,8 +188,6 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
                     });
                 }
             }
-
-            this.isGroupTemplate = (dashboard && dashboard.groupTemplate) || false;
         }));
     }
 
@@ -184,7 +200,9 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
         if (this.tabGroup) {
             path += `/tabgroup/${this.tabGroup}`;
         }
-        path += `/dashboard/${dashboardId}`;
+        if (!this.tabGroup || !deviceDetail) {
+            path += `/dashboard/${dashboardId}`;
+        }
         path += `/device/${this.deviceId}`;
         if (deviceDetail) {
             path += `/${deviceDetail}`;
@@ -192,12 +210,12 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
         return path;
     }
 
-    createTabGroupTabPath(dashboardId: string) {
+    createTabGroupTabPath(dashboardId: string, deviceId?: string) {
         let path = `/application/${this.applicationId}`;
         path += `/tabgroup/${this.tabGroup}`;
         path += `/dashboard/${dashboardId}`;
-        if (this.deviceId) {
-            path += `/device/${this.deviceId}`
+        if (deviceId) {
+            path += `/device/${deviceId}`
         }
         return path;
     }
