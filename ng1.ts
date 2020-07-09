@@ -24,7 +24,6 @@ import '@c8y/ng1-modules/deviceControlRelayArray/cumulocity.json';
 // import '@c8y/ng1-modules/cockpit-alarmRecent/cumulocity.json';
 // import '@c8y/ng1-modules/cockpit-reports/cumulocity.json';
 // import '@c8y/ng1-modules/cockpit-smartRulesUI/cumulocity.json';
-// import '@c8y/ng1-modules/cockpit-home/cumulocity.json';
 // import '@c8y/ng1-modules/cockpit-dataPointExplorerUI/cumulocity.json';
 import '@c8y/ng1-modules/alarmsEventsExplorer/cumulocity.json';
 import '@c8y/ng1-modules/deviceDatabase4/cumulocity.json';
