@@ -25,12 +25,6 @@ import './cumulocity.json';
 angular.module("c8y.smartRulesUI", ["c8y.smartRules"])
     // Use a directive rather than a component so that we can hack the $routeParams before the template is constructed
     .directive('legacySmartRules', ['$routeParams', 'c8yUiUtil', function ($routeParams, c8yUiUtil) {
-        const context = c8yUiUtil.getContext();
-        if (context.context === 'device') {
-            $routeParams.deviceId = context.id;
-        } else if (context.context != null) {
-            $routeParams.groupId = context.id;
-        }
         return {
             restrict: 'E',
             template: require("@c8y/ng1-modules/smartRules/views/list.html").default,
@@ -50,6 +44,19 @@ angular.module("c8y.cockpit.config", []);
 })
 export class LegacySmartRulesComponent extends UpgradeComponent {
     constructor(elementRef: ElementRef, injector: Injector) {
+        // Get the AngularJS Injector
+        // noinspection JSDeprecatedSymbols
+        const $injector = injector.get('$injector');
+        $injector.invoke(['c8yUiUtil', '$routeParams', function(c8yUiUtil, $routeParams) {
+            // Set the context device/group for this component
+            const context = c8yUiUtil.getContext();
+            if (context.context === 'device') {
+                $routeParams.deviceId = context.id;
+            } else if (context.context != null) {
+                $routeParams.groupId = context.id;
+            }
+        }]);
+
         super('legacySmartRules', elementRef, injector);
     }
 }
