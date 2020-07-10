@@ -55,6 +55,7 @@ const client = new Client(new CookieAuth());
         {provide: SystemOptionsService, useValue: client.options.system},
         {provide: TenantOptionsService, useValue: client.options.tenant},
         {provide: Realtime, useValue: client.realtime},
+        {provide: InventoryRoleService, useValue: client.role},
         {provide: TenantService, useValue: client.tenant},
         {provide: UserService, useValue: client.user},
         {provide: UserGroupService, useValue: client.userGroup},

@@ -30,20 +30,22 @@ import {ApplicationService} from '@c8y/client';
 import {AppIdService} from "../app-id.service";
 import {SimulatorConfig} from "../simulator/simulator-config";
 import {SimulationStrategiesService} from "../simulator/simulation-strategies.service";
+import {SimulatorCommunicationService} from "../simulator/mainthread/simulator-communication.service";
 
 @Component({
     templateUrl: './edit-simulator-modal.component.html'
 })
 export class EditSimulatorModalComponent implements OnInit {
     busy: boolean = false;
-
     @ViewChild("configWrapper", { read: ViewContainerRef, static: true }) configWrapper: ViewContainerRef;
     simulatorConfig: SimulatorConfig;
-    constructor(public bsModalRef: BsModalRef, private simulationStrategiesService: SimulationStrategiesService,
-         private resolver: ComponentFactoryResolver, private injector: Injector, 
-         private appService: ApplicationService, private appIdService: AppIdService) {
 
-    }
+    constructor(
+        private simSvc: SimulatorCommunicationService,
+        public bsModalRef: BsModalRef, private simulationStrategiesService: SimulationStrategiesService,
+        private resolver: ComponentFactoryResolver, private injector: Injector,
+        private appService: ApplicationService, private appIdService: AppIdService
+    ) {}
 
     ngOnInit() {
         this.openSimulatorConfig();
@@ -85,6 +87,10 @@ export class EditSimulatorModalComponent implements OnInit {
             id: app.id,
             applicationBuilder: app.applicationBuilder
         } as any);
+
+        // We could just wait for them to refresh, but it's nicer to instantly refresh
+        await this.simSvc.simulator.checkForSimulatorConfigChanges();
+
         this.bsModalRef.hide();
     }
 }

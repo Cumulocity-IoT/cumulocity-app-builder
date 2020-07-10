@@ -16,14 +16,21 @@
 * limitations under the License.
  */
 
-import {ApplicationService, IApplication, PagingStrategy, RealtimeAction} from "@c8y/client";
+import {ApplicationService, IApplication} from "@c8y/client";
 import {DeviceSimulator} from "../device-simulator";
 import {SimulatorConfig} from "../simulator-config";
 import {SimulatorWorkerAPI} from "./simulator-worker-api.service";
 import {AppIdService} from "../../app-id.service";
 import {LOCK_TIMEOUT, SimulationLockService} from "./simulation-lock.service";
-import {switchMap, flatMap, map, filter, distinctUntilChanged, tap, withLatestFrom} from "rxjs/operators";
-import {from, interval, merge, of, Subscription} from "rxjs";
+import {
+    switchMap,
+    map,
+    distinctUntilChanged,
+    tap,
+    withLatestFrom,
+    debounceTime
+} from "rxjs/operators";
+import {from, interval, merge, of, Subject, Subscription} from "rxjs";
 import * as deepEqual from "fast-deep-equal";
 import * as cloneDeep from "clone-deep";
 import {SimulationStrategiesService} from "../simulation-strategies.service";
@@ -55,17 +62,15 @@ export class SimulatorManagerService {
                 if (appId) {
                     const lockStatusChanges$ = this.lockService.lockStatus$(appId);
 
-                    const simulatorConfigChanges$ = from(this.appService.list$({pageSize: 100, withTotalPages: true}, {
-                        hot: true,
-                        realtime: true,
-                        pagingStrategy: PagingStrategy.ALL,
-                        realtimeAction: RealtimeAction.FULL,
-                        pagingDelay: 0
-                    })).pipe(
-                        flatMap(applications => from(applications)),
-                        filter(application => application.id === appId),
+                    const simulatorConfigChanges$ = merge(
+                        of(-1), // Check the current value immediately
+                        interval(30000), // Check every 30 seconds
+                        this.simulatorWorkerAPI._checkForSimulatorConfigChanges // Check if asked to
+                    ).pipe(
+                        debounceTime(100),
+                        switchMap(() => this.appService.detail(appId)),
+                        map(res => res.data),
                         map((application: IApplication & { applicationBuilder: any })  => application.applicationBuilder.simulators || []),
-                        map(simulatorConfigs => cloneDeep(simulatorConfigs)), // The list$ command reuses existing objects so we want to clone to be able to detect differences
                         // Check to see if the simulator config has changed
                         distinctUntilChanged((prev, curr) => deepEqual(prev, curr))
                     );

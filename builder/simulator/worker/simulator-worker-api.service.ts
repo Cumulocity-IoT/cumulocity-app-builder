@@ -23,7 +23,7 @@ import {LockStatus, SimulationLockService} from "./simulation-lock.service";
 import {AppStateService} from "@c8y/ngx-components";
 import {AppIdService} from "../../app-id.service";
 import { SimulatorConfig } from "../simulator-config";
-import {BehaviorSubject, Subscription} from "rxjs";
+import {BehaviorSubject, Subject, Subscription} from "rxjs";
 
 @Injectable()
 export class SimulatorWorkerAPI {
@@ -31,8 +31,14 @@ export class SimulatorWorkerAPI {
     _lockStatus$ = new BehaviorSubject<{isLocked: boolean, isLockOwned: boolean, lockStatus?: LockStatus}>({isLocked: false, isLockOwned: false});
     _simulatorConfig$ = new BehaviorSubject<Map<number, SimulatorConfig>>(new Map());
     _listeners = new Map<number, Subscription>();
+    _checkForSimulatorConfigChanges = new Subject<any>();
 
-    constructor(private fetchClient: FetchClient, private lockService: SimulationLockService, private appStateService: AppStateService, private appIdService: AppIdService) {}
+    constructor(
+        private fetchClient: FetchClient,
+        private lockService: SimulationLockService,
+        private appStateService: AppStateService,
+        private appIdService: AppIdService
+    ) {}
 
     setUserAndCredentials(user: IUser | null, credentials: ICredentials) {
         this.fetchClient.setAuth(new BasicAuth(credentials));
@@ -65,5 +71,9 @@ export class SimulatorWorkerAPI {
         const id = this._listenerId++;
         this._listeners.set(id, this._simulatorConfig$.subscribe(simulatorConfig => listener(simulatorConfig)));
         return id;
+    }
+
+    checkForSimulatorConfigChanges() {
+        this._checkForSimulatorConfigChanges.next();
     }
 }

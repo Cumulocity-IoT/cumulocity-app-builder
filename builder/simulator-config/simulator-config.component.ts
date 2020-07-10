@@ -46,7 +46,7 @@ export class SimulatorConfigComponent implements OnDestroy {
     constructor(
         private simSvc: SimulatorCommunicationService, private modalService: BsModalService,
         private appIdService: AppIdService, private appService: ApplicationService,
-        private simulationStrategiesService: SimulationStrategiesService
+        public simulationStrategiesService: SimulationStrategiesService
     ) {
         this._lockStatusListener = simSvc.simulator.addLockStatusListener(Comlink.proxy(lockStatus => this.lockStatus$.next(lockStatus)));
         this._simulatorConfigListener = simSvc.simulator.addSimulatorConfigListener(Comlink.proxy(simulatorConfigById => this.simulatorConfigById$.next(simulatorConfigById)));
@@ -82,7 +82,9 @@ export class SimulatorConfigComponent implements OnDestroy {
             id: appId,
             applicationBuilder: app.applicationBuilder
         } as IApplication);
-        // No need to do anything apart from update the simulator config - this automatically refreshes the simulators
+
+        // We could just wait for them to refresh, but it's nicer to instantly refresh
+        await this.simSvc.simulator.checkForSimulatorConfigChanges();
     }
 
     async deleteSimulator(simulatorConfig: SimulatorConfig) {
@@ -95,7 +97,9 @@ export class SimulatorConfigComponent implements OnDestroy {
             id: appId,
             applicationBuilder: app.applicationBuilder
         } as IApplication);
-        // No need to do anything apart from update the simulator config - this automatically refreshes the simulators
+
+        // We could just wait for them to refresh, but it's nicer to instantly refresh
+        await this.simSvc.simulator.checkForSimulatorConfigChanges();
     }
 
     ngOnDestroy(): void {

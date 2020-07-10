@@ -30,6 +30,7 @@ import {InventoryService, ApplicationService} from '@c8y/client';
 import {AppIdService} from "../app-id.service";
 import {SimulationStrategyConfigComponent, SimulationStrategyFactory} from "../simulator/simulation-strategy";
 import {SimulationStrategiesService} from "../simulator/simulation-strategies.service";
+import {SimulatorCommunicationService} from "../simulator/mainthread/simulator-communication.service";
 
 @Component({
     templateUrl: './new-simulator-modal.component.html'
@@ -47,7 +48,8 @@ export class NewSimulatorModalComponent {
     simulatorName: string = '';
 
     constructor(
-        public bsModalRef: BsModalRef, private simulationStrategiesService: SimulationStrategiesService,
+        private simSvc: SimulatorCommunicationService,
+        public bsModalRef: BsModalRef, public simulationStrategiesService: SimulationStrategiesService,
         private resolver: ComponentFactoryResolver, private injector: Injector, private inventoryService: InventoryService,
         private appService: ApplicationService, private appIdService: AppIdService
     ) {}
@@ -109,7 +111,8 @@ export class NewSimulatorModalComponent {
             applicationBuilder: appServiceData.applicationBuilder
         } as any);
 
-        // No need to ask the device simulator to create the new instance - this will be automatically picked up after the appService.update(...)
+        // We could just wait for them to refresh, but it's nicer to instantly refresh
+        await this.simSvc.simulator.checkForSimulatorConfigChanges();
 
         this.bsModalRef.hide();
     }
