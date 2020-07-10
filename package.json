@@ -30,7 +30,7 @@
     "@c8y/style": "1006.3.0",
     "@ng-reactive/async-input": "0.0.1",
     "@ng-select/ng-select": "^3.7.3",
-    "angular": "1.6.9",
+    "angular": "1.8.0",
     "comlink": "^4.3.0",
     "core-js": "^3.4.0",
     "cumulocity-runtime-widget-loader": "1006.3.0-1.2",
