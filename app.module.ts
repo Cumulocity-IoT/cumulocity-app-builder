@@ -34,7 +34,7 @@ import {RuntimeWidgetInstallerModule, RuntimeWidgetLoaderService} from "cumuloci
     UpgradeModule,
     BrowserAnimationsModule,
     RouterModule.forRoot(),
-    NgRouterModule.forRoot([], { enableTracing: true, useHash: true }),
+    NgRouterModule.forRoot([], { enableTracing: false, useHash: true }),
     CoreModule.forRoot(),
     NgUpgradeModule,
     DashboardUpgradeModule,
