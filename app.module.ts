@@ -15,7 +15,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
  */
-import {NgModule} from '@angular/core';
+import {Injector, NgModule} from '@angular/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {NavigationError, Router, RouterModule as NgRouterModule} from '@angular/router';
 import { UpgradeModule as NgUpgradeModule } from '@angular/upgrade/static';
@@ -45,7 +45,7 @@ import {RuntimeWidgetInstallerModule, RuntimeWidgetLoaderService} from "cumuloci
   ]
 })
 export class AppModule extends HybridAppModule {
-    constructor(protected upgrade: NgUpgradeModule, appStateService: AppStateService, router: Router, private runtimeWidgetLoaderService: RuntimeWidgetLoaderService) {
+    constructor(protected upgrade: NgUpgradeModule, appStateService: AppStateService, private router: Router, private runtimeWidgetLoaderService: RuntimeWidgetLoaderService, private injector: Injector) {
         super();
 
         // Fixes a bug where the router removes the hash when the user tries to navigate to an app and is not logged in
@@ -72,5 +72,19 @@ export class AppModule extends HybridAppModule {
         super.ngDoBootstrap();
         // Only do this after bootstrapping so that angularJs is loaded
         this.runtimeWidgetLoaderService.loadRuntimeWidgets();
+
+        // A hack to get href hash changes to always trigger an Angular Router update... There seems to be an AngularUpgrade/AngularJS/Cumulocity bug somewhere that stops the hashchange event firing.
+        // This bug is apparent when trying to use the AppSwitcher to change to another AppBuilder App, sometimes it works, sometimes it doesn't
+        const $injector = this.injector.get('$injector');
+        $injector.invoke(['$rootScope', ($rootScope) => {
+            $rootScope.$on('$locationChangeStart', (event, next, current) => {
+                const nextSplit = next.split('#');
+                const currentSplit = current.split('#');
+                if (nextSplit[0] != currentSplit[0]) {
+                    return;
+                }
+                this.router.navigateByUrl(nextSplit.length > 1 ? nextSplit[1] : '');
+            });
+        }]);
     }
 }
