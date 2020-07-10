@@ -15,12 +15,12 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
  */
-import { NgModule } from '@angular/core';
+import {NgModule} from '@angular/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {NavigationError, Router, RouterModule as NgRouterModule} from '@angular/router';
 import { UpgradeModule as NgUpgradeModule } from '@angular/upgrade/static';
 import {AppStateService, CoreModule, RouterModule} from '@c8y/ngx-components';
-import { DashboardUpgradeModule, UpgradeModule, HybridAppModule, UPGRADE_ROUTES } from '@c8y/ngx-components/upgrade';
+import {DashboardUpgradeModule, UpgradeModule, HybridAppModule} from '@c8y/ngx-components/upgrade';
 import {BuilderModule} from "./builder/builder.module";
 import {filter, first, map, startWith, tap, withLatestFrom} from "rxjs/operators";
 import { IUser } from '@c8y/client';
@@ -34,9 +34,7 @@ import {RuntimeWidgetInstallerModule, RuntimeWidgetLoaderService} from "cumuloci
     UpgradeModule,
     BrowserAnimationsModule,
     RouterModule.forRoot(),
-    NgRouterModule.forRoot([
-        ...UPGRADE_ROUTES
-    ], { enableTracing: false, useHash: true }),
+    NgRouterModule.forRoot([], { enableTracing: true, useHash: true }),
     CoreModule.forRoot(),
     NgUpgradeModule,
     DashboardUpgradeModule,
