@@ -41,6 +41,10 @@ import {HelpComponent} from "./help/help.component";
 import {MarkdownModule} from "ngx-markdown";
 import {BrandingDirtyGuardService} from "./branding/branding-dirty-guard.service";
 import {AppListComponent} from "./app-list/app-list.component";
+import {LockStatus} from "./simulator/worker/simulation-lock.service";
+import {fromEvent, Observable} from "rxjs";
+import {withLatestFrom} from "rxjs/operators";
+import {proxy} from "comlink";
 
 @NgModule({
     imports: [
@@ -111,6 +115,22 @@ export class BuilderModule {
             }
             return await simSvc.simulator.setUserAndCredentials(user, {});
         });
+
+        const lockStatus$: Observable<{isLocked: boolean, isLockOwned: boolean, lockStatus?: LockStatus}> = new Observable<{isLocked: boolean, isLockOwned: boolean, lockStatus?: LockStatus}>(subscriber => {
+            simSvc.simulator
+                .addLockStatusListener(proxy(lockStatus => subscriber.next(lockStatus)))
+                .then(listenerId => subscriber.add(() => simSvc.simulator.removeListener(listenerId)));
+        });
+
+        // If the user leaves the page then unlock the simulators
+        fromEvent(window, "beforeunload")
+            .pipe(withLatestFrom(lockStatus$))
+            .subscribe(([event, lockStatus]) => {
+                if (lockStatus.isLockOwned) {
+                    simSvc.simulator.unlock();
+                }
+            });
+
         appStateService.currentTenant.subscribe(async (tenant) => await simSvc.simulator.setTenant(tenant));
         appIdService.appId$.subscribe(async (appId) => await simSvc.simulator.setAppId(appId));
     }

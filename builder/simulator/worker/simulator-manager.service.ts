@@ -110,7 +110,7 @@ export class SimulatorManagerService {
                     console.debug("Lock owned: Creating/Recreating simulators");
                     simulatorConfigLoaded.then(() => this.reloadSimulators());
                     // Refresh the lock every LOCK_TIMEOUT/2
-                    this.lockRefreshSubscription = interval(LOCK_TIMEOUT/2).subscribe(() => this.lockService.refreshLock(appId))
+                    this.lockRefreshSubscription = interval(LOCK_TIMEOUT/2).subscribe(() => this.lockService.refreshLock(appId));
                 } else if (!isLocked) {
                     console.debug("Unlocked: Clearing simulators and attempting to take lock");
                     this.clearSimulators();

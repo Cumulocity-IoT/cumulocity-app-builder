@@ -124,6 +124,19 @@ export class SimulationLockService {
         }
     }
 
+    /**
+     * Unlocks the simulators for the appId specified.
+     * Note: doesn't check to see if the lock is owned by the person unlocking
+     * @param appId
+     */
+    async unlock(appId: string): Promise<void> {
+        await this.updateLockStatus(appId, {
+            sessionId: -1,
+            lockedBy: '',
+            lockedOn: new Date(0).toUTCString()
+        });
+    }
+
     _checkLock(currentTime: number, lockStatus: LockStatus | undefined): boolean {
         if (lockStatus) {
             const lockTime = Date.parse(lockStatus.lockedOn);
@@ -171,7 +184,7 @@ export class SimulationLockService {
     }
 
     async refreshLock(appId: string): Promise<void> {
-        this.updateLockStatus(appId, {
+        return this.updateLockStatus(appId, {
             sessionId: this.sessionId,
             lockedBy: this.appStateService.currentUser.getValue().email,
             lockedOn: new Date().toUTCString()

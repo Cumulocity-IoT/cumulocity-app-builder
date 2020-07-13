@@ -76,4 +76,8 @@ export class SimulatorWorkerAPI {
     checkForSimulatorConfigChanges() {
         this._checkForSimulatorConfigChanges.next();
     }
+
+    async unlock() {
+        return this.lockService.unlock(this.appIdService.getCurrentAppId());
+    }
 }
