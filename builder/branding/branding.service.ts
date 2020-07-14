@@ -139,7 +139,13 @@ body {
 }
 
 .btn.btn-primary {
-    color: ${this.primaryButtonTextColor(app.applicationBuilder.branding.colors.primary)};
+    color: ${this.contrastingTextColor(app.applicationBuilder.branding.colors.primary)};
+}
+.btn.btn-primary:active,.btn.btn-primary:active:hover {
+    color: ${this.contrastingTextColor(app.applicationBuilder.branding.colors.text)};
+}
+.btn.btn-primary:hover,.btn.btn-primary:focus {
+    color: var(--brand-primary, #1776BF);
 }
 `;
             } else {
@@ -180,7 +186,7 @@ body {
         }
     }
 
-    primaryButtonTextColor(primaryColor: string): string {
+    contrastingTextColor(primaryColor: string): string {
         try {
             const color = d3.color(primaryColor).rgb();
             // Formula from Gacek: https://stackoverflow.com/a/1855903/11530669
