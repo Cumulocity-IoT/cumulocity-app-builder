@@ -36,21 +36,23 @@ export const WELCOME_DASHBOARD_TEMPLATE = {
             "config": {
                 "html": `
 <style>
-    .container {
+    .container-objectives {
         position: absolute;
+        top: 0;
+        left: 0;
         height: 100%;
         width: 100%;
         padding: 20px;
     }
-    .container > * {
+    .container-objectives > * {
         margin-bottom: 10px;
     }
-    .container h3 {
+    .container-objectives h3 {
         color: var(--header-text-color, var(--brand-dark, #0B385B));
     }
 </style>
     
-<div class="container">
+<div class="container-objectives">
     <h3>Demonstration Objectives</h3>
     <p>Remote asset codition monitoring is the best demo i have ever seen, it makes all of the other demos look like rubbish. I wish i had been the developer of the RACM demo.If i had been then I would take all of the credit leaving none for anyone else...</p>
 </div>
@@ -88,6 +90,8 @@ export const WELCOME_DASHBOARD_TEMPLATE = {
         display: flex;
         align-items: center;
         position: absolute;
+        top: 0;
+        left: 0;
         padding: 100px;
         box-sizing: border-box;
     }
@@ -133,24 +137,26 @@ export const WELCOME_DASHBOARD_TEMPLATE = {
             "config": {
                 "html": `
 <style>
-    .container {
+    .container-differentiation {
         position: absolute;
+        top: 0;
+        left: 0;
         height: 100%;
         width: 100%;
         padding: 20px;
     }
-    .container > * {
+    .container-differentiation > * {
         margin-bottom: 10px;
     }
-    .container > h3 {
+    .container-differentiation > h3 {
         color: var(--header-text-color, var(--brand-dark, #0B385B));
     }
-    .container > ul > li > strong {
+    .container-differentiation > ul > li > strong {
         color: var(--header-text-color, var(--brand-dark, #0B385B));
     }
 </style>
 
-<div class="container">
+<div class="container-differentiation">
     <h3>Differentiating Areas</h3>
     <ul>
         <li><strong>Independent</strong> - My mum says that I am a strong and independent application and I am not going to take any rubbish from no script</li>
