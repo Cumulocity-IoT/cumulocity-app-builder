@@ -116,7 +116,7 @@ export class BuilderModule {
             return await simSvc.simulator.setUserAndCredentials(user, {});
         });
 
-        const lockStatus$: Observable<{isLocked: boolean, isLockOwned: boolean, lockStatus?: LockStatus}> = new Observable<{isLocked: boolean, isLockOwned: boolean, lockStatus?: LockStatus}>(subscriber => {
+        const lockStatus$ = new Observable<{isLocked: boolean, isLockOwned: boolean, lockStatus?: LockStatus}>(subscriber => {
             simSvc.simulator
                 .addLockStatusListener(proxy(lockStatus => subscriber.next(lockStatus)))
                 .then(listenerId => subscriber.add(() => simSvc.simulator.removeListener(listenerId)));

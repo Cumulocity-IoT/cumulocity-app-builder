@@ -16,6 +16,7 @@
 * limitations under the License.
  */
 import {IApplication} from "@c8y/client";
+import {SimulatorConfig} from "./simulator/simulator-config";
 
 export type IApplicationBuilderApplication = IApplication & {
     applicationBuilder: {
@@ -27,6 +28,7 @@ export type IApplicationBuilderApplication = IApplication & {
             icon: string,
             deviceId?: string,
             groupTemplate?: boolean
-        }[]
+        }[],
+        simulators?: SimulatorConfig<unknown>[]
     }
 }

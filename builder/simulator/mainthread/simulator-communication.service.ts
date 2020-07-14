@@ -18,9 +18,32 @@
 import * as Comlink from "comlink";
 import {SimulatorWorkerAPI} from "../worker/simulator-worker-api.service";
 import {Injectable} from "@angular/core";
+import {AppIdService} from "../../app-id.service";
+import {filter} from "rxjs/operators";
+import { ApplicationService, UserService, IUser } from "@c8y/client";
+import {AlertService} from "@c8y/ngx-components";
 
 @Injectable({providedIn: 'root'})
 export class SimulatorCommunicationService {
     // @ts-ignore
     simulator: Comlink.Remote<SimulatorWorkerAPI> = Comlink.wrap(new Worker('../worker/index.ts', {type: 'module'}));
+
+    constructor(private appIdService: AppIdService, private applicationService: ApplicationService, private alertService: AlertService, private userService: UserService) {
+        appIdService.appIdDelayedUntilAfterLogin$.pipe(filter(appId => appId != null)).subscribe((appId) => this.checkUserPermissions(appId));
+    }
+
+    async checkUserPermissions(appId: string) {
+        const result = await this.applicationService.detail(appId);
+
+        if (result.res.status === 401) {
+            this.alertService.danger("User does not have the required permissions to start simulators", "Missing Application Read Permission");
+        } else if (result.res.status < 200 && result.res.status >= 300) {
+            this.alertService.danger("Unable to start simulators", await result.res.text());
+        }
+
+        const userWithRoles = (await this.userService.currentWithEffectiveRoles()).data as IUser;
+        if (!this.userService.hasRole(userWithRoles, "ROLE_INVENTORY_ADMIN")) {
+            this.alertService.danger("User does not have the required permissions to start simulators", "Missing Inventory Admin Permission");
+        }
+    }
 }
