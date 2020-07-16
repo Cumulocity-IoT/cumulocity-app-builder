@@ -25,6 +25,10 @@ import {AppIdService} from "../../app-id.service";
 import { SimulatorConfig } from "../simulator-config";
 import {BehaviorSubject, Subject, Subscription} from "rxjs";
 
+/**
+ * The public api for talking to the simulators
+ * Fields starting with _ are for use only by the worker
+ */
 @Injectable()
 export class SimulatorWorkerAPI {
     private _listenerId;

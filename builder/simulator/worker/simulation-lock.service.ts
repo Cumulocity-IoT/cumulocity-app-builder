@@ -35,6 +35,19 @@ export interface LockStatus {
     lockedOn: string
 }
 
+/**
+ * Manages the simulator lock and it's status
+ * The lock is unique per application and consists of a managedObject with the following format:
+ * {
+ *     id: '123', // The managedObject id
+ *     applicationId: '456', // The id of the appBuilder application
+ *     AppBuilder_LockStatus: {
+ *         sessionId: 789,
+ *         lockedBy: 'richard.peach@email.com',
+ *         lockedOn: 'Thu, 16 Jul 2020 14:57:02 GMT'
+ *     }
+ * }
+ */
 @Injectable()
 export class SimulationLockService {
     sessionId: number = Math.floor(Math.random() * 1000000000);

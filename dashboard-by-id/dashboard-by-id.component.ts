@@ -29,6 +29,10 @@ import {
 import {ActivatedRoute, Router} from "@angular/router";
 import {Subscription} from "rxjs";
 
+/**
+ * Cumulocity don't provide the ability to show a dashboard just based on the dashboard's Id so this component implements that.
+ * It is very similar to the ContextDashboardComponent so we extend that to avoid duplicating code
+ */
 @Component({
     selector: 'dashboard-by-id',
     template: `

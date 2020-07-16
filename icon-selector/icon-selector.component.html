@@ -1,20 +1,3 @@
-<!--<ngx-select [items]="items" optionValueField="className" optionTextField="name"-->
-<!--            [ngModel]="value"-->
-<!--            (ngModelChange)="valueChange.emit($event)"-->
-<!--            placeholder="No icon selected">-->
-
-<!--    <ng-template ngx-select-option ngx-select-option-selected let-option let-text="text">-->
-<!--        <i [c8yIcon]="option.data.className" style="margin-right: 5px"></i>-->
-<!--        <span [innerHtml]="text" style="margin-right: 5px"></span>-->
-<!--        ({{option.data.className}})-->
-<!--    </ng-template>-->
-
-<!--    <ng-template ngx-select-option-not-found let-input>-->
-<!--        "{{input}}" not found-->
-<!--    </ng-template>-->
-
-<!--</ngx-select>-->
-
 <ng-select #select [items]="items" [ngModel]="value" (ngModelChange)="valueChange.emit($event)" appendTo="body" [clearable]="false" [virtualScroll]="true" (open)="opened(select)" bindLabel="name" bindValue="className">
     <ng-template ng-label-tmp let-item="item">
         <i [c8yIcon]="item.className" style="margin-right: 5px"></i>

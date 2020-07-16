@@ -16,6 +16,9 @@
 * limitations under the License.
  */
 
+/**
+ * The interface that for simulator configuration that all simulators will be passed.
+ */
 export interface SimulatorConfig<T=any> {
     id: number,
     name: string,

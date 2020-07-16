@@ -28,6 +28,7 @@ export class IconSelectorComponent {
     @Input() value: string;
     @Output() valueChange = new EventEmitter<string>();
 
+    // Create a list of all icons
     items = Object.keys(fa)
         .filter(name => !["html5", "s15", "500px"].includes(name))
         .map(name => name.replace(/[A-Z0-9]/g, match => '-' + match.toLowerCase()))

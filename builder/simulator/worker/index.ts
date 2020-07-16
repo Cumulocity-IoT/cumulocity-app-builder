@@ -15,6 +15,9 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
  */
+
+/** This file is the main entrypoint for the simulator worker */
+
 /** IE9, IE10, IE11, Evergreen browsers require the following polyfills. */
 import '@angular-devkit/build-angular/src/angular-cli-files/models/es5-jit-polyfills.js';
 import '@angular-devkit/build-angular/src/angular-cli-files/models/es5-polyfills.js';

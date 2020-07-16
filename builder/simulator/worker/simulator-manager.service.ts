@@ -43,6 +43,9 @@ export interface DeviceSimulatorInstance {
     deviceId: string
 }
 
+/**
+ * Manages the lifecycle of the simulators
+ */
 @Injectable()
 export class SimulatorManagerService {
     simulatorInstances: DeviceSimulatorInstance[] = [];

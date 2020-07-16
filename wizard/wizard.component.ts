@@ -30,6 +30,17 @@ import {BehaviorSubject, Subscription} from "rxjs";
 import {AsyncInput} from "@ng-reactive/async-input";
 import {filter, startWith} from "rxjs/operators";
 
+/**
+ * A simple step by step wizard, allows a user to click through a series of different screens
+ <wizard activeStepId="menu">
+     <wizard-step stepId="menu">
+        <button (click)="wizard.selectStep('page1')">Next</button>
+     </wizard-step>
+     <wizard-step stepId="page1">
+        <button (click)="wizard.selectStep('menu')">Back</button>
+     </wizard-step>
+ </wizard>
+ */
 @Component({
     selector: 'wizard',
     template: `<ng-content></ng-content>`

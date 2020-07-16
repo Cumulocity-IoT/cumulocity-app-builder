@@ -55,6 +55,10 @@ export class AppBuilderConfigNavigationRegistrationService {
     }
 }
 
+/**
+ * Add the configuration menu item to the navigation.
+ * Sub-items can be added via the AppBuilderConfigNavigationRegistrationService
+ */
 @Injectable()
 export class AppBuilderConfigNavigationService implements NavigatorNodeFactory {
     nodes = new BehaviorSubject<NavigatorNode[]>([]);
@@ -83,7 +87,6 @@ export class AppBuilderConfigNavigationService implements NavigatorNodeFactory {
                         const configNode = new NavigatorNode({
                             label: 'Configuration',
                             icon: 'wrench',
-                           // path: `/application/${appId}/config`,
                             priority: 0
                         });
                         configNode.add(new NavigatorNode({

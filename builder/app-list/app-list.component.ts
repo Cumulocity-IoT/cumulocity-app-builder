@@ -36,9 +36,6 @@ import {contextPathFromURL} from "../utils/contextPathFromURL";
     templateUrl: './app-list.component.html'
 })
 export class AppListComponent {
-    newAppName: string = "My New App";
-    newAppIcon: string = "bathtub";
-
     applications: Observable<IApplication[]>;
 
     userHasAdminRights: boolean;
@@ -46,6 +43,7 @@ export class AppListComponent {
     bsModalRef: BsModalRef;
 
     constructor(private router: Router, private appService: ApplicationService, private appStateService: AppStateService, private modalService: BsModalService, private userService: UserService) {
+        // Get a list of the applications on the tenant (This includes live updates)
         this.applications = from(this.appService.list$({ pageSize: 100, withTotalPages: true }, {
             hot: true,
             pagingStrategy: PagingStrategy.ALL,
@@ -54,6 +52,7 @@ export class AppListComponent {
             pagingDelay: 0.1
         }))
             .pipe(
+                // Some users can't get the full list of applications (they don't have permission) so we get them by user instead (without live updates)
                 catchError(() =>
                     from(this.appService.listByUser(appStateService.currentUser.value, { pageSize: 2000 }).then(res => res.data))
                 ),

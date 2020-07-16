@@ -33,6 +33,9 @@ import {Subscription} from "rxjs";
 import {ContextDashboardComponent} from "../../../dashboard-by-id/context-dashboard.component";
 import {WidgetService} from "../../../dashboard-by-id/widget.service";
 
+/**
+ * Loads a template dashboard, substituting the templateDeviceId for the current deviceId
+ */
 @Component({
     selector: 'group-template-dashboard',
     template: `
@@ -122,7 +125,6 @@ export class GroupTemplateComponent extends ContextDashboardComponent implements
 
     // The parent class seems to have the wrong type for this argument so we change the type.... maybe it's a bug in c8y?
     update_patched($event: DashboardChange) {
-        debugger;
         return super.updateDashboardChildren($event as any as DashboardChildChange);
     }
 

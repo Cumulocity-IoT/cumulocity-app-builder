@@ -20,6 +20,9 @@ import { InjectionToken } from '@angular/core';
 
 export const HOOK_SIMULATION_STRATEGY_FACTORY = new InjectionToken('SimulationStrategy');
 
+/**
+ * An abstract simulator interface, all simulators should extend this
+ */
 export abstract class DeviceSimulator {
     started = false;
 

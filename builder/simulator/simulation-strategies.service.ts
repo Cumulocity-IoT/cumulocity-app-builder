@@ -20,6 +20,9 @@ import {Inject, Injectable} from "@angular/core";
 import {HOOK_SIMULATION_STRATEGY_FACTORY} from "./device-simulator";
 import {SimulationStrategyFactory} from "./simulation-strategy";
 
+/**
+ * A service containing a list of simulation strategies
+ */
 @Injectable({providedIn: 'root'})
 export class SimulationStrategiesService {
     readonly strategies: SimulationStrategyFactory[];

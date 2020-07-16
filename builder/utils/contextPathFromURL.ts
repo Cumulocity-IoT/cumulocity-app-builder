@@ -15,6 +15,10 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
  */
+
+/**
+ * Gets the current context path from the url. Eg: https://tenant.cumulocity.com/apps/<context-path>/
+ */
 export function contextPathFromURL() {
     return window.location.pathname.match(/\/apps\/(.*?)\//)[1];
 }

@@ -20,6 +20,9 @@ import { Injectable } from "@angular/core";
 import {BehaviorSubject} from "rxjs";
 import { ICurrentTenant, IUser } from "@c8y/client";
 
+/**
+ * There's not really the concept of a currentTenant and currentUser when inside a worker so we stub it and manually pass the values from the main thread.
+ */
 @Injectable()
 export class WorkerAppStateService {
     currentTenant = new BehaviorSubject<ICurrentTenant | null>(null);

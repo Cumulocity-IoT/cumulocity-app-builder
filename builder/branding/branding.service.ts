@@ -22,6 +22,10 @@ import * as d3 from "d3-color";
 
 declare const FontFace: any;
 
+/**
+ * Adds style elements to the head which set the css variables required to re-theme cumulocity
+ * Also deals with css required for icons, the app name, favicon etc
+ */
 @Injectable()
 export class BrandingService {
     appGeneral: HTMLStyleElement;

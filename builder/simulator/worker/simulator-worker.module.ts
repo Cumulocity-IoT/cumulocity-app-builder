@@ -32,6 +32,9 @@ import {SimulationStrategiesService} from "../simulation-strategies.service";
 
 const client = new Client(new CookieAuth());
 
+/**
+ * Main simulator worker module
+ */
 @NgModule({
     imports: [
         BrowserModule,

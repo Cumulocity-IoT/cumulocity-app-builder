@@ -22,6 +22,9 @@ import {AppIdService} from "../../app-id.service";
 import {AppStateService} from "@c8y/ngx-components";
 import {filter, first, mapTo, switchMap} from "rxjs/operators";
 
+/**
+ * The worker is passed it's appId from the main thread so the service to get it is slightly different but meets the same interface
+ */
 @Injectable()
 export class WorkerAppIdService implements AppIdService {
     appId$: BehaviorSubject<string | undefined> = new BehaviorSubject<string|undefined>(undefined);
@@ -33,8 +36,8 @@ export class WorkerAppIdService implements AppIdService {
                 filter(user => user != null),
                 first(),
                 mapTo(url)
-                )
-            ));
+            ))
+        );
     }
 
     getCurrentAppId(): string | undefined {

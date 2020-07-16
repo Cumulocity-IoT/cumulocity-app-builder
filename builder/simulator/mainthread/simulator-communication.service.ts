@@ -23,6 +23,9 @@ import {filter} from "rxjs/operators";
 import { ApplicationService, UserService, IUser } from "@c8y/client";
 import {AlertService} from "@c8y/ngx-components";
 
+/**
+ * The service used for communicating with the simulators (running in a worker)
+ */
 @Injectable({providedIn: 'root'})
 export class SimulatorCommunicationService {
     // @ts-ignore
@@ -32,7 +35,7 @@ export class SimulatorCommunicationService {
         appIdService.appIdDelayedUntilAfterLogin$.pipe(filter(appId => appId != null)).subscribe((appId) => this.checkUserPermissions(appId));
     }
 
-    async checkUserPermissions(appId: string) {
+    private async checkUserPermissions(appId: string) {
         const result = await this.applicationService.detail(appId);
 
         if (result.res.status === 401) {

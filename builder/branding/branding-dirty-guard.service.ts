@@ -20,6 +20,9 @@ import {Injectable} from "@angular/core";
 import {CanDeactivate} from "@angular/router";
 import {BrandingComponent} from "./branding.component";
 
+/**
+ * If the branding component has any unsaved changes then this asks the user to confirm that they want to leave
+ */
 @Injectable()
 export class BrandingDirtyGuardService implements CanDeactivate<BrandingComponent> {
     async canDeactivate(component: BrandingComponent) {

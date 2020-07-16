@@ -18,6 +18,9 @@
 
 import {DeviceSimulator} from "./device-simulator";
 
+/**
+ * An abstract simulator that generates values at a fixed interval
+ */
 export abstract class DeviceIntervalSimulator extends DeviceSimulator {
     protected abstract get interval();
 

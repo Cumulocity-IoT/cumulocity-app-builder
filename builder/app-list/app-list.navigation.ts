@@ -27,6 +27,7 @@ export class AppListNavigation implements NavigatorNodeFactory {
     nodes = new BehaviorSubject<NavigatorNode[]>([]);
 
     constructor(appIdService: AppIdService) {
+        // Only show the app-list navigation if we aren't in an app-builder application
         appIdService.appId$
             .pipe(
                 map(appId => {

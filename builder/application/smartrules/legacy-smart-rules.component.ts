@@ -23,19 +23,14 @@ declare const angular: any;
 import './cumulocity.json';
 
 angular.module("c8y.smartRulesUI", ["c8y.smartRules"])
-    // Use a directive rather than a component so that we can hack the $routeParams before the template is constructed
-    .directive('legacySmartRules', ['$routeParams', 'c8yUiUtil', function ($routeParams, c8yUiUtil) {
-        return {
-            restrict: 'E',
-            template: require("@c8y/ng1-modules/smartRules/views/list.html").default,
-            controller: ['c8yTitle', 'gettext', (c8yTitle, gettext) => {
-                c8yTitle.changeTitle({
-                    title: gettext('Smart Rules')
-                });
-            }],
-            controllerAs: '$ctrl'
-        }
-    }]);
+    .component('legacySmartRules', {
+        template: require("@c8y/ng1-modules/smartRules/views/list.html").default,
+        controller: ['c8yTitle', 'gettext', (c8yTitle, gettext) => {
+            c8yTitle.changeTitle({
+                title: gettext('Smart Rules')
+            });
+        }]
+    });
 
 angular.module("c8y.cockpit.config", []);
 
@@ -44,6 +39,9 @@ angular.module("c8y.cockpit.config", []);
 })
 export class LegacySmartRulesComponent extends UpgradeComponent {
     constructor(elementRef: ElementRef, injector: Injector) {
+        // The angularJS smartRules component only reads the device/group from the $routeParams,
+        // we're not using the $routeParams in the same way so we just hack it in by manually setting the $routeParams
+
         // Get the AngularJS Injector
         // noinspection JSDeprecatedSymbols
         const $injector = injector.get('$injector');

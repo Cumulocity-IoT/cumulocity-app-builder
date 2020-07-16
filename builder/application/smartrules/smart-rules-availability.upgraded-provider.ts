@@ -19,6 +19,9 @@ import {InjectionToken} from "@angular/core";
 
 export const SMART_RULES_AVAILABILITY_TOKEN = new InjectionToken('SmartRulesAvailability');
 
+/**
+ * Upgrades the c8ySmartRulesAvailability service from angularJS to Angular
+ */
 export const smartRulesAvailabilityProvider = {
     provide: SMART_RULES_AVAILABILITY_TOKEN,
     useFactory: ($injector) => $injector.get('c8ySmartRulesAvailability'),
