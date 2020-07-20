@@ -36,7 +36,8 @@ import {Subscription} from "rxjs";
 @Component({
     selector: 'dashboard-by-id',
     template: `
-        <c8y-widgets-dashboard [context]="context" 
+        <c8y-widgets-dashboard [context]="context"
+                               [contextDashboard]="dashboard"
                                [widgets]="widgets"
                                [settings]="{
                                 isLoading: isLoading,

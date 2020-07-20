@@ -40,6 +40,7 @@ import {WidgetService} from "../../../dashboard-by-id/widget.service";
     selector: 'group-template-dashboard',
     template: `
         <c8y-widgets-dashboard [context]="context" 
+                               [contextDashboard]="dashboard"
                                [widgets]="widgets"
                                [settings]="{
                                 isLoading: isLoading,
