@@ -50,6 +50,9 @@
         <div class="drag-handle"><i class="fa custom-icon-drag-handle"></i></div>
         <div class="col">{{item.value.name}}</div>
         <div class="col">{{item.value.id}}</div>
+        <div class="col">{{item.value.visibility === 'no-nav' ? 'Tabs Only' : 
+            item.value.visibility === 'hidden' ? 'Hidden': item.value.visibility}}</div>
+        <div class="col">{{item.value.tabGroup}}</div>
         <div class="col"><i [c8yIcon]="item.value.icon"></i> {{item.value.icon}}</div>
         <div class="col">{{item.value.groupTemplate ? 'Children of: ' : ''}}{{item.value.deviceId || '-'}}</div>
         <div>
@@ -77,6 +80,8 @@
                             <div class="drag-handle invisible"><i class="fa custom-icon-drag-handle"></i></div>
                             <div class="col">Path</div>
                             <div class="col">Dashboard ID</div>
+                            <div class="col">Visibility</div>
+                            <div class="col">Tab Group</div>
                             <div class="col">Icon</div>
                             <div class="col">Device(s)</div>
                             <div class="invisible"><button class="btn btn-default">Edit</button><button class="btn btn-default">Delete</button></div>
