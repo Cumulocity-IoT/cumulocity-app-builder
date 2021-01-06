@@ -27,7 +27,6 @@ import { IUser } from '@c8y/client';
 import {SimulationStrategiesModule} from "./simulation-strategies/simulation-strategies.module";
 import {CustomWidgetsModule} from "./custom-widgets/custom-widgets.module";
 import {RuntimeWidgetInstallerModule, RuntimeWidgetLoaderService} from "cumulocity-runtime-widget-loader";
-
 @NgModule({
   imports: [
     // Upgrade module must be the first
@@ -65,7 +64,10 @@ export class AppModule extends HybridAppModule {
             first(),
             filter(([, event]: [IUser, NavigationError | null]) => event != null),
             map(([, event]: [IUser, NavigationError]) => event)
-        ).subscribe(event => router.navigateByUrl(event.url));
+        ).subscribe(event => {
+            console.log("route url ===", event.url);
+            router.navigateByUrl(event.url);
+        });
     }
 
     ngDoBootstrap(): void {

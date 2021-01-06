@@ -16,12 +16,13 @@
 * limitations under the License.
  */
 
-import {Component, isDevMode} from '@angular/core';
+import {Component, isDevMode, OnInit} from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap/modal';
-import {ApplicationService, ApplicationAvailability, ApplicationType, FetchClient, InventoryService} from '@c8y/client';
+import {ApplicationService, ApplicationAvailability, ApplicationType, FetchClient, InventoryService, IApplication} from '@c8y/client';
 import {AlertService, AppStateService} from "@c8y/ngx-components";
 import {UpdateableAlert} from "../utils/UpdateableAlert";
 import {contextPathFromURL} from "../utils/contextPathFromURL";
+import { Observable } from 'rxjs';
 
 @Component({
     template: `
@@ -50,6 +51,14 @@ import {contextPathFromURL} from "../utils/contextPathFromURL";
                     <input type="text" class="form-control" id="name" name="name" [placeholder]="currentContextPath() + ' (optional, cannot be changed)'" [(ngModel)]="appPath">
                 </div>
             </div>
+
+            <div class="form-group">
+                    <label for="appCloneName"><span>Clone Existing Application</span></label>
+                    <input type="text" class="form-control" id="appCloneName" name="appCloneName"
+                      placeholder="e.g. Type Application Name/Id (optional)" 
+                      [(ngModel)]="existingAppName" [typeahead]="appNameList" autocomplete="off">
+                      
+                </div>
         </form>
     </div>
     <div class="modal-footer">
@@ -59,18 +68,42 @@ import {contextPathFromURL} from "../utils/contextPathFromURL";
   `
 })
 
-export class NewApplicationModalComponent {
+export class NewApplicationModalComponent implements OnInit {
     appName: string = '';
     appPath: string = '';
+    existingAppName: string = '';
     appIcon: string = 'bathtub';
+    applications: Observable<IApplication[]>;
+    appList: any = [];
+    appNameList: any = [];
 
     constructor(public bsModalRef: BsModalRef, private appService: ApplicationService, private appStateService: AppStateService, private fetchClient: FetchClient, private inventoryService: InventoryService, private alertService: AlertService) {}
+   
+    ngOnInit() {
+        this.loadApplicationsForClone();
+    }
 
-    async createApplication() {
-        this.bsModalRef.hide();
+    async createApplication1() {
+        let isCloneApp = false;
+        let appBuilderObj;
+        if(this.existingAppName) {
+            const existingApp = this.existingAppName.split(' (');
+            if(existingApp.length > 1) {
+                const existingAppId = existingApp[1].replace(')','');
+                const appData = this.appList.filter(app => app.id === existingAppId);
+                if(appData  && appData.length > 0) {
+                    appBuilderObj = appData[0].applicationBuilder;
+                    if(appBuilderObj && appBuilderObj.icon) {
+                        appBuilderObj.icon = this.appIcon;
+                    }
+                    isCloneApp = true;
+                }
+            }
+            
+        }
 
         const defaultAppBuilderData = {
-            applicationBuilder: {
+            applicationBuilder: isCloneApp ? appBuilderObj : {
                 version: __VERSION__,
                 branding: {
                     colors: {
@@ -89,7 +122,47 @@ export class NewApplicationModalComponent {
                 "class": `fa fa-${this.appIcon}`
             },
         };
+        console.log('default app data', defaultAppBuilderData);
+    }
+    async createApplication() {
+        this.bsModalRef.hide();
+        
+        let isCloneApp = false;
+        let appBuilderObj = {};
+        if(this.existingAppName) {
+            const existingApp = this.existingAppName.split(' (');
+            if(existingApp.length > 1) {
+                const existingAppId = existingApp[1].replace(')','');
+                const appData = this.appList.filter(app => app.id === existingAppId);
+                if(appData  && appData.length > 0) {
+                    appBuilderObj = appData[0].applicationBuilder;
+                    isCloneApp = true;
+                }
+            }
+            
+        }
 
+        const defaultAppBuilderData = {
+            applicationBuilder: isCloneApp ? appBuilderObj : {
+                version: __VERSION__,
+                branding: {
+                    colors: {
+                        primary: '#1776BF',
+                        active: '#14629F',
+                        text: '#333333',
+                        textOnPrimary: 'white',
+                        textOnActive: 'white'
+                    }
+                },
+                dashboards: [],
+                icon: this.appIcon
+            },
+            icon: {
+                name: this.appIcon,
+                "class": `fa fa-${this.appIcon}`
+            },
+        };
+        
         // If the appPath option has been set then we copy the full AppBuilder into a new application
         if (this.appPath) {
             // Check if we're debugging or on localhost - copying the AppBuilder won't work when debugging on localhost
@@ -206,5 +279,15 @@ export class NewApplicationModalComponent {
 
     currentContextPath(): string {
         return contextPathFromURL();
+    }
+
+    loadApplicationsForClone() {
+        this.applications.subscribe(apps => {
+            this.appList = apps;
+            if (this.appList && this.appList.length > 0) {
+                this.appNameList = Array.from(new Set(this.appList.map(app => `${app.name} (${app.id})`)));
+            }
+        });
+      
     }
 }

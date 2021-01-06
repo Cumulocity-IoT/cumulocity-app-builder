@@ -64,7 +64,8 @@ export class AppListComponent {
     }
 
     createAppWizard() {
-        this.bsModalRef = this.modalService.show(NewApplicationModalComponent, { class: 'c8y-wizard' });
+        this.bsModalRef = this.modalService.show(NewApplicationModalComponent, { class: 'c8y-wizard' ,initialState : 
+        { applications: this.applications}});
     }
 
     async deleteApplication(id: number) {

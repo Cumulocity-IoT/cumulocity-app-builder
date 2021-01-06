@@ -1,16 +1,16 @@
 {
   "name": "app-builder",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Application builder for Cumulocity (written by Software AG Global Presales)",
   "main": "index.ts",
   "scripts": {
-    "start": "c8ycli server --env.extraWebpackConfig=./extra-webpack.config.js",
+    "start": "c8ycli server --env.extraWebpackConfig=./extra-webpack.config.js ",
     "build": "c8ycli build --env.extraWebpackConfig=./extra-webpack.config.js",
     "deploy": "c8ycli deploy",
     "postinstall": "patch-package && patch-package --patch-dir node_modules/cumulocity-runtime-widget-loader/patches"
   },
   "keywords": [],
-  "author": "Richard Peach - Software AG, Global Presales",
+  "author": "Darpankuar Lalani - Software AG, Global Presales",
   "license": "Apache 2.0",
   "dependencies": {
     "@angular/animations": "8.2.13",
@@ -25,9 +25,9 @@
     "@angular/platform-webworker-dynamic": "^8.2.13",
     "@angular/router": "8.2.13",
     "@angular/upgrade": "8.2.13",
-    "@c8y/ng1-modules": "1006.6.8",
-    "@c8y/ngx-components": "1006.6.8",
-    "@c8y/style": "1006.6.8",
+    "@c8y/ng1-modules": "1006.6.22",
+    "@c8y/ngx-components": "1006.6.22",
+    "@c8y/style": "1006.6.22",
     "@ng-reactive/async-input": "0.0.1",
     "@ng-select/ng-select": "^3.7.3",
     "angular": "1.6.9",
@@ -48,10 +48,10 @@
     "zone.js": "~0.9.1"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "0.803.17",
+    "@angular-devkit/build-angular": "0.803.23",
     "@angular/compiler-cli": "8.2.13",
     "@angular/language-service": "8.2.13",
-    "@c8y/cli": "1006.6.8",
+    "@c8y/cli": "1006.6.22",
     "@types/lodash-es": "^4.17.3",
     "patch-package": "^6.2.2",
     "typescript": "3.5.3"
