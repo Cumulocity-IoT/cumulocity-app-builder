@@ -24,7 +24,6 @@ import {AppStateService} from "@c8y/ngx-components";
 import {AppIdService} from "../../app-id.service";
 import { SimulatorConfig } from "../simulator-config";
 import {BehaviorSubject, Subject, Subscription} from "rxjs";
-
 /**
  * The public api for talking to the simulators
  * Fields starting with _ are for use only by the worker
@@ -44,11 +43,13 @@ export class SimulatorWorkerAPI {
         private appIdService: AppIdService
     ) {}
 
-    setUserAndCredentials(user: IUser | null, credentials: ICredentials) {
+    setUserAndCredentials(user: IUser | null, credentials: ICredentials, isCookieAuth: boolean, cookieAuth: any) {
+        if(isCookieAuth) {
+            this.fetchClient.defaultHeaders = {'X-XSRF-TOKEN': cookieAuth};
+        }
         this.fetchClient.setAuth(new BasicAuth(credentials));
         this.appStateService.currentUser.next(user);
     }
-
     setTenant(tenant: ICurrentTenant | null) {
         this.appStateService.currentTenant.next(tenant);
     }
