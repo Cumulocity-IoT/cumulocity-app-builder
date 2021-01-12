@@ -1,16 +1,16 @@
 {
   "name": "app-builder",
-  "version": "1.2.3",
+  "version": "1.2.3-rc.1",
   "description": "Application builder for Cumulocity (written by Software AG Global Presales)",
   "main": "index.ts",
   "scripts": {
-    "start": "c8ycli server --env.extraWebpackConfig=./extra-webpack.config.js ",
+    "start": "c8ycli server --env.extraWebpackConfig=./extra-webpack.config.js -u https://sandbox-ar.eu-latest.cumulocity.com",
     "build": "c8ycli build --env.extraWebpackConfig=./extra-webpack.config.js",
     "deploy": "c8ycli deploy",
     "postinstall": "patch-package && patch-package --patch-dir node_modules/cumulocity-runtime-widget-loader/patches"
   },
   "keywords": [],
-  "author": "Darpankuar Lalani - Software AG, Global Presales",
+  "author": "Darpankumar Lalani - Software AG, Global Presales",
   "license": "Apache 2.0",
   "dependencies": {
     "@angular/animations": "8.2.13",

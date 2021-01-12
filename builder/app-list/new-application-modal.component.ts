@@ -82,8 +82,10 @@ export class NewApplicationModalComponent implements OnInit {
     ngOnInit() {
         this.loadApplicationsForClone();
     }
-
-    async createApplication1() {
+   
+    async createApplication() {
+        this.bsModalRef.hide();
+        
         let isCloneApp = false;
         let appBuilderObj;
         if(this.existingAppName) {
@@ -96,52 +98,21 @@ export class NewApplicationModalComponent implements OnInit {
                     if(appBuilderObj && appBuilderObj.icon) {
                         appBuilderObj.icon = this.appIcon;
                     }
+                    appBuilderObj.version = __VERSION__;
                     isCloneApp = true;
+                    const appDashboards = appBuilderObj.dashboards;
+                    await Promise.all(appDashboards.map(async dashboard => {
+                        await this.addClonedDashboard(appBuilderObj, dashboard.name, dashboard.id, dashboard.icon, 
+                            (dashboard.deviceId ? dashboard.deviceId : ''), dashboard.groupTemplate);
+                    }));
+                    let simulators = appBuilderObj.simulators;
+                    simulators.forEach(simulator => {
+                        simulator.id = Math.floor(Math.random() * 1000000);
+                    });
+                    appBuilderObj.simulators = simulators;
                 }
-            }
-            
+            }            
         }
-
-        const defaultAppBuilderData = {
-            applicationBuilder: isCloneApp ? appBuilderObj : {
-                version: __VERSION__,
-                branding: {
-                    colors: {
-                        primary: '#1776BF',
-                        active: '#14629F',
-                        text: '#333333',
-                        textOnPrimary: 'white',
-                        textOnActive: 'white'
-                    }
-                },
-                dashboards: [],
-                icon: this.appIcon
-            },
-            icon: {
-                name: this.appIcon,
-                "class": `fa fa-${this.appIcon}`
-            },
-        };
-        console.log('default app data', defaultAppBuilderData);
-    }
-    async createApplication() {
-        this.bsModalRef.hide();
-        
-        let isCloneApp = false;
-        let appBuilderObj = {};
-        if(this.existingAppName) {
-            const existingApp = this.existingAppName.split(' (');
-            if(existingApp.length > 1) {
-                const existingAppId = existingApp[1].replace(')','');
-                const appData = this.appList.filter(app => app.id === existingAppId);
-                if(appData  && appData.length > 0) {
-                    appBuilderObj = appData[0].applicationBuilder;
-                    isCloneApp = true;
-                }
-            }
-            
-        }
-
         const defaultAppBuilderData = {
             applicationBuilder: isCloneApp ? appBuilderObj : {
                 version: __VERSION__,
@@ -289,5 +260,32 @@ export class NewApplicationModalComponent implements OnInit {
             }
         });
       
+    }
+
+    async addClonedDashboard(appBuilderObj, name: string, dashboardId: string, icon: string, deviceId: string, isGroupTemplate: boolean = false) {
+        const dashboardManagedObject = (await this.inventoryService.detail(dashboardId)).data;
+        const template = dashboardManagedObject.c8y_Dashboard;
+        await this.addTemplateDashboard(appBuilderObj,name, icon, template, deviceId, dashboardId, isGroupTemplate);
+    }
+    async addTemplateDashboard(appBuilderObj, name: string, icon: string, template: any, deviceId: string, existingDashboardId: string, isGroupTemplate: boolean = false) {
+        const dashboardManagedObject = (await this.inventoryService.create({
+            "c8y_Dashboard": {
+                ...template,
+                name,
+                icon,
+                global: true
+            },
+            ...(isGroupTemplate ? {
+                applicationBuilder_groupTemplate: {
+                    groupId: deviceId,
+                    templateDeviceId: "NO_DEVICE_TEMPLATE_ID"
+                }
+            } : {})
+        })).data;
+        appBuilderObj.dashboards.forEach(dashboard => {
+            if(dashboard.id === existingDashboardId) {
+                dashboard.id = dashboardManagedObject.id
+            }
+        });
     }
 }

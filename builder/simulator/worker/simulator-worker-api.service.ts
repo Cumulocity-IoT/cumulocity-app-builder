@@ -44,7 +44,10 @@ export class SimulatorWorkerAPI {
         private appIdService: AppIdService
     ) {}
 
-    setUserAndCredentials(user: IUser | null, credentials: ICredentials) {
+    setUserAndCredentials(user: IUser | null, credentials: ICredentials, isCookieAuth: boolean, cookieAuth: any) {
+        if(isCookieAuth) {
+            this.fetchClient.defaultHeaders = {'X-XSRF-TOKEN': cookieAuth};
+        }
         this.fetchClient.setAuth(new BasicAuth(credentials));
         this.appStateService.currentUser.next(user);
     }
