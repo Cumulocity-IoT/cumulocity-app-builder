@@ -33,7 +33,7 @@ import { Observable } from 'rxjs';
         <h4 class="text-uppercase" style="margin:0; letter-spacing: 0.15em;">Add application</h4>
     </div>
     <div class="modal-body c8y-wizard-form">
-        <form name="newAppBuilderAppForm" class="c8y-wizard-form">
+        <form name="newAppBuilderAppForm" #newAppBuilderAppForm="ngForm" class="c8y-wizard-form">
             <div class="form-group">
                 <label for="name"><span>Name</span></label>
                 <input type="text" class="form-control" id="name" name="name" placeholder="e.g. My First Application (required)" required [(ngModel)]="appName">
@@ -63,7 +63,7 @@ import { Observable } from 'rxjs';
     </div>
     <div class="modal-footer">
         <button type="button" class="btn btn-default" (click)="bsModalRef.hide()">Cancel</button>
-        <button type="button" class="btn btn-primary" (click)="createApplication()">Save</button>
+        <button type="button" class="btn btn-primary" [disabled]="!newAppBuilderAppForm.form.valid" (click)="createApplication()">Save</button>
     </div>
   `
 })

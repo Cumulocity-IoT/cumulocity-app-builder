@@ -9,7 +9,7 @@
 </div>
 <hr style="margin:0;">
 <div class="modal-inner-scroll">
-    <form name="editDashboardForm" class="c8y-wizard-form">
+    <form name="editDashboardForm"  #editDashboardForm="ngForm" class="c8y-wizard-form">
         <div class="form-group">
             <label for="name"><span>Path</span></label>
             <input type="text" class="form-control" id="name" name="name" placeholder="e.g. Some Folder/My First Application (required)" required autofocus="true" [(ngModel)]="dashboardName">
@@ -57,5 +57,5 @@
 </div>
 <div class="c8y-wizard-footer">
     <button class="btn btn-default" (click)="bsModalRef.hide()">Cancel</button>
-    <button class="btn btn-primary" (click)="save()" [disabled]="busy">Save</button>
+    <button class="btn btn-primary" (click)="save()" [disabled]="busy || !editDashboardForm.form.valid">Save</button>
 </div>

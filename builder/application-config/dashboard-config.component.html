@@ -25,7 +25,7 @@
                 </div>
                 <hr/>
                 <div class="card-block">
-
+                    <form name="editAppBuilderAppForm" #editAppBuilderAppForm="ngForm">
                     <div class="form-group">
                         <label for="name"><span>Name</span></label>
                         <input type="text" class="form-control" id="name" name="name" placeholder="e.g. My First Application (required)" required [(ngModel)]="newAppName">
@@ -40,7 +40,8 @@
                         <label for="icon"><span>Icon</span></label>
                         <icon-selector id="icon" name="icon" [(value)]="newAppIcon"></icon-selector>
                     </div>
-                    <button class="btn btn-primary" (click)="saveAppChanges(app)">Save</button>
+                    </form>
+                    <button class="btn btn-primary" [disabled]="!editAppBuilderAppForm.form.valid" (click)="saveAppChanges(app)">Save</button>
                 </div>
             </div>
         </div>
