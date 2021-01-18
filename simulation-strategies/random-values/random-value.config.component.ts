@@ -17,6 +17,7 @@
  */
 
 import {Component} from "@angular/core";
+import { ControlContainer, NgForm } from '@angular/forms';
 import {SimulationStrategyConfigComponent} from "../../builder/simulator/simulation-strategy";
 
 export interface RandomValueSimulationStrategyConfig {
@@ -55,7 +56,8 @@ export interface RandomValueSimulationStrategyConfig {
             <label for="interval"><span>Interval (seconds)</span></label>
             <input type="number" class="form-control" id="interval" name="interval" placeholder="e.g. 5 (required)" required [(ngModel)]="config.interval">
         </div>
-    `
+    `,
+    viewProviders: [ { provide: ControlContainer, useExisting: NgForm } ]
 })
 export class RandomValueSimulationStrategyConfigComponent extends SimulationStrategyConfigComponent {
     config: RandomValueSimulationStrategyConfig;
