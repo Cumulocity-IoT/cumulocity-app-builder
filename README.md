@@ -78,6 +78,37 @@ A more detailed user guide is available in the Help section of the Application B
 
 **NOTE:** This is only shown in the main page of the Application Builder, not when editing an individual application
 
+## Troubleshooting
+ *  **Application Builder keep loading:** 
+  If you are building your own version of app builder you may experience below error in browser console due to nv.d3.js bug.
+  ```
+  Uncaught (in promise) TypeError: true is not a function
+    at eval (nv.d3.js?4bd4:9)
+    at eval (nv.d3.js?4bd4:14365)
+  ```
+  If you encounter above error, please follow below steps:
+  
+   1. Stop the server.
+   2. Goto /cumulocity_app_builder/node_modules/nvd3 folder
+   3. Open nv.d3.js file
+   4. add ";" at line number 7. Refer below code snippet.
+    
+    ```
+      (function(){
+
+      var nv = window.nv || {};
+
+
+      nv.version = '1.1.15b';
+      nv.dev = true; //set false when in production
+
+      window.nv = nv;
+    
+    ```
+   5. Save file
+   6. Goto /cumulocity_app_builder/patches and delete nvd3+0.0.1.patch file
+   7. Execute "npx patch-package nvd3" command in your terminal
+   8. Start the server
 ------------------------------
 
 These tools are provided as-is and without warranty or support. They do not constitute part of the Software AG product suite. Users are free to use, fork and modify them, subject to the license agreement. While Software AG welcomes contributions, we cannot guarantee to include every contribution in the master project.
