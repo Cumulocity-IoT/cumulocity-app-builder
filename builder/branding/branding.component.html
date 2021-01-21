@@ -51,7 +51,7 @@
 
                     <div class="form-group">
                         <label for="hide-icon"><span>App Icon</span></label>
-                        <button class="btn btn-default" id="hide-icon" name="hide-icon" [(ngModel)]="app.applicationBuilder.branding.hideIcon" (ngModelChange)="showBrandingChange(app)" [disabled]="!app.applicationBuilder.branding.enabled" [class.disabled]="!app.applicationBuilder.branding.enabled" btnCheckbox tabindex="0">{{app.applicationBuilder.branding.hideIcon ? 'Hidden' : 'Visible'}}</button>
+                        <button class="btn btn-default" id="hide-icon" name="hide-icon" [(ngModel)]="app.applicationBuilder.branding.hideIcon" (ngModelChange)="showBrandingChange(app)" [disabled]="!app.applicationBuilder.branding.enabled" [class.disabled]="!app.applicationBuilder.branding.enabled" btnCheckbox tabindex="0">{{app.applicationBuilder.branding.hideIcon ? 'Disabled' : 'Enabled' }}</button>
                     </div>
                 </div>
             </div>

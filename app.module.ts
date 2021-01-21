@@ -27,7 +27,8 @@ import { IUser } from '@c8y/client';
 import {SimulationStrategiesModule} from "./simulation-strategies/simulation-strategies.module";
 import {CustomWidgetsModule} from "./custom-widgets/custom-widgets.module";
 import {RuntimeWidgetInstallerModule, RuntimeWidgetLoaderService} from "cumulocity-runtime-widget-loader";
-
+import { interval } from 'rxjs';
+import { NONE_TYPE } from '@angular/compiler/src/output/output_ast';
 @NgModule({
   imports: [
     // Upgrade module must be the first
@@ -65,7 +66,10 @@ export class AppModule extends HybridAppModule {
             first(),
             filter(([, event]: [IUser, NavigationError | null]) => event != null),
             map(([, event]: [IUser, NavigationError]) => event)
-        ).subscribe(event => router.navigateByUrl(event.url));
+        ).subscribe(event => {
+            console.log("route url ===", event.url);
+            router.navigateByUrl(event.url);
+        });
     }
 
     ngDoBootstrap(): void {
@@ -86,5 +90,17 @@ export class AppModule extends HybridAppModule {
                 this.router.navigateByUrl(nextSplit.length > 1 ? nextSplit[1] : '');
             });
         }]);
+
+        // Hiding (+) icon sine its not relevant for app builder
+        const actionOutletInt = interval(1000);
+        const actionOutletSub = actionOutletInt.subscribe(async val => {
+            let actionOutlet = document.querySelector('c8y-action-outlet button') as any;
+            if (actionOutlet) {
+                    actionOutlet.disabled = true;
+                    actionOutlet.style.color = '#B0B9BF';
+                    actionOutlet.style.display = 'none';
+                    actionOutletSub.unsubscribe();
+            }
+        });
     }
 }

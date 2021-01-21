@@ -25,7 +25,7 @@
                 </div>
                 <hr/>
                 <div class="card-block">
-
+                    <form name="editAppBuilderAppForm" #editAppBuilderAppForm="ngForm">
                     <div class="form-group">
                         <label for="name"><span>Name</span></label>
                         <input type="text" class="form-control" id="name" name="name" placeholder="e.g. My First Application (required)" required [(ngModel)]="newAppName">
@@ -40,7 +40,8 @@
                         <label for="icon"><span>Icon</span></label>
                         <icon-selector id="icon" name="icon" [(value)]="newAppIcon"></icon-selector>
                     </div>
-                    <button class="btn btn-primary" (click)="saveAppChanges(app)">Save</button>
+                    </form>
+                    <button class="btn btn-primary" [disabled]="!editAppBuilderAppForm.form.valid" (click)="saveAppChanges(app)">Save</button>
                 </div>
             </div>
         </div>
@@ -50,6 +51,9 @@
         <div class="drag-handle"><i class="fa custom-icon-drag-handle"></i></div>
         <div class="col">{{item.value.name}}</div>
         <div class="col">{{item.value.id}}</div>
+        <div class="col">{{item.value.visibility === 'no-nav' ? 'Tabs Only' : 
+            item.value.visibility === 'hidden' ? 'Hidden': item.value.visibility}}</div>
+        <div class="col">{{item.value.tabGroup}}</div>
         <div class="col"><i [c8yIcon]="item.value.icon"></i> {{item.value.icon}}</div>
         <div class="col">{{item.value.groupTemplate ? 'Children of: ' : ''}}{{item.value.deviceId || '-'}}</div>
         <div>
@@ -77,6 +81,8 @@
                             <div class="drag-handle invisible"><i class="fa custom-icon-drag-handle"></i></div>
                             <div class="col">Path</div>
                             <div class="col">Dashboard ID</div>
+                            <div class="col">Visibility</div>
+                            <div class="col">Tab Group</div>
                             <div class="col">Icon</div>
                             <div class="col">Device(s)</div>
                             <div class="invisible"><button class="btn btn-default">Edit</button><button class="btn btn-default">Delete</button></div>

@@ -24,6 +24,7 @@ import {CommonModule} from "@angular/common";
 import {AppStateService, CoreModule, HOOK_NAVIGATOR_NODES} from "@c8y/ngx-components";
 import {AppListNavigation} from "./app-list.navigation";
 import {BsDropdownModule} from "ngx-bootstrap/dropdown";
+import { TypeaheadModule } from 'ngx-bootstrap/typeahead';
 import {NewApplicationModalComponent} from "./new-application-modal.component";
 import {IconSelectorModule} from "../../icon-selector/icon-selector.module";
 import {ApplicationService, IApplication} from "@c8y/client";
@@ -65,6 +66,7 @@ export class RedirectToDefaultApplicationOrBuilder implements CanActivate {
         CommonModule,
         FormsModule,
         BsDropdownModule.forRoot(),
+        TypeaheadModule.forRoot(),
         CoreModule,
         IconSelectorModule
     ],

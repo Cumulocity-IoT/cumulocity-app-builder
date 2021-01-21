@@ -4,10 +4,15 @@ The Application Builder for Cumulocity provides a simple, coding-free way to cre
 ![](https://user-images.githubusercontent.com/38696279/72333172-47cec300-36b3-11ea-9abf-1bb29b490a22.png)
 
 ## What's new?
-* **Support for the Latest Cumulocity Version:** Based on Cumulocity 1006.3 (The current eu-latest version)
+* **Support for the Latest Cumulocity Version:** Based on Cumulocity 1006.6.
+* **Clone Existing Application:** User can now clone existing application while creating new one.
+* **Dashboard Configuration Updates:** Now additional fields are visible such as device group, tab group in dashboard configuration page.
+* **Various bug fixes**
+
+## Features
 * **Browser-based Device Simulators:** Create device simulators that run directly in your browser.
 * **[Runtime widget loading](https://github.com/SoftwareAG/cumulocity-runtime-widget-loader):** Install widgets without re-compiling
-* **Group template dashboards:** Give every device in a group an identical dashboard (but customised to the device)
+* **Group template dashboards:** Give every device in a group an identical dashboard (but customized to the device)
 * **Create an App with a custom contextPath:** Change the URL used to access a particular app
 * **Tabs:** Group your dashboards into tabs
 
@@ -20,11 +25,11 @@ The Application Builder for Cumulocity provides a simple, coding-free way to cre
 6. Select the Zip you downloaded earlier
 
 ## Build Instructions
-**Note:** It is only necessary to follow these instructions if you are modifying/extending the Application Builder (such as adding custom widgets), otherwise see the [Installation Guide](#Installation).
+**Note:** It is only necessary to follow these instructions if you are modifying/extending the Application Builder (such as adding custom widgets, branding, etc.), otherwise see the [Installation Guide](#Installation).
 
 **Requirements:**
 * Git
-* NodeJS (release builds are currently built with `v10.19.0`)
+* NodeJS (release builds are currently built with `v12.19.0`)
 * NPM (Included with NodeJS)
 
 **Instructions**
@@ -38,7 +43,7 @@ cd cumulocity-app-builder
 ```
 2. (Optional) Checkout a specific version: 
 ```
-git checkout v1.1.0
+git checkout v1.2.2
 ```
 3. Install the dependencies: 
 ```
@@ -57,7 +62,7 @@ npm run build
 npm run deploy
 ```
 
-## Quickstart
+## QuickStart
 
 This guide will teach you how to create your first application using the Application Builder.
 
@@ -68,7 +73,7 @@ This guide will teach you how to create your first application using the Applica
 3. Enter the application details and click `Save`
 4. Select `Add dashboard`
 5. Click `Blank Dashboard`
-6. Enter the dahsboard details and click `Save`
+6. Enter the dashboard details and click `Save`
 7. Select the dashboard from the navigation
 
 Congratulations! You have created an application and added your first screen.
@@ -77,6 +82,30 @@ Congratulations! You have created an application and added your first screen.
 A more detailed user guide is available in the Help section of the Application Builder app.
 
 **NOTE:** This is only shown in the main page of the Application Builder, not when editing an individual application
+
+## Runtime Widgets
+
+Application Builder supports runtime widgets deployment. 
+Here are some of runtime widgets which are available to download and install.
+
+* **[Data Points Map](https://github.com/SoftwareAG/cumulocity-data-points-map-widget)**
+* **[Smart Map](https://github.com/SoftwareAG/cumulocity-smart-map-widget)**
+* **[Smart Map Settings](https://github.com/SoftwareAG/cumulocity-smart-map-settings-widget)**
+* **[Compass](https://github.com/SoftwareAG/cumulocity-compass-widget)**
+* **[Device Chart](https://github.com/SoftwareAG/cumulocity-device-chart-widget)**
+* **[Process](https://github.com/SoftwareAG/cumulocity-processing-widget)**
+* **[Weather Forcast](https://github.com/SoftwareAG/cumulocity-weather-forecast-widget)**
+* **[Event Chart](https://github.com/SoftwareAG/cumulocity-event-chart-widget)**
+* **[Event Image Viewer](https://github.com/SoftwareAG/cumulocity-event-image-viewer-widget)**
+* **[Image Animation](https://github.com/SoftwareAG/cumulocity-image-animation-widget)**
+* **[KPI Trend](https://github.com/SoftwareAG/cumulocity-kpi-trend-widget)**
+* **[Markdown](https://github.com/SoftwareAG/cumulocity-markdown-widget)**
+* **[Silo Capacity](https://github.com/SoftwareAG/cumulocity-silo-capacity-widget)**
+* **[Employee Proximity Check](https://github.com/SoftwareAG/cumulocity-employee-proximity-check-widget)**
+* **[Safe Interaction Overview](https://github.com/SoftwareAG/cumulocity-safe-interaction-overview-widget)**
+
+Would you like to create your own Custom Runtime widget? Please refer our [Demo Widget](https://github.com/SoftwareAG/cumulocity-demo-widget).
+
 
 ## Troubleshooting
  *  **Application Builder keep loading:** 
@@ -113,6 +142,4 @@ A more detailed user guide is available in the Help section of the Application B
 
 These tools are provided as-is and without warranty or support. They do not constitute part of the Software AG product suite. Users are free to use, fork and modify them, subject to the license agreement. While Software AG welcomes contributions, we cannot guarantee to include every contribution in the master project.
 _____________________
-For more information you can Ask a Question in the [TECHcommunity Forums](http://tech.forums.softwareag.com/techjforum/forums/list.page?product=cumulocity).
-
-You can find additional information in the [Software AG TECHcommunity](http://techcommunity.softwareag.com/home/-/product/name/cumulocity).
+For more information you can Ask a Question in the [TECH Community Forums](https://tech.forums.softwareag.com/tag/Cumulocity-IoT).

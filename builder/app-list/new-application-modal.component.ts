@@ -16,12 +16,13 @@
 * limitations under the License.
  */
 
-import {Component, isDevMode} from '@angular/core';
+import {Component, isDevMode, OnInit} from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap/modal';
-import {ApplicationService, ApplicationAvailability, ApplicationType, FetchClient, InventoryService} from '@c8y/client';
+import {ApplicationService, ApplicationAvailability, ApplicationType, FetchClient, InventoryService, IApplication} from '@c8y/client';
 import {AlertService, AppStateService} from "@c8y/ngx-components";
 import {UpdateableAlert} from "../utils/UpdateableAlert";
 import {contextPathFromURL} from "../utils/contextPathFromURL";
+import { Observable } from 'rxjs';
 
 @Component({
     template: `
@@ -32,7 +33,7 @@ import {contextPathFromURL} from "../utils/contextPathFromURL";
         <h4 class="text-uppercase" style="margin:0; letter-spacing: 0.15em;">Add application</h4>
     </div>
     <div class="modal-body c8y-wizard-form">
-        <form name="newAppBuilderAppForm" class="c8y-wizard-form">
+        <form name="newAppBuilderAppForm" #newAppBuilderAppForm="ngForm" class="c8y-wizard-form">
             <div class="form-group">
                 <label for="name"><span>Name</span></label>
                 <input type="text" class="form-control" id="name" name="name" placeholder="e.g. My First Application (required)" required [(ngModel)]="appName">
@@ -50,27 +51,70 @@ import {contextPathFromURL} from "../utils/contextPathFromURL";
                     <input type="text" class="form-control" id="name" name="name" [placeholder]="currentContextPath() + ' (optional, cannot be changed)'" [(ngModel)]="appPath">
                 </div>
             </div>
+
+            <div class="form-group">
+                    <label for="appCloneName"><span>Clone Existing Application</span></label>
+                    <input type="text" class="form-control" id="appCloneName" name="appCloneName"
+                      placeholder="e.g. Type Application Name/Id (optional)" 
+                      [(ngModel)]="existingAppName" [typeahead]="appNameList" autocomplete="off">
+                      
+                </div>
         </form>
     </div>
     <div class="modal-footer">
         <button type="button" class="btn btn-default" (click)="bsModalRef.hide()">Cancel</button>
-        <button type="button" class="btn btn-primary" (click)="createApplication()">Save</button>
+        <button type="button" class="btn btn-primary" [disabled]="!newAppBuilderAppForm.form.valid" (click)="createApplication()">Save</button>
     </div>
   `
 })
 
-export class NewApplicationModalComponent {
+export class NewApplicationModalComponent implements OnInit {
     appName: string = '';
     appPath: string = '';
+    existingAppName: string = '';
     appIcon: string = 'bathtub';
+    applications: Observable<IApplication[]>;
+    appList: any = [];
+    appNameList: any = [];
 
     constructor(public bsModalRef: BsModalRef, private appService: ApplicationService, private appStateService: AppStateService, private fetchClient: FetchClient, private inventoryService: InventoryService, private alertService: AlertService) {}
-
+   
+    ngOnInit() {
+        this.loadApplicationsForClone();
+    }
+   
     async createApplication() {
         this.bsModalRef.hide();
-
+        
+        let isCloneApp = false;
+        let appBuilderObj;
+        if(this.existingAppName) {
+            const existingApp = this.existingAppName.split(' (');
+            if(existingApp.length > 1) {
+                const existingAppId = existingApp[1].replace(')','');
+                const appData = this.appList.filter(app => app.id === existingAppId);
+                if(appData  && appData.length > 0) {
+                    appBuilderObj = appData[0].applicationBuilder;
+                    if(appBuilderObj && appBuilderObj.icon) {
+                        appBuilderObj.icon = this.appIcon;
+                    }
+                    appBuilderObj.version = __VERSION__;
+                    isCloneApp = true;
+                    const appDashboards = appBuilderObj.dashboards;
+                    await Promise.all(appDashboards.map(async dashboard => {
+                        await this.addClonedDashboard(appBuilderObj, dashboard.name, dashboard.id, dashboard.icon, 
+                            (dashboard.deviceId ? dashboard.deviceId : ''), dashboard.groupTemplate);
+                    }));
+                    let simulators = appBuilderObj.simulators;
+                    simulators.forEach(simulator => {
+                        simulator.id = Math.floor(Math.random() * 1000000);
+                    });
+                    appBuilderObj.simulators = simulators;
+                }
+            }            
+        }
         const defaultAppBuilderData = {
-            applicationBuilder: {
+            applicationBuilder: isCloneApp ? appBuilderObj : {
                 version: __VERSION__,
                 branding: {
                     colors: {
@@ -89,7 +133,7 @@ export class NewApplicationModalComponent {
                 "class": `fa fa-${this.appIcon}`
             },
         };
-
+        
         // If the appPath option has been set then we copy the full AppBuilder into a new application
         if (this.appPath) {
             // Check if we're debugging or on localhost - copying the AppBuilder won't work when debugging on localhost
@@ -206,5 +250,42 @@ export class NewApplicationModalComponent {
 
     currentContextPath(): string {
         return contextPathFromURL();
+    }
+
+    loadApplicationsForClone() {
+        this.applications.subscribe(apps => {
+            this.appList = apps;
+            if (this.appList && this.appList.length > 0) {
+                this.appNameList = Array.from(new Set(this.appList.map(app => `${app.name} (${app.id})`)));
+            }
+        });
+      
+    }
+
+    async addClonedDashboard(appBuilderObj, name: string, dashboardId: string, icon: string, deviceId: string, isGroupTemplate: boolean = false) {
+        const dashboardManagedObject = (await this.inventoryService.detail(dashboardId)).data;
+        const template = dashboardManagedObject.c8y_Dashboard;
+        await this.addTemplateDashboard(appBuilderObj,name, icon, template, deviceId, dashboardId, isGroupTemplate);
+    }
+    async addTemplateDashboard(appBuilderObj, name: string, icon: string, template: any, deviceId: string, existingDashboardId: string, isGroupTemplate: boolean = false) {
+        const dashboardManagedObject = (await this.inventoryService.create({
+            "c8y_Dashboard": {
+                ...template,
+                name,
+                icon,
+                global: true
+            },
+            ...(isGroupTemplate ? {
+                applicationBuilder_groupTemplate: {
+                    groupId: deviceId,
+                    templateDeviceId: "NO_DEVICE_TEMPLATE_ID"
+                }
+            } : {})
+        })).data;
+        appBuilderObj.dashboards.forEach(dashboard => {
+            if(dashboard.id === existingDashboardId) {
+                dashboard.id = dashboardManagedObject.id
+            }
+        });
     }
 }

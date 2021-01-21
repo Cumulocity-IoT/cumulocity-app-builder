@@ -110,8 +110,8 @@ export const WELCOME_DASHBOARD_TEMPLATE = {
             <h2>Global Pre-Sales Demo</h2>
         </div>
         <div class="banner-links">
-            <a class="btn btn-primary" href="https://solutionbook.softwareag.com" target="_blank">Learn More</a>
-            <a class="btn btn-primary" href="https://solutionbook.softwareag.com" target="_blank">Documentation</a>
+            <a class="btn btn-primary" href="" target="_blank">Learn More</a>
+            <a class="btn btn-primary" href="" target="_blank">Documentation</a>
         </div>
     </div>
 </div>

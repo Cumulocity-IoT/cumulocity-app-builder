@@ -72,7 +72,7 @@
         </div>
         <hr style="margin:0;">
         <div class="modal-inner-scroll">
-            <form class="c8y-wizard-form" name="newSimulatorForm">
+            <form class="c8y-wizard-form" name="newSimulatorFormDevice" #newSimulatorFormDevice="ngForm">
                 <div class="form-group">
                     <label for="deviceId"><span>Device ID</span></label>
                     <input type="text" class="form-control" id="deviceId" name="deviceId" placeholder="e.g. 12345 (required)" required autofocus [(ngModel)]="deviceId">
@@ -82,7 +82,7 @@
         <div class="c8y-wizard-footer">
             <button class="btn btn-default" (click)="wizard.selectStep('device')">Back</button>
             <button class="btn btn-default" (click)="bsModalRef.hide()">Cancel</button>
-            <button class="btn btn-primary" (click)="openSimulatorConfig()">Next <i c8yIcon="chevron-right"></i> </button>
+            <button class="btn btn-primary" (click)="openSimulatorConfig()" [disabled]="!newSimulatorFormDevice.form.valid">Next <i c8yIcon="chevron-right"></i> </button>
         </div>
     </wizard-step>
     <wizard-step stepId="config">
@@ -97,7 +97,7 @@
         </div>
         <hr style="margin:0;">
         <div class="modal-inner-scroll">
-            <form class="c8y-wizard-form" name="newSimulatorForm">
+            <form class="c8y-wizard-form" name="newSimulatorForm" #newSimulatorForm="ngForm">
                 <div class="form-group">
                     <label for="name"><span>Name</span></label>
                     <input type="text" class="form-control" id="name" name="name" placeholder="e.g. My First Simulator (required)" required autofocus [(ngModel)]="simulatorName">
@@ -108,7 +108,7 @@
         <div class="c8y-wizard-footer">
             <button class="btn btn-default" (click)="wizard.selectStep('device')">Back</button>
             <button class="btn btn-default" (click)="bsModalRef.hide()">Cancel</button>
-            <button class="btn btn-primary" [disabled]="busy" (click)="saveAndClose()">Save</button>
+            <button class="btn btn-primary" [disabled]="busy || !newSimulatorForm.form.valid" (click)="saveAndClose()">Save</button>
         </div>
     </wizard-step>
 </wizard>

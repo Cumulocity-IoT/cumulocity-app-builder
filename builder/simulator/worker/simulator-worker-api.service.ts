@@ -17,8 +17,7 @@
  */
 
 import {Injectable} from "@angular/core";
-import {ICredentials} from "@c8y/client/lib/src/core/IAuthentication";
-import {BasicAuth, FetchClient, IUser, ICurrentTenant} from "@c8y/client";
+import {BasicAuth, FetchClient, IUser, ICurrentTenant, ICredentials} from "@c8y/client";
 import {LockStatus, SimulationLockService} from "./simulation-lock.service";
 import {AppStateService} from "@c8y/ngx-components";
 import {AppIdService} from "../../app-id.service";

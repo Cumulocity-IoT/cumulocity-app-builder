@@ -199,7 +199,7 @@ export class SimulationLockService {
     async refreshLock(appId: string): Promise<void> {
         return this.updateLockStatus(appId, {
             sessionId: this.sessionId,
-            lockedBy: this.appStateService.currentUser.getValue().email,
+            lockedBy: (this.appStateService.currentUser.getValue().email ? this.appStateService.currentUser.getValue().email :this.appStateService.currentUser.getValue().userName),
             lockedOn: new Date().toUTCString()
         });
     }
