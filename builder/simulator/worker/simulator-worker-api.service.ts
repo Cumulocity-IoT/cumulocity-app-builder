@@ -23,7 +23,6 @@ import {AppStateService} from "@c8y/ngx-components";
 import {AppIdService} from "../../app-id.service";
 import { SimulatorConfig } from "../simulator-config";
 import {BehaviorSubject, Subject, Subscription} from "rxjs";
-
 /**
  * The public api for talking to the simulators
  * Fields starting with _ are for use only by the worker
@@ -50,7 +49,6 @@ export class SimulatorWorkerAPI {
         this.fetchClient.setAuth(new BasicAuth(credentials));
         this.appStateService.currentUser.next(user);
     }
-
     setTenant(tenant: ICurrentTenant | null) {
         this.appStateService.currentTenant.next(tenant);
     }

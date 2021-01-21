@@ -106,26 +106,26 @@ export class BuilderModule {
     constructor(appStateService: AppStateService, loginService: LoginService, simSvc: SimulatorCommunicationService, appIdService: AppIdService) {
         // Pass the app state to the worker from the main thread (Initially and every time it changes)
         appStateService.currentUser.subscribe(async (user) => {
-                let isCookieAuth = false;
-                let cookieAuth = null; 
-                let xsrfToken = null;
-                const token = localStorage.getItem(loginService.TOKEN_KEY) || sessionStorage.getItem(loginService.TOKEN_KEY);
-                if (!token) {
-                    // XSRF token required by webworker while cookie auth used. use case: login using sso
-                    cookieAuth =  new CookieAuth();
-                    xsrfToken = cookieAuth.getCookieValue('XSRF-TOKEN');
-                    isCookieAuth = true;
+            let isCookieAuth = false;
+            let cookieAuth = null; 
+            let xsrfToken = null;
+            const token = localStorage.getItem(loginService.TOKEN_KEY) || sessionStorage.getItem(loginService.TOKEN_KEY);
+            if (!token) {
+                // XSRF token required by webworker while cookie auth used. use case: login using sso
+                cookieAuth =  new CookieAuth();
+                xsrfToken = cookieAuth.getCookieValue('XSRF-TOKEN');
+                isCookieAuth = true;
+            }
+            if (user != null) {
+                const tfa = localStorage.getItem(loginService.TFATOKEN_KEY) || sessionStorage.getItem(loginService.TFATOKEN_KEY);
+                if (token !== undefined && token) {
+                    return await simSvc.simulator.setUserAndCredentials(user, {token, tfa}, isCookieAuth, null);
+                } else {
+                    return await simSvc.simulator.setUserAndCredentials(user, {token, tfa}, isCookieAuth, xsrfToken);
                 }
-                if (user != null) {
-                    const tfa = localStorage.getItem(loginService.TFATOKEN_KEY) || sessionStorage.getItem(loginService.TFATOKEN_KEY);
-                    if (token !== undefined && token) {
-                        return await simSvc.simulator.setUserAndCredentials(user, {token, tfa}, isCookieAuth, null);
-                    } else {
-                        return await simSvc.simulator.setUserAndCredentials(user, {token, tfa}, isCookieAuth, xsrfToken);
-                    }
-                }
-                return await simSvc.simulator.setUserAndCredentials(user, {}, isCookieAuth, xsrfToken);
-            });
+            }
+            return await simSvc.simulator.setUserAndCredentials(user, {}, isCookieAuth, xsrfToken);
+        });
 
         const lockStatus$ = new Observable<{isLocked: boolean, isLockOwned: boolean, lockStatus?: LockStatus}>(subscriber => {
             simSvc.simulator
@@ -141,7 +141,6 @@ export class BuilderModule {
                     simSvc.simulator.unlock();
                 }
             });
-
         appStateService.currentTenant.subscribe(async (tenant) => await simSvc.simulator.setTenant(tenant));
         appIdService.appId$.subscribe(async (appId) => await simSvc.simulator.setAppId(appId));
     }
