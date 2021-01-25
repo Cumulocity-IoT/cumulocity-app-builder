@@ -105,11 +105,13 @@ export class NewApplicationModalComponent implements OnInit {
                         await this.addClonedDashboard(appBuilderObj, dashboard.name, dashboard.id, dashboard.icon, 
                             (dashboard.deviceId ? dashboard.deviceId : ''), dashboard.groupTemplate);
                     }));
-                    let simulators = appBuilderObj.simulators;
-                    simulators.forEach(simulator => {
-                        simulator.id = Math.floor(Math.random() * 1000000);
-                    });
-                    appBuilderObj.simulators = simulators;
+                    if(appBuilderObj.simulators) {
+                        let simulators = appBuilderObj.simulators;
+                        simulators.forEach(simulator => {
+                            simulator.id = Math.floor(Math.random() * 1000000);
+                        });
+                        appBuilderObj.simulators = simulators;
+                    }
                 }
             }            
         }
@@ -147,17 +149,31 @@ export class NewApplicationModalComponent implements OnInit {
                 this.alertService.warning("Creating an application with a custom path may not work correct unless the Application Builder is deployed.");
             }
 
+            const creationAlert = new UpdateableAlert(this.alertService);
+
             // find the application Builder's app
-            const appList = (await this.appService.list({pageSize: 2000})).data;
-            const appBuilder = appList.find(app => app.contextPath === contextPathFromURL());
+            let isClone = false;
+            let appList = (await this.appService.list({pageSize: 2000})).data;
+            let appBuilder: any;
+            appBuilder = appList.find(app => app.contextPath === contextPathFromURL() && app.availability === 'PRIVATE');
             if (!appBuilder) {
-                throw Error('Could not find application builder');
+                creationAlert.update('Searching Application Builder...');
+                const appBuilderMarket = appList.find(app => app.contextPath === contextPathFromURL());
+                if(!appBuilderMarket) 
+                 throw Error('Could not find application builder');
+                else {
+                    // Own Application not found... cloning subscribed application to access binary
+                    appBuilder = await this.fetchClient.fetch(`application/applications/${appBuilderMarket.id}/clone`, {method: 'POST'}) as Response;
+                    appList = (await this.appService.list({pageSize: 2000})).data;
+                    appBuilder = appList.find(app => app.contextPath && app.contextPath.indexOf('app-builder') !== -1 && app.availability === 'PRIVATE');
+                    isClone =  true;
+                    if(!appBuilderMarket) 
+                        throw Error('Could not find application builder');
+                }
             }
             const binaryId = appBuilder.activeVersionId;
             const binary = (await this.inventoryService.detail(binaryId)).data;
-
-            const creationAlert = new UpdateableAlert(this.alertService);
-
+            
             creationAlert.update('Creating application...');
 
                 try {
@@ -169,7 +185,6 @@ export class NewApplicationModalComponent implements OnInit {
 
                     const reader = response.body.getReader();
                     const contentLength = binary.length;
-
                     let receivedLength = 0;
                     const chunks = [];
                     while (true) {
@@ -223,6 +238,11 @@ export class NewApplicationModalComponent implements OnInit {
                         activeVersionId,
                         ...defaultAppBuilderData
                     } as any);
+
+                    // deleting cloned app
+                    if(isClone){
+                        await this.fetchClient.fetch(`application/applications/${appBuilder.id}`, {method: 'DELETE'}) as Response;
+                    }
                     creationAlert.update(`Application Created!`, "success");
                     creationAlert.close(2000);
                 } catch(e) {
