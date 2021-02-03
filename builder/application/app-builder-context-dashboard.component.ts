@@ -17,7 +17,7 @@
  */
 import {Component, Inject, OnDestroy} from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
-import {Subscription} from "rxjs";
+import {interval, Subscription} from "rxjs";
 import {ContextDashboardType} from "@c8y/ngx-components/context-dashboard";
 import { InventoryService, ApplicationService, UserService } from "@c8y/client";
 import {last} from "lodash-es";
@@ -25,6 +25,7 @@ import {SMART_RULES_AVAILABILITY_TOKEN} from "./smartrules/smart-rules-availabil
 import {IApplicationBuilderApplication} from "../iapplication-builder-application";
 import {AppStateService} from "@c8y/ngx-components";
 import {RuntimeWidgetInstallerModalService} from "cumulocity-runtime-widget-loader";
+import { timeout } from 'rxjs/operators';
 
 @Component({
     selector: 'app-builder-context-dashboard',
@@ -188,6 +189,20 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
                     });
                 }
             }
+
+            // Bug ? mutliple active tabs while routing. Hack by hijacking DOM
+            const tabOutletInt = interval(50);
+            const tabOutletSub = tabOutletInt.subscribe(async val => {
+                const activeTabs = document.querySelectorAll('c8y-tabs-outlet li.active') as any;
+                if(activeTabs.length > 1) {
+                    activeTabs.forEach(tab => {
+                        if(tab.textContent !== 'Smart rules' && tab.textContent !== 'Alarms' && tab.textContent !== 'Data explorer') {
+                            tab.classList.remove('active');
+                        }
+                    });
+                }
+                tabOutletSub.unsubscribe();
+            });
         }));
     }
 
