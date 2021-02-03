@@ -1,6 +1,6 @@
 {
   "name": "app-builder",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "Application builder for Cumulocity (written by Software AG Global Presales)",
   "main": "index.ts",
   "scripts": {
@@ -33,7 +33,7 @@
     "angular": "1.6.9",
     "comlink": "^4.3.0",
     "core-js": "^3.4.0",
-    "cumulocity-runtime-widget-loader": "1006.3.0-1.2",
+    "cumulocity-runtime-widget-loader": "file:binary/cumulocity-runtime-widget-loader-1006.6.24-1.0.0.tgz",
     "d3-color": "^1.4.1",
     "delay": "^4.3.0",
     "fontawesome": "4.7.2",
