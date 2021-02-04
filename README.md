@@ -86,7 +86,7 @@ A more detailed user guide is available in the Help section of the Application B
 ## Runtime Widgets
 
 Application Builder supports runtime widgets deployment. 
-Please visit [SoftwareAG's Open Source Page](https://open-source.softwareag.com/?search=runtime&topic=cumulocity-iot) for more details.
+Please visit [open-source.softwareag.com](https://open-source.softwareag.com/?search=runtime&topic=cumulocity-iot) for more details.
 
 Would you like to create your own Custom Runtime widget? Please refer our [Demo Widget](https://github.com/SoftwareAG/cumulocity-demo-widget).
 
