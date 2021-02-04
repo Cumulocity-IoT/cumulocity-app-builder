@@ -86,23 +86,7 @@ A more detailed user guide is available in the Help section of the Application B
 ## Runtime Widgets
 
 Application Builder supports runtime widgets deployment. 
-Here are some of runtime widgets which are available to download and install.
-
-* **[Data Points Map](https://github.com/SoftwareAG/cumulocity-data-points-map-widget)**
-* **[Smart Map](https://github.com/SoftwareAG/cumulocity-smart-map-widget)**
-* **[Smart Map Settings](https://github.com/SoftwareAG/cumulocity-smart-map-settings-widget)**
-* **[Compass](https://github.com/SoftwareAG/cumulocity-compass-widget)**
-* **[Device Chart](https://github.com/SoftwareAG/cumulocity-device-chart-widget)**
-* **[Process](https://github.com/SoftwareAG/cumulocity-processing-widget)**
-* **[Weather Forcast](https://github.com/SoftwareAG/cumulocity-weather-forecast-widget)**
-* **[Event Chart](https://github.com/SoftwareAG/cumulocity-event-chart-widget)**
-* **[Event Image Viewer](https://github.com/SoftwareAG/cumulocity-event-image-viewer-widget)**
-* **[Image Animation](https://github.com/SoftwareAG/cumulocity-image-animation-widget)**
-* **[KPI Trend](https://github.com/SoftwareAG/cumulocity-kpi-trend-widget)**
-* **[Markdown](https://github.com/SoftwareAG/cumulocity-markdown-widget)**
-* **[Silo Capacity](https://github.com/SoftwareAG/cumulocity-silo-capacity-widget)**
-* **[Employee Proximity Check](https://github.com/SoftwareAG/cumulocity-employee-proximity-check-widget)**
-* **[Safe Interaction Overview](https://github.com/SoftwareAG/cumulocity-safe-interaction-overview-widget)**
+Please visit [SoftwareAG's Open Source Page](https://open-source.softwareag.com/?search=runtime&topic=cumulocity-iot) for more details.
 
 Would you like to create your own Custom Runtime widget? Please refer our [Demo Widget](https://github.com/SoftwareAG/cumulocity-demo-widget).
 
@@ -135,9 +119,11 @@ Would you like to create your own Custom Runtime widget? Please refer our [Demo 
     
     ```
    5. Save file
-   6. Goto /cumulocity_app_builder/patches and delete nvd3+0.0.1.patch file
-   7. Execute "npx patch-package nvd3" command in your terminal
-   8. Start the server
+   6. Goto /cumulocity_app_builder/patches 
+   7. Delete nvd3+0.0.1.patch file
+   8. Goto /cumulocity_app_builder 
+   9. Execute "npx patch-package nvd3" command in your terminal
+   10. Start the server
 ------------------------------
 
 These tools are provided as-is and without warranty or support. They do not constitute part of the Software AG product suite. Users are free to use, fork and modify them, subject to the license agreement. While Software AG welcomes contributions, we cannot guarantee to include every contribution in the master project.
