@@ -155,7 +155,7 @@ export class NewApplicationModalComponent implements OnInit {
             let isClone = false;
             let appList = (await this.appService.list({pageSize: 2000})).data;
             let appBuilder: any;
-            appBuilder = appList.find(app => app.contextPath === contextPathFromURL() && app.availability === 'PRIVATE');
+            appBuilder = appList.find((app: any) => app.contextPath === contextPathFromURL() && app.availability === 'PRIVATE');
             if (!appBuilder) {
                 creationAlert.update('Searching Application Builder...');
                 const appBuilderMarket = appList.find(app => app.contextPath === contextPathFromURL());
@@ -165,7 +165,7 @@ export class NewApplicationModalComponent implements OnInit {
                     // Own Application not found... cloning subscribed application to access binary
                     appBuilder = await this.fetchClient.fetch(`application/applications/${appBuilderMarket.id}/clone`, {method: 'POST'}) as Response;
                     appList = (await this.appService.list({pageSize: 2000})).data;
-                    appBuilder = appList.find(app => app.contextPath && app.contextPath.indexOf('app-builder') !== -1 && app.availability === 'PRIVATE');
+                    appBuilder = appList.find((app: any) => app.contextPath && app.contextPath.indexOf('app-builder') !== -1 && app.availability === 'PRIVATE');
                     isClone =  true;
                     if(!appBuilderMarket) 
                         throw Error('Could not find application builder');

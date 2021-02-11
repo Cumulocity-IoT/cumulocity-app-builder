@@ -142,6 +142,12 @@ export class BuilderModule {
                 }
             });
         appStateService.currentTenant.subscribe(async (tenant) => await simSvc.simulator.setTenant(tenant));
-        appIdService.appId$.subscribe(async (appId) => await simSvc.simulator.setAppId(appId));
+        appIdService.appId$.subscribe(async (appId) => 
+        {
+            await simSvc.simulator.setAppId(appId)
+            if(window && window['aptrinsic'] ){
+                window['aptrinsic']('track', 'Applications', {"appId": appId });
+            }
+        });
     }
 }
