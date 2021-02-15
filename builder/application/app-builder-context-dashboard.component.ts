@@ -30,11 +30,6 @@ import { timeout } from 'rxjs/operators';
 @Component({
     selector: 'app-builder-context-dashboard',
     template: `
-    /* <c8y-action-bar-item [placement]="'right'">
-        <button class="btn btn-link" >
-            <i c8yIcon="plus-circle"></i> Instructions
-        </button>
-    </c8y-action-bar-item> */
         <c8y-tab *ngFor="let tab of tabs" [icon]="tab.icon" [label]="tab.label" [path]="tab.path"
                  [priority]="tab.priority"></c8y-tab>
 

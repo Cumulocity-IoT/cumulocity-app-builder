@@ -46,6 +46,8 @@ import {fromEvent, Observable} from "rxjs";
 import {withLatestFrom} from "rxjs/operators";
 import {proxy} from "comlink";
 import { CookieAuth } from '@c8y/client';
+import { AnalyticsProviderModule } from './analytics/analytics-provider.module';
+import { AnalyticsProviderComponent } from './analytics/analytics-provider.component';
 @NgModule({
     imports: [
         ApplicationModule,
@@ -72,6 +74,9 @@ import { CookieAuth } from '@c8y/client';
             }, {
                 path: 'help',
                 component: HelpComponent
+            }, {
+                path: 'settings-analytics',
+                component: AnalyticsProviderComponent
             }
         ]),
         CoreModule,
@@ -82,6 +87,7 @@ import { CookieAuth } from '@c8y/client';
         BrandingModule.forRoot(),
         SimulatorConfigModule,
         AppListModule,
+        AnalyticsProviderModule,
         MarkdownModule.forRoot()
     ],
     declarations: [

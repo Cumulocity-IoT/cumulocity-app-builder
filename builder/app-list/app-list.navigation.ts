@@ -22,11 +22,14 @@ import {BehaviorSubject} from "rxjs";
 import {map, startWith} from "rxjs/operators";
 import {AppIdService} from "../app-id.service";
 
+
 @Injectable()
 export class AppListNavigation implements NavigatorNodeFactory {
     nodes = new BehaviorSubject<NavigatorNode[]>([]);
 
-    constructor(appIdService: AppIdService) {
+    constructor(appIdService: AppIdService, ) {
+
+        
         // Only show the app-list navigation if we aren't in an app-builder application
         appIdService.appId$
             .pipe(
@@ -34,20 +37,32 @@ export class AppListNavigation implements NavigatorNodeFactory {
                     if (appId != undefined) {
                         return []
                     } else {
-                        return [
-                            new NavigatorNode({
-                                label: 'All Applications',
-                                icon: 'wrench',
-                                path: `/application-builder`,
-                                priority: 0
-                            }),
-                            new NavigatorNode({
-                                label: 'Help',
-                                icon: 'question',
-                                path: `/help`,
-                                priority: 0
-                            })
-                        ];
+                        const appNode = [];
+                        appNode.push(new NavigatorNode({
+                            label: 'All Applications',
+                            icon: 'wrench',
+                            path: `/application-builder`,
+                            priority: 1
+                        }));
+                        const settingsNode =  new NavigatorNode({
+                            label: 'Settings',
+                            icon: 'cog',
+                            priority: 0
+                        });
+                        settingsNode.add(new NavigatorNode({
+                            label: 'Analytics Provider',
+                            icon: 'line-chart',
+                            path: `/settings-analytics`,
+                            priority: 1
+                        }));
+                        appNode.push(settingsNode);
+                        appNode.push(new NavigatorNode({
+                            label: 'Help & Support',
+                            icon: 'question',
+                            path: `/help`,
+                            priority: 0
+                        }));
+                        return appNode;
                     }
                 }),
                 startWith([])
