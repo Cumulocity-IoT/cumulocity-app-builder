@@ -16,13 +16,12 @@
 * limitations under the License.
  */
 
-import {Injectable, NgModule} from "@angular/core";
+import {NgModule} from "@angular/core";
 import {FormsModule} from "@angular/forms";
 import {AnalyticsProviderComponent} from "./analytics-provider.component";
 import {CommonModule} from "@angular/common";
-import {AppStateService, CoreModule, HOOK_NAVIGATOR_NODES} from "@c8y/ngx-components";
+import {CoreModule} from "@c8y/ngx-components";
 import {BsDropdownModule} from "ngx-bootstrap/dropdown";
-import { TypeaheadModule } from 'ngx-bootstrap/typeahead';
 import {NewAnalyticsProviderModalComponent} from "./new-analytics-provider-modal.component";
 import { EditAnalyticsProviderModalComponent } from './edit-analytics-provider-modal.component';
 import { AnalyticsProviderService } from './analytics-provider.service';

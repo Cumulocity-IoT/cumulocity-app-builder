@@ -16,12 +16,11 @@
 * limitations under the License.
  */
 
-import {Component, isDevMode, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap/modal';
-import {ApplicationService, InventoryService} from '@c8y/client';
-import {AlertService, AppStateService} from "@c8y/ngx-components";
+import {InventoryService} from '@c8y/client';
+import {AlertService} from "@c8y/ngx-components";
 import {UpdateableAlert} from "../utils/UpdateableAlert";
-import {contextPathFromURL} from "../utils/contextPathFromURL";
 import { IAnalyticsProvider, IAppBuilder } from 'builder/app-list/app-builder-interface';
 import { AnalyticsProviderService } from './analytics-provider.service';
 
@@ -38,7 +37,7 @@ import { AnalyticsProviderService } from './analytics-provider.service';
             <div class="form-group">
                 <label for="provider"><span>Analytics Provider</span></label>
                 <select name="provider" id="provider" required [(ngModel)]="analyticsProvider.providerName" placeholder="Select Analytics Provider (required)">
-                    <option value="gainsight">Gainsight PX</option>
+                    <option value="Gainsight PX">Gainsight PX</option>
                 </select>
              </div>
             <div class="form-group">
@@ -77,11 +76,11 @@ export class NewAnalyticsProviderModalComponent implements OnInit {
         analyticsProvider: []
     };
     analyticsProvider: IAnalyticsProvider = {
-        providerName: 'gainsight',
+        providerName: 'Gainsight PX',
         isActive: false
     };
 
-    constructor(public bsModalRef: BsModalRef, private appService: ApplicationService, private providerService: AnalyticsProviderService,
+    constructor(public bsModalRef: BsModalRef, private providerService: AnalyticsProviderService,
         private inventoryService: InventoryService, private alertService: AlertService) {}
    
     ngOnInit() {
@@ -107,7 +106,8 @@ export class NewAnalyticsProviderModalComponent implements OnInit {
             await this.inventoryService.create(this.appBuilderObject);
         }
         creationAlert.update(`Proivder Added!`, "success");
-        
+        creationAlert.close();
+        this.providerService.refresh();
     }
 
 }

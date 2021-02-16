@@ -18,20 +18,13 @@
 
 import {Component, OnInit} from "@angular/core";
 import {
-    ApplicationService,
-    IApplication,
     InventoryService,
-    PagingStrategy,
-    RealtimeAction,
     UserService
 } from "@c8y/client";
-import {catchError, map} from "rxjs/operators";
-import {from, Observable} from "rxjs";
 import {AlertService, AppStateService} from "@c8y/ngx-components";
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import {NewAnalyticsProviderModalComponent} from "./new-analytics-provider-modal.component";
 import {Router} from "@angular/router";
-import {contextPathFromURL} from "../utils/contextPathFromURL";
 import { IAnalyticsProvider, IAppBuilder } from 'builder/app-list/app-builder-interface';
 import { EditAnalyticsProviderModalComponent } from './edit-analytics-provider-modal.component';
 import {UpdateableAlert} from "../utils/UpdateableAlert";
@@ -49,9 +42,12 @@ export class AnalyticsProviderComponent implements OnInit{
     AppBuilderConfig: IAppBuilder ; 
     alertServiceObj;
     appId:string;
-    constructor(private router: Router,  private appStateService: AppStateService, private providerService: AnalyticsProviderService,
+    constructor( private appStateService: AppStateService, private providerService: AnalyticsProviderService,
         private modalService: BsModalService, private userService: UserService, private inventoryService: InventoryService,
         private alertService: AlertService) {
+        this.providerService.refreshProviderList.subscribe(() => {
+            this.getProviderList();
+        });
         this.userHasAdminRights = userService.hasRole(appStateService.currentUser.value, "ROLE_APPLICATION_MANAGEMENT_ADMIN")
     }
 
@@ -65,6 +61,7 @@ export class AnalyticsProviderComponent implements OnInit{
             if(this.AppBuilderConfig) {
             this.appId = this.AppBuilderConfig.appBuilderId;
             this.anlyticsProviderList = this.AppBuilderConfig.analyticsProvider;
+            this.anlyticsProviderList.sort((a, b) => a.providerAccountName > b.providerAccountName ? 1 : -1);
         }
 
     }
@@ -73,12 +70,26 @@ export class AnalyticsProviderComponent implements OnInit{
         this.bsModalRef = this.modalService.show(NewAnalyticsProviderModalComponent, { class: 'c8y-wizard' });
     }
 
-    provideActiveChanged() {
-
+    async provideActiveChanged(analyticsProvider : IAnalyticsProvider, active: boolean) {
+        analyticsProvider.isActive = active;
+        const analyticsProviderList = this.AppBuilderConfig.analyticsProvider.filter( provider => provider.id !== analyticsProvider.id);
+        if(analyticsProvider.isActive) {
+            analyticsProviderList.forEach((providerItem) => {
+                providerItem.isActive = false;
+            });
+        }
+        analyticsProviderList.push(analyticsProvider);
+        await this.inventoryService.update({
+            id: this.AppBuilderConfig.id,
+            analyticsProvider: analyticsProviderList
+        });
+        this.providerService.refresh();
     }
 
     editProvider(analyticsProvider: any) {
-        this.bsModalRef = this.modalService.show(EditAnalyticsProviderModalComponent, { class: 'c8y-wizard', initialState: { analyticsProvider } })
+        let providerObj = {};
+        providerObj = Object.assign(providerObj, analyticsProvider);
+        this.bsModalRef = this.modalService.show(EditAnalyticsProviderModalComponent, { class: 'c8y-wizard', initialState: { analyticsProvider : providerObj} })
 
     }
     async deleteProvider(analyticsProvider: any) {
@@ -89,6 +100,8 @@ export class AnalyticsProviderComponent implements OnInit{
             analyticsProvider: analyticsProviderList
         });
         this.alertServiceObj.update(`Proivder Deleted!`, "success");
+        this.alertServiceObj.close();
+        this.providerService.refresh();
     }
 
 }

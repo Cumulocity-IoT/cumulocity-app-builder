@@ -16,8 +16,9 @@
 * limitations under the License.
  */
 
-import {Inject, Injectable} from "@angular/core";
+import {Injectable} from "@angular/core";
 import { ApplicationService, InventoryService } from '@c8y/ngx-components/api';
+import { BehaviorSubject } from 'rxjs';
 import { contextPathFromURL } from '../utils/contextPathFromURL';
 
 
@@ -25,6 +26,8 @@ import { contextPathFromURL } from '../utils/contextPathFromURL';
 export class AnalyticsProviderService {
 
     appbuilderId: any;
+    refreshProviderList = new BehaviorSubject<void>(undefined);
+    
     constructor(private appService: ApplicationService, private inventoryService: InventoryService){
     }
 
@@ -44,5 +47,9 @@ export class AnalyticsProviderService {
             await this.getProviderList();
             return this.appbuilderId;
         }
+    }
+
+    refresh() {
+        this.refreshProviderList.next(undefined);
     }
 }
