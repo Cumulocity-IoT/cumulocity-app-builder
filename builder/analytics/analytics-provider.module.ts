@@ -42,7 +42,6 @@ import { AnalyticsProviderService } from './analytics-provider.service';
         NewAnalyticsProviderModalComponent, EditAnalyticsProviderModalComponent
     ],
     providers: [
-        AnalyticsProviderService
     ]
 })
 export class AnalyticsProviderModule {}

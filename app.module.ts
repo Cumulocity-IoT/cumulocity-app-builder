@@ -15,7 +15,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
  */
-import {Inject, Injector, NgModule, Renderer2, RendererFactory2} from '@angular/core';
+import {Injector, NgModule} from '@angular/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {NavigationError, Router, RouterModule as NgRouterModule} from '@angular/router';
 import { UpgradeModule as NgUpgradeModule } from '@angular/upgrade/static';
@@ -28,8 +28,6 @@ import {SimulationStrategiesModule} from "./simulation-strategies/simulation-str
 import {CustomWidgetsModule} from "./custom-widgets/custom-widgets.module";
 import {RuntimeWidgetInstallerModule, RuntimeWidgetLoaderService} from "cumulocity-runtime-widget-loader";
 import { interval } from 'rxjs';
-import { NONE_TYPE } from '@angular/compiler/src/output/output_ast';
-import { DOCUMENT } from '@angular/common';
 @NgModule({
   imports: [
     // Upgrade module must be the first
@@ -47,12 +45,9 @@ import { DOCUMENT } from '@angular/common';
   ]
 })
 export class AppModule extends HybridAppModule {
-    private renderer: Renderer2;
     constructor(protected upgrade: NgUpgradeModule, appStateService: AppStateService, private router: Router, 
-        private runtimeWidgetLoaderService: RuntimeWidgetLoaderService, private injector: Injector,
-        rendererFactory: RendererFactory2, @Inject(DOCUMENT) private _document: Document) {
+        private runtimeWidgetLoaderService: RuntimeWidgetLoaderService, private injector: Injector) {
         super();
-        this.renderer = rendererFactory.createRenderer(null, null);
 
         // Fixes a bug where the router removes the hash when the user tries to navigate to an app and is not logged in
         appStateService.currentUser.pipe(filter(user => user != null)).pipe(
@@ -81,8 +76,6 @@ export class AppModule extends HybridAppModule {
         super.ngDoBootstrap();
         // Only do this after bootstrapping so that angularJs is loaded
         this.runtimeWidgetLoaderService.loadRuntimeWidgets();
-        this.initGainsight();
-
         // A hack to get href hash changes to always trigger an Angular Router update... There seems to be an AngularUpgrade/AngularJS/Cumulocity bug somewhere that stops the hashchange event firing.
         // This bug is apparent when trying to use the AppSwitcher to change to another AppBuilder App, sometimes it works, sometimes it doesn't
         const $injector = this.injector.get('$injector');
@@ -109,31 +102,4 @@ export class AppModule extends HybridAppModule {
             }
         });
     }
-
-    //Gainsight Integration
-    initGainsight() {
-        let script = this.renderer.createElement("script");
-        script.type = `text/javascript`;
-        script.text =
-          `
-            (function(n,t,a,e,co){var i="aptrinsic";n[i]=n[i]||function(){
-              (n[i].q=n[i].q||[]).push(arguments)},n[i].p=e;n[i].c=co;
-            var r=t.createElement("script");r.async=!0,r.src=a+"?a="+e;
-            var c=t.getElementsByTagName("script")[0];c.parentNode.insertBefore(r,c)
-          })(window,document,"https://web-sdk.aptrinsic.com/api/aptrinsic.js",""); //Integration key
-          ` +
-          `
-          aptrinsic("identify",
-          {
-            "id":"demo@democenter.com"
-          },
-          {
-            //Account Fields
-            "id": "app-builder-1.2.5", //Required
-            "name":"Application Builder"
-          });
-            `;
-    
-        this.renderer.appendChild(this._document.body, script);
-      }
 }

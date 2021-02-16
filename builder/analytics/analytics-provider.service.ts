@@ -18,16 +18,18 @@
 
 import {Injectable} from "@angular/core";
 import { ApplicationService, InventoryService } from '@c8y/ngx-components/api';
+import { IAnalyticsProvider } from 'builder/app-list/app-builder-interface';
 import { BehaviorSubject } from 'rxjs';
 import { contextPathFromURL } from '../utils/contextPathFromURL';
 
-
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class AnalyticsProviderService {
 
     appbuilderId: any;
+    activeAnalyticsProvider: any;
+    appBuilderConfig: any;
     refreshProviderList = new BehaviorSubject<void>(undefined);
-    
+    isAnalyticsProviderLoaded = false;
     constructor(private appService: ApplicationService, private inventoryService: InventoryService){
     }
 
@@ -37,7 +39,8 @@ export class AnalyticsProviderService {
         appBuilder = appList.find((app: any) => app.contextPath === contextPathFromURL());
         this.appbuilderId = appBuilder.id;
         const AppBuilderConfigList = (await this.inventoryService.list( {pageSize: 2000, query: `type eq AppBuilder-Configuration`})).data;
-        return AppBuilderConfigList.find(appConfig => appConfig.appBuilderId === appBuilder.id);
+        this.appBuilderConfig = AppBuilderConfigList.find(appConfig => appConfig.appBuilderId === appBuilder.id);
+        return this.appBuilderConfig;
    
     }
     
@@ -51,5 +54,31 @@ export class AnalyticsProviderService {
 
     refresh() {
         this.refreshProviderList.next(undefined);
+    }
+
+    private findActiveAnalyticsProivder() {
+        let activeProvider = null;
+        if(this.appBuilderConfig){
+            const anlyticsBuilderList = this.appBuilderConfig.analyticsProvider;
+            anlyticsBuilderList.forEach((item: IAnalyticsProvider) => {
+                if(item.isActive) {
+                    activeProvider =  item;
+                }
+            });
+        }
+        return activeProvider;
+    }
+
+    async getActiveAnalyticsProvider() {
+        if(this.activeAnalyticsProvider) return this.activeAnalyticsProvider;
+        else {
+            if(this.appBuilderConfig) {
+                this.activeAnalyticsProvider = this.findActiveAnalyticsProivder();
+            } else {
+                await this.getProviderList();
+                this.activeAnalyticsProvider = this.findActiveAnalyticsProivder();
+            }
+        }    
+        return this.activeAnalyticsProvider;    
     }
 }

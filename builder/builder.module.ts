@@ -15,7 +15,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
  */
-import {NgModule} from "@angular/core";
+import {Inject, NgModule, Renderer2, RendererFactory2} from "@angular/core";
 import {ApplicationModule} from "./application/application.module";
 import {RouterModule} from "@angular/router";
 import {DashboardConfigComponent} from "./application-config/dashboard-config.component";
@@ -48,6 +48,9 @@ import {proxy} from "comlink";
 import { CookieAuth } from '@c8y/client';
 import { AnalyticsProviderModule } from './analytics/analytics-provider.module';
 import { AnalyticsProviderComponent } from './analytics/analytics-provider.component';
+import { AnalyticsProviderService } from './analytics/analytics-provider.service';
+import { IAnalyticsProvider } from './app-list/app-builder-interface';
+import { DOCUMENT } from '@angular/common';
 @NgModule({
     imports: [
         ApplicationModule,
@@ -109,7 +112,10 @@ import { AnalyticsProviderComponent } from './analytics/analytics-provider.compo
     ]
 })
 export class BuilderModule {
-    constructor(appStateService: AppStateService, loginService: LoginService, simSvc: SimulatorCommunicationService, appIdService: AppIdService) {
+    private renderer: Renderer2;
+    constructor(appStateService: AppStateService, loginService: LoginService, simSvc: SimulatorCommunicationService, 
+        appIdService: AppIdService, private analyticsService: AnalyticsProviderService,
+        rendererFactory: RendererFactory2, @Inject(DOCUMENT) private _document: Document) {
         // Pass the app state to the worker from the main thread (Initially and every time it changes)
         appStateService.currentUser.subscribe(async (user) => {
             let isCookieAuth = false;
@@ -147,13 +153,71 @@ export class BuilderModule {
                     simSvc.simulator.unlock();
                 }
             });
-        appStateService.currentTenant.subscribe(async (tenant) => await simSvc.simulator.setTenant(tenant));
+        appStateService.currentTenant.subscribe(async (tenant) => {
+            await simSvc.simulator.setTenant(tenant)
+            if(!analyticsService.isAnalyticsProviderLoaded) {
+                this.renderer = rendererFactory.createRenderer(null, null);
+                this.registerAndTrackAnalyticsProvider(true);
+            }
+        });
         appIdService.appId$.subscribe(async (appId) => 
         {
             await simSvc.simulator.setAppId(appId)
-            if(window && window['aptrinsic'] ){
-                window['aptrinsic']('track', 'Applications', {"appId": appId });
-            }
+            this.registerAndTrackAnalyticsProvider(false, appId);
+            
         });
+  
+        console.log('builder module loaded');
     }
+
+    private async registerAndTrackAnalyticsProvider(isRegister: boolean, appId?: any) {
+        this.analyticsService.isAnalyticsProviderLoaded = true;
+        const analyticsProvider: IAnalyticsProvider = await this.analyticsService.getActiveAnalyticsProvider();
+        if(analyticsProvider) {
+            switch (analyticsProvider.providerName) {
+                case "Gainsight PX":
+                    if(isRegister) {
+                        this.initGainsight(analyticsProvider.providerURL, analyticsProvider.providerKey, 
+                            analyticsProvider.providerIdentity, analyticsProvider.providerAccountId, 
+                            analyticsProvider.providerAccountName);
+                    } else {
+                        if(window && window['aptrinsic'] ){
+                            window['aptrinsic']('track', 'Applications', {"appId": appId });
+                        }
+                    }
+                    break;
+            
+                default:
+                    break;
+            }
+        } else {
+            this.analyticsService.isAnalyticsProviderLoaded = false;
+        }
+    }
+    //Gainsight Integration
+    private initGainsight(url: string, key: string, indentity : string, accountId : string, accountName : string) {
+        let script = this.renderer.createElement("script");
+        script.type = `text/javascript`;
+        script.text =
+          `
+            (function(n,t,a,e,co){var i="aptrinsic";n[i]=n[i]||function(){
+              (n[i].q=n[i].q||[]).push(arguments)},n[i].p=e;n[i].c=co;
+            var r=t.createElement("script");r.async=!0,r.src=a+"?a="+e;
+            var c=t.getElementsByTagName("script")[0];c.parentNode.insertBefore(r,c)
+          })(window,document,"${url}","${key}"); //Integration key
+          ` +
+          `
+          aptrinsic("identify",
+          {
+            "id":"${indentity}"
+          },
+          {
+            //Account Fields
+            "id": "${accountId}", //Required
+            "name":"${accountName}"
+          });
+            `;
+    
+        this.renderer.appendChild(this._document.body, script);
+      }
 }

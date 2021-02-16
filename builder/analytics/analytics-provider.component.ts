@@ -83,7 +83,9 @@ export class AnalyticsProviderComponent implements OnInit{
             id: this.AppBuilderConfig.id,
             analyticsProvider: analyticsProviderList
         });
-        this.providerService.refresh();
+        this.alertServiceObj.update(`Provider Updated! Refreshing...`, "success");
+        await this.alertServiceObj.close(3000);
+        location.reload();
     }
 
     editProvider(analyticsProvider: any) {
