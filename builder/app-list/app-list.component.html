@@ -1,13 +1,5 @@
 <c8y-title>Applications</c8y-title>
 
-<c8y-action-bar-item [placement]="'right'">
-    <button class="btn btn-link" (click)="launchHelp()" >
-        <i c8yIcon="lightbulb-o"></i> Instructions
-    </button>
-    <button class="btn btn-link" (click)="launchFeedback()" >
-        <i c8yIcon="thumbs-o-up"></i> Feedback
-    </button>
-</c8y-action-bar-item>
 <div class="card-group interact-grid">
     <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2" style="min-height: 194px;" *ngIf="userHasAdminRights">
         <a class="card add-card clickable" (click)="createAppWizard()">

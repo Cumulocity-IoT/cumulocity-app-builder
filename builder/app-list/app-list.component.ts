@@ -82,15 +82,4 @@ export class AppListComponent {
             this.router.navigateByUrl(`/application/${app.id}${subPath || ''}`);
         }
     }
-
-    launchHelp() {
-        if(window && window['aptrinsic'] ){
-            window['aptrinsic']('track', 'AppBuilder-Help', {"type": "General" });
-        }
-    }
-    launchFeedback() {
-        if(window && window['aptrinsic'] ){
-            window['aptrinsic']('track', 'AppBuilder-Help', {"type": "Feedback" });
-        }
-    }
 }
