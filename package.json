@@ -4,7 +4,7 @@
   "description": "Application builder for Cumulocity (written by Software AG Global Presales)",
   "main": "index.ts",
   "scripts": {
-    "start": "c8ycli server --env.extraWebpackConfig=./extra-webpack.config.js",
+    "start": "c8ycli server --env.extraWebpackConfig=./extra-webpack.config.js -u https://appbuilder.latest.stage.c8y.io",
     "build": "c8ycli build --env.extraWebpackConfig=./extra-webpack.config.js --env.mode=production",
     "deploy": "c8ycli deploy",
     "postinstall": "patch-package && patch-package --patch-dir node_modules/cumulocity-runtime-widget-loader/patches"

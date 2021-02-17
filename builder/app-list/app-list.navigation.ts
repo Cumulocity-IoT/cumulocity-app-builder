@@ -17,7 +17,8 @@
  */
 
 import {Injectable} from "@angular/core";
-import {NavigatorNode, NavigatorNodeFactory} from "@c8y/ngx-components";
+import {AppStateService, NavigatorNode, NavigatorNodeFactory} from "@c8y/ngx-components";
+import { UserService } from '@c8y/ngx-components/api';
 import {BehaviorSubject} from "rxjs";
 import {map, startWith} from "rxjs/operators";
 import {AppIdService} from "../app-id.service";
@@ -27,7 +28,7 @@ import {AppIdService} from "../app-id.service";
 export class AppListNavigation implements NavigatorNodeFactory {
     nodes = new BehaviorSubject<NavigatorNode[]>([]);
 
-    constructor(appIdService: AppIdService, ) {
+    constructor(appIdService: AppIdService, private appStateService: AppStateService, private userService: UserService) {
 
         
         // Only show the app-list navigation if we aren't in an app-builder application
@@ -55,7 +56,9 @@ export class AppListNavigation implements NavigatorNodeFactory {
                             path: `/settings-analytics`,
                             priority: 1
                         }));
-                        appNode.push(settingsNode);
+                        if (this.userService.hasAllRoles(this.appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN","ROLE_APPLICATION_MANAGEMENT_ADMIN"])) {
+                            appNode.push(settingsNode);
+                        }
                         appNode.push(new NavigatorNode({
                             label: 'Help & Support',
                             icon: 'question',

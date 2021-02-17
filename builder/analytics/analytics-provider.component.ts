@@ -48,8 +48,9 @@ export class AnalyticsProviderComponent implements OnInit{
         this.providerService.refreshProviderList.subscribe(() => {
             this.getProviderList();
         });
-        this.userHasAdminRights = userService.hasRole(appStateService.currentUser.value, "ROLE_APPLICATION_MANAGEMENT_ADMIN")
+        this.userHasAdminRights = userService.hasAllRoles(appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN","ROLE_APPLICATION_MANAGEMENT_ADMIN"])
     }
+                        
 
     ngOnInit() {
         this.alertServiceObj = new UpdateableAlert(this.alertService);

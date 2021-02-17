@@ -34,24 +34,12 @@ export class AnalyticsProviderService {
     }
 
     async getProviderList() {
-        let appList = (await this.appService.list({pageSize: 2000})).data;
-        let appBuilder: any;
-        appBuilder = appList.find((app: any) => app.contextPath === contextPathFromURL());
-        this.appbuilderId = appBuilder.id;
         const AppBuilderConfigList = (await this.inventoryService.list( {pageSize: 2000, query: `type eq AppBuilder-Configuration`})).data;
-        this.appBuilderConfig = AppBuilderConfigList.find(appConfig => appConfig.appBuilderId === appBuilder.id);
+        this.appBuilderConfig = (AppBuilderConfigList.length > 0 ? AppBuilderConfigList[0] : []);
         return this.appBuilderConfig;
    
     }
     
-    async getAppBuilderId() {
-        if(this.appbuilderId) return this.appbuilderId 
-        else {
-            await this.getProviderList();
-            return this.appbuilderId;
-        }
-    }
-
     refresh() {
         this.refreshProviderList.next(undefined);
     }

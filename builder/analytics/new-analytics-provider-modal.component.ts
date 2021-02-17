@@ -94,7 +94,7 @@ export class NewAnalyticsProviderModalComponent implements OnInit {
         this.analyticsProvider.id = Math.floor(Math.random() * 1000000);
         this.appBuilderObject.analyticsProvider.push(this.analyticsProvider);
         const AppBuilderConfig: IAppBuilder  = await this.providerService.getProviderList() as any;
-        this.appBuilderObject.appBuilderId = await this.providerService.getAppBuilderId();
+      //  this.appBuilderObject.appBuilderId = await this.providerService.getAppBuilderId();
         if(AppBuilderConfig) {
             const analyticsProviderList = AppBuilderConfig.analyticsProvider || [];
             analyticsProviderList.push(this.analyticsProvider)
