@@ -3,7 +3,7 @@
 <ng-container *ngIf="simulatorConfigById$ | async as simulatorConfigById">
 <div class="card-group interact-grid" *ngIf="lockStatus$ | async as lockStatus">
     <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3" style="min-height: 165px">
-        <a  *ngIf="lockStatus.isLockOwned else locked" class="card add-card clickable" (click)="showCreateSimulatorDialog()">
+        <a  *ngIf="userHasAdminRights && lockStatus.isLockOwned else locked" class="card add-card clickable" (click)="showCreateSimulatorDialog()">
             <i c8yIcon="plus-square"></i><br>
             Add Simulator
         </a>
@@ -11,7 +11,7 @@
             <div class="card add-card">
                <i c8yIcon="lock"></i><br>
                 <ng-container *ngIf="lockStatus.isLocked && lockStatus.lockStatus else gettingStatus">
-                    <span *ngIf="!isUnlocking else unlocking">Locked <small>(<a class="clickable" (click)="forceUnlock()">Force Unlock</a>)</small></span>
+                    <span *ngIf="!isUnlocking else unlocking">Locked <small *ngIf="userHasAdminRights">(<a class="clickable" (click)="forceUnlock()">Force Unlock</a>)</small></span>
                     <ng-template #unlocking>Unlocking...</ng-template>
                     <p class="text-truncate"><small class="text-muted">Locked By :
                             {{lockStatus.lockStatus.lockedBy}}</small></p>
@@ -29,7 +29,7 @@
         <ng-container *ngIf="simulationStrategiesService.strategiesByName.get(simulatorConfig.type) as simulationStrategyFactory">
         <ng-container *ngIf="simulationStrategyFactory.getSimulatorMetadata() as simulationStrategyMetadata">
         <div class="card">
-            <div class="dropdown card-actions" dropdown (click)="$event.stopPropagation()" *ngIf="lockStatus.isLockOwned">
+            <div class="dropdown card-actions" dropdown (click)="$event.stopPropagation()" *ngIf="userHasAdminRights && lockStatus.isLockOwned">
                 <button title="Settings" class="dropdown-toggle c8y-dropdown" dropdownToggle type="button">
                     <i c8yIcon="ellipsis-v"></i>
                 </button>
