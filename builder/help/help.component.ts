@@ -25,4 +25,22 @@ import './cumulocity';
 })
 export class HelpComponent {
 
+    openLink(type) {
+        switch (type) {
+            case 'widget':
+                window.open("https://open-source.softwareag.com/iot-analytics?search=runtime&topic=cumulocity-iot&repository=widget");
+                break;
+            case 'doc':
+                window.open("https://github.com/SoftwareAG/cumulocity-app-builder/blob/master/README.md");
+                break;
+            case 'source': 
+                window.open("https://github.com/SoftwareAG/cumulocity-app-builder");
+                break;
+            case 'forum':
+                window.open("https://tech.forums.softwareag.com/tag/Cumulocity-IoT");
+                break;
+            default:
+                break;
+        }
+    }
 }
