@@ -165,8 +165,6 @@ export class BuilderModule {
             await simSvc.simulator.setAppId(appId)
             this.registerAndTrackAnalyticsProvider(false, appId);
         });
-  
-        console.log('builder module loaded');
     }
 
     private async registerAndTrackAnalyticsProvider(isRegister: boolean, appId?: any) {
