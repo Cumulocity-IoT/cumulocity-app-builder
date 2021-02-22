@@ -22,6 +22,7 @@ import {RandomValueSimulationStrategyModule} from "./random-values/random-value.
 import {RandomWalkSimulationStrategyModule} from "./random-walk/random-walk.simulation-strategy.module";
 import {WaveSimulationStrategyModule} from "./wave/wave.simulation-strategy.module";
 import {FirmwareUpdateSimulationStrategyModule} from "./firmware-update/firmware-update.simulation-strategy.module";
+import { DtdlSimulationStrategyModule } from './dtdl/dtdl.simulation-strategy.module';
 
 @NgModule({
     imports: [
@@ -29,7 +30,8 @@ import {FirmwareUpdateSimulationStrategyModule} from "./firmware-update/firmware
         RandomValueSimulationStrategyModule,
         RandomWalkSimulationStrategyModule,
         WaveSimulationStrategyModule,
-        FirmwareUpdateSimulationStrategyModule
+        FirmwareUpdateSimulationStrategyModule,
+        DtdlSimulationStrategyModule
     ]
 })
 export class SimulationStrategiesModule {}

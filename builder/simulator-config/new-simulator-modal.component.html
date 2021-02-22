@@ -106,7 +106,7 @@
             </form>
         </div>
         <div class="c8y-wizard-footer">
-            <button class="btn btn-default" (click)="wizard.selectStep('device')">Back</button>
+            <button class="btn btn-default" (click)="wizard.selectStep('device');resetDialogSize()">Back</button>
             <button class="btn btn-default" (click)="bsModalRef.hide()">Cancel</button>
             <button class="btn btn-primary" [disabled]="busy || !newSimulatorForm.form.valid" (click)="saveAndClose()">Save</button>
         </div>

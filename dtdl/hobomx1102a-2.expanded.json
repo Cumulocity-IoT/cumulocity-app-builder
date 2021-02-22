@@ -1,0 +1,98 @@
+[
+  {
+    "@context": [
+      "dtmi:iotcentral:context;2",
+      "dtmi:dtdl:context;2"
+    ],
+    "@id": "dtmi:rigado:HoboMX1102A;2",
+    "@type": "Interface",
+    "contents": [
+      {
+        "@id": "dtmi:rigado:HoboMX1102A:relativeHumidity;1",
+        "@type": [
+          "Telemetry",
+          "RelativeHumidity"
+        ],
+        "displayName": {
+          "en": "Relative Humidity"
+        },
+        "name": "relativeHumidity",
+        "schema": "double",
+        "unit": "percent"
+      },
+      {
+        "@id": "dtmi:rigado:HoboMX1102A:co2;1",
+        "@type": "Telemetry",
+        "displayName": {
+          "en": "CO2"
+        },
+        "name": "co2",
+        "schema": "integer"
+      },
+      {
+        "@id": "dtmi:rigado:HoboMX1102A:temperature;1",
+        "@type": [
+          "Telemetry",
+          "Temperature"
+        ],
+        "displayName": {
+          "en": "Temperature"
+        },
+        "name": "temperature",
+        "schema": "double",
+        "unit": "degreeFahrenheit"
+      }
+    ],
+    "displayName": {
+      "en": "Hobo MX-1102A"
+    },
+    "extends": [
+      "dtmi:rigado:IotDevice;1"
+    ]
+  },
+  {
+    "@context": [
+      "dtmi:iotcentral:context;2",
+      "dtmi:dtdl:context;2"
+    ],
+    "@id": "dtmi:rigado:IotDevice;1",
+    "@type": "Interface",
+    "contents": [
+      {
+        "@id": "dtmi:rigado:IotDevice:deviceId;1",
+        "@type": "Property",
+        "displayName": {
+          "en": "Device ID"
+        },
+        "name": "deviceId",
+        "schema": "string",
+        "writable": false
+      },
+      {
+        "@id": "dtmi:rigado:IotDevice:rssi;1",
+        "@type": "Telemetry",
+        "displayName": {
+          "en": "RSSI"
+        },
+        "name": "rssi",
+        "schema": "integer"
+      },
+      {
+        "@id": "dtmi:rigado:IotDevice:batteryLevel;1",
+        "@type": [
+          "Telemetry",
+          "Voltage"
+        ],
+        "displayName": {
+          "en": "Battery Level"
+        },
+        "name": "batteryLevel",
+        "schema": "double",
+        "unit": "volt"
+      }
+    ],
+    "displayName": {
+      "en": "IotDevice"
+    }
+  }
+]
