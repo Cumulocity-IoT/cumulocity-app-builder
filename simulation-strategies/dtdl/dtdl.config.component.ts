@@ -16,7 +16,6 @@
 * limitations under the License.
  */
 
-import { identifierModuleUrl } from '@angular/compiler';
 import {Component} from "@angular/core";
 import { ControlContainer, NgForm } from '@angular/forms';
 import {SimulationStrategyConfigComponent} from "../../builder/simulator/simulation-strategy";
@@ -42,7 +41,7 @@ export interface DtdlSimulationModel {
 }
 @Component({
     template: `
-        <div class="row">
+        <div class="row" >
             <div class="col-xs-12 col-sm-6 col-md-6">
                 <div class="form-group">
                     <label for="dtdlFile"><span>Upload a DTDL File</span></label>
@@ -59,30 +58,59 @@ export interface DtdlSimulationModel {
                 <label for="dtdlDevice"><span>Select Device</span></label>
                 <select name="dtdlDevice" id="dtdlDevice" [(ngModel)]="config.dtdlDeviceId" required (change)="onSelectedDtdlDevice()">
                         <option *ngFor="let device of deviceList"  [value]="device.deviceId">{{device.deviceName}}</option>
-                        
-                    </select>
+                </select>
              </div>
             </div>
         </div>
         
-       
-        <div class="form-group">
-            <label for="series"><span>Series</span></label>
-            <input type="text" class="form-control" id="series" name="series" placeholder="e.g. T (required)" required autofocus [(ngModel)]="config.series">
+        <div class="row">
+                
+        </div>
+        <div class="row form-group">
+            <accordion  [isAnimated]="true" [closeOthers]="true">
+                <accordion-group  *ngFor="let model of config.dtdlModelConfig;let index = index"  #dtdlGroup>
+                    <button class="btn btn-link btn-block clearfix" accordion-heading type="button">
+                        <div class="pull-left float-left">{{model.measurementName}}</div>
+                        <span class="float-right pull-right"><i *ngIf="dtdlGroup.isOpen" class="fa fa-caret-up"></i>
+                        <i *ngIf="!dtdlGroup.isOpen" class="fa fa-caret-down"></i></span>
+                    </button>
+                    <div class="col-xs-12 col-sm-6 col-md-6">
+                    <div class="form-group">
+                        <label for="fragment"><span>Fragment</span></label>
+                        <input type="text" class="form-control"  name="fragment{{index}}" placeholder="e.g. temperature_measurement (required)" required autofocus [(ngModel)]="config.dtdlModelConfig[index].fragment">
+                    </div>
+                    </div>
+                    <div class="col-xs-12 col-sm-6 col-md-6">
+                        <div class="form-group">
+                            <label for="series"><span>Series</span></label>
+                            <input type="text" class="form-control" name="series{{index}}" placeholder="e.g. T (required)" required autofocus [(ngModel)]="config.dtdlModelConfig[index].series">
+                        </div>
+                    </div>
+                    <div class="col-xs-12 col-sm-6 col-md-6">
+                        <div class="form-group">
+                            <label for="minvalue"><span>Minimum Value</span></label>
+                            <input type="number" class="form-control"  name="minvalue{{index}}" placeholder="e.g. 10 (required)" required [(ngModel)]="config.dtdlModelConfig[index].minValue">
+                        </div>
+                    </div>
+                    <div class="col-xs-12 col-sm-6 col-md-6">
+                        <div class="form-group">
+                            <label for="maxvalue"><span>Maximum Value</span></label>
+                            <input type="number" class="form-control"  name="maxvalue{{index}}" placeholder="e.g. 20 (required)" required [(ngModel)]="config.dtdlModelConfig[index].maxValue">
+                        </div>
+                    </div>
+                    <div class="col-xs-12 col-sm-6 col-md-6">
+                        <div class="form-group">
+                            <label for="unit"><span>Unit</span></label>
+                            <input type="text" class="form-control"  name="unit{{index}}" placeholder="e.g. C (optional)" [(ngModel)]="config.dtdlModelConfig[index].unit">
+                        </div>        
+                    </div>
+                    <div class="col-xs-12 col-sm-6 col-md-6">
+                        
+                    </div>
+                </accordion-group>
+            </accordion>
         </div>
         <div class="form-group">
-            <label for="minvalue"><span>Minimum Value</span></label>
-            <input type="number" class="form-control" id="minvalue" name="minvalue" placeholder="e.g. 10 (required)" required [(ngModel)]="config.minValue">
-        </div> 
-        <div class="form-group">
-            <label for="maxvalue"><span>Maximum Value</span></label>
-            <input type="number" class="form-control" id="maxvalue" name="maxvalue" placeholder="e.g. 20 (required)" required [(ngModel)]="config.maxValue">
-        </div> 
-        <div class="form-group">
-            <label for="unit"><span>Unit</span></label>
-            <input type="text" class="form-control" id="unit" name="unit" placeholder="e.g. C (optional)" [(ngModel)]="config.unit">
-        </div> */ 
-         <div class="form-group">
             <label for="interval"><span>Interval (seconds)</span></label>
             <input type="number" class="form-control" id="interval" name="interval" placeholder="e.g. 5 (required)" required [(ngModel)]="config.interval">
         </div>
@@ -97,11 +125,6 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
     isUploading = false;
     isError = false;
     initializeConfig() {
-        /* this.config.fragment = "temperature_measurement";
-        this.config.series = "T";
-        this.config.minValue = 10;
-        this.config.maxValue = 20;
-        this.config.unit = "C"; */
         this.config.dtdlModelConfig = [];
         this.config.dtdlDeviceId = "";
         this.configModel = [];
@@ -182,7 +205,7 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
                     const typeLength = (Array.isArray(content['@type']) ? content['@type'].length : 0);
                     const model: DtdlSimulationModel = {};
                     model.measurementName = (content.displayName && content.displayName.constructor === Object ? content.displayName.en : content.displayName);
-                    model.fragment = 'c8y_' + ( typeLength > 0 ? content['@type'][typeLength - 1] : content['@type']);
+                    model.fragment = ( typeLength > 0 ? content['@type'][typeLength - 1] : content['@type']);
                     model.id = content['@id'];
                     model.schema = content.schema;
                     model.series = content.name;

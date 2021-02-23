@@ -42,6 +42,7 @@ export class DtdlSimulationStrategy extends DeviceIntervalSimulator {
     }
 
     onTick() {
+        console.log('on tick object', this.config);
         /* const measurementValue = Math.floor(Math.random() * (this.config.maxValue - this.config.minValue + 1)) + this.config.minValue;
 
         this.measurementService.create({
