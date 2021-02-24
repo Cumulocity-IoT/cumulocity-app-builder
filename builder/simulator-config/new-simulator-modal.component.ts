@@ -66,8 +66,8 @@ export class NewSimulatorModalComponent {
             const componentRef: ComponentRef<SimulationStrategyConfigComponent> = this.configWrapper.createComponent(factory);
             componentRef.instance.config = this.newConfig = {};
             componentRef.instance.initializeConfig();
-            if(metadata.modalSize) {
-                this.bsModalRef.setClass(metadata.modalSize);
+            if(componentRef.instance.config.modalSize) {
+                this.bsModalRef.setClass(componentRef.instance.config.modalSize);
             }
         }
     }

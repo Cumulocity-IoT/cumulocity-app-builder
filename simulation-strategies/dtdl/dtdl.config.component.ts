@@ -22,6 +22,7 @@ import {SimulationStrategyConfigComponent} from "../../builder/simulator/simulat
 
 export interface DtdlSimulationStrategyConfig {
     deviceId: string,
+    modalSize?: string,
     deviceName: string,
     dtdlDeviceId: string,
     dtdlModelConfig: DtdlSimulationModel[],
@@ -41,7 +42,8 @@ export interface DtdlSimulationModel {
 }
 @Component({
     template: `
-        <div class="row" >
+    
+        <div class="row" *ngIf="!config.isEditMode">
             <div class="col-xs-12 col-sm-6 col-md-6">
                 <div class="form-group">
                     <label for="dtdlFile"><span>Upload a DTDL File</span></label>
@@ -125,6 +127,7 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
     isUploading = false;
     isError = false;
     initializeConfig() {
+        this.config.modalSize = "modal-md",
         this.config.dtdlModelConfig = [];
         this.config.dtdlDeviceId = "";
         this.configModel = [];

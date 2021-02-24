@@ -25,7 +25,6 @@ export interface SimulationStrategyMetadata {
     name: string,
     icon: string,
     description?: string,
-    modalSize?: string,
     configComponent?: any
 }
 

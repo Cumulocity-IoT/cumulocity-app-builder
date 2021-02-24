@@ -61,7 +61,8 @@ export class SimulatorConfigComponent implements OnDestroy {
     }
 
     async showEditSimulatorDialog(simulatorConfig: SimulatorConfig) {
-        this.bsModalRef = this.modalService.show(EditSimulatorModalComponent, { class: 'c8y-wizard', initialState: { simulatorConfig } })
+        this.bsModalRef = this.modalService.show(EditSimulatorModalComponent, 
+            { class: (simulatorConfig.config.modalSize ? simulatorConfig.config.modalSize : 'c8y-wizard'), initialState: { simulatorConfig } })
     }
 
     async forceUnlock() {

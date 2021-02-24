@@ -29,7 +29,6 @@ import { DtdlSimulationStrategyConfig, DtdlSimulationStrategyConfigComponent } f
     name: "DTDL (Digital Twin Definition Language)",
     icon: "windows",
     description: "Simulate a device based on DTDL",
-    modalSize: "modal-md",
     configComponent: DtdlSimulationStrategyConfigComponent
 })
 export class DtdlSimulationStrategy extends DeviceIntervalSimulator {

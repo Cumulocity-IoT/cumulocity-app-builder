@@ -67,9 +67,8 @@ export class EditSimulatorModalComponent implements OnInit {
             const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(metadata.configComponent);
             const componentRef = this.configWrapper.createComponent(factory);
             componentRef.instance.config = this.simulatorConfig.config;
-            if(metadata.modalSize) {
-                this.bsModalRef.setClass(metadata.modalSize);
-            }
+            //Accessing EditMode variable in simulator strategy
+            componentRef.instance.config.isEditMode = true; 
         }
     }
 
