@@ -26,9 +26,9 @@ import {SimulatorConfig} from "../../builder/simulator/simulator-config";
 import { DtdlSimulationStrategyConfig, DtdlSimulationStrategyConfigComponent } from './dtdl.config.component';
 
 @SimulationStrategy({
-    name: "DTDL (Digital Twin Definition Language)",
+    name: "DTDL",
     icon: "windows",
-    description: "Simulate a device based on DTDL",
+    description: "Simulate a device based on DTDL (Digital Twin Definition Language)",
     configComponent: DtdlSimulationStrategyConfigComponent
 })
 export class DtdlSimulationStrategy extends DeviceIntervalSimulator {
