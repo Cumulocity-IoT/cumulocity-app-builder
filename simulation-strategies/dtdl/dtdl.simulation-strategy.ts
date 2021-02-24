@@ -41,19 +41,21 @@ export class DtdlSimulationStrategy extends DeviceIntervalSimulator {
     }
 
     onTick() {
-        console.log('on tick object', this.config);
-        /* const measurementValue = Math.floor(Math.random() * (this.config.maxValue - this.config.minValue + 1)) + this.config.minValue;
-
-        this.measurementService.create({
-            sourceId: this.config.deviceId,
-            time: new Date(),
-            [this.config.fragment]: {
-                [this.config.series]: {
-                    value: measurementValue,
-                    ...this.config.unit && {unit: this.config.unit}
+        
+        const dtdlConfigModel = this.config.dtdlModelConfig;
+        dtdlConfigModel.forEach( modelConfig => {
+            const measurementValue = Math.floor(Math.random() * (modelConfig.maxValue - modelConfig.minValue + 1)) + modelConfig.minValue;
+            this.measurementService.create({
+                sourceId: this.config.deviceId,
+                time: new Date(),
+                [modelConfig.fragment]: {
+                    [modelConfig.series]: {
+                        value: measurementValue,
+                        ...modelConfig.unit && {unit: modelConfig.unit}
+                    }
                 }
-            }
-        }); */
+            });
+        });
     }
 }
 
