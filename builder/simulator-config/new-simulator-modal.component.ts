@@ -79,7 +79,10 @@ export class NewSimulatorModalComponent {
         this.busy = true;
 
         const metadata = this.selectedStrategyFactory.getSimulatorMetadata();
-
+        // get simulator Name from strategy's deviceName field
+        if(metadata.hideSimulatorName) {
+            this.simulatorName = this.newConfig.deviceName;
+        }
         let device;
         if (!this.deviceId) {
             // createDevice

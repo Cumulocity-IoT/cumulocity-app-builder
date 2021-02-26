@@ -29,6 +29,7 @@ import { DtdlSimulationStrategyConfig, DtdlSimulationStrategyConfigComponent } f
     name: "DTDL",
     icon: "windows",
     description: "Simulate a device based on DTDL (Digital Twin Definition Language)",
+    hideSimulatorName: true, // hide default simulator name field
     configComponent: DtdlSimulationStrategyConfigComponent
 })
 export class DtdlSimulationStrategy extends DeviceIntervalSimulator {
@@ -80,7 +81,7 @@ export class DtdlSimulationStrategy extends DeviceIntervalSimulator {
                     this.randomWalkPreviousValue = this.randomWalkMeasurementValue;
                     this.createMeasurements(this.config.deviceId, modelConfig, this.randomWalkMeasurementValue);
                     break;
-                    
+
                 default:
                     break;
             }

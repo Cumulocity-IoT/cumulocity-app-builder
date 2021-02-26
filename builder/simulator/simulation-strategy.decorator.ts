@@ -25,7 +25,8 @@ export interface SimulationStrategyMetadata {
     name: string,
     icon: string,
     description?: string,
-    configComponent?: any
+    configComponent?: any,
+    hideSimulatorName?: boolean
 }
 
 export function SimulationStrategy(config: SimulationStrategyMetadata) {

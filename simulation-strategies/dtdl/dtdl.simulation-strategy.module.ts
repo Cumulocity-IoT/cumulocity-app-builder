@@ -23,11 +23,13 @@ import {CommonModule} from "@angular/common";
 import {FormsModule} from "@angular/forms";
 import { HOOK_SIMULATION_STRATEGY_FACTORY } from '../../builder/simulator/device-simulator';
 import { AccordionModule } from 'ngx-bootstrap/accordion';
+import {NgSelectModule} from "@ng-select/ng-select";
 
 @NgModule({
     imports: [
         CommonModule,
         FormsModule,
+        NgSelectModule,
         AccordionModule.forRoot()
     ],
     declarations: [
