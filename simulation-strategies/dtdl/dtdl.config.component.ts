@@ -36,9 +36,13 @@ export interface DtdlSimulationModel {
     unit?: string,
     schema?: string,
     id?: string,
-    minValue?: number,
-    maxValue?: number,
+    minValue?: number, //random value, random walk
+    maxValue?: number, //random value, random walk
+    value?: string, //value series
+    startingValue?: number, //random walk
+    maxDelta?: number, //random walk
     deviceId?: string;
+    simulationType?: string;
 }
 @Component({
     template: `
@@ -57,7 +61,7 @@ export interface DtdlSimulationModel {
             </div>
             <div class="col-xs-12 col-sm-6 col-md-6">
              <div class="form-group">
-                <label for="dtdlDevice"><span>Select Device</span></label>
+                <label for="dtdlDevice"><span>Select a Device From DTDL</span></label>
                 <select name="dtdlDevice" id="dtdlDevice" [(ngModel)]="config.dtdlDeviceId" required (change)="onSelectedDtdlDevice()">
                         <option *ngFor="let device of deviceList"  [value]="device.deviceId">{{device.deviceName}}</option>
                 </select>
@@ -65,9 +69,6 @@ export interface DtdlSimulationModel {
             </div>
         </div>
         
-        <div class="row">
-                
-        </div>
         <div class="row form-group">
             <accordion  [isAnimated]="true" [closeOthers]="true">
                 <accordion-group  *ngFor="let model of config.dtdlModelConfig;let index = index"  #dtdlGroup>
@@ -76,6 +77,16 @@ export interface DtdlSimulationModel {
                         <span class="float-right pull-right"><i *ngIf="dtdlGroup.isOpen" class="fa fa-caret-up"></i>
                         <i *ngIf="!dtdlGroup.isOpen" class="fa fa-caret-down"></i></span>
                     </button>
+                    <div class="col-xs-12 col-sm-6 col-md-6">
+                        <div class="form-group">
+                            <label for="simulationType"><span>Simulation Type</span></label>
+                            <select name="simulationType{{index}}"  [(ngModel)]="config.dtdlModelConfig[index].simulationType" required (change)="simulatorTypeChange()">
+                                <option value="randomValue" >Random Value</option>
+                                <option value="valueSeries" >Value Series</option>
+                                <option value="randomWalk" >Random Walk</option>
+                            </select>
+                        </div>     
+                    </div>
                     <div class="col-xs-12 col-sm-6 col-md-6">
                     <div class="form-group">
                         <label for="fragment"><span>Fragment</span></label>
@@ -88,18 +99,56 @@ export interface DtdlSimulationModel {
                             <input type="text" class="form-control" name="series{{index}}" placeholder="e.g. T (required)" required autofocus [(ngModel)]="config.dtdlModelConfig[index].series">
                         </div>
                     </div>
-                    <div class="col-xs-12 col-sm-6 col-md-6">
-                        <div class="form-group">
-                            <label for="minvalue"><span>Minimum Value</span></label>
-                            <input type="number" class="form-control"  name="minvalue{{index}}" placeholder="e.g. 10 (required)" required [(ngModel)]="config.dtdlModelConfig[index].minValue">
-                        </div>
-                    </div>
-                    <div class="col-xs-12 col-sm-6 col-md-6">
-                        <div class="form-group">
-                            <label for="maxvalue"><span>Maximum Value</span></label>
-                            <input type="number" class="form-control"  name="maxvalue{{index}}" placeholder="e.g. 20 (required)" required [(ngModel)]="config.dtdlModelConfig[index].maxValue">
-                        </div>
-                    </div>
+                    <ng-container [ngSwitch]="config.dtdlModelConfig[index].simulationType">
+                        <ng-container *ngSwitchCase="'randomValue'">
+                            <div class="col-xs-12 col-sm-6 col-md-6">
+                                <div class="form-group">
+                                    <label for="minvalue"><span>Minimum Value</span></label>
+                                    <input type="number" class="form-control"  name="minvalue{{index}}" placeholder="e.g. 10 (required)" required [(ngModel)]="config.dtdlModelConfig[index].minValue">
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-sm-6 col-md-6">
+                                <div class="form-group">
+                                    <label for="maxvalue"><span>Maximum Value</span></label>
+                                    <input type="number" class="form-control"  name="maxvalue{{index}}" placeholder="e.g. 20 (required)" required [(ngModel)]="config.dtdlModelConfig[index].maxValue">
+                                </div>
+                            </div>
+                        </ng-container>
+                        <ng-container *ngSwitchCase="'valueSeries'">
+                            <div class="col-xs-12 col-sm-6 col-md-6">
+                                <div class="form-group">
+                                    <label for="value"><span>Value</span></label>
+                                    <input type="text" class="form-control" id="value" name="value" placeholder="e.g. 15,20,30 (required)" required [(ngModel)]="config.dtdlModelConfig[index].value">
+                                </div> 
+                            </div>
+                        </ng-container>
+                        <ng-container *ngSwitchCase="'randomWalk'">
+                            <div class="col-xs-12 col-sm-6 col-md-6">
+                                <div class="form-group">
+                                <label for="startingvalue"><span>Starting Value</span></label>
+                                <input type="number" class="form-control" id="startingvalue" name="startingvalue" placeholder="e.g. 10 (required)" required [(ngModel)]="config.dtdlModelConfig[index].startingValue">
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-sm-6 col-md-6">
+                                <div class="form-group">
+                                    <label for="maxdelta"><span>Maximum Change Amount</span></label>
+                                    <input type="number" class="form-control" id="maxdelta" name="maxdelta" min="0" placeholder="e.g. 10 (required)" required [(ngModel)]="config.dtdlModelConfig[index].maxDelta">
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-sm-6 col-md-6">
+                                <div class="form-group">
+                                    <label for="minvalue"><span>Minimum Value</span></label>
+                                    <input type="number" class="form-control"  name="minvalue{{index}}" placeholder="e.g. 10 (required)" required [(ngModel)]="config.dtdlModelConfig[index].minValue">
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-sm-6 col-md-6">
+                                <div class="form-group">
+                                    <label for="maxvalue"><span>Maximum Value</span></label>
+                                    <input type="number" class="form-control"  name="maxvalue{{index}}" placeholder="e.g. 20 (required)" required [(ngModel)]="config.dtdlModelConfig[index].maxValue">
+                                </div>
+                            </div>
+                        </ng-container>
+                    </ng-container>
                     <div class="col-xs-12 col-sm-6 col-md-6">
                         <div class="form-group">
                             <label for="unit"><span>Unit</span></label>
@@ -175,6 +224,9 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
         return false;
     }
 
+    simulatorTypeChange() {
+
+    }
     onSelectedDtdlDevice() {
         console.log('selected deviceId', this.config.dtdlDeviceId);
         const measurementObj = this.configModel.filter((model) => model.deviceId === this.config.dtdlDeviceId);
@@ -206,7 +258,9 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
             dtdlM.forEach((content: any) => {
                 if(content['@type'].includes("Telemetry")) {
                     const typeLength = (Array.isArray(content['@type']) ? content['@type'].length : 0);
-                    const model: DtdlSimulationModel = {};
+                    const model: DtdlSimulationModel = {
+                        simulationType: 'randomValue'
+                    };
                     model.measurementName = (content.displayName && content.displayName.constructor === Object ? content.displayName.en : content.displayName);
                     model.fragment = ( typeLength > 0 ? content['@type'][typeLength - 1] : content['@type']);
                     model.id = content['@id'];

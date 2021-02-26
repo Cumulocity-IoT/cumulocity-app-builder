@@ -32,6 +32,11 @@ import { DtdlSimulationStrategyConfig, DtdlSimulationStrategyConfigComponent } f
     configComponent: DtdlSimulationStrategyConfigComponent
 })
 export class DtdlSimulationStrategy extends DeviceIntervalSimulator {
+    seriesValueMeasurementCounter = 0;
+    seriesvalues: number[] = [];
+    randomWalkFirstValue: boolean = true;
+    randomWalkPreviousValue: number = 0;
+    randomWalkMeasurementValue: number = null;
     constructor(private measurementService: MeasurementService, private config: DtdlSimulationStrategyConfig) {
         super();
     }
@@ -44,17 +49,54 @@ export class DtdlSimulationStrategy extends DeviceIntervalSimulator {
         
         const dtdlConfigModel = this.config.dtdlModelConfig;
         dtdlConfigModel.forEach( modelConfig => {
-            const measurementValue = Math.floor(Math.random() * (modelConfig.maxValue - modelConfig.minValue + 1)) + modelConfig.minValue;
-            this.measurementService.create({
-                sourceId: this.config.deviceId,
-                time: new Date(),
-                [modelConfig.fragment]: {
-                    [modelConfig.series]: {
-                        value: measurementValue,
-                        ...modelConfig.unit && {unit: modelConfig.unit}
+            switch (modelConfig.simulationType) {
+                case 'randomValue':
+                    const measurementValue = Math.floor(Math.random() * (modelConfig.maxValue - modelConfig.minValue + 1)) + modelConfig.minValue;
+                    this.createMeasurements(this.config.deviceId, modelConfig, measurementValue);                
+                    break;
+
+                case 'valueSeries':
+                    if(this.seriesvalues.length === 0) {
+                        this.seriesvalues = modelConfig.value.split(',').map(value => parseFloat(value.trim()));
                     }
+                    if (this.seriesValueMeasurementCounter >= this.seriesvalues.length) {
+                        this.seriesValueMeasurementCounter = 0;
+                    }
+                    this.createMeasurements(this.config.deviceId, modelConfig, this.seriesvalues[this.seriesValueMeasurementCounter++]);                
+                    break;
+
+                case 'randomWalk':
+                    if (this.randomWalkMeasurementValue === null) {
+                        this.randomWalkMeasurementValue = modelConfig.startingValue;
+                        this.randomWalkPreviousValue = 0;
+                    } else {
+                        const max = Math.max(modelConfig.minValue, modelConfig.maxValue);
+                        const min = Math.min(modelConfig.minValue, modelConfig.maxValue);
+                        const maxDelta = Math.abs(modelConfig.maxDelta);
+                        const delta = maxDelta * 2 * Math.random() - maxDelta;
+                        this.randomWalkMeasurementValue = Math.min(Math.max(this.randomWalkPreviousValue + delta, min), max);
+                    }
+
+                    this.randomWalkPreviousValue = this.randomWalkMeasurementValue;
+                    this.createMeasurements(this.config.deviceId, modelConfig, this.randomWalkMeasurementValue);
+                    break;
+                    
+                default:
+                    break;
+            }
+            
+        });
+    }
+    private createMeasurements(deviceId: any, modelConfig:any, value: any) {
+        this.measurementService.create({
+            sourceId: deviceId,
+            time: new Date(),
+            [modelConfig.fragment]: {
+                [modelConfig.series]: {
+                    value: value,
+                    ...modelConfig.unit && {unit: modelConfig.unit}
                 }
-            });
+            }
         });
     }
 }
