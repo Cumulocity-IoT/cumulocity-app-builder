@@ -15,37 +15,41 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
  */
-import {NgModule} from "@angular/core";
-import {ApplicationModule} from "./application/application.module";
-import {RouterModule} from "@angular/router";
-import {DashboardConfigComponent} from "./application-config/dashboard-config.component";
-import {EditDashboardModalComponent} from "./application-config/edit-dashboard-modal.component";
-import {NewDashboardModalComponent} from "./application-config/new-dashboard-modal.component";
-import {AppStateService, CoreModule, HOOK_NAVIGATOR_NODES, LoginService} from "@c8y/ngx-components";
-import {IconSelectorModule} from "../icon-selector/icon-selector.module";
-import {SortableModule, TooltipModule} from "ngx-bootstrap";
-import {WizardModule} from "../wizard/wizard.module";
-import {BrandingModule} from "./branding/branding.module";
-import {AppBuilderNavigationService} from "./navigation/app-builder-navigation.service";
+import { NgModule } from "@angular/core";
+import { ApplicationModule } from "./application/application.module";
+import { RouterModule } from "@angular/router";
+import { DashboardConfigComponent } from "./application-config/dashboard-config.component";
+import { EditDashboardModalComponent } from "./application-config/edit-dashboard-modal.component";
+import { NewDashboardModalComponent } from "./application-config/new-dashboard-modal.component";
+import { AppStateService, CoreModule, HOOK_NAVIGATOR_NODES, LoginService } from "@c8y/ngx-components";
+import { IconSelectorModule } from "../icon-selector/icon-selector.module";
+import { SortableModule, TooltipModule } from "ngx-bootstrap";
+import { WizardModule } from "../wizard/wizard.module";
+import { BrandingModule } from "./branding/branding.module";
+import { AppBuilderNavigationService } from "./navigation/app-builder-navigation.service";
 import {
     AppBuilderConfigNavigationRegistrationService,
     AppBuilderConfigNavigationService
 } from "./navigation/app-builder-config-navigation.service";
-import {BrandingComponent} from "./branding/branding.component";
-import {SimulatorConfigModule} from "./simulator-config/simulator-config.module";
-import {SimulatorCommunicationService} from "./simulator/mainthread/simulator-communication.service";
-import {AppIdService} from "./app-id.service";
-import {SimulatorConfigComponent} from "./simulator-config/simulator-config.component";
-import {AppListModule, RedirectToDefaultApplicationOrBuilder} from "./app-list/app-list.module";
-import {HelpComponent} from "./help/help.component";
-import {MarkdownModule} from "ngx-markdown";
-import {BrandingDirtyGuardService} from "./branding/branding-dirty-guard.service";
-import {AppListComponent} from "./app-list/app-list.component";
-import {LockStatus} from "./simulator/worker/simulation-lock.service";
-import {fromEvent, Observable} from "rxjs";
-import {withLatestFrom} from "rxjs/operators";
-import {proxy} from "comlink";
+import { BrandingComponent } from "./branding/branding.component";
+import { SimulatorConfigModule } from "./simulator-config/simulator-config.module";
+import { SimulatorCommunicationService } from "./simulator/mainthread/simulator-communication.service";
+import { AppIdService } from "./app-id.service";
+import { SimulatorConfigComponent } from "./simulator-config/simulator-config.component";
+import { AppListModule, RedirectToDefaultApplicationOrBuilder } from "./app-list/app-list.module";
+import { HelpComponent } from "./help/help.component";
+import { MarkdownModule } from "ngx-markdown";
+import { BrandingDirtyGuardService } from "./branding/branding-dirty-guard.service";
+import { AppListComponent } from "./app-list/app-list.component";
+import { LockStatus } from "./simulator/worker/simulation-lock.service";
+import { fromEvent, Observable } from "rxjs";
+import { withLatestFrom } from "rxjs/operators";
+import { proxy } from "comlink";
 import { CookieAuth } from '@c8y/client';
+import { TemplateCatalogModule } from "./template-catalog/template-catalog.module";
+import { RectangleSpinnerModule } from "./utils/rectangle-spinner/rectangle-spinner.module";
+import { DeviceSelectorModalModule } from "./utils/device-selector/device-selector.module";
+
 @NgModule({
     imports: [
         ApplicationModule,
@@ -76,8 +80,11 @@ import { CookieAuth } from '@c8y/client';
         ]),
         CoreModule,
         IconSelectorModule,
+        RectangleSpinnerModule,
+        DeviceSelectorModalModule,
         SortableModule.forRoot(),
         WizardModule,
+        TemplateCatalogModule,
         TooltipModule.forRoot(),
         BrandingModule.forRoot(),
         SimulatorConfigModule,
@@ -96,10 +103,10 @@ import { CookieAuth } from '@c8y/client';
     ],
     providers: [
         AppBuilderNavigationService,
-        { provide: HOOK_NAVIGATOR_NODES, useExisting: AppBuilderNavigationService, multi: true},
+        { provide: HOOK_NAVIGATOR_NODES, useExisting: AppBuilderNavigationService, multi: true },
         AppBuilderConfigNavigationRegistrationService,
         AppBuilderConfigNavigationService,
-        { provide: HOOK_NAVIGATOR_NODES, useExisting: AppBuilderConfigNavigationService, multi: true},
+        { provide: HOOK_NAVIGATOR_NODES, useExisting: AppBuilderConfigNavigationService, multi: true },
     ]
 })
 export class BuilderModule {
@@ -107,27 +114,27 @@ export class BuilderModule {
         // Pass the app state to the worker from the main thread (Initially and every time it changes)
         appStateService.currentUser.subscribe(async (user) => {
             let isCookieAuth = false;
-            let cookieAuth = null; 
+            let cookieAuth = null;
             let xsrfToken = null;
             const token = localStorage.getItem(loginService.TOKEN_KEY) || sessionStorage.getItem(loginService.TOKEN_KEY);
             if (!token) {
                 // XSRF token required by webworker while cookie auth used. use case: login using sso
-                cookieAuth =  new CookieAuth();
+                cookieAuth = new CookieAuth();
                 xsrfToken = cookieAuth.getCookieValue('XSRF-TOKEN');
                 isCookieAuth = true;
             }
             if (user != null) {
                 const tfa = localStorage.getItem(loginService.TFATOKEN_KEY) || sessionStorage.getItem(loginService.TFATOKEN_KEY);
                 if (token !== undefined && token) {
-                    return await simSvc.simulator.setUserAndCredentials(user, {token, tfa}, isCookieAuth, null);
+                    return await simSvc.simulator.setUserAndCredentials(user, { token, tfa }, isCookieAuth, null);
                 } else {
-                    return await simSvc.simulator.setUserAndCredentials(user, {token, tfa}, isCookieAuth, xsrfToken);
+                    return await simSvc.simulator.setUserAndCredentials(user, { token, tfa }, isCookieAuth, xsrfToken);
                 }
             }
             return await simSvc.simulator.setUserAndCredentials(user, {}, isCookieAuth, xsrfToken);
         });
 
-        const lockStatus$ = new Observable<{isLocked: boolean, isLockOwned: boolean, lockStatus?: LockStatus}>(subscriber => {
+        const lockStatus$ = new Observable<{ isLocked: boolean, isLockOwned: boolean, lockStatus?: LockStatus }>(subscriber => {
             simSvc.simulator
                 .addLockStatusListener(proxy(lockStatus => subscriber.next(lockStatus)))
                 .then(listenerId => subscriber.add(() => simSvc.simulator.removeListener(listenerId)));
@@ -142,11 +149,10 @@ export class BuilderModule {
                 }
             });
         appStateService.currentTenant.subscribe(async (tenant) => await simSvc.simulator.setTenant(tenant));
-        appIdService.appId$.subscribe(async (appId) => 
-        {
+        appIdService.appId$.subscribe(async (appId) => {
             await simSvc.simulator.setAppId(appId)
-            if(window && window['aptrinsic'] ){
-                window['aptrinsic']('track', 'Applications', {"appId": appId });
+            if (window && window['aptrinsic']) {
+                window['aptrinsic']('track', 'Applications', { "appId": appId });
             }
         });
     }

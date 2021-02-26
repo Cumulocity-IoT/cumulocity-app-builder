@@ -16,20 +16,24 @@
 * limitations under the License.
  */
 
-import {Component, OnDestroy} from "@angular/core";
-import {ApplicationService, InventoryService, IApplication} from "@c8y/client";
-import {Observable, from, Subject, Subscription} from "rxjs";
-import {debounceTime, filter, switchMap, tap} from "rxjs/operators";
-import {AppBuilderNavigationService} from "../navigation/app-builder-navigation.service";
-import {AlertService, AppStateService} from "@c8y/ngx-components";
-import {BrandingService} from "../branding/branding.service";
+import { Component, OnDestroy } from "@angular/core";
+import { ApplicationService, InventoryService, IApplication, IManagedObject } from "@c8y/client";
+import { Observable, from, Subject, Subscription } from "rxjs";
+import { debounceTime, filter, switchMap, tap } from "rxjs/operators";
+import { AppBuilderNavigationService } from "../navigation/app-builder-navigation.service";
+import { AlertService, AppStateService } from "@c8y/ngx-components";
+import { BrandingService } from "../branding/branding.service";
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
-import {NewDashboardModalComponent} from "./new-dashboard-modal.component";
-import {EditDashboardModalComponent} from "./edit-dashboard-modal.component";
-import {AppIdService} from "../app-id.service";
-import {UpdateableAlert} from "../utils/UpdateableAlert";
-import {contextPathFromURL} from "../utils/contextPathFromURL";
+import { NewDashboardModalComponent } from "./new-dashboard-modal.component";
+import { EditDashboardModalComponent } from "./edit-dashboard-modal.component";
+import { AppIdService } from "../app-id.service";
+import { UpdateableAlert } from "../utils/UpdateableAlert";
+import { contextPathFromURL } from "../utils/contextPathFromURL";
 import * as delay from "delay";
+import { TemplateCatalogModalComponent } from "../template-catalog/template-catalog.component";
+import { TemplateUpdateModalComponent } from "../template-catalog/template-update.component";
+import { BinaryDescription, DeviceDescription } from "../template-catalog/template-catalog.model";
+
 
 export interface DashboardConfig {
     id: string,
@@ -40,6 +44,12 @@ export interface DashboardConfig {
     deviceId?: string,
     groupTemplate: {
         groupId: string
+    },
+    templateDashboard?: {
+        id: string;
+        name: string;
+        devices?: Array<DeviceDescription>,
+        binaries?: Array<BinaryDescription>,
     }
 }
 
@@ -68,7 +78,7 @@ export class DashboardConfigComponent implements OnDestroy {
             switchMap(appId => from(
                 appService.detail(appId).then(res => res.data as any)
             )),
-            tap((app: IApplication & {applicationBuilder: any}) => { // TODO: do this a nicer way....
+            tap((app: IApplication & { applicationBuilder: any }) => { // TODO: do this a nicer way....
                 this.newAppName = app.name;
                 this.newAppContextPath = app.contextPath;
                 this.newAppIcon = app.applicationBuilder.icon;
@@ -152,7 +162,7 @@ export class DashboardConfigComponent implements OnDestroy {
 
             savingAlert.update('Application saved!', 'success');
             savingAlert.close(1500);
-        } catch(e) {
+        } catch (e) {
             savingAlert.update('Unable to save!\nCheck browser console for details', 'danger');
             throw e;
         }
@@ -167,25 +177,45 @@ export class DashboardConfigComponent implements OnDestroy {
         this.bsModalRef = this.modalService.show(NewDashboardModalComponent, { class: 'c8y-wizard', initialState: { app } });
     }
 
-    showEditDashboardDialog(app, dashboards: DashboardConfig[],index: number) {
+    showEditDashboardDialog(app, dashboards: DashboardConfig[], index: number) {
+        // TODO differentiate betwenn template dashboard and normal dashboards
+
         const dashboard = dashboards[index];
-        this.bsModalRef = this.modalService.show(EditDashboardModalComponent, {
-            class: 'c8y-wizard',
-            initialState: {
-                app,
-                index,
-                dashboardName: dashboard.name,
-                dashboardVisibility: dashboard.visibility || '',
-                dashboardIcon: dashboard.icon,
-                deviceId: dashboard.deviceId,
-                tabGroup: dashboard.tabGroup,
-                ...(dashboard.groupTemplate ? {
-                    dashboardType: 'group-template'
-                } : {
-                    dashboardType: 'standard'
-                })
-            }
-        });
+        if (dashboard.templateDashboard) {
+            console.log('open template dashboard dialog');
+            this.showTemplateDashboardEditModalDialog(app, dashboard);
+        } else {
+            this.bsModalRef = this.modalService.show(EditDashboardModalComponent, {
+                class: 'c8y-wizard',
+                initialState: {
+                    app,
+                    index,
+                    dashboardName: dashboard.name,
+                    dashboardVisibility: dashboard.visibility || '',
+                    dashboardIcon: dashboard.icon,
+                    deviceId: dashboard.deviceId,
+                    tabGroup: dashboard.tabGroup,
+                    ...(dashboard.groupTemplate ? {
+                        dashboardType: 'group-template'
+                    } : {
+                            dashboardType: 'standard'
+                        })
+                }
+            });
+        }
+    }
+
+    showTemplateCatalogModalDialog(app): void {
+        this.bsModalRef = this.modalService.show(TemplateCatalogModalComponent, { class: 'template-catalog', initialState: { app } });
+        // this.bsModalRef = this.modalService.show(DeviceSelectorModalComponent, { class: 'c8y-wizard', initialState: {} });
+        // this.bsModalRef.content.onDeviceSelected.subscribe((device: IManagedObject) => {
+        //     console.log('dialog closed and device selected');
+        //     console.log(device)
+        // })
+    }
+
+    showTemplateDashboardEditModalDialog(app, dashboardConfig: DashboardConfig): void {
+        this.bsModalRef = this.modalService.show(TemplateUpdateModalComponent, { class: 'template-catalog', initialState: { app, dashboardConfig } });
     }
 
     ngOnDestroy(): void {
