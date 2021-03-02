@@ -50,55 +50,93 @@ export class DtdlSimulationStrategy extends DeviceIntervalSimulator {
         
         const dtdlConfigModel = this.config.dtdlModelConfig;
         dtdlConfigModel.forEach( modelConfig => {
-            switch (modelConfig.simulationType) {
-                case 'randomValue':
-                    const measurementValue = Math.floor(Math.random() * (modelConfig.maxValue - modelConfig.minValue + 1)) + modelConfig.minValue;
-                    this.createMeasurements(this.config.deviceId, modelConfig, measurementValue);                
-                    break;
-
-                case 'valueSeries':
-                    if(this.seriesvalues.length === 0) {
-                        this.seriesvalues = modelConfig.value.split(',').map(value => parseFloat(value.trim()));
-                    }
-                    if (this.seriesValueMeasurementCounter >= this.seriesvalues.length) {
-                        this.seriesValueMeasurementCounter = 0;
-                    }
-                    this.createMeasurements(this.config.deviceId, modelConfig, this.seriesvalues[this.seriesValueMeasurementCounter++]);                
-                    break;
-
-                case 'randomWalk':
-                    if (this.randomWalkMeasurementValue === null) {
-                        this.randomWalkMeasurementValue = modelConfig.startingValue;
-                        this.randomWalkPreviousValue = 0;
-                    } else {
-                        const max = Math.max(modelConfig.minValue, modelConfig.maxValue);
-                        const min = Math.min(modelConfig.minValue, modelConfig.maxValue);
-                        const maxDelta = Math.abs(modelConfig.maxDelta);
-                        const delta = maxDelta * 2 * Math.random() - maxDelta;
-                        this.randomWalkMeasurementValue = Math.min(Math.max(this.randomWalkPreviousValue + delta, min), max);
-                    }
-
-                    this.randomWalkPreviousValue = this.randomWalkMeasurementValue;
-                    this.createMeasurements(this.config.deviceId, modelConfig, this.randomWalkMeasurementValue);
-                    break;
-
-                default:
-                    break;
-            }
-            
+            this.createMeasurements(this.config.deviceId, modelConfig); 
         });
     }
-    private createMeasurements(deviceId: any, modelConfig:any, value: any) {
-        this.measurementService.create({
-            sourceId: deviceId,
-            time: new Date(),
-            [modelConfig.fragment]: {
-                [modelConfig.series]: {
-                    value: value,
-                    ...modelConfig.unit && {unit: modelConfig.unit}
-                }
+
+    private getRandomValue(modelConfig: any) {
+        return Math.floor(Math.random() * (modelConfig.maxValue - modelConfig.minValue + 1)) + modelConfig.minValue;
+    }
+
+    private getValueSeries(modelConfig: any) {
+        if(this.seriesvalues.length === 0) {
+            this.seriesvalues = modelConfig.value.split(',').map(value => parseFloat(value.trim()));
+        }
+        if (this.seriesValueMeasurementCounter >= this.seriesvalues.length) {
+            this.seriesValueMeasurementCounter = 0;
+        }
+        return this.seriesvalues[this.seriesValueMeasurementCounter++]
+    }
+
+    private getRandomWalk(modelConfig: any) {
+        if (this.randomWalkMeasurementValue === null) {
+            this.randomWalkMeasurementValue = modelConfig.startingValue;
+            this.randomWalkPreviousValue = 0;
+        } else {
+            const max = Math.max(modelConfig.minValue, modelConfig.maxValue);
+            const min = Math.min(modelConfig.minValue, modelConfig.maxValue);
+            const maxDelta = Math.abs(modelConfig.maxDelta);
+            const delta = maxDelta * 2 * Math.random() - maxDelta;
+            this.randomWalkMeasurementValue = Math.min(Math.max(this.randomWalkPreviousValue + delta, min), max);
+        }
+
+        this.randomWalkPreviousValue = this.randomWalkMeasurementValue;
+        return this.randomWalkMeasurementValue;
+    }
+    private getMeasurementValue(modelConfig: any) {
+        let mValue: any;
+        switch (modelConfig.simulationType) {
+            case 'randomValue':
+                mValue = this.getRandomValue(modelConfig);            
+                break;
+
+            case 'valueSeries':
+                mValue = this.getValueSeries(modelConfig); 
+                break;
+            
+            case 'randomWalk':
+                mValue = this.getRandomWalk(modelConfig); 
+                break;
+
+            default:
+                break;
+        }
+        return mValue;
+    }
+    private createMeasurements(deviceId: any, modelConfig:any) {
+        if(modelConfig.schema && modelConfig.schema['@type'] === 'Object' && modelConfig.schema.fields) {
+            const fields = modelConfig.schema.fields;
+            if(fields && fields.length > 0 ) {
+                let fragementmap = new Map();
+                fields.forEach(field => {
+                    fragementmap.set(`${modelConfig.series}:${field.name}`, {
+                        value: this.getMeasurementValue(modelConfig),
+                        unit: modelConfig.unit
+                    })
+                });
+                const modelFragmentObject = Array.from(fragementmap.entries()).reduce((main, [key, value]) => ({...main, [key]: value}), {});
+                this.measurementService.create({
+                    sourceId: deviceId,
+                    time: new Date(),
+                    [modelConfig.fragment]: {
+                        ...modelFragmentObject
+                    }
+                });
             }
-        });
+            
+        } else {
+            this.measurementService.create({
+                sourceId: deviceId,
+                time: new Date(),
+                [modelConfig.fragment]: {
+                    [modelConfig.series]: {
+                        value: this.getMeasurementValue(modelConfig),
+                        ...modelConfig.unit && {unit: modelConfig.unit}
+                    }
+                }
+            });
+        }
+        
     }
 }
 

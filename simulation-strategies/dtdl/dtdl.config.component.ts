@@ -193,7 +193,6 @@ export interface DtdlSimulationModel {
 export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyConfigComponent {
     config: DtdlSimulationStrategyConfig;
     configModel: DtdlSimulationModel[] = [];
-    selectedMeasurements: any = [];
     dtdlFile: FileList;
     isUploading = false;
     isError = false;
@@ -262,21 +261,32 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
         if(dtdlM && dtdlM.length > 0) {
             dtdlM.forEach((content: any) => {
                 if(content['@type'].includes("Telemetry")) {
-                    const typeLength = (Array.isArray(content['@type']) ? content['@type'].length : 0);
-                    const model: DtdlSimulationModel = {
-                        simulationType: 'randomValue'
-                    };
-                    model.measurementName = (content.displayName && content.displayName.constructor === Object ? content.displayName.en : content.displayName);
-                    model.fragment = ( typeLength > 0 ? content['@type'][typeLength - 1] : content['@type']);
-                    model.id = content['@id'];
-                    model.schema = content.schema;
-                    model.series = content.name;
-                    model.unit = content.unit;
-                    model.deviceId = deviceId;
-                    this.configModel.push(model);
+                    this.processTeletry(content, deviceId);
+                } else if (content['@type'].includes("Component")) {
+                    const schemaContent = (content.schema && content.schema.contents ? content.schema.contents : []);
+                    schemaContent.forEach((content: any) => {
+                        if(content['@type'].includes("Telemetry")) {
+                            this.processTeletry(content,deviceId);
+                        } 
+                    });
                 }
             });
-            this.selectedMeasurements = [];
+            console.log("config model", this.configModel);
         }
+    }
+
+    private processTeletry(content: any, deviceId?: string) {
+        const typeLength = (Array.isArray(content['@type']) ? content['@type'].length : 0);
+        const model: DtdlSimulationModel = {
+            simulationType: 'randomValue'
+        };
+        model.measurementName = (content.displayName && content.displayName.constructor === Object ? content.displayName.en : content.displayName);
+        model.fragment = ( typeLength > 0 ? content['@type'][typeLength - 1] : content['@type']);
+        model.id = content['@id'];
+        model.schema = content.schema;
+        model.series = content.name;
+        model.unit = content.unit;
+        model.deviceId = deviceId;
+        this.configModel.push(model);
     }
 }
