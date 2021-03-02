@@ -19,17 +19,17 @@
 import {Component, OnDestroy} from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
 import {ApplicationService} from "@c8y/client";
-import {map, switchMap} from "rxjs/operators";
+import {map, switchMap, tap} from "rxjs/operators";
 import {from, Observable} from "rxjs";
 import {BrandingService} from "./branding.service";
 
 @Component({
     templateUrl: './branding.component.html'
 })
-export class BrandingComponent implements OnDestroy {
+export class BrandingComponent implements OnDestroy{
     app: Observable<any>;
     dirty = false;
-
+    showIcon = true;
     constructor(private route: ActivatedRoute, private appService: ApplicationService, private brandingService: BrandingService) {
         const appId = route.paramMap.pipe(
             map(paramMap => paramMap.get('applicationId'))
@@ -39,8 +39,11 @@ export class BrandingComponent implements OnDestroy {
             switchMap(appId => from(
                 appService.detail(appId)
                     .then(res => res.data as any)
-            ))
-        );
+            )),
+            tap((app: any & {applicationBuilder: any}) => { 
+                this.showIcon = !app.applicationBuilder.branding.hideIcon;
+            })
+        )
     }
 
     async save(app) {
@@ -55,6 +58,13 @@ export class BrandingComponent implements OnDestroy {
 
     showBrandingChange(app) {
         this.dirty = true;
+   //     this.showIcon = !app.applicationBuilder.branding.hideIcon;
+        this.brandingService.updateStyleForApp(app);
+    }
+
+    showBrandingLogoChange(app) {
+        this.dirty = true;
+        app.applicationBuilder.branding.hideIcon = !this.showIcon;
         this.brandingService.updateStyleForApp(app);
     }
 
