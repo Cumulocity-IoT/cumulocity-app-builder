@@ -46,6 +46,7 @@ export class NewSimulatorModalComponent {
     newConfig: any;
     deviceId: string | undefined;
     simulatorName: string = '';
+    deviceName: string | undefined;
 
     constructor(
         private simSvc: SimulatorCommunicationService,
@@ -124,5 +125,9 @@ export class NewSimulatorModalComponent {
         await this.simSvc.simulator.checkForSimulatorConfigChanges();
 
         this.bsModalRef.hide();
+    }
+    getSelectedDevice(device: any) {
+        this.deviceId = device.id;
+        this.deviceName = device.name;
     }
 }

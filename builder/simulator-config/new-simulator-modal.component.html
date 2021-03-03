@@ -36,7 +36,7 @@
             <h4 class="text-uppercase" style="margin:0; letter-spacing: 0.15em;">Add Simulator</h4>
         </div>
         <div class="c8y-wizard-nav">
-            <span>Select Device</span>
+            <span>Select Device/Group</span>
         </div>
         <hr style="margin:0;">
         <div class="modal-inner-scroll">
@@ -52,6 +52,18 @@
                       <i c8yIcon="c8y-device"></i>
                     </span>
                     <span>Existing Device</span>
+                </a>
+                <a class="list-group-item clickable" (click)="deviceId = undefined; openSimulatorConfig()">
+                    <span class="list-group-icon">
+                      <i c8yIcon="plus-square"></i>
+                    </span>
+                    <span>New Group</span>
+                </a>
+                <a class="list-group-item clickable" (click)="wizard.selectStep('select-device')">
+                    <span class="list-group-icon">
+                      <i c8yIcon="object-group"></i>
+                    </span>
+                    <span>Existing Group</span>
                 </a>
             </div>
         </div>
@@ -71,11 +83,13 @@
             <span>Select Device</span>
         </div>
         <hr style="margin:0;">
-        <div class="modal-inner-scroll">
+        <div class="modal-inner-scroll" style="min-height: 250px;">
             <form class="c8y-wizard-form" name="newSimulatorFormDevice" #newSimulatorFormDevice="ngForm">
                 <div class="form-group">
                     <label for="deviceId"><span>Device ID</span></label>
-                    <input type="text" class="form-control" id="deviceId" name="deviceId" placeholder="e.g. 12345 (required)" required autofocus [(ngModel)]="deviceId">
+                    <!-- <input type="text" class="form-control" id="deviceId" name="deviceId" placeholder="e.g. 12345 (required)" required autofocus [(ngModel)]="deviceId"> -->
+                    <device-selector id="deviceId" name="deviceId" [(value)]="deviceName" [placeHolder]="'Type your Device Name'" [required]="true"
+                    (selectedDevice)= "getSelectedDevice($event)"></device-selector>
                 </div>
             </form>
         </div>
@@ -97,6 +111,7 @@
         </div>
         <hr style="margin:0;">
         <div class="modal-inner-scroll">
+            {{deviceId}} -- {{deviceName}}
             <form class="c8y-wizard-form" name="newSimulatorForm" #newSimulatorForm="ngForm">
                 <div class="form-group" *ngIf="!selectedStrategyFactory || !selectedStrategyFactory.getSimulatorMetadata().hideSimulatorName">
                     <label for="name"><span>Name</span></label>
