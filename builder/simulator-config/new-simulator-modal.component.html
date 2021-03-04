@@ -53,7 +53,7 @@
                     </span>
                     <span>Existing Device</span>
                 </a>
-                <a class="list-group-item clickable" (click)="deviceId = undefined; openSimulatorConfig()">
+                <a class="list-group-item clickable" (click)="isGroup = true; wizard.selectStep('add-group')">
                     <span class="list-group-icon">
                       <i c8yIcon="plus-square"></i>
                     </span>
@@ -66,10 +66,41 @@
                     <span>Existing Group</span>
                 </a>
             </div>
+           Group: {{isGroup}}
         </div>
         <div class="c8y-wizard-footer">
             <button class="btn btn-default" (click)="wizard.selectStep('menu')">Back</button>
             <button class="btn btn-default" (click)="bsModalRef.hide()">Cancel</button>
+        </div>
+    </wizard-step>
+    <wizard-step stepId="add-group">
+        <div class="modal-header text-center bg-primary">
+            <div style="font-size: 62px;">
+                <span c8yIcon="c8y-simulator"></span>
+            </div>
+            <h4 class="text-uppercase" style="margin:0; letter-spacing: 0.15em;">Add Simulator</h4>
+        </div>
+        <div class="c8y-wizard-nav">
+            <span>Add Group</span>
+        </div>
+        <hr style="margin:0;">
+        Group: {{isGroup}}
+        <div class="modal-inner-scroll" style="min-height: 250px;">
+            <form class="c8y-wizard-form" name="newSimulatorFormAddGroup" #newSimulatorFormAddGroup="ngForm">
+                <div class="form-group">
+                    <label for="groupName"><span>Group Name</span></label>
+                    <input type="text" class="form-control" id="groupName" name="groupName" placeholder="e.g. my-group (required)" required autofocus [(ngModel)]="groupName">
+                </div>
+                <div class="form-group">
+                    <label for="numberOfDevice"><span>Number of Devices</span></label>
+                    <input type="number" class="form-control" id="numberOfDevice" name="numberOfDevice" placeholder="e.g. 2 (required)" required autofocus [(ngModel)]="numberOfDevice">
+                </div>
+            </form>
+        </div>
+        <div class="c8y-wizard-footer">
+            <button class="btn btn-default" (click)="isGroup = false; wizard.selectStep('device'); ">Back</button>
+            <button class="btn btn-default" (click)="bsModalRef.hide()">Cancel</button>
+            <button class="btn btn-primary" (click)="openSimulatorConfig()" [disabled]="!newSimulatorFormAddGroup.form.valid ">Next <i c8yIcon="chevron-right"></i> </button>
         </div>
     </wizard-step>
     <wizard-step stepId="select-device">
@@ -86,7 +117,7 @@
         <div class="modal-inner-scroll" style="min-height: 250px;">
             <form class="c8y-wizard-form" name="newSimulatorFormDevice" #newSimulatorFormDevice="ngForm">
                 <div class="form-group">
-                    <label for="deviceId"><span>Device ID</span></label>
+                    <label for="deviceId"><span>Device Name</span></label>
                     <!-- <input type="text" class="form-control" id="deviceId" name="deviceId" placeholder="e.g. 12345 (required)" required autofocus [(ngModel)]="deviceId"> -->
                     <device-selector id="deviceId" name="deviceId" [(value)]="deviceName" [placeHolder]="'Type your Device Name'" [required]="true"
                     (selectedDevice)= "getSelectedDevice($event)"></device-selector>
@@ -94,9 +125,9 @@
             </form>
         </div>
         <div class="c8y-wizard-footer">
-            <button class="btn btn-default" (click)="wizard.selectStep('device')">Back</button>
+            <button class="btn btn-default" (click)="wizard.selectStep('device'); ">Back</button>
             <button class="btn btn-default" (click)="bsModalRef.hide()">Cancel</button>
-            <button class="btn btn-primary" (click)="openSimulatorConfig()" [disabled]="!newSimulatorFormDevice.form.valid">Next <i c8yIcon="chevron-right"></i> </button>
+            <button class="btn btn-primary" (click)="openSimulatorConfig()" [disabled]="!newSimulatorFormDevice.form.valid || deviceId === '' ">Next <i c8yIcon="chevron-right"></i> </button>
         </div>
     </wizard-step>
     <wizard-step stepId="config">
@@ -112,6 +143,7 @@
         <hr style="margin:0;">
         <div class="modal-inner-scroll">
             {{deviceId}} -- {{deviceName}}
+            Group: {{isGroup}}
             <form class="c8y-wizard-form" name="newSimulatorForm" #newSimulatorForm="ngForm">
                 <div class="form-group" *ngIf="!selectedStrategyFactory || !selectedStrategyFactory.getSimulatorMetadata().hideSimulatorName">
                     <label for="name"><span>Name</span></label>
@@ -121,7 +153,7 @@
             </form>
         </div>
         <div class="c8y-wizard-footer">
-            <button class="btn btn-default" (click)="wizard.selectStep('device');resetDialogSize()">Back</button>
+            <button class="btn btn-default" (click)="isGroup = false; wizard.selectStep('device');resetDialogSize()">Back</button>
             <button class="btn btn-default" (click)="bsModalRef.hide()">Cancel</button>
             <button class="btn btn-primary" [disabled]="busy || !newSimulatorForm.form.valid" (click)="saveAndClose()">Save</button>
         </div>

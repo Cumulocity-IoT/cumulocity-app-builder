@@ -30,7 +30,7 @@ import {SimulatorConfig} from "../simulator/simulator-config";
 import {SimulatorCommunicationService} from "../simulator/mainthread/simulator-communication.service";
 import {SimulationStrategiesService} from "../simulator/simulation-strategies.service";
 import { AppStateService } from '@c8y/ngx-components';
-
+import * as cloneDeep from "clone-deep";
 @Component({
     templateUrl: './simulator-config.component.html'
 })
@@ -61,8 +61,10 @@ export class SimulatorConfigComponent implements OnDestroy {
     }
 
     async showEditSimulatorDialog(simulatorConfig: SimulatorConfig) {
+        const copySimulatorConfig = cloneDeep(simulatorConfig);
         this.bsModalRef = this.modalService.show(EditSimulatorModalComponent, 
-            { class: (simulatorConfig.config.modalSize ? simulatorConfig.config.modalSize : 'c8y-wizard'), initialState: { simulatorConfig } })
+            { class: (simulatorConfig.config.modalSize ? simulatorConfig.config.modalSize : 'c8y-wizard'), initialState: { simulatorConfig : copySimulatorConfig} })
+        
     }
 
     async forceUnlock() {

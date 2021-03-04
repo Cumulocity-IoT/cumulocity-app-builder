@@ -58,7 +58,11 @@ export class EditSimulatorModalComponent implements OnInit {
             this.bsModalRef.hide();
             return;
         }
-
+        // For exisitng simulators
+        if(this.simulatorConfig.config && !this.simulatorConfig.config.deviceName) {
+            this.simulatorConfig.config.deviceName = this.simulatorConfig.config.deviceId;
+        }
+        
         const metadata = strategyFactory.getSimulatorMetadata();
 
         this.configWrapper.clear();
@@ -96,6 +100,14 @@ export class EditSimulatorModalComponent implements OnInit {
         // We could just wait for them to refresh, but it's nicer to instantly refresh
         await this.simSvc.simulator.checkForSimulatorConfigChanges();
 
+        this.bsModalRef.hide();
+    }
+
+    getSelectedDevice(device: any) {
+        this.simulatorConfig.config.deviceId = device.id;
+        this.simulatorConfig.config.deviceName = device.name;
+    }
+    cancelEdit() {
         this.bsModalRef.hide();
     }
 }

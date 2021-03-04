@@ -47,6 +47,7 @@ export class NewSimulatorModalComponent {
     deviceId: string | undefined;
     simulatorName: string = '';
     deviceName: string | undefined;
+    isGroup: boolean = false;
 
     constructor(
         private simSvc: SimulatorCommunicationService,
@@ -91,11 +92,13 @@ export class NewSimulatorModalComponent {
                 c8y_IsDevice: {},
                 name: this.simulatorName
             })).data;
+            this.deviceName = this.simulatorName;
+            this.deviceId = device.id;
         } else {
             // getExistingDevice
-            device = (await this.inventoryService.detail(this.deviceId)).data;
+            // device = (await this.inventoryService.detail(this.deviceId)).data;
         }
-        this.deviceId = device.id;
+      //  this.deviceId = device.id;
         
         const appId = this.appIdService.getCurrentAppId();
         let appServiceData;
@@ -107,6 +110,7 @@ export class NewSimulatorModalComponent {
         const simulators = appServiceData.applicationBuilder.simulators || [];
         const simulatorId = Math.floor(Math.random() * 1000000);
         this.newConfig.deviceId = this.deviceId;
+        this.newConfig.deviceName = this.deviceName;
         const newSimulatorObject = {
             id: simulatorId,
             name: this.simulatorName,

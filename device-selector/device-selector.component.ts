@@ -39,6 +39,11 @@ export class DeviceSelectorComponent implements OnInit{
     constructor(private inventoryService: InventoryService) {}
     ngOnInit(): void {
         this.suggestions$ = new Observable((observer: Observer<any>) => {
+            const item: any = {
+                id : '',
+                name : this.value
+            }
+            this.selectedDevice.emit(item);
             this.getAllDevices(1, this.value).then ( res => {
                 observer.next(res.data);
             });
