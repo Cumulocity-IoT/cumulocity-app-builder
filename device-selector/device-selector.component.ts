@@ -31,6 +31,7 @@ export class DeviceSelectorComponent implements OnInit{
     @Input() value: string;
     @Input() placeHolder: string;
     @Input() required: boolean;
+    @Input() isGroup: boolean;
     @Output() selectedDevice = new EventEmitter<string>();
     suggestions$: Observable<any[]>;
     deviceList :any[] = [];
@@ -58,7 +59,11 @@ export class DeviceSelectorComponent implements OnInit{
             currentPage: pageToGet
         };
         if (searchName) {
-            inventoryFilter['query'] = `$filter=(has(c8y_IsDevice) and (name eq '${this.generateRegEx(searchName)}'))`;
+            if(this.isGroup) {
+                inventoryFilter['query'] = `$filter=(has(c8y_IsDeviceGroup) and (name eq '${this.generateRegEx(searchName)}'))`;
+            } else {
+                inventoryFilter['query'] = `$filter=(has(c8y_IsDevice) and (name eq '${this.generateRegEx(searchName)}'))`;
+            }
         } else {
             inventoryFilter['query'] = `$filter=(has(c8y_IsDevice))`;
         }

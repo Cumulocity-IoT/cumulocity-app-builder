@@ -16,13 +16,16 @@
                 placeholder="e.g. My First Simulator (required)" required
                 [(ngModel)]="simulatorConfig.name">
         </div>
-          <div class="form-group" style="padding-bottom: 30px;">
-              <label for="deviceId"><span>Device ID</span></label>
-              <!-- <input type="text" class="form-control" id="deviceId" name="deviceId" required placeholder="e.g. 12345 (required)"
-                  [(ngModel)]="simulatorConfig.config.deviceId"> -->
-               <device-selector id="deviceId" name="deviceId" [(value)]="simulatorConfig.config.deviceName" [placeHolder]="'Type your Device Name'" [required]="true"
+          <div class="form-group" *ngIf="simulatorConfig.config.isGroup" style="padding-bottom: 30px;">
+              <label for="deviceName"><span>Group Name</span></label>
+               <device-selector id="deviceName" name="deviceName" [(value)]="simulatorConfig.config.deviceName" [isGroup]='true' [placeHolder]="'Type your Group Name'" [required]="true"
                   (selectedDevice)= "getSelectedDevice($event)"></device-selector>
           </div>
+          <div class="form-group" *ngIf="!simulatorConfig.config.isGroup" style="padding-bottom: 30px;">
+            <label for="deviceId"><span>Device Name</span></label>
+             <device-selector id="deviceId" name="deviceId" [(value)]="simulatorConfig.config.deviceName" [placeHolder]="'Type your Device Name'" [required]="true"
+                (selectedDevice)= "getSelectedDevice($event)"></device-selector>
+        </div>
         <ng-container #configWrapper ></ng-container>
     </form>
 </div>
