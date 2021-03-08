@@ -15,6 +15,7 @@ export interface TemplateDetails {
     input: {
         devices?: Array<DeviceDescription>;
         images?: Array<BinaryDescription>;
+        dependencies?: Array<DependencyDescription>;
     },
     description: string;
     preview: string;
@@ -48,6 +49,14 @@ export interface BinaryDescription {
     type: string;
     placeholder: string;
     id?: string;
+}
+
+export interface DependencyDescription {
+    id: string;
+    title: string;
+    repository: string;
+    link: string;
+    isInstalled?: boolean;
 }
 
 export interface CumulocityDashboard {

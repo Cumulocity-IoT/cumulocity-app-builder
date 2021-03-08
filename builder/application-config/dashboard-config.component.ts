@@ -33,6 +33,7 @@ import * as delay from "delay";
 import { TemplateCatalogModalComponent } from "../template-catalog/template-catalog.component";
 import { TemplateUpdateModalComponent } from "../template-catalog/template-update.component";
 import { BinaryDescription, DeviceDescription } from "../template-catalog/template-catalog.model";
+import { ProgressIndicatorModalComponent } from "../utils/progress-indicator-modal/progress-indicator-modal.component";
 
 
 export interface DashboardConfig {
@@ -207,6 +208,11 @@ export class DashboardConfigComponent implements OnDestroy {
 
     showTemplateCatalogModalDialog(app): void {
         this.bsModalRef = this.modalService.show(TemplateCatalogModalComponent, { class: 'template-catalog', initialState: { app } });
+        this.bsModalRef.content.onSave.subscribe((isReloadRequired: boolean) => {
+            if (isReloadRequired) {
+                location.reload();
+            }
+        });
         // this.bsModalRef = this.modalService.show(DeviceSelectorModalComponent, { class: 'c8y-wizard', initialState: {} });
         // this.bsModalRef.content.onDeviceSelected.subscribe((device: IManagedObject) => {
         //     console.log('dialog closed and device selected');

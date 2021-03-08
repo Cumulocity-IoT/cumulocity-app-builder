@@ -2,8 +2,11 @@ import { Component, OnInit, ViewEncapsulation } from "@angular/core";
 import { IManagedObject } from '@c8y/client';
 import { DeviceSelectorModalComponent } from "../utils/device-selector/device-selector.component";
 import { BsModalRef, BsModalService } from "ngx-bootstrap";
-import { DeviceDescription, TemplateCatalogEntry, TemplateDetails } from "./template-catalog.model";
+import { DependencyDescription, TemplateCatalogEntry, TemplateDetails } from "./template-catalog.model";
 import { TemplateCatalogService } from "./template-catalog.service";
+import { DynamicComponentDefinition, DynamicComponentService } from "@c8y/ngx-components";
+import { Observable, Subject } from "rxjs";
+import { ProgressIndicatorModalComponent } from "../utils/progress-indicator-modal/progress-indicator-modal.component";
 
 enum TemplateCatalogStep {
     CATALOG,
@@ -43,7 +46,16 @@ export class TemplateCatalogModalComponent implements OnInit {
 
     public selectedDevice: IManagedObject;
 
-    constructor(private modalService: BsModalService, private modalRef: BsModalRef, private catalogService: TemplateCatalogService) { }
+    public onSave: Subject<boolean>;
+
+    private isReloadRequired = false;
+
+    private progressModal: BsModalRef;
+
+    constructor(private modalService: BsModalService, private modalRef: BsModalRef,
+        private catalogService: TemplateCatalogService, private componentService: DynamicComponentService) {
+        this.onSave = new Subject();
+    }
 
     ngOnInit(): void {
         this.loadTemplateCatalog();
@@ -68,6 +80,20 @@ export class TemplateCatalogModalComponent implements OnInit {
         this.catalogService.getTemplateDetails(template.dashboard).subscribe(templateDetails => {
             this.hideLoadingIndicator();
             this.templateDetails = templateDetails;
+            this.updateDepedencies();
+        });
+    }
+
+    updateDepedencies() {
+        if (!this.templateDetails || !this.templateDetails.input || !this.templateDetails.input.dependencies
+            || this.templateDetails.input.dependencies.length === 0) {
+            return;
+        }
+
+        this.templateDetails.input.dependencies.forEach(dependency => {
+            this.componentService.getById$(dependency.id).subscribe(widget => {
+                dependency.isInstalled = (widget != undefined);
+            });
         });
     }
 
@@ -109,8 +135,13 @@ export class TemplateCatalogModalComponent implements OnInit {
         this.modalRef.hide();
     }
 
-    onSaveButtonClicked(): void {
-        this.catalogService.createDashboard(this.app, this.dashboardConfiguration, this.selectedTemplate, this.templateDetails);
+    async onSaveButtonClicked() {
+        this.showProgressModalDialog('Create Dashboard ...')
+
+        await this.catalogService.createDashboard(this.app, this.dashboardConfiguration, this.selectedTemplate, this.templateDetails);
+
+        this.hideProgressModalDialog();
+        this.onSave.next(this.isReloadRequired);
         this.modalRef.hide();
     }
 
@@ -132,6 +163,38 @@ export class TemplateCatalogModalComponent implements OnInit {
 
     hideLoadingIndicator(): void {
         this.isLoadingIndicatorDisplayed = false;
+    }
+
+    showProgressModalDialog(message: string): void {
+        this.progressModal = this.modalService.show(ProgressIndicatorModalComponent, { class: 'c8y-wizard', initialState: { message } });
+    }
+
+    hideProgressModalDialog(): void {
+        this.progressModal.hide();
+    }
+
+    isWidgetInstalled(dependency: DependencyDescription): Observable<DynamicComponentDefinition> {
+        return this.componentService.getById$(dependency.id);
+    }
+
+    async installDependency(dependency: DependencyDescription): Promise<void> {
+        this.showProgressModalDialog(`Install ${dependency.title}`)
+        this.catalogService.downloadBinary(dependency.link).subscribe(data => {
+            const blob = new Blob([data], {
+                type: 'application/zip'
+            });
+
+            this.catalogService.installWidget(blob).then(() => {
+                dependency.isInstalled = true;
+                this.isReloadRequired = true;
+                this.hideProgressModalDialog();
+            });
+        });
+        // await new Promise(resolve => setTimeout(resolve, 5000));
+        // this.hideProgressModalDialog();
+
+        // dependency.isInstalled = true;
+        // this.isReloadRequired = true;
     }
 
     private isDevicesSelected(): boolean {

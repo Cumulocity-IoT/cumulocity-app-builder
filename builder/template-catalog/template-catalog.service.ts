@@ -4,9 +4,11 @@ import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
 import { has, get } from "lodash-es";
 import { IManagedObject, IManagedObjectBinary } from '@c8y/client';
-import { BinaryDescription, CumulocityDashboard, DeviceDescription, TemplateCatalogEntry, TemplateDashboardWidget, TemplateDetails } from "./template-catalog.model";
+import { BinaryDescription, CumulocityDashboard, DependencyDescription, DeviceDescription, TemplateCatalogEntry, TemplateDashboardWidget, TemplateDetails } from "./template-catalog.model";
 import { ApplicationService, InventoryBinaryService, InventoryService } from "@c8y/ngx-components/api";
 import { AppBuilderNavigationService } from "../navigation/app-builder-navigation.service";
+import { Alert, AlertService } from "@c8y/ngx-components";
+import { RuntimeWidgetInstallerService } from "cumulocity-runtime-widget-loader";
 
 @Injectable()
 export class TemplateCatalogService {
@@ -17,7 +19,8 @@ export class TemplateCatalogService {
 
     constructor(private http: HttpClient, private inventoryService: InventoryService,
         private appService: ApplicationService, private navigation: AppBuilderNavigationService,
-        private binaryService: InventoryBinaryService) { }
+        private binaryService: InventoryBinaryService, private alertService: AlertService,
+        private runtimeWidgetInstallerService: RuntimeWidgetInstallerService) { }
 
     getTemplateCatalog(): Observable<TemplateCatalogEntry[]> {
         return this.http.get(`${this.GATEWAY_URL}${this.CATALOG_LABCASE_ID}`).pipe(map(response => {
@@ -47,6 +50,17 @@ export class TemplateCatalogService {
             console.log(dashboard);
             return dashboard;
         }));
+    }
+
+    async installWidget(binary: Blob) {
+        await this.runtimeWidgetInstallerService.installWidget(binary, (msg, type) => { });
+        this.alertService.success("Widget Added! Page will be refreshed once dashbaord is saved...");
+    }
+
+    downloadBinary(binaryId: string): Observable<ArrayBuffer> {
+        return this.http.get(`${this.GATEWAY_URL}${binaryId}`, {
+            responseType: 'arraybuffer'
+        });
     }
 
     uploadImage(image: File): Promise<string> {
