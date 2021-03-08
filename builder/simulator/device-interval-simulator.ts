@@ -16,6 +16,8 @@
 * limitations under the License.
  */
 
+import { Injector } from '@angular/core';
+import { InventoryService } from '@c8y/client';
 import {DeviceSimulator} from "./device-simulator";
 
 /**
@@ -23,14 +25,33 @@ import {DeviceSimulator} from "./device-simulator";
  */
 export abstract class DeviceIntervalSimulator extends DeviceSimulator {
     protected abstract get interval();
+    protected abstract get strategyConfig();
 
     private intervalHandle;
 
-    abstract onTick();
-
+    abstract onTick(deviceId?:string);
+    private inventoryService: InventoryService;
+    constructor(protected injector: Injector) { 
+        super(); 
+        this.inventoryService = injector.get(InventoryService);
+    }
     onStart() {
         console.debug("Device Simulator started");
-        this.intervalHandle = setInterval(() => this.onTick(), this.interval);
+        this.intervalHandle = setInterval(() => {
+            // For group simulators 
+            if(this.strategyConfig && this.strategyConfig.isGroup) {
+                this.getDeviceList(this.strategyConfig.deviceId).then((deviceList: any)=> {
+                    if(deviceList && deviceList.length > 0) {
+                        deviceList.forEach(device => {
+                            this.onTick(device.id);
+                        });
+                    }
+                });
+            } else  {
+                this.onTick()
+            }
+            
+        }, this.interval);
         this.started = true;
     }
 
@@ -39,4 +60,16 @@ export abstract class DeviceIntervalSimulator extends DeviceSimulator {
         console.debug("Device Simulator stopped");
         this.started = false;
     }
+
+    private async getDeviceList(DeviceGroup) {
+
+        let response: any = null;
+        const filter: object = {
+          pageSize: 10000,
+          withTotalPages: true
+        };
+        response = (await this.inventoryService.childAssetsList(DeviceGroup, filter)).data;
+    
+        return response;
+      }
 }
