@@ -49,6 +49,7 @@ import { CookieAuth } from '@c8y/client';
 import { TemplateCatalogModule } from "./template-catalog/template-catalog.module";
 import { RectangleSpinnerModule } from "./utils/rectangle-spinner/rectangle-spinner.module";
 import { DeviceSelectorModalModule } from "./utils/device-selector/device-selector.module";
+import { ProgressIndicatorModalModule } from "./utils/progress-indicator-modal/progress-indicator-modal.module";
 
 @NgModule({
     imports: [
@@ -81,6 +82,7 @@ import { DeviceSelectorModalModule } from "./utils/device-selector/device-select
         CoreModule,
         IconSelectorModule,
         RectangleSpinnerModule,
+        ProgressIndicatorModalModule,
         DeviceSelectorModalModule,
         SortableModule.forRoot(),
         WizardModule,
