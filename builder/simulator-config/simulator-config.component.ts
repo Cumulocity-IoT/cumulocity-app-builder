@@ -24,12 +24,13 @@ import {LOCK_TIMEOUT, LockStatus} from "../simulator/worker/simulation-lock.serv
 import {BehaviorSubject} from "rxjs";
 import * as delay from "delay";
 import * as Comlink from "comlink";
-import {IApplication, ApplicationService} from "@c8y/client";
+import {IApplication, ApplicationService, UserService} from "@c8y/client";
 import {AppIdService} from "../app-id.service";
 import {SimulatorConfig} from "../simulator/simulator-config";
 import {SimulatorCommunicationService} from "../simulator/mainthread/simulator-communication.service";
 import {SimulationStrategiesService} from "../simulator/simulation-strategies.service";
-
+import { AppStateService } from '@c8y/ngx-components';
+import * as cloneDeep from "clone-deep";
 @Component({
     templateUrl: './simulator-config.component.html'
 })
@@ -42,14 +43,17 @@ export class SimulatorConfigComponent implements OnDestroy {
     isUnlocking = false;
     private _lockStatusListener: Promise<number>;
     private _simulatorConfigListener: Promise<number>;
-
+    userHasAdminRights: boolean;
     constructor(
         private simSvc: SimulatorCommunicationService, private modalService: BsModalService,
         private appIdService: AppIdService, private appService: ApplicationService,
-        public simulationStrategiesService: SimulationStrategiesService
+        public simulationStrategiesService: SimulationStrategiesService,
+        private appStateService: AppStateService, private userService: UserService
     ) {
         this._lockStatusListener = simSvc.simulator.addLockStatusListener(Comlink.proxy(lockStatus => this.lockStatus$.next(lockStatus)));
         this._simulatorConfigListener = simSvc.simulator.addSimulatorConfigListener(Comlink.proxy(simulatorConfigById => this.simulatorConfigById$.next(simulatorConfigById)));
+        this.userHasAdminRights = userService.hasAllRoles(appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN","ROLE_APPLICATION_MANAGEMENT_ADMIN"])
+
     }
 
     showCreateSimulatorDialog() {
@@ -57,7 +61,10 @@ export class SimulatorConfigComponent implements OnDestroy {
     }
 
     async showEditSimulatorDialog(simulatorConfig: SimulatorConfig) {
-        this.bsModalRef = this.modalService.show(EditSimulatorModalComponent, { class: 'c8y-wizard', initialState: { simulatorConfig } })
+        const copySimulatorConfig = cloneDeep(simulatorConfig);
+        this.bsModalRef = this.modalService.show(EditSimulatorModalComponent, 
+            { class: (simulatorConfig.config.modalSize ? simulatorConfig.config.modalSize : 'c8y-wizard'), initialState: { simulatorConfig : copySimulatorConfig} })
+        
     }
 
     async forceUnlock() {

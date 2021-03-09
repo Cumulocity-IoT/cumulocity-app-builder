@@ -16,21 +16,25 @@
 * limitations under the License.
  */
 
-// Provided by the polyfills.ts - import '@angular-devkit/build-angular/src/angular-cli-files/models/jit-polyfills.js';
-declare module Reflect {
-    function defineMetadata(name: string, metadata: any[], target: any);
-}
+import {NgModule} from "@angular/core";
+import {NgSelectModule} from "@ng-select/ng-select";
+import {DeviceSelectorComponent} from "./device-selector.component";
+import {FormsModule} from "@angular/forms";
+import {CoreModule} from "@c8y/ngx-components";
+import { TypeaheadModule } from 'ngx-bootstrap/typeahead';
 
-export interface SimulationStrategyMetadata {
-    name: string,
-    icon: string,
-    description?: string,
-    configComponent?: any,
-    hideSimulatorName?: boolean
-}
-
-export function SimulationStrategy(config: SimulationStrategyMetadata) {
-    return function(target: any) {
-        Reflect.defineMetadata('simulationStrategy', [config], target);
-    }
-}
+@NgModule({
+    imports: [
+        NgSelectModule,
+        FormsModule,
+        CoreModule,
+        TypeaheadModule.forRoot(),
+    ],
+    declarations: [
+        DeviceSelectorComponent
+    ],
+    exports: [
+        DeviceSelectorComponent
+    ]
+})
+export class DeviceSelectorModule {}

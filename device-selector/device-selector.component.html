@@ -1,0 +1,7 @@
+<div class="row col-xs-12" style="display: inline-flex;"><input type="text" class="form-control"  name="deviceGroup"
+    [placeholder]="placeHolder" [required]="required" 
+    [(ngModel)]="value" [typeahead]="suggestions$"  (typeaheadLoading)="changeTypeaheadLoading($event)"
+    [typeaheadAsync]="true" typeaheadWaitMs="500" typeaheadOptionField="name" (typeaheadOnSelect)="onSelect($event)"
+    [isAnimated]="true" autocomplete="off" [typeaheadOptionsLimit]="5"  [typeaheadMinLength]="3">
+    <div *ngIf="typeaheadLoading" style="color:blue;margin: 5px;"><i class="fa fa-circle-o-notch fa-spin"></i></div>
+</div>

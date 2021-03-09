@@ -15,18 +15,18 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
  */
-import { NgModule } from "@angular/core";
-import { ApplicationModule } from "./application/application.module";
-import { RouterModule } from "@angular/router";
-import { DashboardConfigComponent } from "./application-config/dashboard-config.component";
-import { EditDashboardModalComponent } from "./application-config/edit-dashboard-modal.component";
-import { NewDashboardModalComponent } from "./application-config/new-dashboard-modal.component";
-import { AppStateService, CoreModule, HOOK_NAVIGATOR_NODES, LoginService } from "@c8y/ngx-components";
-import { IconSelectorModule } from "../icon-selector/icon-selector.module";
-import { SortableModule, TooltipModule } from "ngx-bootstrap";
-import { WizardModule } from "../wizard/wizard.module";
-import { BrandingModule } from "./branding/branding.module";
-import { AppBuilderNavigationService } from "./navigation/app-builder-navigation.service";
+import {Inject, NgModule, Renderer2, RendererFactory2} from "@angular/core";
+import {ApplicationModule} from "./application/application.module";
+import {RouterModule} from "@angular/router";
+import {DashboardConfigComponent} from "./application-config/dashboard-config.component";
+import {EditDashboardModalComponent} from "./application-config/edit-dashboard-modal.component";
+import {NewDashboardModalComponent} from "./application-config/new-dashboard-modal.component";
+import {AppStateService, CoreModule, HOOK_NAVIGATOR_NODES, LoginService} from "@c8y/ngx-components";
+import {IconSelectorModule} from "../icon-selector/icon-selector.module";
+import {SortableModule, TooltipModule} from "ngx-bootstrap";
+import {WizardModule} from "../wizard/wizard.module";
+import {BrandingModule} from "./branding/branding.module";
+import {AppBuilderNavigationService} from "./navigation/app-builder-navigation.service";
 import {
     AppBuilderConfigNavigationRegistrationService,
     AppBuilderConfigNavigationService
@@ -50,7 +50,11 @@ import { TemplateCatalogModule } from "./template-catalog/template-catalog.modul
 import { RectangleSpinnerModule } from "./utils/rectangle-spinner/rectangle-spinner.module";
 import { DeviceSelectorModalModule } from "./utils/device-selector/device-selector.module";
 import { ProgressIndicatorModalModule } from "./utils/progress-indicator-modal/progress-indicator-modal.module";
-
+import { AnalyticsProviderModule } from './analytics/analytics-provider.module';
+import { AnalyticsProviderComponent } from './analytics/analytics-provider.component';
+import { AnalyticsProviderService } from './analytics/analytics-provider.service';
+import { IAnalyticsProvider } from './app-list/app-builder-interface';
+import { DOCUMENT } from '@angular/common';
 @NgModule({
     imports: [
         ApplicationModule,
@@ -77,6 +81,9 @@ import { ProgressIndicatorModalModule } from "./utils/progress-indicator-modal/p
             }, {
                 path: 'help',
                 component: HelpComponent
+            }, {
+                path: 'settings-analytics',
+                component: AnalyticsProviderComponent
             }
         ]),
         CoreModule,
@@ -91,6 +98,7 @@ import { ProgressIndicatorModalModule } from "./utils/progress-indicator-modal/p
         BrandingModule.forRoot(),
         SimulatorConfigModule,
         AppListModule,
+        AnalyticsProviderModule,
         MarkdownModule.forRoot()
     ],
     declarations: [
@@ -112,7 +120,10 @@ import { ProgressIndicatorModalModule } from "./utils/progress-indicator-modal/p
     ]
 })
 export class BuilderModule {
-    constructor(appStateService: AppStateService, loginService: LoginService, simSvc: SimulatorCommunicationService, appIdService: AppIdService) {
+    private renderer: Renderer2;
+    constructor(appStateService: AppStateService, loginService: LoginService, simSvc: SimulatorCommunicationService, 
+        appIdService: AppIdService, private analyticsService: AnalyticsProviderService,
+        rendererFactory: RendererFactory2, @Inject(DOCUMENT) private _document: Document) {
         // Pass the app state to the worker from the main thread (Initially and every time it changes)
         appStateService.currentUser.subscribe(async (user) => {
             let isCookieAuth = false;
@@ -150,12 +161,68 @@ export class BuilderModule {
                     simSvc.simulator.unlock();
                 }
             });
-        appStateService.currentTenant.subscribe(async (tenant) => await simSvc.simulator.setTenant(tenant));
-        appIdService.appId$.subscribe(async (appId) => {
-            await simSvc.simulator.setAppId(appId)
-            if (window && window['aptrinsic']) {
-                window['aptrinsic']('track', 'Applications', { "appId": appId });
+        appStateService.currentTenant.subscribe(async (tenant) => {
+            await simSvc.simulator.setTenant(tenant)
+            if(!analyticsService.isAnalyticsProviderLoaded) {
+                this.renderer = rendererFactory.createRenderer(null, null);
+                this.registerAndTrackAnalyticsProvider(true);
             }
         });
+        appIdService.appId$.subscribe(async (appId) => 
+        {
+            await simSvc.simulator.setAppId(appId)
+            this.registerAndTrackAnalyticsProvider(false, appId);
+        });
     }
+
+    private async registerAndTrackAnalyticsProvider(isRegister: boolean, appId?: any) {
+        this.analyticsService.isAnalyticsProviderLoaded = true;
+        const analyticsProvider: IAnalyticsProvider = await this.analyticsService.getActiveAnalyticsProvider();
+        if(analyticsProvider) {
+            switch (analyticsProvider.providerName) {
+                case "Gainsight PX":
+                    if(isRegister) {
+                        this.initGainsight(analyticsProvider.providerURL, analyticsProvider.providerKey, 
+                            analyticsProvider.providerIdentity, analyticsProvider.providerAccountId, 
+                            analyticsProvider.providerAccountName);
+                    } else {
+                        if(window && window['aptrinsic'] ){
+                            window['aptrinsic']('track', 'Applications', {"appId": appId });
+                        }
+                    }
+                    break;
+            
+                default:
+                    break;
+            }
+        } else {
+            this.analyticsService.isAnalyticsProviderLoaded = false;
+        }
+    }
+    //Gainsight Integration
+    private initGainsight(url: string, key: string, indentity : string, accountId : string, accountName : string) {
+        let script = this.renderer.createElement("script");
+        script.type = `text/javascript`;
+        script.text =
+          `
+            (function(n,t,a,e,co){var i="aptrinsic";n[i]=n[i]||function(){
+              (n[i].q=n[i].q||[]).push(arguments)},n[i].p=e;n[i].c=co;
+            var r=t.createElement("script");r.async=!0,r.src=a+"?a="+e;
+            var c=t.getElementsByTagName("script")[0];c.parentNode.insertBefore(r,c)
+          })(window,document,"${url}","${key}"); //Integration key
+          ` +
+          `
+          aptrinsic("identify",
+          {
+            "id":"${indentity}"
+          },
+          {
+            //Account Fields
+            "id": "${accountId}", //Required
+            "name":"${accountName}"
+          });
+            `;
+    
+        this.renderer.appendChild(this._document.body, script);
+      }
 }
