@@ -43,13 +43,26 @@ export class FirmwareUpdateSimulationStrategy extends DeviceSimulator {
     }
 
     async onStart() {
-        const device = (await this.inventoryService.detail(this.config.deviceId)).data;
+        if(this.config && this.config.isGroup) {
+            this.getDeviceList(this.config.deviceId).then((deviceList: any)=> {
+                if(deviceList && deviceList.length > 0) {
+                    deviceList.forEach(async deviceData => {
+                        await this.onStartSimulator(deviceData.id);
+                    });
+                }
+            });
+        } else {
+            await this.onStartSimulator(this.config.deviceId);
+        }
+    }
+    private async onStartSimulator(deviceId: string) {
+        const device = (await this.inventoryService.detail(deviceId)).data;
 
         // Check that the device supports firmware updates
         if (device.com_cumulocity_model_Agent == undefined) {
             device.com_cumulocity_model_Agent = {};
             await this.inventoryService.update({
-                id: this.config.deviceId,
+                id: deviceId,
                 com_cumulocity_model_Agent: device.com_cumulocity_model_Agent,
             });
         }
@@ -59,7 +72,7 @@ export class FirmwareUpdateSimulationStrategy extends DeviceSimulator {
         if (!device.c8y_SupportedOperations.includes('c8y_Firmware')) {
             device.c8y_SupportedOperations = [...device.c8y_SupportedOperations, 'c8y_Firmware'];
             await this.inventoryService.update({
-                id: this.config.deviceId,
+                id: deviceId,
                 c8y_SupportedOperations: device.c8y_SupportedOperations
             });
         }
@@ -84,7 +97,7 @@ export class FirmwareUpdateSimulationStrategy extends DeviceSimulator {
                 break;
             case "restart":
                 await this.inventoryService.update({
-                    id: this.config.deviceId,
+                    id: deviceId,
                     c8y_Firmware: {
                         name: this.config.firmwareVersions[0].name,
                         version: this.config.firmwareVersions[0].version,
@@ -134,6 +147,15 @@ export class FirmwareUpdateSimulationStrategy extends DeviceSimulator {
             default: return opStatus;
         }
     }
+    private async getDeviceList(DeviceGroup) {
+        let response: any = null;
+        const filter: object = {
+          pageSize: 10000,
+          withTotalPages: true
+        };
+        response = (await this.inventoryService.childAssetsList(DeviceGroup, filter)).data;
+        return response;
+      }
 }
 
 @Injectable()

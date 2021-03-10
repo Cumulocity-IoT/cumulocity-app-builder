@@ -22,7 +22,7 @@ import {
 } from "./wave.config.component";
 import {SimulationStrategy} from "../../builder/simulator/simulation-strategy.decorator";
 import {DeviceIntervalSimulator} from "../../builder/simulator/device-interval-simulator";
-import {Injectable} from "@angular/core";
+import {Injectable, Injector} from "@angular/core";
 import {SimulationStrategyFactory} from "../../builder/simulator/simulation-strategy";
 import {MeasurementService} from "@c8y/client";
 import {SimulatorConfig} from "../../builder/simulator/simulator-config";
@@ -36,12 +36,16 @@ import {SimulatorConfig} from "../../builder/simulator/simulator-config";
 export class WaveSimulationStrategy extends DeviceIntervalSimulator {
     startTime: number = 0;
 
-    constructor(private measurementService: MeasurementService, private config: WaveSimulationStrategyConfig) {
-        super();
+    constructor(protected injector: Injector, private measurementService: MeasurementService, private config: WaveSimulationStrategyConfig) {
+        super(injector);
     }
 
     protected get interval() {
         return this.config.interval * 1000;
+    }
+
+    get strategyConfig() {
+        return this.config;
     }
 
     onStart() {
@@ -49,7 +53,7 @@ export class WaveSimulationStrategy extends DeviceIntervalSimulator {
         this.startTime = Date.now();
     }
 
-    onTick() {
+    onTick(groupDeviceId?: any) {
         const t = (Date.now() - this.startTime) / 1000;
         const w = 2 * Math.PI / this.config.wavelength;
 
@@ -75,7 +79,7 @@ export class WaveSimulationStrategy extends DeviceIntervalSimulator {
         }
 
         this.measurementService.create({
-            sourceId: this.config.deviceId,
+            sourceId: (groupDeviceId? groupDeviceId : this.config.deviceId),
             time: new Date(),
             [this.config.fragment]: {
                 [this.config.series]: {
@@ -89,12 +93,12 @@ export class WaveSimulationStrategy extends DeviceIntervalSimulator {
 
 @Injectable()
 export class WaveSimulationStrategyFactory extends SimulationStrategyFactory<WaveSimulationStrategy> {
-    constructor(private measurementService: MeasurementService) {
+    constructor(private injector: Injector, private measurementService: MeasurementService) {
         super();
     }
 
     createInstance(config: SimulatorConfig<WaveSimulationStrategyConfig>): WaveSimulationStrategy {
-        return new WaveSimulationStrategy(this.measurementService, config.config);
+        return new WaveSimulationStrategy(this.injector, this.measurementService, config.config);
     }
 
     getSimulatorClass(): typeof WaveSimulationStrategy {
