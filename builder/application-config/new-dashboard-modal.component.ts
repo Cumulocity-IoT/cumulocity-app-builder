@@ -35,6 +35,7 @@ export class NewDashboardModalComponent {
     dashboardName: string = '';
     dashboardIcon: string = 'th';
     deviceId: string = '';
+    deviceName: string = '';
     tabGroup: string = '';
     dashboardVisibility: '' | 'hidden' | 'no-nav' = '';
 
@@ -54,7 +55,10 @@ export class NewDashboardModalComponent {
             default: return false;
         }
     }
-
+    getSelectedDevice(device: any) {
+        this.deviceId = device.id;
+        this.deviceName = device.name;
+    }
     async createDashboard() {
         this.busy = true;
         switch(this.creationMode) {

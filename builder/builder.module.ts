@@ -51,6 +51,7 @@ import { AnalyticsProviderComponent } from './analytics/analytics-provider.compo
 import { AnalyticsProviderService } from './analytics/analytics-provider.service';
 import { IAnalyticsProvider } from './app-list/app-builder-interface';
 import { DOCUMENT } from '@angular/common';
+import { DeviceSelectorModule } from '../device-selector/device-selector.module';
 @NgModule({
     imports: [
         ApplicationModule,
@@ -91,6 +92,7 @@ import { DOCUMENT } from '@angular/common';
         SimulatorConfigModule,
         AppListModule,
         AnalyticsProviderModule,
+        DeviceSelectorModule,
         MarkdownModule.forRoot()
     ],
     declarations: [
