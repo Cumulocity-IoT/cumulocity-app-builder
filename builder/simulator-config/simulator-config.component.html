@@ -57,7 +57,7 @@
             <div class="card-block row" style="margin-bottom: 5px;">
                 <div class="col-xs-6">
                     <label class="c8y-switch">
-                        <input type="checkbox" [disabled]="!lockStatus.isLockOwned" [ngModel]="simulatorConfig.started" (ngModelChange)="changeSimulatorStarted(simulatorConfig, $event)"/>
+                        <input type="checkbox" [disabled]="!userHasAdminRights || !lockStatus.isLockOwned" [ngModel]="simulatorConfig.started" (ngModelChange)="changeSimulatorStarted(simulatorConfig, $event)"/>
                         <span></span>
                         {{simulatorConfig.started ? 'Running' : 'Paused'}}
                     </label>

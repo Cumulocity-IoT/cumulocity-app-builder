@@ -23,6 +23,7 @@ import {RandomWalkSimulationStrategyModule} from "./random-walk/random-walk.simu
 import {WaveSimulationStrategyModule} from "./wave/wave.simulation-strategy.module";
 import {FirmwareUpdateSimulationStrategyModule} from "./firmware-update/firmware-update.simulation-strategy.module";
 import { DtdlSimulationStrategyModule } from './dtdl/dtdl.simulation-strategy.module';
+import { PositionUpdateSimulationStrategyModule } from './position-update/position-update.simulation-strategy.module';
 
 @NgModule({
     imports: [
@@ -31,7 +32,8 @@ import { DtdlSimulationStrategyModule } from './dtdl/dtdl.simulation-strategy.mo
         RandomWalkSimulationStrategyModule,
         WaveSimulationStrategyModule,
         FirmwareUpdateSimulationStrategyModule,
-        DtdlSimulationStrategyModule
+        DtdlSimulationStrategyModule,
+        PositionUpdateSimulationStrategyModule
     ]
 })
 export class SimulationStrategiesModule {}
