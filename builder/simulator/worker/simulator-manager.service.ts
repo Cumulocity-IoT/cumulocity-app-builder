@@ -141,7 +141,8 @@ export class SimulatorManagerService {
 
         const app = (await this.appService.detail(appId)).data as IApplication & {applicationBuilder: any};
         if (app.applicationBuilder.simulators) {
-            for (let simulatorConfig of app.applicationBuilder.simulators as SimulatorConfig[]) {
+            const sortedSimulators = app.applicationBuilder.simulators.sort((a, b) => a.name > b.name ? 1 : -1);
+            for (let simulatorConfig of sortedSimulators as SimulatorConfig[]) {
                 this.simulatorConfigById.set(simulatorConfig.id, simulatorConfig);
             }
         }

@@ -24,7 +24,7 @@
             </div>
         </ng-template>
     </div>
-    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3" *ngFor="let simulatorIdConfigPair of $any(simulatorConfigById) | keyvalue">
+    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3" *ngFor="let simulatorIdConfigPair of $any(simulatorConfigById) | keyvalue: unsorted">
         <ng-container *ngIf="simulatorIdConfigPair.value as simulatorConfig">
         <ng-container *ngIf="simulationStrategiesService.strategiesByName.get(simulatorConfig.type) as simulationStrategyFactory">
         <ng-container *ngIf="simulationStrategyFactory.getSimulatorMetadata() as simulationStrategyMetadata">

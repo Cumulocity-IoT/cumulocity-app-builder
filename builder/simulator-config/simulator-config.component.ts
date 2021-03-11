@@ -51,7 +51,8 @@ export class SimulatorConfigComponent implements OnDestroy {
         private appStateService: AppStateService, private userService: UserService
     ) {
         this._lockStatusListener = simSvc.simulator.addLockStatusListener(Comlink.proxy(lockStatus => this.lockStatus$.next(lockStatus)));
-        this._simulatorConfigListener = simSvc.simulator.addSimulatorConfigListener(Comlink.proxy(simulatorConfigById => this.simulatorConfigById$.next(simulatorConfigById)));
+        this._simulatorConfigListener = simSvc.simulator.addSimulatorConfigListener(Comlink.proxy(simulatorConfigById =>
+            this.simulatorConfigById$.next(simulatorConfigById)));
         this.userHasAdminRights = userService.hasAllRoles(appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN","ROLE_APPLICATION_MANAGEMENT_ADMIN"])
 
     }
@@ -113,4 +114,7 @@ export class SimulatorConfigComponent implements OnDestroy {
         this._lockStatusListener.then(id => this.simSvc.simulator.removeListener(id));
         this._simulatorConfigListener.then(id => this.simSvc.simulator.removeListener(id));
     }
+
+    // for keyValue pipe
+    unsorted() {}
 }
