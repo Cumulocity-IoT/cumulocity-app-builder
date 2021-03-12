@@ -51,7 +51,7 @@
     "@angular-devkit/build-angular": "0.803.23",
     "@angular/compiler-cli": "8.2.13",
     "@angular/language-service": "8.2.13",
-    "@c8y/cli": "1009.3.0",
+    "@c8y/cli": "1007.2.0",
     "@types/lodash-es": "^4.17.3",
     "patch-package": "^6.2.2",
     "typescript": "3.5.3"
