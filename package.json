@@ -1,10 +1,10 @@
 {
   "name": "app-builder",
-  "version": "1.2.5-Dev-2",
+  "version": "1.2.5-RC-1",
   "description": "Application builder for Cumulocity (written by Software AG Global Presales)",
   "main": "index.ts",
   "scripts": {
-    "start": "c8ycli server --env.extraWebpackConfig=./extra-webpack.config.js -u ",
+    "start": "c8ycli server --env.extraWebpackConfig=./extra-webpack.config.js ",
     "build": "c8ycli build --env.extraWebpackConfig=./extra-webpack.config.js --env.mode=production",
     "deploy": "c8ycli deploy",
     "postinstall": "patch-package && patch-package --patch-dir node_modules/cumulocity-runtime-widget-loader/patches"
@@ -33,7 +33,7 @@
     "angular": "1.6.9",
     "comlink": "^4.3.0",
     "core-js": "^3.4.0",
-    "cumulocity-runtime-widget-loader": "file:binary/cumulocity-runtime-widget-loader-1006.6.24-1.0.0.tgz",
+    "cumulocity-runtime-widget-loader": "file:binary/cumulocity-runtime-widget-loader-1006.6.24-1.0.1.tgz",
     "d3-color": "^1.4.1",
     "delay": "^4.3.0",
     "fontawesome": "4.7.2",
@@ -51,7 +51,7 @@
     "@angular-devkit/build-angular": "0.803.23",
     "@angular/compiler-cli": "8.2.13",
     "@angular/language-service": "8.2.13",
-    "@c8y/cli": "1007.2.0",
+    "@c8y/cli": "1009.3.0",
     "@types/lodash-es": "^4.17.3",
     "patch-package": "^6.2.2",
     "typescript": "3.5.3"
