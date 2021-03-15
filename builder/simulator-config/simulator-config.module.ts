@@ -23,7 +23,7 @@ import {SimulatorConfigComponent} from "./simulator-config.component";
 import {CommonModule} from "@angular/common";
 import {NewSimulatorModalComponent} from "./new-simulator-modal.component";
 import {WizardModule} from "../../wizard/wizard.module";
-import {BsDropdownModule} from "ngx-bootstrap";
+import {BsDropdownModule} from "ngx-bootstrap/dropdown";
 import { ButtonsModule } from 'ngx-bootstrap/buttons';
 import {EditSimulatorModalComponent} from "./edit-simulator-modal.component";
 import { DeviceSelectorModule } from '../../device-selector/device-selector.module';

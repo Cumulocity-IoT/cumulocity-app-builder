@@ -22,7 +22,7 @@ import {
     DashboardChange,
     DashboardChildChange
 } from "@c8y/ngx-components";
-import {BsModalService} from "ngx-bootstrap";
+import {BsModalService} from "ngx-bootstrap/modal";
 import {
     CONTEXT_DASHBOARD_CONFIG,
     ContextDashboardService,

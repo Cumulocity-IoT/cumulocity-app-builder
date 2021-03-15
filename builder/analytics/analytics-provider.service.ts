@@ -35,7 +35,7 @@ export class AnalyticsProviderService {
 
     async getProviderList() {
         const AppBuilderConfigList = (await this.inventoryService.list( {pageSize: 2000, query: `type eq AppBuilder-Configuration`})).data;
-        this.appBuilderConfig = (AppBuilderConfigList.length > 0 ? AppBuilderConfigList[0] : []);
+        this.appBuilderConfig = (AppBuilderConfigList.length > 0 ? AppBuilderConfigList[0] : null);
         return this.appBuilderConfig;
    
     }
@@ -47,12 +47,14 @@ export class AnalyticsProviderService {
     private findActiveAnalyticsProivder() {
         let activeProvider = null;
         if(this.appBuilderConfig){
-            const anlyticsBuilderList = this.appBuilderConfig.analyticsProvider;
-            anlyticsBuilderList.forEach((item: IAnalyticsProvider) => {
-                if(item.isActive) {
-                    activeProvider =  item;
-                }
-            });
+            const analyticsBuilderList = this.appBuilderConfig.analyticsProvider;
+            if(analyticsBuilderList) {
+                analyticsBuilderList.forEach((item: IAnalyticsProvider) => {
+                    if(item.isActive) {
+                        activeProvider =  item;
+                    }
+                });
+            }
         }
         return activeProvider;
     }

@@ -29,6 +29,7 @@ import { IAnalyticsProvider, IAppBuilder } from 'builder/app-list/app-builder-in
 import { EditAnalyticsProviderModalComponent } from './edit-analytics-provider-modal.component';
 import {UpdateableAlert} from "../utils/UpdateableAlert";
 import { AnalyticsProviderService } from './analytics-provider.service';
+import { skip } from 'rxjs/operators';
 
 @Component({
     templateUrl: './analytics-provider.component.html'
@@ -45,7 +46,9 @@ export class AnalyticsProviderComponent implements OnInit{
     constructor( private appStateService: AppStateService, private providerService: AnalyticsProviderService,
         private modalService: BsModalService, private userService: UserService, private inventoryService: InventoryService,
         private alertService: AlertService) {
-        this.providerService.refreshProviderList.subscribe(() => {
+        this.providerService.refreshProviderList
+        .pipe(skip(1))
+        .subscribe(() => {
             this.getProviderList();
         });
         this.userHasAdminRights = userService.hasAllRoles(appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN","ROLE_APPLICATION_MANAGEMENT_ADMIN"])
@@ -62,7 +65,9 @@ export class AnalyticsProviderComponent implements OnInit{
             if(this.AppBuilderConfig) {
             this.appId = this.AppBuilderConfig.appBuilderId;
             this.anlyticsProviderList = this.AppBuilderConfig.analyticsProvider;
-            this.anlyticsProviderList.sort((a, b) => a.providerAccountName > b.providerAccountName ? 1 : -1);
+            if(this.anlyticsProviderList) {
+                 this.anlyticsProviderList.sort((a, b) => a.providerAccountName > b.providerAccountName ? 1 : -1);
+            }
         }
 
     }

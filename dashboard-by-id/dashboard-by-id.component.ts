@@ -18,7 +18,7 @@
 import {Component, Inject, Input, OnChanges, OnInit, Renderer2, SimpleChanges} from "@angular/core";
 import {InventoryService} from "@c8y/client";
 import {AlertService, DashboardChange, DashboardChildChange} from "@c8y/ngx-components";
-import {BsModalService} from "ngx-bootstrap";
+import {BsModalService} from "ngx-bootstrap/modal";
 import {ContextDashboardComponent} from "./context-dashboard.component";
 import {WidgetService} from "./widget.service";
 import {

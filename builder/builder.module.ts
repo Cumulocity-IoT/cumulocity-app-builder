@@ -23,7 +23,8 @@ import {EditDashboardModalComponent} from "./application-config/edit-dashboard-m
 import {NewDashboardModalComponent} from "./application-config/new-dashboard-modal.component";
 import {AppStateService, CoreModule, HOOK_NAVIGATOR_NODES, LoginService} from "@c8y/ngx-components";
 import {IconSelectorModule} from "../icon-selector/icon-selector.module";
-import {SortableModule, TooltipModule} from "ngx-bootstrap";
+import {TooltipModule} from "ngx-bootstrap/tooltip";
+import {SortableModule} from "ngx-bootstrap/sortable";
 import {WizardModule} from "../wizard/wizard.module";
 import {BrandingModule} from "./branding/branding.module";
 import {AppBuilderNavigationService} from "./navigation/app-builder-navigation.service";
