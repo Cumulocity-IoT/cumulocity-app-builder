@@ -263,7 +263,10 @@ export class NewApplicationModalComponent implements OnInit {
                 ...defaultAppBuilderData
             } as any);
         }
-
+        // Track app creation if gainsight is configured
+        if(window && window['aptrinsic'] ){
+            window['aptrinsic']('track', 'Application Creation', {"appName": this.appName });
+        }
         // Refresh the applications list
         this.appStateService.currentUser.next(this.appStateService.currentUser.value);
     }
