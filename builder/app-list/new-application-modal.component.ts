@@ -45,10 +45,10 @@ import { Observable } from 'rxjs';
             </div>
 
             <div class="form-group">
-                <label for="name"><span>Context Path</span></label>
+                <label for="contextPath"><span>Context Path</span></label>
                 <div class="input-group">
                     <div class="input-group-addon">/apps/</div>
-                    <input type="text" class="form-control" id="name" name="name" [placeholder]="currentContextPath() + ' (optional, cannot be changed)'" [(ngModel)]="appPath">
+                    <input type="text" class="form-control" id="contextPath" name="contextPath" [placeholder]="currentContextPath() + ' (optional, cannot be changed)'" [(ngModel)]="appPath">
                 </div>
             </div>
 
