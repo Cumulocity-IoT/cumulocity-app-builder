@@ -190,11 +190,6 @@ export class TemplateCatalogModalComponent implements OnInit {
                 this.hideProgressModalDialog();
             });
         });
-        // await new Promise(resolve => setTimeout(resolve, 5000));
-        // this.hideProgressModalDialog();
-
-        // dependency.isInstalled = true;
-        // this.isReloadRequired = true;
     }
 
     private isDevicesSelected(): boolean {
