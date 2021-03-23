@@ -58,13 +58,13 @@ export class SimulatorConfigComponent implements OnDestroy {
     }
 
     showCreateSimulatorDialog() {
-        this.bsModalRef = this.modalService.show(NewSimulatorModalComponent, { class: 'c8y-wizard' });
+        this.bsModalRef = this.modalService.show(NewSimulatorModalComponent, { backdrop: 'static' , class: 'c8y-wizard' });
     }
 
     async showEditSimulatorDialog(simulatorConfig: SimulatorConfig) {
         const copySimulatorConfig = cloneDeep(simulatorConfig);
         this.bsModalRef = this.modalService.show(EditSimulatorModalComponent, 
-            { class: (simulatorConfig.config.modalSize ? simulatorConfig.config.modalSize : 'c8y-wizard'), initialState: { simulatorConfig : copySimulatorConfig} })
+            {backdrop: 'static' , class: (simulatorConfig.config.modalSize ? simulatorConfig.config.modalSize : 'c8y-wizard'), initialState: { simulatorConfig : copySimulatorConfig} })
         
     }
 
