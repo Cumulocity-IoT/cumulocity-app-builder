@@ -33,11 +33,7 @@ import { DtdlSimulationStrategyConfig, DtdlSimulationStrategyConfigComponent } f
     configComponent: DtdlSimulationStrategyConfigComponent
 })
 export class DtdlSimulationStrategy extends DeviceIntervalSimulator {
-    seriesValueMeasurementCounter = 0;
-    seriesvalues: number[] = [];
-    randomWalkFirstValue: boolean = true;
-    randomWalkPreviousValue: number = 0;
-    randomWalkMeasurementValue: number = null;
+    simulatorTypeConfigParam: simulatorTypeConfigParam[] = [];
     constructor(protected injector: Injector, private measurementService: MeasurementService, private config: DtdlSimulationStrategyConfig) {
         super(injector);
     }
@@ -63,32 +59,59 @@ export class DtdlSimulationStrategy extends DeviceIntervalSimulator {
         return Math.floor(Math.random() * (modelConfig.maxValue - modelConfig.minValue + 1)) + modelConfig.minValue;
     }
 
-    private getValueSeries(modelConfig: any) {
-        if(this.seriesvalues.length === 0) {
-            this.seriesvalues = modelConfig.value.split(',').map(value => parseFloat(value.trim()));
+    private getValueSeries(modelConfig: any, deviceId: any) {
+        let valueSeriesConfigParam:simulatorTypeConfigParam  = this.getSimulatorConfigParam(deviceId, 'valueSeries', modelConfig.fragment);
+        if(valueSeriesConfigParam == null) {
+            valueSeriesConfigParam = { deviceId, simulatorType: 'valueSeries', fragment: modelConfig.fragment};
+            valueSeriesConfigParam.seriesvalues = modelConfig.value.split(',').map(value => parseFloat(value.trim()));
+            valueSeriesConfigParam.seriesValueMeasurementCounter = 0;
         }
-        if (this.seriesValueMeasurementCounter >= this.seriesvalues.length) {
-            this.seriesValueMeasurementCounter = 0;
+        if (valueSeriesConfigParam.seriesValueMeasurementCounter >= valueSeriesConfigParam.seriesvalues.length) {
+            valueSeriesConfigParam.seriesValueMeasurementCounter = 0;
         }
-        return this.seriesvalues[this.seriesValueMeasurementCounter++]
+        const seriesValue = valueSeriesConfigParam.seriesvalues[valueSeriesConfigParam.seriesValueMeasurementCounter++];
+        this.updateSimulatorConfigParam(valueSeriesConfigParam);
+        return seriesValue;
     }
 
-    private getRandomWalk(modelConfig: any) {
-        if (this.randomWalkMeasurementValue === null) {
-            this.randomWalkMeasurementValue = modelConfig.startingValue;
-            this.randomWalkPreviousValue = 0;
+    private getRandomWalk(modelConfig: any, deviceId: any) {
+        let randomWalkConfigParam:simulatorTypeConfigParam  = this.getSimulatorConfigParam(deviceId, 'randomWalk', modelConfig.fragment);
+        if (randomWalkConfigParam == null) {
+            randomWalkConfigParam = { deviceId, simulatorType: 'randomWalk', fragment: modelConfig.fragment};
+            randomWalkConfigParam.randomWalkMeasurementValue = modelConfig.startingValue;
+            randomWalkConfigParam.randomWalkPreviousValue = 0;
         } else {
             const max = Math.max(modelConfig.minValue, modelConfig.maxValue);
             const min = Math.min(modelConfig.minValue, modelConfig.maxValue);
             const maxDelta = Math.abs(modelConfig.maxDelta);
             const delta = maxDelta * 2 * Math.random() - maxDelta;
-            this.randomWalkMeasurementValue = Math.min(Math.max(this.randomWalkPreviousValue + delta, min), max);
+            randomWalkConfigParam.randomWalkMeasurementValue = Math.min(Math.max(randomWalkConfigParam.randomWalkPreviousValue + delta, min), max);
         }
 
-        this.randomWalkPreviousValue = this.randomWalkMeasurementValue;
-        return this.randomWalkMeasurementValue;
+        randomWalkConfigParam.randomWalkPreviousValue = randomWalkConfigParam.randomWalkMeasurementValue;
+        this.updateSimulatorConfigParam(randomWalkConfigParam);
+        return Math.round(randomWalkConfigParam.randomWalkMeasurementValue * 100) / 100 ;
     }
-    private getMeasurementValue(modelConfig: any) {
+
+    private getSimulatorConfigParam(deviceId: any, simulatorType: string, fragment: string) {
+        if(this.simulatorTypeConfigParam && this.simulatorTypeConfigParam.length > 0) {
+            const configParams = this.simulatorTypeConfigParam.find((param) => param.deviceId === deviceId && 
+            param.simulatorType === simulatorType && param.fragment === fragment);
+            return configParams ? configParams : null;
+        }
+        return null;
+    }
+
+    private updateSimulatorConfigParam(configParam: simulatorTypeConfigParam) {
+        const matchingIndex = this.simulatorTypeConfigParam.findIndex( config => config.deviceId === configParam.deviceId && 
+            config.simulatorType === configParam.simulatorType && config.fragment === configParam.fragment);
+        if (matchingIndex > -1) {
+            this.simulatorTypeConfigParam[matchingIndex] = configParam;
+        } else {
+            this.simulatorTypeConfigParam.push(configParam)
+        }
+    }
+    private getMeasurementValue(modelConfig: any, deviceId: any) {
         let mValue: any;
         switch (modelConfig.simulationType) {
             case 'randomValue':
@@ -96,11 +119,11 @@ export class DtdlSimulationStrategy extends DeviceIntervalSimulator {
                 break;
 
             case 'valueSeries':
-                mValue = this.getValueSeries(modelConfig); 
+                mValue = this.getValueSeries(modelConfig, deviceId); 
                 break;
             
             case 'randomWalk':
-                mValue = this.getRandomWalk(modelConfig); 
+                mValue = this.getRandomWalk(modelConfig, deviceId); 
                 break;
 
             default:
@@ -115,7 +138,7 @@ export class DtdlSimulationStrategy extends DeviceIntervalSimulator {
                 let fragementmap = new Map();
                 fields.forEach(field => {
                     fragementmap.set(`${modelConfig.series}:${field.name}`, {
-                        value: this.getMeasurementValue(modelConfig),
+                        value: this.getMeasurementValue(modelConfig, deviceId),
                         unit: modelConfig.unit
                     })
                 });
@@ -135,7 +158,7 @@ export class DtdlSimulationStrategy extends DeviceIntervalSimulator {
                 time: new Date(),
                 [modelConfig.fragment]: {
                     [modelConfig.series]: {
-                        value: this.getMeasurementValue(modelConfig),
+                        value: this.getMeasurementValue(modelConfig, deviceId),
                         ...modelConfig.unit && {unit: modelConfig.unit}
                     }
                 }
@@ -158,4 +181,16 @@ export class DtdlSimulationStrategyFactory extends SimulationStrategyFactory<Dtd
     getSimulatorClass(): typeof DtdlSimulationStrategy {
         return DtdlSimulationStrategy;
     }
+}
+
+export interface simulatorTypeConfigParam {
+ 
+    deviceId: string,
+    simulatorType: string,
+    fragment: string,
+    seriesValueMeasurementCounter?: number,
+    seriesvalues?: number[],
+    randomWalkFirstValue?: boolean
+    randomWalkPreviousValue?: number,
+    randomWalkMeasurementValue?: number   
 }
