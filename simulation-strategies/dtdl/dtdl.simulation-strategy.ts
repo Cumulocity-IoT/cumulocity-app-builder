@@ -21,7 +21,7 @@ import {SimulationStrategy} from "../../builder/simulator/simulation-strategy.de
 import {DeviceIntervalSimulator} from "../../builder/simulator/device-interval-simulator";
 import {Injectable, Injector} from "@angular/core";
 import {SimulationStrategyFactory} from "../../builder/simulator/simulation-strategy";
-import {MeasurementService} from "@c8y/client";
+import {MeasurementService, EventService, InventoryService, IManagedObject} from "@c8y/client";
 import {SimulatorConfig} from "../../builder/simulator/simulator-config";
 import { DtdlSimulationStrategyConfig, DtdlSimulationStrategyConfigComponent } from './dtdl.config.component';
 
@@ -34,8 +34,11 @@ import { DtdlSimulationStrategyConfig, DtdlSimulationStrategyConfigComponent } f
 })
 export class DtdlSimulationStrategy extends DeviceIntervalSimulator {
     simulatorTypeConfigParam: simulatorTypeConfigParam[] = [];
-    constructor(protected injector: Injector, private measurementService: MeasurementService, private config: DtdlSimulationStrategyConfig) {
+    private invService: InventoryService;
+    constructor(protected injector: Injector, private measurementService: MeasurementService, 
+        private config: DtdlSimulationStrategyConfig, private eventService: EventService) {
         super(injector);
+        this.invService = injector.get(InventoryService);
     }
 
     get interval() {
@@ -51,7 +54,9 @@ export class DtdlSimulationStrategy extends DeviceIntervalSimulator {
         const dtdlConfigModel = this.config.dtdlModelConfig;
         dtdlConfigModel.forEach( modelConfig => {
             const deviceId =(groupDeviceId? groupDeviceId : this.config.deviceId);
-            this.createMeasurements(deviceId, modelConfig); 
+            if(modelConfig.simulationType && modelConfig.simulationType === 'positionUpdate') {
+                this.updatePosition(deviceId, modelConfig);
+            } else { this.createMeasurements(deviceId, modelConfig); }
         });
     }
 
@@ -166,16 +171,53 @@ export class DtdlSimulationStrategy extends DeviceIntervalSimulator {
         }
         
     }
+    private updatePosition(deviceId: string, modelConfig: any){
+        const time = new Date().toISOString();
+        let positionUpdateConfigParam:simulatorTypeConfigParam  = this.getSimulatorConfigParam(deviceId, 'positionUpdate', modelConfig.fragment);
+        if(positionUpdateConfigParam == null) {
+            positionUpdateConfigParam = { deviceId, simulatorType: 'positionUpdate', fragment: modelConfig.fragment};
+            positionUpdateConfigParam.positionLatitude = modelConfig.latitude.split(',').map(value => parseFloat(value.trim()));
+            positionUpdateConfigParam.positionLongitude = modelConfig.longitude.split(',').map(value => parseFloat(value.trim()));
+            positionUpdateConfigParam.positionAltitude = modelConfig.altitude.split(',').map(value => parseFloat(value.trim()));
+            positionUpdateConfigParam.positionCounter = 0;
+        }
+        if (positionUpdateConfigParam.positionCounter >= positionUpdateConfigParam.positionLatitude.length || positionUpdateConfigParam.positionCounter >= positionUpdateConfigParam.positionLatitude.length) {
+            positionUpdateConfigParam.positionCounter = 0;
+        }
+        
+        const c8yPsition: C8yPosition = {
+            lat: positionUpdateConfigParam.positionLatitude[positionUpdateConfigParam.positionCounter],
+            alt: positionUpdateConfigParam.positionLongitude[positionUpdateConfigParam.positionCounter],
+            lng: positionUpdateConfigParam.positionAltitude[positionUpdateConfigParam.positionCounter++] 
+        };
+        this.updateSimulatorConfigParam(positionUpdateConfigParam);
+        
+        const deviceToUpdate: Partial<IManagedObject> = {
+            id: deviceId,
+            c8y_Position: c8yPsition
+        };
+        this.invService.update(deviceToUpdate);
+
+        this.eventService.create({
+            source: {
+                id: deviceId
+            },
+            type: "c8y_LocationUpdate",
+            time: time,
+            text: "LocationUpdate",
+            c8y_Position: c8yPsition
+        });
+    }
 }
 
 @Injectable()
 export class DtdlSimulationStrategyFactory extends SimulationStrategyFactory<DtdlSimulationStrategy> {
-    constructor(private injector: Injector, private measurementService: MeasurementService) {
+    constructor(private injector: Injector, private measurementService: MeasurementService, private eventService: EventService) {
         super();
     }
 
     createInstance(config: SimulatorConfig<DtdlSimulationStrategyConfig>): DtdlSimulationStrategy {
-        return new DtdlSimulationStrategy(this.injector, this.measurementService, config.config);
+        return new DtdlSimulationStrategy(this.injector, this.measurementService, config.config, this.eventService);
     }
 
     getSimulatorClass(): typeof DtdlSimulationStrategy {
@@ -193,4 +235,14 @@ export interface simulatorTypeConfigParam {
     randomWalkFirstValue?: boolean
     randomWalkPreviousValue?: number,
     randomWalkMeasurementValue?: number   
+    positionLatitude?: number[],
+    positionLongitude?: number[],
+    positionAltitude?: number[],
+    positionCounter?: number;
+}
+
+export interface C8yPosition {
+    lng: any; // in case the coordinates are defined as string...
+    alt: any;
+    lat: any;
 }

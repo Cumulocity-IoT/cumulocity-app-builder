@@ -36,11 +36,14 @@ export interface DtdlSimulationModel {
     unit?: string,
     schema?: string,
     id?: string,
-    minValue?: number, //random value, random walk
-    maxValue?: number, //random value, random walk
-    value?: string, //value series
-    startingValue?: number, //random walk
-    maxDelta?: number, //random walk
+    minValue?: number, // random value, random walk
+    maxValue?: number, // random value, random walk
+    value?: string, // value series
+    startingValue?: number, // random walk
+    maxDelta?: number, // random walk
+    latitude?: string, // position update
+    longitude?: string, // position update
+    altitude?: string, // position update
     deviceId?: string;
     simulationType?: string;
 }
@@ -89,16 +92,17 @@ export interface DtdlSimulationModel {
                                 <option value="randomValue" >Random Value</option>
                                 <option value="valueSeries" >Value Series</option>
                                 <option value="randomWalk" >Random Walk</option>
+                                <option value="positionUpdate" >Position Update</option>
                             </select>
                         </div>     
                     </div>
-                    <div class="col-xs-12 col-sm-4 col-md-4">
+                    <div class="col-xs-12 col-sm-4 col-md-4" *ngIf="config.dtdlModelConfig[index].simulationType !== 'positionUpdate'">
                     <div class="measurement-accordion">
                         <label for="fragment"><span>Fragment</span></label>
                         <input type="text" class="form-control"  name="fragment{{model.id}}" placeholder="e.g. temperature_measurement (required)" required autofocus [(ngModel)]="config.dtdlModelConfig[index].fragment">
                     </div>
                     </div>
-                    <div class="col-xs-12 col-sm-4 col-md-4">
+                    <div class="col-xs-12 col-sm-4 col-md-4" *ngIf="config.dtdlModelConfig[index].simulationType !== 'positionUpdate'">
                         <div class="measurement-accordion">
                             <label for="series"><span>Series</span></label>
                             <input type="text" class="form-control" name="series{{model.id}}" placeholder="e.g. T (required)" required autofocus [(ngModel)]="config.dtdlModelConfig[index].series">
@@ -116,6 +120,26 @@ export interface DtdlSimulationModel {
                                 <div class="measurement-accordion">
                                     <label for="maxvalue"><span>Maximum Value</span></label>
                                     <input type="number" class="form-control"  name="maxvalue{{model.id}}" placeholder="e.g. 20 (required)" required [(ngModel)]="config.dtdlModelConfig[index].maxValue">
+                                </div>
+                            </div>
+                        </ng-container>
+                        <ng-container *ngSwitchCase="'positionUpdate'">
+                            <div class="col-xs-12 col-sm-4 col-md-4">
+                                <div class="measurement-accordion">
+                                    <label for="latitude"><span>Latitude Value</span></label>
+                                    <input type="text" class="form-control"  name="latitude{{model.id}}" placeholder="e.g. 40.66,50.40 (required)" required [(ngModel)]="config.dtdlModelConfig[index].latitude">
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-sm-4 col-md-4">
+                                <div class="measurement-accordion">
+                                    <label for="altitude"><span>Altitude Value</span></label>
+                                    <input type="text" class="form-control"  name="altitude{{model.id}}" placeholder="e.g. 40.66,50.40 (required)" required [(ngModel)]="config.dtdlModelConfig[index].altitude">
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-sm-4 col-md-4">
+                                <div class="measurement-accordion">
+                                    <label for="longitude"><span>Longitude value</span></label>
+                                    <input type="text" class="form-control"  name="longitude{{model.id}}" placeholder="e.g. 40.66,50.40 (required)" required [(ngModel)]="config.dtdlModelConfig[index].longitude">
                                 </div>
                             </div>
                         </ng-container>
@@ -154,14 +178,11 @@ export interface DtdlSimulationModel {
                             </div>
                         </ng-container>
                     </ng-container>
-                    <div class="col-xs-12 col-sm-4 col-md-4">
+                    <div class="col-xs-12 col-sm-4 col-md-4" *ngIf="config.dtdlModelConfig[index].simulationType !== 'positionUpdate'">
                         <div class="measurement-accordion">
                             <label for="unit"><span>Unit</span></label>
                             <input type="text" class="form-control"  name="unit{{model.id}}" placeholder="e.g. C (optional)" [(ngModel)]="config.dtdlModelConfig[index].unit">
                         </div>        
-                    </div>
-                    <div class="col-xs-12 col-sm-4 col-md-4">
-                        
                     </div>
                 </accordion-group>
             </accordion>
