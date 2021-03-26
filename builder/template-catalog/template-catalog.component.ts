@@ -16,8 +16,7 @@ enum TemplateCatalogStep {
 @Component({
     selector: 'template-catalog',
     templateUrl: './template-catalog.component.html',
-    styleUrls: ['template-catalog.less'],
-    encapsulation: ViewEncapsulation.None,
+    styleUrls: ['template-catalog.less']
 })
 export class TemplateCatalogModalComponent implements OnInit {
 
@@ -179,17 +178,22 @@ export class TemplateCatalogModalComponent implements OnInit {
 
     async installDependency(dependency: DependencyDescription): Promise<void> {
         this.showProgressModalDialog(`Install ${dependency.title}`)
-        this.catalogService.downloadBinary(dependency.link).subscribe(data => {
-            const blob = new Blob([data], {
-                type: 'application/zip'
-            });
+        // this.catalogService.downloadBinary(dependency.link).subscribe(data => {
+        //     const blob = new Blob([data], {
+        //         type: 'application/zip'
+        //     });
 
-            this.catalogService.installWidget(blob).then(() => {
-                dependency.isInstalled = true;
-                this.isReloadRequired = true;
-                this.hideProgressModalDialog();
-            });
-        });
+        //     this.catalogService.installWidget(blob).then(() => {
+        //         dependency.isInstalled = true;
+        //         this.isReloadRequired = true;
+        //         this.hideProgressModalDialog();
+        //     });
+        // });
+        await new Promise(resolve => setTimeout(resolve, 5000));
+        this.hideProgressModalDialog();
+
+        dependency.isInstalled = true;
+        this.isReloadRequired = true;
     }
 
     private isDevicesSelected(): boolean {

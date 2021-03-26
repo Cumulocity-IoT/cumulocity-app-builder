@@ -207,21 +207,16 @@ export class DashboardConfigComponent implements OnDestroy {
     }
 
     showTemplateCatalogModalDialog(app): void {
-        this.bsModalRef = this.modalService.show(TemplateCatalogModalComponent, { class: 'template-catalog', initialState: { app } });
+        this.bsModalRef = this.modalService.show(TemplateCatalogModalComponent, { class: 'modal-lg', initialState: { app } });
         this.bsModalRef.content.onSave.subscribe((isReloadRequired: boolean) => {
             if (isReloadRequired) {
                 location.reload();
             }
         });
-        // this.bsModalRef = this.modalService.show(DeviceSelectorModalComponent, { class: 'c8y-wizard', initialState: {} });
-        // this.bsModalRef.content.onDeviceSelected.subscribe((device: IManagedObject) => {
-        //     console.log('dialog closed and device selected');
-        //     console.log(device)
-        // })
     }
 
     showTemplateDashboardEditModalDialog(app, dashboardConfig: DashboardConfig): void {
-        this.bsModalRef = this.modalService.show(TemplateUpdateModalComponent, { class: 'template-catalog', initialState: { app, dashboardConfig } });
+        this.bsModalRef = this.modalService.show(TemplateUpdateModalComponent, { class: 'modal-lg', initialState: { app, dashboardConfig } });
     }
 
     ngOnDestroy(): void {

@@ -9,8 +9,7 @@ import { TemplateCatalogService } from "./template-catalog.service";
 @Component({
     selector: 'template-update-component',
     templateUrl: './template-update.component.html',
-    styleUrls: ['template-catalog.less'],
-    encapsulation: ViewEncapsulation.None,
+    styleUrls: ['template-catalog.less']
 })
 export class TemplateUpdateModalComponent implements OnInit {
 
