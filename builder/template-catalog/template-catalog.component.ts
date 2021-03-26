@@ -4,7 +4,7 @@ import { DeviceSelectorModalComponent } from "../utils/device-selector/device-se
 import { BsModalRef, BsModalService } from "ngx-bootstrap";
 import { DependencyDescription, TemplateCatalogEntry, TemplateDetails } from "./template-catalog.model";
 import { TemplateCatalogService } from "./template-catalog.service";
-import { DynamicComponentDefinition, DynamicComponentService } from "@c8y/ngx-components";
+import { AlertService, DynamicComponentDefinition, DynamicComponentService } from "@c8y/ngx-components";
 import { Observable, Subject } from "rxjs";
 import { ProgressIndicatorModalComponent } from "../utils/progress-indicator-modal/progress-indicator-modal.component";
 
@@ -52,7 +52,8 @@ export class TemplateCatalogModalComponent implements OnInit {
     private progressModal: BsModalRef;
 
     constructor(private modalService: BsModalService, private modalRef: BsModalRef,
-        private catalogService: TemplateCatalogService, private componentService: DynamicComponentService) {
+        private catalogService: TemplateCatalogService, private componentService: DynamicComponentService,
+        private alertService: AlertService) {
         this.onSave = new Subject();
     }
 
@@ -177,23 +178,24 @@ export class TemplateCatalogModalComponent implements OnInit {
     }
 
     async installDependency(dependency: DependencyDescription): Promise<void> {
+        const currentHost = window.location.host.split(':')[0];
+        if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
+            this.alertService.warning("Runtime widget installation isn't supported when running Application Builder on localhost.");
+            return;
+        }
+
         this.showProgressModalDialog(`Install ${dependency.title}`)
-        // this.catalogService.downloadBinary(dependency.link).subscribe(data => {
-        //     const blob = new Blob([data], {
-        //         type: 'application/zip'
-        //     });
+        this.catalogService.downloadBinary(dependency.link).subscribe(data => {
+            const blob = new Blob([data], {
+                type: 'application/zip'
+            });
 
-        //     this.catalogService.installWidget(blob).then(() => {
-        //         dependency.isInstalled = true;
-        //         this.isReloadRequired = true;
-        //         this.hideProgressModalDialog();
-        //     });
-        // });
-        await new Promise(resolve => setTimeout(resolve, 5000));
-        this.hideProgressModalDialog();
-
-        dependency.isInstalled = true;
-        this.isReloadRequired = true;
+            this.catalogService.installWidget(blob).then(() => {
+                dependency.isInstalled = true;
+                this.isReloadRequired = true;
+                this.hideProgressModalDialog();
+            });
+        });
     }
 
     private isDevicesSelected(): boolean {
