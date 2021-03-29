@@ -39,6 +39,8 @@ import {AppIdService} from "./app-id.service";
 import {SimulatorConfigComponent} from "./simulator-config/simulator-config.component";
 import {AppListModule, RedirectToDefaultApplicationOrBuilder} from "./app-list/app-list.module";
 import {HelpComponent} from "./help/help.component";
+import {HomeComponent} from "./home/home.component";
+
 import {MarkdownModule} from "ngx-markdown";
 import {BrandingDirtyGuardService} from "./branding/branding-dirty-guard.service";
 import {AppListComponent} from "./app-list/app-list.component";
@@ -64,7 +66,8 @@ import { DeviceSelectorModule } from '../device-selector/device-selector.module'
             {
                 path: '',
                 pathMatch: 'full',
-                canActivate: [RedirectToDefaultApplicationOrBuilder],
+                component: HomeComponent,
+             //   canActivate: [RedirectToDefaultApplicationOrBuilder],
                 children: []
             }, {
                 path: 'application/:applicationId/config',
@@ -82,6 +85,9 @@ import { DeviceSelectorModule } from '../device-selector/device-selector.module'
             }, {
                 path: 'settings-analytics',
                 component: AnalyticsProviderComponent
+            }, {
+                path: 'home',
+                component: HomeComponent
             }
         ]),
         CoreModule,
@@ -100,7 +106,8 @@ import { DeviceSelectorModule } from '../device-selector/device-selector.module'
         DashboardConfigComponent,
         NewDashboardModalComponent,
         EditDashboardModalComponent,
-        HelpComponent
+        HelpComponent,
+        HomeComponent
     ],
     entryComponents: [
         NewDashboardModalComponent,

@@ -3,6 +3,7 @@ export interface IAppBuilder {
     appBuilderId?: any;
     type?: string;
     analyticsProvider?: IAnalyticsProvider[];
+    c8y_Global?: any;
 }
 export interface IAnalyticsProvider {
     id?: any;

@@ -40,31 +40,43 @@ export class AppListNavigation implements NavigatorNodeFactory {
                     } else {
                         const appNode = [];
                         appNode.push(new NavigatorNode({
+                            label: 'Home',
+                            icon: 'home',
+                            path: `/home`,
+                            priority: 3
+                        }));
+                        appNode.push(new NavigatorNode({
                             label: 'All Applications',
                             icon: 'wrench',
                             path: `/application-builder`,
-                            priority: 1
+                            priority: 2
                         }));
                         const settingsNode =  new NavigatorNode({
                             label: 'Settings',
-                            icon: 'cog',
+                            icon: 'cogs',
                             priority: 0
                         });
                         settingsNode.add(new NavigatorNode({
                             label: 'Analytics Provider',
                             icon: 'line-chart',
                             path: `/settings-analytics`,
+                            priority: 2
+                        }));
+                        settingsNode.add(new NavigatorNode({
+                            label: 'Custom Properties',
+                            icon: 'cog',
+                            path: `/settings-analytics`,
                             priority: 1
                         }));
                         if (this.userService.hasAllRoles(this.appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN","ROLE_APPLICATION_MANAGEMENT_ADMIN"])) {
                             appNode.push(settingsNode);
                         }
-                        appNode.push(new NavigatorNode({
+                       /*  appNode.push(new NavigatorNode({
                             label: 'Help & Support',
                             icon: 'question',
                             path: `/help`,
                             priority: 0
-                        }));
+                        })); */
                         return appNode;
                     }
                 }),

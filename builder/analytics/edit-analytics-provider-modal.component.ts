@@ -87,7 +87,8 @@ export class EditAnalyticsProviderModalComponent {
             analyticsProviderList.push(this.analyticsProvider)
             await this.inventoryService.update({
                 id: AppBuilderConfig.id,
-                analyticsProvider: analyticsProviderList
+                analyticsProvider: analyticsProviderList,
+                c8y_Global: {}
             })
         } 
         creationAlert.update(`Proivder Updated!`, "success");

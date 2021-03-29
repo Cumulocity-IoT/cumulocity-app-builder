@@ -73,7 +73,8 @@ import { AnalyticsProviderService } from './analytics-provider.service';
 
 export class NewAnalyticsProviderModalComponent implements OnInit {
     appBuilderObject: IAppBuilder = {
-        analyticsProvider: []
+        analyticsProvider: [],
+        c8y_Global: {}
     };
     analyticsProvider: IAnalyticsProvider = {
         providerName: 'Gainsight PX',
@@ -94,13 +95,13 @@ export class NewAnalyticsProviderModalComponent implements OnInit {
         this.analyticsProvider.id = Math.floor(Math.random() * 1000000);
         this.appBuilderObject.analyticsProvider.push(this.analyticsProvider);
         const AppBuilderConfig: IAppBuilder  = await this.providerService.getProviderList() as any;
-      //  this.appBuilderObject.appBuilderId = await this.providerService.getAppBuilderId();
         if(AppBuilderConfig) {
             const analyticsProviderList = AppBuilderConfig.analyticsProvider || [];
             analyticsProviderList.push(this.analyticsProvider)
             await this.inventoryService.update({
                 id: AppBuilderConfig.id,
-                analyticsProvider: analyticsProviderList
+                analyticsProvider: analyticsProviderList,
+                c8y_Global: {}
             })
         } else  {
             await this.inventoryService.create(this.appBuilderObject);
