@@ -8,6 +8,8 @@ import { AlertService, DynamicComponentDefinition, DynamicComponentService } fro
 import { Observable, Subject } from "rxjs";
 import { ProgressIndicatorModalComponent } from "../utils/progress-indicator-modal/progress-indicator-modal.component";
 
+import './cumulocity.json';
+
 enum TemplateCatalogStep {
     CATALOG,
     DETAIL_PAGE

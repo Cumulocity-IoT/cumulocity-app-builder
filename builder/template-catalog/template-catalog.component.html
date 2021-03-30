@@ -13,11 +13,7 @@
             <div class="flip-card">
                 <div class="card-demo flip-card-inner">
                     <div class="flip-card-front">
-                        <img class="card-image" [src]="
-                    template?.thumbnail && template?.thumbnail != ''
-                        ? template?.thumbnail
-                        : 'https://labcase.softwareag.com/storage/d/268511356c9c2efe2d9e4083d37f6f50'
-                    " />
+                        <img class="card-image" [src]="template?.thumbnail && template?.thumbnail != '' ? template?.thumbnail : './images/placeholder.png'" />
                         <div class="card-data">
                             <h3 [title]="template?.title">
                                 <b>{{ template?.title }} </b>

@@ -1,0 +1,8 @@
+{
+  "name": "TemplateCatalog",
+  "ngModules": [
+  ],
+  "copy":[
+    "images/placeholder.png"
+  ]
+}
