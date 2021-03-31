@@ -15,7 +15,7 @@ export class TemplateCatalogService {
 
     private readonly GATEWAY_URL = 'https://democenter.gateway.webmethodscloud.com/gateway/LabcaseAssetService/1.0/storage/d/';
 
-    private readonly CATALOG_LABCASE_ID = 'f5077165f394be735dba24e52eeb45d2';
+    private readonly CATALOG_LABCASE_ID = '35cbb988a5fdcbfbe08be099cfaf37eb';
 
     constructor(private http: HttpClient, private inventoryService: InventoryService,
         private appService: ApplicationService, private navigation: AppBuilderNavigationService,
