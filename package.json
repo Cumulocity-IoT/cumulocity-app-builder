@@ -31,6 +31,7 @@
     "@ng-reactive/async-input": "0.0.1",
     "@ng-select/ng-select": "^3.7.3",
     "angular": "1.6.9",
+    "app-builder-external-assets": "file:binary/app-builder-external-assets-0.0.8.tgz",
     "comlink": "^4.3.0",
     "core-js": "^3.4.0",
     "cumulocity-runtime-widget-loader": "file:binary/cumulocity-runtime-widget-loader-1006.6.24-1.0.2.tgz",
@@ -45,7 +46,8 @@
     "url-search-params-polyfill": "6.0.0",
     "webpack-external-import": "^2.2.4",
     "worker-plugin": "^4.0.3",
-    "zone.js": "~0.9.1"
+    "zone.js": "~0.9.1",
+    "crypto-js": "^4.0.0"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "0.803.23",
