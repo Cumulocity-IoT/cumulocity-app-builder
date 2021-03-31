@@ -23,7 +23,7 @@
                 </div>
             </div>
         </div>
-        <div class="row col-xs-12 col-sm-12 col-md-12">
+        <div class="">
             <div class="col-xs-12 col-sm-6 col-md-6"> 
                 <div class="card home-wdiget-card">
                     <div class="card-header">
@@ -42,7 +42,7 @@
                 </div>
             </div>
             <div class="col-xs-12 col-sm-6 col-md-6"> 
-                <div class="row card home-wdiget-card" style="margin-right: -20px;">
+                <div class="row card home-wdiget-card" >
                     <div class="card-header">
                         Upgrade Application Builder
                     </div>
@@ -64,78 +64,22 @@
     <div class="col-xs-12 col-sm-4 col-md-4">
         <div class="card" >
             <div class="card-header">
-                Quick Start videos
+                Quick Start Videos
             </div>
             <div class="card-block" >
-                <div class="row home-video" (click)="openLink('media-01')">
+                <div *ngFor="let media of mediaList"  class="row home-video" (click)="openLink(media.key)">
                     <div class="col-xs-4 col-sm-2 col-md-2">
                         <img  src="./images/c8y-app-play.png">
                     </div>
                     <div class="col-xs-8 col-sm-10 col-md-10 home-video-content">
-                        How to create a new application?
-                    </div>
-                </div>
-                <div class="row home-video" (click)="openLink('media-02')">
-                    <div class="col-xs-4 col-sm-2 col-md-2">
-                        <img  src="./images/c8y-app-play.png">
-                    </div>
-                    <div class="col-xs-8 col-sm-10 col-md-10 home-video-content">
-                        How to create a new application?
-                    </div>
-                </div>
-                <div class="row home-video" (click)="openLink('media-03')">
-                    <div class="col-xs-4 col-sm-2 col-md-2">
-                        <img  src="./images/c8y-app-play.png">
-                    </div>
-                    <div class="col-xs-8 col-sm-10 col-md-10 home-video-content">
-                        How to create a new application?
-                    </div>
-                </div>
-                <div class="row home-video" (click)="openLink('media-04')">
-                    <div class="col-xs-4 col-sm-2 col-md-2">
-                        <img  src="./images/c8y-app-play.png">
-                    </div>
-                    <div class="col-xs-8 col-sm-10 col-md-10 home-video-content">
-                        How to create a new application?
-                    </div>
-                </div>
-                <div class="row home-video" (click)="openLink('media-05')">
-                    <div class="col-xs-4 col-sm-2 col-md-2">
-                        <img  src="./images/c8y-app-play.png">
-                    </div>
-                    <div class="col-xs-8 col-sm-10 col-md-10 home-video-content">
-                        How to create a new application?
-                    </div>
-                </div>
-                <div class="row home-video" (click)="openLink('media-06')">
-                    <div class="col-xs-4 col-sm-2 col-md-2">
-                        <img  src="./images/c8y-app-play.png">
-                    </div>
-                    <div class="col-xs-8 col-sm-10 col-md-10 home-video-content">
-                        How to create a new application?
-                    </div>
-                </div>
-                <div class="row home-video" (click)="openLink('media-07')">
-                    <div class="col-xs-4 col-sm-2 col-md-2">
-                        <img  src="./images/c8y-app-play.png">
-                    </div>
-                    <div class="col-xs-8 col-sm-10 col-md-10 home-video-content">
-                        How to create a new application?
-                    </div>
-                </div>
-                <div class="row home-video" (click)="openLink('media-08')">
-                    <div class="col-xs-4 col-sm-2 col-md-2">
-                        <img  src="./images/c8y-app-play.png">
-                    </div>
-                    <div class="col-xs-8 col-sm-10 col-md-10 home-video-content">
-                        How to create a new application?
+                       {{media.value}}
                     </div>
                 </div>
             </div>
         </div>
     </div>
   </div>
-  <div class="card-group interact-grid">
+  <div class="card-group interact-grid" style="margin-top: -10px;">
     <div class="col-xs-12 col-sm-12 col-md-12">
         <div class="card home-wdiget-card">
             <div class="card-header">

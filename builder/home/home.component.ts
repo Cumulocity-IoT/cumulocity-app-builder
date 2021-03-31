@@ -16,32 +16,66 @@
 * limitations under the License.
  */
 
-import {Component} from "@angular/core";
+import {Component, OnInit} from "@angular/core";
+import { AppBuilderExternalAssetsService } from 'app-builder-external-assets';
+import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 
 import './cumulocity';
+import { VideoModalComponent } from './video-modal.component';
 
 @Component({
     templateUrl: './home.component.html',
     styleUrls: ['./home.component.less']
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit{
 
+    bsModalRef: BsModalRef;
+    mediaList = [];
+
+    constructor(private modalService: BsModalService, private externalService: AppBuilderExternalAssetsService) {}
+
+    ngOnInit() {
+        this.mediaList = this.externalService.getMediaList();
+    }
     openLink(type) {
         switch (type) {
             case 'widget':
                 window.open("https://open-source.softwareag.com/iot-analytics?search=runtime&topic=cumulocity-iot&repository=widget");
                 break;
+
             case 'doc':
                 window.open("https://github.com/SoftwareAG/cumulocity-app-builder/blob/master/README.md");
                 break;
+
             case 'source': 
                 window.open("https://github.com/SoftwareAG/cumulocity-app-builder");
                 break;
+
             case 'forum':
                 window.open("https://tech.forums.softwareag.com/tag/Cumulocity-IoT");
                 break;
+
+            case 'media-01':
+            case 'media-02':
+            case 'media-03':
+            case 'media-04':
+            case 'media-05':
+            case 'media-06':
+            case 'media-07':
+            case 'media-08':
+                const media = this.getMediaDetails(type);
+                const currentTime = new Date().getTime();
+                const mediaURL = this.externalService.getURL(type) + `?t=${currentTime}`;
+                this.bsModalRef = this.modalService.show(VideoModalComponent, 
+                    { backdrop: 'static' ,  class: 'c8y-wizard', initialState: { media, mediaURL}} );
+                break;
+
             default:
                 break;
         }
+    }
+
+    private getMediaDetails(key) {
+        return this.mediaList.find(mkey => mkey.key === key);
     }
 }

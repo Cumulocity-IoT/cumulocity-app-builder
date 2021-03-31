@@ -55,6 +55,7 @@ import { AnalyticsProviderService } from './analytics/analytics-provider.service
 import { IAnalyticsProvider } from './app-list/app-builder-interface';
 import { DOCUMENT } from '@angular/common';
 import { DeviceSelectorModule } from '../device-selector/device-selector.module';
+import { VideoModalComponent } from './home/video-modal.component';
 @NgModule({
     imports: [
         ApplicationModule,
@@ -100,18 +101,20 @@ import { DeviceSelectorModule } from '../device-selector/device-selector.module'
         AppListModule,
         AnalyticsProviderModule,
         DeviceSelectorModule,
-        MarkdownModule.forRoot()
+        MarkdownModule.forRoot(),
     ],
     declarations: [
         DashboardConfigComponent,
         NewDashboardModalComponent,
         EditDashboardModalComponent,
         HelpComponent,
-        HomeComponent
+        HomeComponent,
+        VideoModalComponent
     ],
     entryComponents: [
         NewDashboardModalComponent,
-        EditDashboardModalComponent
+        EditDashboardModalComponent,
+        VideoModalComponent
     ],
     providers: [
         AppBuilderNavigationService,
