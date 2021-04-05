@@ -48,7 +48,7 @@ import {LockStatus} from "./simulator/worker/simulation-lock.service";
 import {fromEvent, Observable} from "rxjs";
 import {withLatestFrom} from "rxjs/operators";
 import {proxy} from "comlink";
-import { CookieAuth } from '@c8y/client';
+import { CookieAuth, TenantService } from '@c8y/client';
 import { AnalyticsProviderModule } from './analytics/analytics-provider.module';
 import { AnalyticsProviderComponent } from './analytics/analytics-provider.component';
 import { AnalyticsProviderService } from './analytics/analytics-provider.service';
@@ -128,7 +128,7 @@ export class BuilderModule {
     private renderer: Renderer2;
     constructor(appStateService: AppStateService, loginService: LoginService, simSvc: SimulatorCommunicationService, 
         appIdService: AppIdService, private analyticsService: AnalyticsProviderService,
-        rendererFactory: RendererFactory2, @Inject(DOCUMENT) private _document: Document) {
+        rendererFactory: RendererFactory2, @Inject(DOCUMENT) private _document: Document, private tenantService: TenantService) {
         // Pass the app state to the worker from the main thread (Initially and every time it changes)
         appStateService.currentUser.subscribe(async (user) => {
             let isCookieAuth = false;
@@ -167,12 +167,17 @@ export class BuilderModule {
                 }
             });
         appStateService.currentTenant.subscribe(async (tenant) => {
+            console.log('tenant', tenant);
+            /* this.tenantService.currentTenantType().then( result => {
+                console.log('tenantType', result);
+            }) */
             await simSvc.simulator.setTenant(tenant)
             if(!analyticsService.isAnalyticsProviderLoaded) {
                 this.renderer = rendererFactory.createRenderer(null, null);
                 this.registerAndTrackAnalyticsProvider(true);
             }
         });
+       
         appIdService.appId$.subscribe(async (appId) => 
         {
             await simSvc.simulator.setAppId(appId)
