@@ -23,6 +23,7 @@ import {AlertService, AppStateService} from "@c8y/ngx-components";
 import {UpdateableAlert} from "../utils/UpdateableAlert";
 import {contextPathFromURL} from "../utils/contextPathFromURL";
 import { Observable } from 'rxjs';
+import { SettingsService } from './../settings/settings.service';
 
 @Component({
     template: `
@@ -77,7 +78,9 @@ export class NewApplicationModalComponent implements OnInit {
     appList: any = [];
     appNameList: any = [];
 
-    constructor(public bsModalRef: BsModalRef, private appService: ApplicationService, private appStateService: AppStateService, private fetchClient: FetchClient, private inventoryService: InventoryService, private alertService: AlertService) {}
+    constructor(public bsModalRef: BsModalRef, private appService: ApplicationService, private appStateService: AppStateService, 
+        private fetchClient: FetchClient, private inventoryService: InventoryService, private alertService: AlertService,
+        private settingsService: SettingsService) {}
    
     ngOnInit() {
         this.loadApplicationsForClone();
@@ -135,6 +138,7 @@ export class NewApplicationModalComponent implements OnInit {
                 "class": `fa fa-${this.appIcon}`
             },
         };
+        let appId : any = '';
         
         // If the appPath option has been set then we copy the full AppBuilder into a new application
         if (this.appPath) {
@@ -233,6 +237,7 @@ export class NewApplicationModalComponent implements OnInit {
 
                     // Update the app
                     creationAlert.update(`Creating application...\nSaving...`);
+                    appId = app.id;
                     await this.appService.update({
                         id: app.id,
                         activeVersionId,
@@ -257,6 +262,7 @@ export class NewApplicationModalComponent implements OnInit {
                 key: `application-builder-${this.appName}-app-key`,
                 externalUrl: `${window.location.pathname}#/application-builder`
             })).data;
+            appId = app.id;
             await this.appService.update({
                 id: app.id,
                 externalUrl: `${window.location.pathname}#/application/${app.id}`,
@@ -265,7 +271,11 @@ export class NewApplicationModalComponent implements OnInit {
         }
         // Track app creation if gainsight is configured
         if(window && window['aptrinsic'] ){
-            window['aptrinsic']('track', 'Application Creation', {"appName": this.appName });
+            window['aptrinsic']('track', 'gp_appbuilder_createapp_clicked', {
+                "appName": this.appName, 
+                "appId" : appId,
+                "tenantId":  this.settingsService.getTenantName()
+            });
         }
         // Refresh the applications list
         this.appStateService.currentUser.next(this.appStateService.currentUser.value);

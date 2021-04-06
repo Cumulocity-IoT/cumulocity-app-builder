@@ -292,7 +292,6 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
                     });
                 }
             });
-            console.log("config model", this.configModel);
         }
     }
 

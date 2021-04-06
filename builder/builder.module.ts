@@ -56,6 +56,9 @@ import { IAnalyticsProvider } from './app-list/app-builder-interface';
 import { DOCUMENT } from '@angular/common';
 import { DeviceSelectorModule } from '../device-selector/device-selector.module';
 import { VideoModalComponent } from './home/video-modal.component';
+import { SettingsModule } from './settings/settings.module';
+import { CustomPropertiesComponent } from './settings/custom-properties.component';
+import { SettingsService } from './settings/settings.service';
 @NgModule({
     imports: [
         ApplicationModule,
@@ -80,12 +83,10 @@ import { VideoModalComponent } from './home/video-modal.component';
             }, {
                 path: 'application/:applicationId/simulator-config',
                 component: SimulatorConfigComponent
-            }, {
-                path: 'help',
-                component: HelpComponent
-            }, {
-                path: 'settings-analytics',
-                component: AnalyticsProviderComponent
+            }, 
+            {
+                path: 'settings-properties',
+                component: CustomPropertiesComponent
             }, {
                 path: 'home',
                 component: HomeComponent
@@ -102,6 +103,7 @@ import { VideoModalComponent } from './home/video-modal.component';
         AnalyticsProviderModule,
         DeviceSelectorModule,
         MarkdownModule.forRoot(),
+        SettingsModule
     ],
     declarations: [
         DashboardConfigComponent,
@@ -127,7 +129,7 @@ import { VideoModalComponent } from './home/video-modal.component';
 export class BuilderModule {
     private renderer: Renderer2;
     constructor(appStateService: AppStateService, loginService: LoginService, simSvc: SimulatorCommunicationService, 
-        appIdService: AppIdService, private analyticsService: AnalyticsProviderService,
+        appIdService: AppIdService, private settingService: SettingsService,
         rendererFactory: RendererFactory2, @Inject(DOCUMENT) private _document: Document, private tenantService: TenantService) {
         // Pass the app state to the worker from the main thread (Initially and every time it changes)
         appStateService.currentUser.subscribe(async (user) => {
@@ -167,12 +169,10 @@ export class BuilderModule {
                 }
             });
         appStateService.currentTenant.subscribe(async (tenant) => {
-            console.log('tenant', tenant);
-            /* this.tenantService.currentTenantType().then( result => {
-                console.log('tenantType', result);
-            }) */
             await simSvc.simulator.setTenant(tenant)
-            if(!analyticsService.isAnalyticsProviderLoaded) {
+            this.settingService.setTenant(tenant);
+            const validAnalyticsProvider = await this.settingService.loadAnalyticsProvider();
+            if(validAnalyticsProvider) {
                 this.renderer = rendererFactory.createRenderer(null, null);
                 this.registerAndTrackAnalyticsProvider(true);
             }
@@ -186,27 +186,16 @@ export class BuilderModule {
     }
 
     private async registerAndTrackAnalyticsProvider(isRegister: boolean, appId?: any) {
-        this.analyticsService.isAnalyticsProviderLoaded = true;
-        const analyticsProvider: IAnalyticsProvider = await this.analyticsService.getActiveAnalyticsProvider();
-        if(analyticsProvider) {
-            switch (analyticsProvider.providerName) {
-                case "Gainsight PX":
-                    if(isRegister) {
-                        this.initGainsight(analyticsProvider.providerURL, analyticsProvider.providerKey, 
-                            analyticsProvider.providerIdentity, analyticsProvider.providerAccountId, 
-                            analyticsProvider.providerAccountName);
-                    } else {
-                        if(window && window['aptrinsic'] ){
-                            window['aptrinsic']('track', 'Applications', {"appId": appId });
-                        }
-                    }
-                    break;
-            
-                default:
-                    break;
-            }
+        this.settingService.isAnalyticsProviderLoaded = true;
+        if(isRegister) {
+            const provider = this.settingService.getAnalyticsProvider();
+            this.initGainsight(provider.providerURL, provider.providerKey, 
+                provider.providerIdentity, provider.providerAccountId, 
+                provider.providerAccountName);
         } else {
-            this.analyticsService.isAnalyticsProviderLoaded = false;
+            if(window && window['aptrinsic'] ){
+                window['aptrinsic']('track', 'Applications', {"appId": appId });
+            }
         }
     }
     //Gainsight Integration

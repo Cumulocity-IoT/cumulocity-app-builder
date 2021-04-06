@@ -28,6 +28,7 @@ import {SimulationStrategiesModule} from "./simulation-strategies/simulation-str
 import {CustomWidgetsModule} from "./custom-widgets/custom-widgets.module";
 import {RuntimeWidgetInstallerModule, RuntimeWidgetLoaderService} from "cumulocity-runtime-widget-loader";
 import { interval } from 'rxjs';
+import { SettingsService } from './builder/settings/settings.service';
 @NgModule({
   imports: [
     // Upgrade module must be the first
@@ -46,7 +47,8 @@ import { interval } from 'rxjs';
 })
 export class AppModule extends HybridAppModule {
     constructor(protected upgrade: NgUpgradeModule, appStateService: AppStateService, private router: Router, 
-        private runtimeWidgetLoaderService: RuntimeWidgetLoaderService, private injector: Injector) {
+        private runtimeWidgetLoaderService: RuntimeWidgetLoaderService, private injector: Injector,
+        private settingsService: SettingsService) {
         super();
 
         // Fixes a bug where the router removes the hash when the user tries to navigate to an app and is not logged in
@@ -67,7 +69,6 @@ export class AppModule extends HybridAppModule {
             filter(([, event]: [IUser, NavigationError | null]) => event != null),
             map(([, event]: [IUser, NavigationError]) => event)
         ).subscribe(event => {
-            console.log("route url ===", event.url);
             router.navigateByUrl(event.url);
         });
     }
@@ -83,6 +84,8 @@ export class AppModule extends HybridAppModule {
             $rootScope.$on('$locationChangeStart', (event, next, current) => {
                 const nextSplit = next.split('#');
                 const currentSplit = current.split('#');
+                // For gainsight tracking
+                if(nextSplit.length > 1) { this.trackRouteEvents(nextSplit[1]); }
                 if (nextSplit[0] != currentSplit[0]) {
                     return;
                 }
@@ -101,5 +104,57 @@ export class AppModule extends HybridAppModule {
                     actionOutletSub.unsubscribe();
             }
         });
+    }
+
+    // Gainsight Events Tracking
+    private trackRouteEvents(url: string){
+        const urlParams = url.split('/');
+        if(urlParams.length> 0) {
+            let appId = '';
+            let dashboardId = '';
+            let other = "";
+            if(urlParams.length > 2) {
+                urlParams.forEach( (param , index) => {
+                    switch (param) {
+                        case 'application':
+                            appId = urlParams[index + 1];
+                            break;
+                        case 'dashboard':
+                            dashboardId = urlParams[index + 1];
+                            break;   
+                        case 'config':
+                        case 'branding':
+                        case 'simulator-config':
+                            other = param;
+                            break; 
+                        default: 
+                            break;
+                    }
+                });
+                if(window && window['aptrinsic'] ){
+                        window['aptrinsic']('track', 'gp_appbuilder_apppage_viewed',  {
+                            "appId": appId, 
+                            "tenantId": this.settingsService.getTenantName(), 
+                            "dashboardId": dashboardId,
+                            "other": other
+                        });
+                }
+            } else if (urlParams.length > 1 && (urlParams[1] === '' || urlParams[1] === 'home')) {
+                if(window && window['aptrinsic'] ){
+                    window['aptrinsic']('track', 'gp_appbuilder_homepage_viewed ',  {
+                        "tenantId": this.settingsService.getTenantName(), 
+                    });
+                }
+            } else if(urlParams.length > 1) {
+                other = urlParams[1];
+                if(window && window['aptrinsic'] ){
+                    window['aptrinsic']('track', 'gp_appbuilder_page_viewed',  {
+                        "tenantId": this.settingsService.getTenantName(), 
+                        "other": other
+                });
+                }
+            }
+        }
+        
     }
 }

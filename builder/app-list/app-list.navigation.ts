@@ -56,16 +56,16 @@ export class AppListNavigation implements NavigatorNodeFactory {
                             icon: 'cogs',
                             priority: 0
                         });
-                        settingsNode.add(new NavigatorNode({
+                        /* settingsNode.add(new NavigatorNode({
                             label: 'Analytics Provider',
                             icon: 'line-chart',
                             path: `/settings-analytics`,
                             priority: 2
-                        }));
+                        })); */
                         settingsNode.add(new NavigatorNode({
                             label: 'Custom Properties',
                             icon: 'cog',
-                            path: `/settings-analytics`,
+                            path: `/settings-properties`,
                             priority: 1
                         }));
                         if (this.userService.hasAllRoles(this.appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN","ROLE_APPLICATION_MANAGEMENT_ADMIN"])) {
