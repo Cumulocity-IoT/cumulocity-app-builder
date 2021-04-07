@@ -113,7 +113,7 @@ export class SettingsService {
         // if(this.isGaisigntEnabledFromParent() || this.isAnalyticsProviderLoaded) { return false;} //Required for 1009.x.x
         if(this.isAnalyticsProviderLoaded) { return false;}
         else {
-            if(this.isGaisigntEnabledFromParent) { return true; }
+            if(this.isGaisigntEnabledFromParent()) { return true; }
             const isProviderActive =  await this.isAnalyticsProviderActive();
             return isProviderActive;
         }
