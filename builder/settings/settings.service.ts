@@ -1,14 +1,12 @@
 import { Injectable } from '@angular/core';
 import { ApplicationService, InventoryService, ICurrentTenant, IApplication } from '@c8y/client';
 import { AlertService } from '@c8y/ngx-components';
+import { AppBuilderExternalAssetsService } from 'app-builder-external-assets';
 import { contextPathFromURL } from '../utils/contextPathFromURL';
 import {UpdateableAlert} from "../utils/UpdateableAlert";
 
 @Injectable({providedIn: 'root'})
 export class SettingsService {
-    constructor(private appService: ApplicationService, private inventoryService: InventoryService,
-        private alertService: AlertService ){}
-
     isAnalyticsProviderLoaded = false;
 
     private appBuilderConfig: any;
@@ -17,15 +15,19 @@ export class SettingsService {
         gainsightEnabled: ""
     };
     private currentTenant: ICurrentTenant;
+    private analyticsProvider: any = {};
     
-    analyticsProvider = {
-        providerURL : 'https://web-sdk.aptrinsic.com/api/aptrinsic.js', 
-        providerKey : 'AP-98W68BOG3KCQ-2', 
-        providerIdentity: 'demo@democenter.com',
-        providerAccountId : 'Application Builder', 
-        providerAccountName: 'Application Builder'
-    }
+    constructor(private appService: ApplicationService, private inventoryService: InventoryService,
+        private alertService: AlertService, private externalAssetService: AppBuilderExternalAssetsService ){
+            const providerList = this.externalAssetService.getAssetsList('ANALYTICS')
+            this.analyticsProvider = providerList.find( provider => provider.key === 'gainsight');
+            this.analyticsProvider.providerURL = this.externalAssetService.getURL('ANALYTICS','gainsight');
+        }
 
+    /**
+     * Get Application Builder Id against custom properties stored.
+     * There are posibilites of more than one app builder when subscribed app builder is also available for a tenant 
+     */ 
     async getAPPBuilderId() {
         if(this.appbuilderId) { return this.appbuilderId; }
         else {

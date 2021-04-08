@@ -35,24 +35,16 @@ export class HomeComponent implements OnInit{
     constructor(private modalService: BsModalService, private externalService: AppBuilderExternalAssetsService) {}
 
     ngOnInit() {
-        this.mediaList = this.externalService.getMediaList();
+        this.mediaList = this.externalService.getAssetsList('MEDIA');
     }
+
+    // Open External Link based or play media
     openLink(type) {
         switch (type) {
             case 'widget':
-                window.open("https://open-source.softwareag.com/iot-analytics?search=runtime&topic=cumulocity-iot&repository=widget");
-                break;
-
-            case 'doc':
-                window.open("https://github.com/SoftwareAG/cumulocity-app-builder/blob/master/README.md");
-                break;
-
             case 'source': 
-                window.open("https://github.com/SoftwareAG/cumulocity-app-builder");
-                break;
-
             case 'forum':
-                window.open("https://tech.forums.softwareag.com/tag/Cumulocity-IoT");
+                window.open(this.externalService.getURL('HOME', type));
                 break;
 
             case 'media-01':
@@ -65,7 +57,7 @@ export class HomeComponent implements OnInit{
             case 'media-08':
                 const media = this.getMediaDetails(type);
                 const currentTime = new Date().getTime();
-                const mediaURL = this.externalService.getURL(type) + `?t=${currentTime}`;
+                const mediaURL = this.externalService.getURL('MEDIA',type) + `?t=${currentTime}`;
                 this.bsModalRef = this.modalService.show(VideoModalComponent, 
                     { backdrop: 'static' ,  class: 'c8y-wizard', initialState: { media, mediaURL}} );
                 break;

@@ -18,15 +18,9 @@
 
 import {Component, OnInit} from "@angular/core";
 import {
-    InventoryService,
     UserService
 } from "@c8y/client";
-import {AlertService, AppStateService} from "@c8y/ngx-components";
-import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
-import {Router} from "@angular/router";
-import { IAnalyticsProvider, IAppBuilder } from 'builder/app-list/app-builder-interface';
-import {UpdateableAlert} from "../utils/UpdateableAlert";
-import { skip } from 'rxjs/operators';
+import {AppStateService} from "@c8y/ngx-components";
 import { SettingsService } from './settings.service';
 
 @Component({
@@ -34,7 +28,7 @@ import { SettingsService } from './settings.service';
     <c8y-title>Custom Properties</c8y-title>
     <div class="col-xs-12 col-sm-8 col-md-8 card" >
         <form name="customPropertiesForm" #customPropertiesForm="ngForm">
-        <div class="card-block">
+        <div class="card-block" *ngIf="!isBusy">
             <div class="form-group">
                 <label translate="" for="gainsightEnabled" >Gainsight Enabled</label>
                 <input type="text" class="form-control" [disabled]="!userHasAdminRights || isGainsightParent " name="gainsightEnabled" id="gainsightEnabled" 
@@ -48,12 +42,15 @@ import { SettingsService } from './settings.service';
     </div>
     `
 })
+
+// Custom property settings for Application Builder
 export class CustomPropertiesComponent implements OnInit{
 
     userHasAdminRights: boolean;
+    isBusy: boolean = false;
     isGainsightParent: boolean = false;
     customProperties = {
-        gainsightEnabled: ""
+        gainsightEnabled: "false"
     }
     constructor( private appStateService: AppStateService,
         private userService: UserService, 
@@ -63,9 +60,11 @@ export class CustomPropertiesComponent implements OnInit{
                         
 
     async ngOnInit() {
+        this.isBusy = true;
         this.customProperties = await this.settingsService.getCustomProperties();
         this.isGainsightParent = this.settingsService.isGaisigntEnabledFromParent();
         if(this.isGainsightParent) { this.customProperties.gainsightEnabled = 'true';}
+        this.isBusy = false;
     }
 
     isFormValid() {

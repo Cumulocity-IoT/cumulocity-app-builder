@@ -38,7 +38,6 @@ import {SimulatorCommunicationService} from "./simulator/mainthread/simulator-co
 import {AppIdService} from "./app-id.service";
 import {SimulatorConfigComponent} from "./simulator-config/simulator-config.component";
 import {AppListModule, RedirectToDefaultApplicationOrBuilder} from "./app-list/app-list.module";
-import {HelpComponent} from "./help/help.component";
 import {HomeComponent} from "./home/home.component";
 
 import {MarkdownModule} from "ngx-markdown";
@@ -49,10 +48,6 @@ import {fromEvent, Observable} from "rxjs";
 import {withLatestFrom} from "rxjs/operators";
 import {proxy} from "comlink";
 import { CookieAuth, TenantService } from '@c8y/client';
-import { AnalyticsProviderModule } from './analytics/analytics-provider.module';
-import { AnalyticsProviderComponent } from './analytics/analytics-provider.component';
-import { AnalyticsProviderService } from './analytics/analytics-provider.service';
-import { IAnalyticsProvider } from './app-list/app-builder-interface';
 import { DOCUMENT } from '@angular/common';
 import { DeviceSelectorModule } from '../device-selector/device-selector.module';
 import { VideoModalComponent } from './home/video-modal.component';
@@ -100,7 +95,6 @@ import { SettingsService } from './settings/settings.service';
         BrandingModule.forRoot(),
         SimulatorConfigModule,
         AppListModule,
-        AnalyticsProviderModule,
         DeviceSelectorModule,
         MarkdownModule.forRoot(),
         SettingsModule
@@ -109,7 +103,6 @@ import { SettingsService } from './settings/settings.service';
         DashboardConfigComponent,
         NewDashboardModalComponent,
         EditDashboardModalComponent,
-        HelpComponent,
         HomeComponent,
         VideoModalComponent
     ],
@@ -171,10 +164,12 @@ export class BuilderModule {
         appStateService.currentTenant.subscribe(async (tenant) => {
             await simSvc.simulator.setTenant(tenant)
             this.settingService.setTenant(tenant);
-            const validAnalyticsProvider = await this.settingService.loadAnalyticsProvider();
-            if(validAnalyticsProvider) {
-                this.renderer = rendererFactory.createRenderer(null, null);
-                this.registerAndTrackAnalyticsProvider(true);
+            if(tenant) {
+                const validAnalyticsProvider = await this.settingService.loadAnalyticsProvider();
+                if(validAnalyticsProvider) {
+                    this.renderer = rendererFactory.createRenderer(null, null);
+                    this.registerAndTrackAnalyticsProvider(true);
+                }
             }
         });
        
@@ -186,8 +181,8 @@ export class BuilderModule {
     }
 
     private async registerAndTrackAnalyticsProvider(isRegister: boolean, appId?: any) {
-        this.settingService.isAnalyticsProviderLoaded = true;
         if(isRegister) {
+            this.settingService.isAnalyticsProviderLoaded = true;
             const provider = this.settingService.getAnalyticsProvider();
             this.initGainsight(provider.providerURL, provider.providerKey, 
                 provider.providerIdentity, provider.providerAccountId, 

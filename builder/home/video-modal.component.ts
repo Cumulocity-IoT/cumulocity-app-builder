@@ -37,6 +37,8 @@ import { BsModalRef } from 'ngx-bootstrap/modal';
     </div>
     `
 })
+
+// Modal Component to play videos
 export class VideoModalComponent  implements AfterViewInit{
     media: any;
     mediaURL: string;
