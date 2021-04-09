@@ -244,6 +244,9 @@ export class NewApplicationModalComponent implements OnInit {
                         ...defaultAppBuilderData
                     } as any);
 
+                    // Update App Builder Custom Properties
+                    await this.updateAppBuilderConfiguration(appBuilder.id, appId);
+
                     // deleting cloned app
                     if(isClone){
                         await this.fetchClient.fetch(`application/applications/${appBuilder.id}`, {method: 'DELETE'}) as Response;
@@ -279,6 +282,17 @@ export class NewApplicationModalComponent implements OnInit {
         }
         // Refresh the applications list
         this.appStateService.currentUser.next(this.appStateService.currentUser.value);
+    }
+
+    private async updateAppBuilderConfiguration(appBuilderId: any, newAppId: any) {
+        const AppBuilderConfigList = (await this.inventoryService.list( {pageSize: 50, query: `type eq AppBuilder-Configuration and appBuilderId eq '${appBuilderId}'`})).data;
+        const appBuilderConfig = (AppBuilderConfigList.length > 0 ? AppBuilderConfigList[0] : null);
+        await this.inventoryService.create({
+            c8y_Global: {},
+            type: "AppBuilder-Configuration",
+            customProperties: (appBuilderConfig.customProperties ? appBuilderConfig.customProperties : {}),
+            appBuilderId: newAppId
+        });
     }
 
     currentContextPath(): string {

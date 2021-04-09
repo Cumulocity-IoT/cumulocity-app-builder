@@ -136,25 +136,18 @@ export class AppModule extends HybridAppModule {
                             "appId": appId, 
                             "tenantId": this.settingsService.getTenantName(), 
                             "dashboardId": dashboardId,
-                            "other": other
+                            "pageId": other
                         });
-                }
-            } else if (urlParams.length > 1 && (urlParams[1] === '' || urlParams[1] === 'home')) {
-                if(window && window['aptrinsic'] ){
-                    window['aptrinsic']('track', 'gp_appbuilder_homepage_viewed ',  {
-                        "tenantId": this.settingsService.getTenantName(), 
-                    });
                 }
             } else if(urlParams.length > 1) {
                 other = urlParams[1];
                 if(window && window['aptrinsic'] ){
                     window['aptrinsic']('track', 'gp_appbuilder_page_viewed',  {
                         "tenantId": this.settingsService.getTenantName(), 
-                        "other": other
+                        "pageId": other
                 });
                 }
             }
         }
-        
     }
 }

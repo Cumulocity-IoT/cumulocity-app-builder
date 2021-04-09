@@ -185,8 +185,7 @@ export class BuilderModule {
             this.settingService.isAnalyticsProviderLoaded = true;
             const provider = this.settingService.getAnalyticsProvider();
             this.initGainsight(provider.providerURL, provider.providerKey, 
-                provider.providerIdentity, provider.providerAccountId, 
-                provider.providerAccountName);
+                provider.providerIdentity, this.settingService.getTenantName());
         } else {
             if(window && window['aptrinsic'] ){
                 window['aptrinsic']('track', 'Applications', {"appId": appId });
@@ -194,7 +193,7 @@ export class BuilderModule {
         }
     }
     //Gainsight Integration
-    private initGainsight(url: string, key: string, indentity : string, accountId : string, accountName : string) {
+    private initGainsight(url: string, key: string, indentity : string, accountId : string) {
         let script = this.renderer.createElement("script");
         script.type = `text/javascript`;
         script.text =
@@ -213,7 +212,6 @@ export class BuilderModule {
           {
             //Account Fields
             "id": "${accountId}", //Required
-            "name":"${accountName}"
           });
             `;
     
