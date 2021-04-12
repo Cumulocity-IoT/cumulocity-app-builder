@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { ApplicationService, InventoryService, ICurrentTenant, IApplication } from '@c8y/client';
 import { AlertService } from '@c8y/ngx-components';
 import { AppBuilderExternalAssetsService } from 'app-builder-external-assets';
+import { Subject } from 'rxjs';
 import { contextPathFromURL } from '../utils/contextPathFromURL';
 import {UpdateableAlert} from "../utils/UpdateableAlert";
 
@@ -16,6 +17,7 @@ export class SettingsService {
     };
     private currentTenant: ICurrentTenant;
     private analyticsProvider: any = {};
+    delayedTenantUpdateSubject = new Subject<any>();
     
     constructor(private appService: ApplicationService, private inventoryService: InventoryService,
         private alertService: AlertService, private externalAssetService: AppBuilderExternalAssetsService ){
@@ -57,10 +59,15 @@ export class SettingsService {
             return (this.appBuilderConfig && this.appBuilderConfig.customProperties ? this.appBuilderConfig.customProperties : this.defaultCustomProperties);
         }
     }
+
+    async isDashboardCatalogEnabled() {
+        const customProp = await this.getCustomProperties();
+        return (customProp && customProp.dashboardCataglogEnabled === "true");
+    }
     
     async saveCustomProperties(customProperties) {
         const creationAlert = new UpdateableAlert(this.alertService);
-        creationAlert.update('Adding new Provider...');
+        creationAlert.update('Updating Custom Properties...');
         const appBuilderId = await this.getAPPBuilderId();
         if(this.appBuilderConfig) {
             await this.inventoryService.update({
@@ -76,13 +83,14 @@ export class SettingsService {
                     appBuilderId
             });
         }
-        creationAlert.update(`Custom Properties Updated!`, "success");
-        creationAlert.close(5000);
+        creationAlert.update(`Custom Properties Updated! Refreshing...`, "success");
+        await creationAlert.close(3000);
         location.reload();
     }
 
     setTenant(tenant: ICurrentTenant | null) {
         this.currentTenant = tenant;
+        this.delayedTenantUpdateSubject.next(this.currentTenant);
     }
 
     getTenantName() {

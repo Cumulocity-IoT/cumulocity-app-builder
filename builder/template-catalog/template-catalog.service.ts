@@ -9,18 +9,22 @@ import { ApplicationService, InventoryBinaryService, InventoryService } from "@c
 import { AppBuilderNavigationService } from "../navigation/app-builder-navigation.service";
 import { Alert, AlertService } from "@c8y/ngx-components";
 import { RuntimeWidgetInstallerService } from "cumulocity-runtime-widget-loader";
+import { AppBuilderExternalAssetsService } from 'app-builder-external-assets';
 
 @Injectable()
 export class TemplateCatalogService {
 
-    private readonly GATEWAY_URL = 'https://democenter.gateway.webmethodscloud.com/gateway/LabcaseAssetService/1.0/storage/d/';
-
-    private readonly CATALOG_LABCASE_ID = '35cbb988a5fdcbfbe08be099cfaf37eb';
+    private  GATEWAY_URL = '';
+    private  CATALOG_LABCASE_ID = '';
 
     constructor(private http: HttpClient, private inventoryService: InventoryService,
         private appService: ApplicationService, private navigation: AppBuilderNavigationService,
         private binaryService: InventoryBinaryService, private alertService: AlertService,
-        private runtimeWidgetInstallerService: RuntimeWidgetInstallerService) { }
+        private runtimeWidgetInstallerService: RuntimeWidgetInstallerService, 
+        private externalService: AppBuilderExternalAssetsService) {
+            this.GATEWAY_URL = this.externalService.getURL('DBCATALOG', 'gatewayURL');
+            this.CATALOG_LABCASE_ID = this.externalService.getURL('DBCATALOG', 'labcaseId');
+         }
 
     getTemplateCatalog(): Observable<TemplateCatalogEntry[]> {
         return this.http.get(`${this.GATEWAY_URL}${this.CATALOG_LABCASE_ID}`).pipe(map(response => {
@@ -47,7 +51,6 @@ export class TemplateCatalogService {
 
     getTemplateDetails(dashboardId: string): Observable<TemplateDetails> {
         return this.http.get(`${this.GATEWAY_URL}${dashboardId}`).pipe(map((dashboard: TemplateDetails) => {
-            console.log(dashboard);
             return dashboard;
         }));
     }
@@ -66,7 +69,6 @@ export class TemplateCatalogService {
     uploadImage(image: File): Promise<string> {
         return this.binaryService.create(image).then((response) => {
             let imageBinary = response.data as IManagedObjectBinary
-            console.log(imageBinary);
             return imageBinary.id;
         });
     }
@@ -79,8 +81,6 @@ export class TemplateCatalogService {
         if (templateDetails.input.images && templateDetails.input.images.length > 0) {
             templateDetails.widgets = this.updateWidgetConfigurationWithImageInformation(templateDetails.input.images, templateDetails.widgets);
         }
-
-        console.log(this.getCumulocityDashboardRepresentation(dashboardConfiguration, templateDetails.widgets));
 
         await this.inventoryService.create({
             "c8y_Dashboard": this.getCumulocityDashboardRepresentation(dashboardConfiguration, templateDetails.widgets)
@@ -134,7 +134,6 @@ export class TemplateCatalogService {
 
     private updateWidgetConfigurationWithDeviceInformation(devices: Array<DeviceDescription>, widgets: Array<TemplateDashboardWidget>): Array<TemplateDashboardWidget> {
         let updatedWidgets = widgets.map(widget => {
-            console.log(JSON.stringify(widget));
             let widgetStringDescription: any = JSON.stringify(widget);
 
             devices.forEach(device => {
@@ -142,30 +141,25 @@ export class TemplateCatalogService {
                 widgetStringDescription = widgetStringDescription.replaceAll(`"{{${device.placeholder}.name}}"`, `"${device.reprensentation.name}"`);
             })
 
-            console.log(widgetStringDescription);
             widget = JSON.parse(widgetStringDescription);
             return widget
         })
 
-        console.log(updatedWidgets);
         return updatedWidgets;
     }
 
     private updateWidgetConfigurationWithImageInformation(images: Array<BinaryDescription>, widgets: Array<TemplateDashboardWidget>): Array<TemplateDashboardWidget> {
         let updatedWidgets = widgets.map(widget => {
-            console.log(JSON.stringify(widget));
             let widgetStringDescription: any = JSON.stringify(widget);
 
             images.forEach(image => {
                 widgetStringDescription = widgetStringDescription.replaceAll(`"{{${image.placeholder}.id}}"`, `"${image.id}"`);
             })
 
-            console.log(widgetStringDescription);
             widget = JSON.parse(widgetStringDescription);
             return widget
         })
 
-        console.log(updatedWidgets);
         return updatedWidgets;
     }
 

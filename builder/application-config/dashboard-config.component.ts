@@ -33,7 +33,7 @@ import * as delay from "delay";
 import { TemplateCatalogModalComponent } from "../template-catalog/template-catalog.component";
 import { TemplateUpdateModalComponent } from "../template-catalog/template-update.component";
 import { BinaryDescription, DeviceDescription } from "../template-catalog/template-catalog.model";
-import { ProgressIndicatorModalComponent } from "../utils/progress-indicator-modal/progress-indicator-modal.component";
+import { SettingsService } from './../../builder/settings/settings.service';
 
 
 export interface DashboardConfig {
@@ -58,10 +58,11 @@ export interface DashboardConfig {
     templateUrl: './dashboard-config.component.html',
     styleUrls: ['./dashboard-config.component.less']
 })
-export class DashboardConfigComponent implements OnDestroy {
+export class DashboardConfigComponent implements OnInit, OnDestroy {
     newAppName: string;
     newAppContextPath: string;
     newAppIcon: string;
+    isDashboardCatalogEnabled: boolean = false;
 
     app: Observable<any>;
 
@@ -73,7 +74,7 @@ export class DashboardConfigComponent implements OnDestroy {
     constructor(
         private appIdService: AppIdService, private appService: ApplicationService, private appStateService: AppStateService,
         private brandingService: BrandingService, private inventoryService: InventoryService, private navigation: AppBuilderNavigationService,
-        private modalService: BsModalService, private alertService: AlertService
+        private modalService: BsModalService, private alertService: AlertService, private settngService: SettingsService
     ) {
         this.app = this.appIdService.appIdDelayedUntilAfterLogin$.pipe(
             switchMap(appId => from(
@@ -96,6 +97,9 @@ export class DashboardConfigComponent implements OnDestroy {
             });
     }
 
+    async ngOnInit() {
+        this.isDashboardCatalogEnabled = await this.settngService.isDashboardCatalogEnabled();
+    }
     async deleteDashboard(application, dashboards: DashboardConfig[], index: number) {
         dashboards.splice(index, 1);
         application.applicationBuilder.dashboards = [...dashboards];
@@ -183,7 +187,6 @@ export class DashboardConfigComponent implements OnDestroy {
 
         const dashboard = dashboards[index];
         if (dashboard.templateDashboard) {
-            console.log('open template dashboard dialog');
             this.showTemplateDashboardEditModalDialog(app, dashboard);
         } else {
             this.bsModalRef = this.modalService.show(EditDashboardModalComponent, {

@@ -28,8 +28,6 @@ export class TemplateUpdateModalComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        console.log('on Init');
-        console.log(this.dashboardConfig);
 
         this.showLoadingIndicator();
         this.catalogService.getTemplateDetails(this.dashboardConfig.templateDashboard.id)

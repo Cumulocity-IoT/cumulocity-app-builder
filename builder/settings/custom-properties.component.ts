@@ -16,11 +16,12 @@
 * limitations under the License.
  */
 
-import {Component, OnInit} from "@angular/core";
+import {Component, OnDestroy, OnInit} from "@angular/core";
 import {
     UserService
 } from "@c8y/client";
 import {AppStateService} from "@c8y/ngx-components";
+import { Subscription } from 'rxjs';
 import { SettingsService } from './settings.service';
 
 @Component({
@@ -34,6 +35,15 @@ import { SettingsService } from './settings.service';
                 <input type="text" class="form-control" [disabled]="!userHasAdminRights || isGainsightParent " name="gainsightEnabled" id="gainsightEnabled" 
                 placeholder="e.g. true/false (required)" required autofocus [(ngModel)]="customProperties.gainsightEnabled" >
             </div>
+            <div class="form-group">
+            <label translate="" for="dashboardCataglogEnabled" >Dashboard Catalog Enabled</label>
+            <input type="text" class="form-control" [disabled]="!userHasAdminRights " name="dashboardCataglogEnabled" id="dashboardCataglogEnabled" 
+            placeholder="e.g. true/false (required)" required autofocus [(ngModel)]="customProperties.dashboardCataglogEnabled" >
+        </div>
+        </div>
+        <div *ngIf="isBusy" class="col-xs-12 col-sm-12 col-md-12" style="padding-bottom:50px;padding-top:20px">
+            <rectangle-spinner  style="position: relative; left: 47%;">
+            </rectangle-spinner>
         </div>
         <div class="card-footer" style="text-align:center" *ngIf="userHasAdminRights">
             <button class="btn btn-primary" (click)="save(customProperties)" [disabled]="!customPropertiesForm.form.valid || !isFormValid()">Save</button>
@@ -44,18 +54,24 @@ import { SettingsService } from './settings.service';
 })
 
 // Custom property settings for Application Builder
-export class CustomPropertiesComponent implements OnInit{
+export class CustomPropertiesComponent implements OnInit, OnDestroy{
 
     userHasAdminRights: boolean;
     isBusy: boolean = false;
     isGainsightParent: boolean = false;
     customProperties = {
-        gainsightEnabled: "false"
+        gainsightEnabled: "false",
+        dashboardCataglogEnabled: "false"
     }
+    delayedTenantSubscription: Subscription;
     constructor( private appStateService: AppStateService,
         private userService: UserService, 
         private settingsService: SettingsService) {
-        this.userHasAdminRights = userService.hasAllRoles(appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN","ROLE_APPLICATION_MANAGEMENT_ADMIN"])
+        this.userHasAdminRights = userService.hasAllRoles(appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN","ROLE_APPLICATION_MANAGEMENT_ADMIN"]);
+        this.delayedTenantSubscription = this.settingsService.delayedTenantUpdateSubject.subscribe ((tenant) => {
+            this.isGainsightParent = this.settingsService.isGaisigntEnabledFromParent();
+            if(this.isGainsightParent) { this.customProperties.gainsightEnabled = 'true';}
+        });
     }
                         
 
@@ -64,14 +80,22 @@ export class CustomPropertiesComponent implements OnInit{
         this.customProperties = await this.settingsService.getCustomProperties();
         this.isGainsightParent = this.settingsService.isGaisigntEnabledFromParent();
         if(this.isGainsightParent) { this.customProperties.gainsightEnabled = 'true';}
+        if(this.customProperties && !this.customProperties.dashboardCataglogEnabled) {
+            this.customProperties.dashboardCataglogEnabled = 'false';
+        }
         this.isBusy = false;
     }
 
     isFormValid() {
-        return (this.customProperties.gainsightEnabled === 'true' || this.customProperties.gainsightEnabled === 'false');
+        return ((this.customProperties.gainsightEnabled === 'true' || this.customProperties.gainsightEnabled === 'false') && 
+        (this.customProperties.dashboardCataglogEnabled === 'true' || this.customProperties.dashboardCataglogEnabled === 'false'));
     }
 
     save(customProperties) {
         this.settingsService.saveCustomProperties(customProperties);
+    }
+
+    ngOnDestroy() {
+        this.delayedTenantSubscription.unsubscribe();
     }
 }
