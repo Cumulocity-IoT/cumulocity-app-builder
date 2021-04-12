@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewEncapsulation } from "@angular/core";
 import { DashboardConfig } from "../application-config/dashboard-config.component";
-import { DeviceSelectorModalComponent } from "../utils/device-selector/device-selector.component";
+import { DeviceSelectorModalComponent } from "../utils/device-selector-modal/device-selector.component";
 import { BsModalRef, BsModalService } from "ngx-bootstrap";
 import { IManagedObject } from '@c8y/client';
 import { TemplateDetails } from "./template-catalog.model";

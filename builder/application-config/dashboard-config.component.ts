@@ -207,7 +207,7 @@ export class DashboardConfigComponent implements OnDestroy {
     }
 
     showTemplateCatalogModalDialog(app): void {
-        this.bsModalRef = this.modalService.show(TemplateCatalogModalComponent, { class: 'modal-lg', initialState: { app } });
+        this.bsModalRef = this.modalService.show(TemplateCatalogModalComponent, { backdrop: 'static', class: 'modal-lg', initialState: { app } });
         this.bsModalRef.content.onSave.subscribe((isReloadRequired: boolean) => {
             if (isReloadRequired) {
                 location.reload();
@@ -216,7 +216,7 @@ export class DashboardConfigComponent implements OnDestroy {
     }
 
     showTemplateDashboardEditModalDialog(app, dashboardConfig: DashboardConfig): void {
-        this.bsModalRef = this.modalService.show(TemplateUpdateModalComponent, { class: 'modal-lg', initialState: { app, dashboardConfig } });
+        this.bsModalRef = this.modalService.show(TemplateUpdateModalComponent, { backdrop: 'static', class: 'modal-lg', initialState: { app, dashboardConfig } });
     }
 
     ngOnDestroy(): void {

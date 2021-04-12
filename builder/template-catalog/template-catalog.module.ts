@@ -5,7 +5,7 @@ import { TemplateCatalogModalComponent } from "./template-catalog.component";
 import { TemplateCatalogService } from "./template-catalog.service";
 import { IconSelectorModule } from "../../icon-selector/icon-selector.module";
 import { RectangleSpinnerModule } from "../utils/rectangle-spinner/rectangle-spinner.module";
-import { DeviceSelectorModalModule } from "../utils/device-selector/device-selector.module";
+import { DeviceSelectorModalModule } from "../utils/device-selector-modal/device-selector.module";
 import { TemplateUpdateModalComponent } from "./template-update.component";
 
 @NgModule({
