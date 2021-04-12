@@ -1,0 +1,130 @@
+<div class="modal-header text-center bg-primary">
+    <h4 *ngIf="isCatalogDisplayed()" class="text-uppercase" style="margin:0; letter-spacing: 0.15em;">Dashboard Catalog
+    </h4>
+    <h4 *ngIf="isDetailPageDisplayed()" class="text-uppercase" style="margin:0; letter-spacing: 0.15em;">
+        {{selectedTemplate?.title}}</h4>
+</div>
+<div class="modal-body">
+    <rectangle-spinner *ngIf="isLoadingIndicatorDisplayed" style="position: relative; left: 47%; top: 200px;">
+    </rectangle-spinner>
+
+    <div *ngIf="isCatalogDisplayed()" class="row">
+        <div *ngFor="let template of templates" class="col-md-3 col-sm-6 col-xs-12 card-demo-container">
+            <div class="flip-card">
+                <div class="card-demo flip-card-inner">
+                    <div class="flip-card-front">
+                        <img class="card-image" [src]="template?.thumbnail && template?.thumbnail != '' ? template?.thumbnail : './images/placeholder.png'" />
+                        <div class="card-data">
+                            <h3 [title]="template?.title">
+                                <b>{{ template?.title }} </b>
+                            </h3>
+                        </div>
+                        <div *ngIf="template.comingSoon==true" class="flip-card-font-coming-soon">
+                        </div>
+                        <div *ngIf="template.comingSoon==true" class="coming-soon-tag">Coming soon</div>
+                    </div>
+                    <div class="flip-card-back" [ngClass]="template.comingSoon==true?'coming-soon-back':''">
+                        <div *ngIf="template.comingSoon==true" class="coming-soon-tag-backside">Coming Soon</div>
+                        <div class="card-desc">
+                            {{template?.description?template?.description:'No description available'}}
+                        </div>
+                        <div *ngIf="template.comingSoon==false" class="button-grp">
+                            <button type="button" class="btn btn-default btn-sm" style="width: 100%;"
+                                (click)="onTemplateClicked(template)">Details</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="isDetailPageDisplayed() && templateDetails" class="row template-detail-container">
+        <div class="col-md-12 template-description">
+            <p>{{templateDetails.description}}</p>
+        </div>
+        <div class="col-md-6">
+            <form name="newDashboardCreationForm" #newDashboardCreationForm="ngForm" class="">
+                <div class="form-group">
+                    <label for="name"><span>Path</span></label>
+                    <input type="text" class="form-control" id="name" name="name"
+                        placeholder="e.g. Some Folder/My First Application (required)" required
+                        [(ngModel)]="dashboardConfiguration.dashboardName">
+                </div>
+
+                <div class="form-group">
+                    <label for="visibility"><span>Visibility</span></label>
+                    <select name="visibility" id="visibility" [(ngModel)]="dashboardConfiguration.dashboardVisibility">
+                        <option value="">Navigation and Tabs</option>
+                        <option value="no-nav">Tabs Only</option>
+                        <option value="hidden">Hidden</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="tabgroup"><span>Tab Group</span></label>
+                    <select name="tabgroup" id="tabgroup" [(ngModel)]="dashboardConfiguration.tabGroup">
+                        <option value="deviceId">Device ID</option>
+                        <option value="">None</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="icon"><span>Icon</span></label>
+                    <icon-selector id="icon" name="icon" [(value)]="dashboardConfiguration.dashboardIcon">
+                    </icon-selector>
+                </div>
+
+                <div *ngIf="templateDetails.input?.devices?.length > 0">
+                    <div class="form-group" *ngFor="let device of templateDetails.input.devices; let i = index">
+                        <label for="device"><span>Device/Sensor - Type: {{device.type}}</span></label>
+                        <form class="form-inline">
+                            <div class="form-group" style="width: 60%; padding:0px">
+                                <label class="sr-only" for="selected-device">Device/Sensor</label>
+                                <input [readonly]="true" name="selected-device" class="form-control"
+                                    style="width: 100%;" id="selected-device" placeholder="Device/Sensor" type="text"
+                                    [ngModel]="templateDetails.input.devices[i].reprensentation?.name">
+                            </div>
+                            <button type="button" style="width: 40%;" class="btn btn-primary"
+                                (click)="openDeviceSelectorDialog(i)">Select Device</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div *ngIf="templateDetails.input?.images?.length > 0">
+                    <div class="form-group" *ngFor="let image of templateDetails.input.images; let i = index">
+                        <label for="exampleInputFile">Image - Type: {{image.type}}</label>
+                        <input type="file" id="exampleInputFile" aria-describedby="helpinput" class="form-control"
+                            (change)="onImageSelected($event.target.files, i)" />
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <div class="template-preview">
+                <label for="Preview"><span>Preview:</span></label>
+                <img style="width: 100%;" [src]="templateDetails.preview" />
+            </div>
+            <div *ngIf="templateDetails.input?.dependencies?.length > 0">
+                <label for="Depedencies"><span>Dependencies:</span></label>
+                <ul class="list-group">
+                    <li *ngFor="let dependency of templateDetails.input.dependencies; let i = index"
+                        class="list-group-item">
+                        <span *ngIf="dependency.isInstalled" class="badge badge-success">INSTALLED</span>
+                        <span *ngIf="!dependency.isInstalled" class="badge badge-danger">NOT INSTALLED</span>
+                        <a href="{{dependency.repository}}" target="_blank">{{dependency.title}}</a>
+                        <button *ngIf="!dependency.isInstalled" type="button" style="margin-left: 10px"
+                            class="btn btn-primary btn-xs btn-icon" (click)="installDependency(dependency)">
+                            <i class="fa fa-cloud-download"></i>
+                            Install</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button *ngIf="isDetailPageDisplayed()" type="button" class="btn btn-default"
+        (click)="onBackButtonClicked()">Back</button>
+    <button type="button" class="btn btn-default" (click)="onCancelButtonClicked()">Cancel</button>
+    <button *ngIf="isDetailPageDisplayed()" type="button" class="btn btn-primary" (click)="onSaveButtonClicked()"
+        [disabled]="!isSaveButtonEnabled()">Create</button>
+</div>

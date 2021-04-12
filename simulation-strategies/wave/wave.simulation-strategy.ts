@@ -34,6 +34,7 @@ import {SimulatorConfig} from "../../builder/simulator/simulator-config";
     configComponent: WaveSimulationStrategyConfigComponent
 })
 export class WaveSimulationStrategy extends DeviceIntervalSimulator {
+
     startTime: number = 0;
 
     constructor(protected injector: Injector, private measurementService: MeasurementService, private config: WaveSimulationStrategyConfig) {
@@ -57,10 +58,10 @@ export class WaveSimulationStrategy extends DeviceIntervalSimulator {
         const t = (Date.now() - this.startTime) / 1000;
         const w = 2 * Math.PI / this.config.wavelength;
 
-        const wt = w *t;
+        const wt = w * t;
 
         let measurementValue = 0;
-        switch(this.config.waveType) {
+        switch (this.config.waveType) {
             case "sine":
                 measurementValue = this.config.height * Math.sin(wt);
                 break;
@@ -71,8 +72,8 @@ export class WaveSimulationStrategy extends DeviceIntervalSimulator {
                 const max_fourier_terms = 8;
                 let fourier_expansion = 0;
                 for (let i = 1; i <= max_fourier_terms; i++) {
-                    const x = 2*i - 1;
-                    fourier_expansion = fourier_expansion + 1/x * Math.sin(x * wt);
+                    const x = 2 * i - 1;
+                    fourier_expansion = fourier_expansion + 1 / x * Math.sin(x * wt);
                 }
                 measurementValue = this.config.height * 4 / Math.PI * fourier_expansion;
                 break;
@@ -84,7 +85,7 @@ export class WaveSimulationStrategy extends DeviceIntervalSimulator {
             [this.config.fragment]: {
                 [this.config.series]: {
                     value: measurementValue,
-                    ...this.config.unit && {unit: this.config.unit}
+                    ...this.config.unit && { unit: this.config.unit }
                 }
             }
         });

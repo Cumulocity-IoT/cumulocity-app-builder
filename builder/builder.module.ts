@@ -32,28 +32,31 @@ import {
     AppBuilderConfigNavigationRegistrationService,
     AppBuilderConfigNavigationService
 } from "./navigation/app-builder-config-navigation.service";
-import {BrandingComponent} from "./branding/branding.component";
-import {SimulatorConfigModule} from "./simulator-config/simulator-config.module";
-import {SimulatorCommunicationService} from "./simulator/mainthread/simulator-communication.service";
-import {AppIdService} from "./app-id.service";
-import {SimulatorConfigComponent} from "./simulator-config/simulator-config.component";
-import {AppListModule, RedirectToDefaultApplicationOrBuilder} from "./app-list/app-list.module";
-import {HomeComponent} from "./home/home.component";
-
-import {MarkdownModule} from "ngx-markdown";
-import {BrandingDirtyGuardService} from "./branding/branding-dirty-guard.service";
-import {AppListComponent} from "./app-list/app-list.component";
-import {LockStatus} from "./simulator/worker/simulation-lock.service";
-import {fromEvent, Observable} from "rxjs";
-import {withLatestFrom} from "rxjs/operators";
-import {proxy} from "comlink";
+import { BrandingComponent } from "./branding/branding.component";
+import { SimulatorConfigModule } from "./simulator-config/simulator-config.module";
+import { SimulatorCommunicationService } from "./simulator/mainthread/simulator-communication.service";
+import { AppIdService } from "./app-id.service";
+import { SimulatorConfigComponent } from "./simulator-config/simulator-config.component";
+import { AppListModule } from "./app-list/app-list.module";
+import { MarkdownModule } from "ngx-markdown";
+import { BrandingDirtyGuardService } from "./branding/branding-dirty-guard.service";
+import { AppListComponent } from "./app-list/app-list.component";
+import { LockStatus } from "./simulator/worker/simulation-lock.service";
+import { fromEvent, Observable } from "rxjs";
+import { withLatestFrom } from "rxjs/operators";
+import { proxy } from "comlink";
 import { CookieAuth, TenantService } from '@c8y/client';
+import { TemplateCatalogModule } from "./template-catalog/template-catalog.module";
+import { RectangleSpinnerModule } from "./utils/rectangle-spinner/rectangle-spinner.module";
+import { DeviceSelectorModalModule } from "./utils/device-selector-modal/device-selector.module";
+import { ProgressIndicatorModalModule } from "./utils/progress-indicator-modal/progress-indicator-modal.module";
 import { DOCUMENT } from '@angular/common';
 import { DeviceSelectorModule } from '../device-selector/device-selector.module';
 import { VideoModalComponent } from './home/video-modal.component';
 import { SettingsModule } from './settings/settings.module';
 import { CustomPropertiesComponent } from './settings/custom-properties.component';
 import { SettingsService } from './settings/settings.service';
+import { HomeComponent } from './home/home.component';
 @NgModule({
     imports: [
         ApplicationModule,
@@ -89,8 +92,12 @@ import { SettingsService } from './settings/settings.service';
         ]),
         CoreModule,
         IconSelectorModule,
+        RectangleSpinnerModule,
+        ProgressIndicatorModalModule,
+        DeviceSelectorModalModule,
         SortableModule.forRoot(),
         WizardModule,
+        TemplateCatalogModule,
         TooltipModule.forRoot(),
         BrandingModule.forRoot(),
         SimulatorConfigModule,
@@ -113,10 +120,10 @@ import { SettingsService } from './settings/settings.service';
     ],
     providers: [
         AppBuilderNavigationService,
-        { provide: HOOK_NAVIGATOR_NODES, useExisting: AppBuilderNavigationService, multi: true},
+        { provide: HOOK_NAVIGATOR_NODES, useExisting: AppBuilderNavigationService, multi: true },
         AppBuilderConfigNavigationRegistrationService,
         AppBuilderConfigNavigationService,
-        { provide: HOOK_NAVIGATOR_NODES, useExisting: AppBuilderConfigNavigationService, multi: true},
+        { provide: HOOK_NAVIGATOR_NODES, useExisting: AppBuilderConfigNavigationService, multi: true },
     ]
 })
 export class BuilderModule {
@@ -127,27 +134,27 @@ export class BuilderModule {
         // Pass the app state to the worker from the main thread (Initially and every time it changes)
         appStateService.currentUser.subscribe(async (user) => {
             let isCookieAuth = false;
-            let cookieAuth = null; 
+            let cookieAuth = null;
             let xsrfToken = null;
             const token = localStorage.getItem(loginService.TOKEN_KEY) || sessionStorage.getItem(loginService.TOKEN_KEY);
             if (!token) {
                 // XSRF token required by webworker while cookie auth used. use case: login using sso
-                cookieAuth =  new CookieAuth();
+                cookieAuth = new CookieAuth();
                 xsrfToken = cookieAuth.getCookieValue('XSRF-TOKEN');
                 isCookieAuth = true;
             }
             if (user != null) {
                 const tfa = localStorage.getItem(loginService.TFATOKEN_KEY) || sessionStorage.getItem(loginService.TFATOKEN_KEY);
                 if (token !== undefined && token) {
-                    return await simSvc.simulator.setUserAndCredentials(user, {token, tfa}, isCookieAuth, null);
+                    return await simSvc.simulator.setUserAndCredentials(user, { token, tfa }, isCookieAuth, null);
                 } else {
-                    return await simSvc.simulator.setUserAndCredentials(user, {token, tfa}, isCookieAuth, xsrfToken);
+                    return await simSvc.simulator.setUserAndCredentials(user, { token, tfa }, isCookieAuth, xsrfToken);
                 }
             }
             return await simSvc.simulator.setUserAndCredentials(user, {}, isCookieAuth, xsrfToken);
         });
 
-        const lockStatus$ = new Observable<{isLocked: boolean, isLockOwned: boolean, lockStatus?: LockStatus}>(subscriber => {
+        const lockStatus$ = new Observable<{ isLocked: boolean, isLockOwned: boolean, lockStatus?: LockStatus }>(subscriber => {
             simSvc.simulator
                 .addLockStatusListener(proxy(lockStatus => subscriber.next(lockStatus)))
                 .then(listenerId => subscriber.add(() => simSvc.simulator.removeListener(listenerId)));
