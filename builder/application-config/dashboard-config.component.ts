@@ -16,7 +16,7 @@
 * limitations under the License.
  */
 
-import { Component, OnDestroy } from "@angular/core";
+import { Component, OnDestroy, OnInit } from "@angular/core";
 import { ApplicationService, InventoryService, IApplication, IManagedObject } from "@c8y/client";
 import { Observable, from, Subject, Subscription } from "rxjs";
 import { debounceTime, filter, switchMap, tap } from "rxjs/operators";

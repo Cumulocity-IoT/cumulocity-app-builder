@@ -191,8 +191,9 @@ export class BuilderModule {
         if(isRegister) {
             this.settingService.isAnalyticsProviderLoaded = true;
             const provider = this.settingService.getAnalyticsProvider();
+            const identity = this.settingService.getIdentity();
             this.initGainsight(provider.providerURL, provider.providerKey, 
-                provider.providerIdentity, this.settingService.getTenantName());
+                identity, this.settingService.getTenantName());
         } else {
             if(window && window['aptrinsic'] ){
                 window['aptrinsic']('track', 'Applications', {"appId": appId });

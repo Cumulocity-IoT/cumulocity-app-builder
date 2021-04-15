@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ApplicationService, InventoryService, ICurrentTenant, IApplication } from '@c8y/client';
-import { AlertService } from '@c8y/ngx-components';
+import { AlertService, AppStateService } from '@c8y/ngx-components';
 import { AppBuilderExternalAssetsService } from 'app-builder-external-assets';
 import { Subject } from 'rxjs';
 import { contextPathFromURL } from '../utils/contextPathFromURL';
@@ -20,7 +20,8 @@ export class SettingsService {
     delayedTenantUpdateSubject = new Subject<any>();
     
     constructor(private appService: ApplicationService, private inventoryService: InventoryService,
-        private alertService: AlertService, private externalAssetService: AppBuilderExternalAssetsService ){
+        private alertService: AlertService, private externalAssetService: AppBuilderExternalAssetsService,
+        private appStateService: AppStateService ){
             const providerList = this.externalAssetService.getAssetsList('ANALYTICS')
             this.analyticsProvider = providerList.find( provider => provider.key === 'gainsight');
             this.analyticsProvider.providerURL = this.externalAssetService.getURL('ANALYTICS','gainsight');
@@ -35,7 +36,7 @@ export class SettingsService {
         else {
             const appList = (await this.appService.list({pageSize: 2000})).data;
             let app: IApplication & {widgetContextPaths?: string[]} = appList.find(app => app.contextPath === contextPathFromURL() &&
-             app.availability === 'PRIVATE');
+             String(app.availability) === 'PRIVATE');
             if (!app) {
                 // Own App builder not found. Looking for subscribed one
                 app = appList.find(app => app.contextPath === contextPathFromURL());
@@ -131,5 +132,13 @@ export class SettingsService {
 
     getAnalyticsProvider() {
         return this.analyticsProvider;
+    }
+
+    getIdentity() {
+        const email = (this.appStateService.currentUser.getValue().email ? this.appStateService.currentUser.getValue().email :this.appStateService.currentUser.getValue().userName);
+        if(email && email.indexOf('@') > -1) {
+            return email.split('@')[1];
+        }
+        return email;
     }
 }
