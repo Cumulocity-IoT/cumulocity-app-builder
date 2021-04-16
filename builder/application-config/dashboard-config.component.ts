@@ -187,7 +187,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
 
         const dashboard = dashboards[index];
         if (dashboard.templateDashboard) {
-            this.showTemplateDashboardEditModalDialog(app, dashboard);
+            this.showTemplateDashboardEditModalDialog(app, dashboard, index);
         } else {
             this.bsModalRef = this.modalService.show(EditDashboardModalComponent, {
                 class: 'c8y-wizard',
@@ -218,8 +218,8 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
         });
     }
 
-    showTemplateDashboardEditModalDialog(app, dashboardConfig: DashboardConfig): void {
-        this.bsModalRef = this.modalService.show(TemplateUpdateModalComponent, { backdrop: 'static', class: 'modal-lg', initialState: { app, dashboardConfig } });
+    showTemplateDashboardEditModalDialog(app, dashboardConfig: DashboardConfig, index: number): void {
+        this.bsModalRef = this.modalService.show(TemplateUpdateModalComponent, { backdrop: 'static', class: 'modal-lg', initialState: { app, dashboardConfig, index } });
     }
 
     ngOnDestroy(): void {

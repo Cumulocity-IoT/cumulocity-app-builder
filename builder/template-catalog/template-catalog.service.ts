@@ -10,21 +10,22 @@ import { AppBuilderNavigationService } from "../navigation/app-builder-navigatio
 import { Alert, AlertService } from "@c8y/ngx-components";
 import { RuntimeWidgetInstallerService } from "cumulocity-runtime-widget-loader";
 import { AppBuilderExternalAssetsService } from 'app-builder-external-assets';
+import { DashboardConfig } from "builder/application-config/dashboard-config.component";
 
 @Injectable()
 export class TemplateCatalogService {
 
-    private  GATEWAY_URL = '';
-    private  CATALOG_LABCASE_ID = '';
+    private GATEWAY_URL = '';
+    private CATALOG_LABCASE_ID = '';
 
     constructor(private http: HttpClient, private inventoryService: InventoryService,
         private appService: ApplicationService, private navigation: AppBuilderNavigationService,
         private binaryService: InventoryBinaryService, private alertService: AlertService,
-        private runtimeWidgetInstallerService: RuntimeWidgetInstallerService, 
+        private runtimeWidgetInstallerService: RuntimeWidgetInstallerService,
         private externalService: AppBuilderExternalAssetsService) {
-            this.GATEWAY_URL = this.externalService.getURL('DBCATALOG', 'gatewayURL');
-            this.CATALOG_LABCASE_ID = this.externalService.getURL('DBCATALOG', 'labcaseId');
-         }
+        this.GATEWAY_URL = this.externalService.getURL('DBCATALOG', 'gatewayURL');
+        this.CATALOG_LABCASE_ID = this.externalService.getURL('DBCATALOG', 'labcaseId');
+    }
 
     getTemplateCatalog(): Observable<TemplateCatalogEntry[]> {
         return this.http.get(`${this.GATEWAY_URL}${this.CATALOG_LABCASE_ID}`).pipe(map(response => {
@@ -102,6 +103,8 @@ export class TemplateCatalogService {
                 }
             ];
 
+            console.log(application.applicationBuilder.dashboards);
+
             return this.appService.update({
                 id: application.id,
                 applicationBuilder: application.applicationBuilder
@@ -109,6 +112,36 @@ export class TemplateCatalogService {
         }).then(() => {
             this.navigation.refresh();
         });
+    }
+
+    async updateDashboard(application, dashboardConfig: DashboardConfig, templateDetails: TemplateDetails, index: number) {
+        const dashboardManagedObject = (await this.inventoryService.detail(dashboardConfig.id)).data;
+        await this.inventoryService.update({
+            id: dashboardManagedObject.id,
+            "c8y_Dashboard": this.getCumulocityDashboardRepresentation(dashboardConfig, templateDetails.widgets)
+        });
+
+        const dashboard = application.applicationBuilder.dashboards[index];
+        application.applicationBuilder.dashboards[index] = {
+            id: dashboardManagedObject.id,
+            name: dashboardConfig.name,
+            icon: dashboardConfig.icon,
+            visibility: dashboardConfig.visibility,
+            tabGroup: dashboardConfig.tabGroup,
+            templateDashboard: {
+                id: dashboard.templateDashboard.id,
+                name: dashboard.templateDashboard.title,
+                devices: templateDetails.input.devices ? templateDetails.input.devices : [],
+                binaries: templateDetails.input.images ? templateDetails.input.images : []
+            }
+        };
+
+        await this.appService.update({
+            id: application.id,
+            applicationBuilder: application.applicationBuilder
+        } as any);
+
+        this.navigation.refresh();
     }
 
     private getCumulocityDashboardRepresentation(dashboardConfiguration, widgets: Array<TemplateDashboardWidget>): CumulocityDashboard {

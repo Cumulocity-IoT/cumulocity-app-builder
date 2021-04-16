@@ -17,6 +17,8 @@ export class TemplateUpdateModalComponent implements OnInit {
 
     dashboardConfig: DashboardConfig;
 
+    index: number;
+
     templateDetails: TemplateDetails;
 
     isLoadingIndicatorDisplayed = false;
@@ -28,7 +30,7 @@ export class TemplateUpdateModalComponent implements OnInit {
     }
 
     ngOnInit(): void {
-
+        console.log(this.dashboardConfig);
         this.showLoadingIndicator();
         this.catalogService.getTemplateDetails(this.dashboardConfig.templateDashboard.id)
             .subscribe(templateDetails => {
@@ -64,11 +66,29 @@ export class TemplateUpdateModalComponent implements OnInit {
     }
 
     onSaveButtonClicked(): void {
-        // this.catalogService.createDashboard(this.app, this.dashboardConfiguration, this.selectedTemplate, this.templateDetails);
-        this.modalRef.hide();
+        this.catalogService.updateDashboard(this.app, this.dashboardConfig, this.templateDetails, this.index)
+            .then(() => this.modalRef.hide());
     }
 
     isSaveButtonEnabled(): boolean {
-        return false;
+        return this.templateDetails && this.isNameAvailable() && (!this.templateDetails.input.devices || this.templateDetails.input.devices.length === 0 || this.isDevicesSelected());
+    }
+
+    private isNameAvailable(): boolean {
+        return this.dashboardConfig.name && this.dashboardConfig.name.length > 0;
+    }
+
+    private isDevicesSelected(): boolean {
+        if (!this.templateDetails.input.devices || this.templateDetails.input.devices.length === 0) {
+            return true;
+        }
+
+        for (let device of this.templateDetails.input.devices) {
+            if (!device.reprensentation) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

@@ -13,7 +13,8 @@
             <div class="flip-card">
                 <div class="card-demo flip-card-inner">
                     <div class="flip-card-front">
-                        <img class="card-image" [src]="template?.thumbnail && template?.thumbnail != '' ? template?.thumbnail : './images/placeholder.png'" />
+                        <img class="card-image"
+                            [src]="template?.thumbnail && template?.thumbnail != '' ? template?.thumbnail : './images/placeholder.png'" />
                         <div class="card-data">
                             <h3 [title]="template?.title">
                                 <b>{{ template?.title }} </b>
@@ -61,10 +62,8 @@
 
                 <div class="form-group">
                     <label for="tabgroup"><span>Tab Group</span></label>
-                    <select name="tabgroup" id="tabgroup" [(ngModel)]="dashboardConfiguration.tabGroup">
-                        <option value="deviceId">Device ID</option>
-                        <option value="">None</option>
-                    </select>
+                    <input type="text" class="form-control" id="tabgroup" name="tabgroup" placeholder="e.g. TabGroup1"
+                        [(ngModel)]="dashboardConfiguration.tabGroup">
                 </div>
 
                 <div class="form-group">
