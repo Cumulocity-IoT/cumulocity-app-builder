@@ -5,6 +5,7 @@ import { BsModalRef, BsModalService } from "ngx-bootstrap";
 import { IManagedObject } from '@c8y/client';
 import { TemplateDetails } from "./template-catalog.model";
 import { TemplateCatalogService } from "./template-catalog.service";
+import { ProgressIndicatorModalComponent } from "../utils/progress-indicator-modal/progress-indicator-modal.component";
 
 @Component({
     selector: 'template-update-component',
@@ -24,6 +25,8 @@ export class TemplateUpdateModalComponent implements OnInit {
     isLoadingIndicatorDisplayed = false;
 
     private deviceSelectorModalRef: BsModalRef;
+
+    private progressModal: BsModalRef;
 
     constructor(private modalService: BsModalService, private modalRef: BsModalRef, private catalogService: TemplateCatalogService) {
 
@@ -53,6 +56,12 @@ export class TemplateUpdateModalComponent implements OnInit {
         })
     }
 
+    onImageSelected(files: FileList, index: number): void {
+        this.catalogService.uploadImage(files.item(0)).then((binaryId: string) => {
+            this.templateDetails.input.images[index].id = binaryId;
+        });
+    }
+
     showLoadingIndicator(): void {
         this.isLoadingIndicatorDisplayed = true;
     }
@@ -65,13 +74,28 @@ export class TemplateUpdateModalComponent implements OnInit {
         this.modalRef.hide();
     }
 
-    onSaveButtonClicked(): void {
+    async onSaveButtonClicked(): Promise<void> {
+        this.showProgressModalDialog('Update Dashboard ...')
+
         this.catalogService.updateDashboard(this.app, this.dashboardConfig, this.templateDetails, this.index)
-            .then(() => this.modalRef.hide());
+            .then(() => {
+                this.hideProgressModalDialog();
+                this.modalRef.hide();
+            });
     }
 
     isSaveButtonEnabled(): boolean {
-        return this.templateDetails && this.isNameAvailable() && (!this.templateDetails.input.devices || this.templateDetails.input.devices.length === 0 || this.isDevicesSelected());
+        return this.templateDetails && this.isNameAvailable()
+            && (!this.templateDetails.input.devices || this.templateDetails.input.devices.length === 0 || this.isDevicesSelected())
+            && (!this.templateDetails.input.images || this.templateDetails.input.images.length === 0 || this.isImagesSelected());
+    }
+
+    private showProgressModalDialog(message: string): void {
+        this.progressModal = this.modalService.show(ProgressIndicatorModalComponent, { class: 'c8y-wizard', initialState: { message } });
+    }
+
+    private hideProgressModalDialog(): void {
+        this.progressModal.hide();
     }
 
     private isNameAvailable(): boolean {
@@ -85,6 +109,20 @@ export class TemplateUpdateModalComponent implements OnInit {
 
         for (let device of this.templateDetails.input.devices) {
             if (!device.reprensentation) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private isImagesSelected(): boolean {
+        if (!this.templateDetails.input.images || this.templateDetails.input.images.length === 0) {
+            return true;
+        }
+
+        for (let image of this.templateDetails.input.images) {
+            if (!image.id || image.id.length === 0) {
                 return false;
             }
         }

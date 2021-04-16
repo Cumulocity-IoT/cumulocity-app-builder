@@ -21,11 +21,11 @@ export class TemplateCatalogService {
     constructor(private http: HttpClient, private inventoryService: InventoryService,
         private appService: ApplicationService, private navigation: AppBuilderNavigationService,
         private binaryService: InventoryBinaryService, private alertService: AlertService,
-        private runtimeWidgetInstallerService: RuntimeWidgetInstallerService, 
+        private runtimeWidgetInstallerService: RuntimeWidgetInstallerService,
         private externalService: AppBuilderExternalAssetsService) {
-            this.GATEWAY_URL = this.externalService.getURL('DBCATALOG', 'gatewayURL');
-            this.CATALOG_LABCASE_ID = this.externalService.getURL('DBCATALOG', 'labcaseId');
-         }
+        this.GATEWAY_URL = this.externalService.getURL('DBCATALOG', 'gatewayURL');
+        this.CATALOG_LABCASE_ID = this.externalService.getURL('DBCATALOG', 'labcaseId');
+    }
 
     getTemplateCatalog(): Observable<TemplateCatalogEntry[]> {
         return this.http.get(`${this.GATEWAY_URL}${this.CATALOG_LABCASE_ID}`).pipe(map(response => {
@@ -113,6 +113,14 @@ export class TemplateCatalogService {
     }
 
     async updateDashboard(application, dashboardConfig: DashboardConfig, templateDetails: TemplateDetails, index: number) {
+        if (templateDetails.input.devices && templateDetails.input.devices.length > 0) {
+            templateDetails.widgets = this.updateWidgetConfigurationWithDeviceInformation(templateDetails.input.devices, templateDetails.widgets);
+        }
+
+        if (templateDetails.input.images && templateDetails.input.images.length > 0) {
+            templateDetails.widgets = this.updateWidgetConfigurationWithImageInformation(templateDetails.input.images, templateDetails.widgets);
+        }
+
         const dashboardManagedObject = (await this.inventoryService.detail(dashboardConfig.id)).data;
         await this.inventoryService.update({
             id: dashboardManagedObject.id,
