@@ -148,7 +148,9 @@ export class TemplateCatalogModalComponent implements OnInit {
     }
 
     isSaveButtonEnabled(): boolean {
-        return this.templateDetails && (!this.templateDetails.input.devices || this.templateDetails.input.devices.length === 0 || this.isDevicesSelected());
+        return this.templateDetails && this.isNameAvailable()
+            && (!this.templateDetails.input.devices || this.templateDetails.input.devices.length === 0 || this.isDevicesSelected())
+            && (!this.templateDetails.input.images || this.templateDetails.input.images.length === 0 || this.isImagesSelected());
     }
 
     isCatalogDisplayed(): boolean {
@@ -212,5 +214,23 @@ export class TemplateCatalogModalComponent implements OnInit {
         }
 
         return true;
+    }
+
+    private isImagesSelected(): boolean {
+        if (!this.templateDetails.input.images || this.templateDetails.input.images.length === 0) {
+            return true;
+        }
+
+        for (let image of this.templateDetails.input.images) {
+            if (!image.id || image.id.length === 0) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private isNameAvailable(): boolean {
+        return this.dashboardConfiguration.dashboardName && this.dashboardConfiguration.dashboardName.length >= 0;
     }
 }
