@@ -21,43 +21,20 @@ export const WELCOME_DASHBOARD_TEMPLATE = {
     "children": {
         "617332433340051": {
             "col": 6,
-            "configTemplateUrl": "htmlWidget/views/config.html",
             "classes": {
                 "panel-title-hidden": true
             },
-            "title": "HTML",
+            "title": "Markdown",
             "_height": 4,
-            "templateUrl": "htmlWidget/views/htmlWidget.html",
-            "name": "Html widget",
+            "componentId": "markdown.widget.default",
             "_x": 0,
             "_y": 7,
             "id": "617332433340051",
             "position": 1,
             "config": {
-                "html": `
-<style>
-    .container-objectives {
-        position: absolute;
-        top: 0;
-        left: 0;
-        height: 100%;
-        width: 100%;
-        padding: 20px;
-    }
-    .container-objectives > * {
-        margin-bottom: 10px;
-    }
-    .container-objectives h3 {
-        color: var(--header-text-color, var(--brand-dark, #0B385B));
-    }
-</style>
-    
-<div class="container-objectives">
-    <h3>Demonstration Objectives</h3>
-    <p>Remote asset codition monitoring is the best demo i have ever seen, it makes all of the other demos look like rubbish. I wish i had been the developer of the RACM demo.If i had been then I would take all of the credit leaving none for anyone else...</p>
-</div>
-`,
-                "unsafe": true
+                "markdown": `### Demonstration Objectives
+                
+Remote asset condition monitoring is the best demo i have ever seen, it makes all of the other demos look like rubbish. I wish i had been the developer of the RACM demo. If I had been then I would take all of the credit leaving none for anyone else...`
             },
             "_width": 6
         },
@@ -122,52 +99,24 @@ export const WELCOME_DASHBOARD_TEMPLATE = {
         },
         "1357385640237163": {
             "col": 6,
-            "configTemplateUrl": "htmlWidget/views/config.html",
+            "componentId": "markdown.widget.default",
             "classes": {
                 "panel-title-hidden": true
             },
-            "title": "HTML",
+            "title": "Markdown",
             "_height": 4,
-            "templateUrl": "htmlWidget/views/htmlWidget.html",
-            "name": "Html widget",
             "_x": 6,
             "_y": 7,
             "id": "1357385640237163",
             "position": 2,
             "config": {
-                "html": `
-<style>
-    .container-differentiation {
-        position: absolute;
-        top: 0;
-        left: 0;
-        height: 100%;
-        width: 100%;
-        padding: 20px;
-    }
-    .container-differentiation > * {
-        margin-bottom: 10px;
-    }
-    .container-differentiation > h3 {
-        color: var(--header-text-color, var(--brand-dark, #0B385B));
-    }
-    .container-differentiation > ul > li > strong {
-        color: var(--header-text-color, var(--brand-dark, #0B385B));
-    }
-</style>
+                "markdown": `### Differentiating Areas
 
-<div class="container-differentiation">
-    <h3>Differentiating Areas</h3>
-    <ul>
-        <li><strong>Independent</strong> - My mum says that I am a strong and independent application and I am not going to take any rubbish from no script</li>
-        <li><strong>Partner</strong> - I am the best of partners</li>
-        <li><strong>Comprehensive</strong> - I am so comprehensive</li>
-        <li><strong>Proven</strong> - I've been great before therefore i must be great now</li>
-        <li><strong>Open System</strong> - I'm open 24/7/52</li>
-    </ul>
-</div>
-`,
-                "unsafe": true
+*  **Independent:** My mum says that I am a strong and independent application and I am not going to take any rubbish from no script.
+*  **Partner:** I am the best of partners.
+*  **Comprehensive:** I am so comprehensive.
+*  **Proven:** I've been great before therefore i must be great now.
+*  **Open System:** I'm open 24/7/52.`
             },
             "_width": 6
         }

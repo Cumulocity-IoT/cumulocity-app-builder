@@ -15,18 +15,21 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
  */
-import {NgModule} from "@angular/core";
-// import {DemoWidgetModule} from "./demo-widget/demo-widget.module";
-import {MarkdownWidgetModule} from './markdown-widget/markdown-widget.module';
 
-// Add ng1 widgets here
-// import './collada-widget/cumulocity'
+import { Component, OnInit, Input } from '@angular/core';
 
-@NgModule({
-    imports: [
-        // Add ngx widgets here
-        // DemoWidgetModule
-        MarkdownWidgetModule
-    ]
+@Component({
+  selector: 'lib-markdown-config',
+  templateUrl: './markdown-widget.config.html'
 })
-export class CustomWidgetsModule {}
+
+export class MarkdownConfigComponent implements OnInit {
+
+@Input() config: any = {};
+
+  constructor() {}
+
+  ngOnInit() {
+  }
+
+}
