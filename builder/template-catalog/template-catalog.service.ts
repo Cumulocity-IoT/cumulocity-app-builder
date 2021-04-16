@@ -21,11 +21,11 @@ export class TemplateCatalogService {
     constructor(private http: HttpClient, private inventoryService: InventoryService,
         private appService: ApplicationService, private navigation: AppBuilderNavigationService,
         private binaryService: InventoryBinaryService, private alertService: AlertService,
-        private runtimeWidgetInstallerService: RuntimeWidgetInstallerService,
+        private runtimeWidgetInstallerService: RuntimeWidgetInstallerService, 
         private externalService: AppBuilderExternalAssetsService) {
-        this.GATEWAY_URL = this.externalService.getURL('DBCATALOG', 'gatewayURL');
-        this.CATALOG_LABCASE_ID = this.externalService.getURL('DBCATALOG', 'labcaseId');
-    }
+            this.GATEWAY_URL = this.externalService.getURL('DBCATALOG', 'gatewayURL');
+            this.CATALOG_LABCASE_ID = this.externalService.getURL('DBCATALOG', 'labcaseId');
+         }
 
     getTemplateCatalog(): Observable<TemplateCatalogEntry[]> {
         return this.http.get(`${this.GATEWAY_URL}${this.CATALOG_LABCASE_ID}`).pipe(map(response => {
@@ -102,8 +102,6 @@ export class TemplateCatalogService {
                     }
                 }
             ];
-
-            console.log(application.applicationBuilder.dashboards);
 
             return this.appService.update({
                 id: application.id,
