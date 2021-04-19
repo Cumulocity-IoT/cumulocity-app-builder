@@ -78,7 +78,7 @@ export class RedirectToFirstDashboardOrConfig implements CanActivate {
         const application = (await this.appService.detail(appId)).data as IApplicationBuilderApplication;
         if (application && application.applicationBuilder) {
             if (application.applicationBuilder.dashboards && application.applicationBuilder.dashboards.length > 0) {
-                console.debug('Redirecting to first dashboard');
+              //  console.debug('Redirecting to first dashboard');
                 const firstDashboard = application.applicationBuilder.dashboards[0];
                 let url = `/application/${appId}`;
                 if (firstDashboard.tabGroup) {
@@ -91,7 +91,7 @@ export class RedirectToFirstDashboardOrConfig implements CanActivate {
                         if (childAssets.length > 0) {
                             url += `/device/${childAssets[0].id}`
                         } else {
-                            console.debug('First dashboard was groupTemplate but no devices available, redirecting to config');
+                           // console.debug('First dashboard was groupTemplate but no devices available, redirecting to config');
                             return this.router.parseUrl(`/application/${appId}/config`);
                         }
                     } else {
@@ -100,7 +100,7 @@ export class RedirectToFirstDashboardOrConfig implements CanActivate {
                 }
                 return this.router.parseUrl(url);
             } else {
-                console.debug('No dashboards available, redirecting to config');
+               // console.debug('No dashboards available, redirecting to config');
                 return this.router.parseUrl(`/application/${appId}/config`);
             }
         } else {

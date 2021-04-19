@@ -36,7 +36,6 @@ export abstract class DeviceIntervalSimulator extends DeviceSimulator {
         this.inventoryService = injector.get(InventoryService);
     }
     onStart() {
-        console.debug("Device Simulator started");
         this.intervalHandle = setInterval(() => {
             // For group simulators 
             if(this.strategyConfig && this.strategyConfig.isGroup) {
@@ -57,7 +56,6 @@ export abstract class DeviceIntervalSimulator extends DeviceSimulator {
 
     onStop() {
         clearInterval(this.intervalHandle);
-        console.debug("Device Simulator stopped");
         this.started = false;
     }
 

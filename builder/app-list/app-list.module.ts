@@ -60,10 +60,10 @@ export class RedirectToDefaultApplicationOrBuilder implements CanActivate {
 
         // Find out if the current application has an applicationBuilder fragment (This is the default application config)
         if (app && (app as IApplication & {applicationBuilder?:any}).applicationBuilder) {
-            console.debug('Found a default application, loading it...');
+            // console.debug('Found a default application, loading it...');
             return this.router.parseUrl(`/application/${app.id}`);
         } else {
-            console.debug('No default application, loading the the application builder...');
+           // console.debug('No default application, loading the the application builder...');
             return this.router.parseUrl('application-builder');
         }
     }

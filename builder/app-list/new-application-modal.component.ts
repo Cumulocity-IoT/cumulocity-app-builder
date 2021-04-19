@@ -160,6 +160,9 @@ export class NewApplicationModalComponent implements OnInit {
             let appList = (await this.appService.list({pageSize: 2000})).data;
             let appBuilder: any;
             appBuilder = appList.find((app: any) => app.contextPath === contextPathFromURL() && app.availability === 'PRIVATE');
+            let existingAppBuilderId: any = '';
+            if(appBuilder) { existingAppBuilderId = appBuilder.id; }
+
             if (!appBuilder) {
                 creationAlert.update('Searching Application Builder...');
                 const appBuilderMarket = appList.find(app => app.contextPath === contextPathFromURL());
@@ -167,6 +170,7 @@ export class NewApplicationModalComponent implements OnInit {
                  throw Error('Could not find application builder');
                 else {
                     // Own Application not found... cloning subscribed application to access binary
+                    existingAppBuilderId = appBuilderMarket.id;
                     appBuilder = await this.fetchClient.fetch(`application/applications/${appBuilderMarket.id}/clone`, {method: 'POST'}) as Response;
                     appList = (await this.appService.list({pageSize: 2000})).data;
                     appBuilder = appList.find((app: any) => app.contextPath && app.contextPath.indexOf('app-builder') !== -1 && app.availability === 'PRIVATE');
@@ -245,7 +249,7 @@ export class NewApplicationModalComponent implements OnInit {
                     } as any);
 
                     // Update App Builder Custom Properties
-                    await this.updateAppBuilderConfiguration(appBuilder.id, appId);
+                    await this.updateAppBuilderConfiguration(existingAppBuilderId, appId);
 
                     // deleting cloned app
                     if(isClone){

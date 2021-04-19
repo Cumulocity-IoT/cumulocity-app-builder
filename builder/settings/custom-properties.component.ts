@@ -90,7 +90,6 @@ export class CustomPropertiesComponent implements OnInit, OnDestroy{
     }
 
     changeGainsightStatus() {
-        console.log('gainsight toggle', this.gainsightEnabled);
         if(this.gainsightEnabled) { this.customProperties.gainsightEnabled = 'true';}
         else { this.customProperties.gainsightEnabled = 'false'; }
 
