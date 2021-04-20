@@ -2,10 +2,10 @@
 
 <ng-container *ngIf="app | async as app">
     <c8y-action-bar-item [placement]="'right'">
-        <button class="btn btn-link" (click)="showCreateDashboardDialog(app)">
+        <button class="btn btn-link" (click)="showCreateDashboardDialog(app)" id="addDashboardButton">
             <i c8yIcon="plus-circle"></i> Add dashboard
         </button>
-        <button *ngIf="isDashboardCatalogEnabled" class="btn btn-link" (click)="showTemplateCatalogModalDialog(app)">
+        <button *ngIf="isDashboardCatalogEnabled" id="addDashboardCatalogButton" class="btn btn-link" (click)="showTemplateCatalogModalDialog(app)">
             <i c8yIcon="book"></i> Dashboard catalog
         </button>
     </c8y-action-bar-item>
@@ -46,7 +46,7 @@
                             <icon-selector id="icon" name="icon" [(value)]="newAppIcon"></icon-selector>
                         </div>
                     </form>
-                    <button class="btn btn-primary" [disabled]="!editAppBuilderAppForm.form.valid"
+                    <button class="btn btn-primary" id="saveApplicationDetails" [disabled]="!editAppBuilderAppForm.form.valid"
                         (click)="saveAppChanges(app)">Save</button>
                 </div>
             </div>
@@ -63,9 +63,9 @@
         <div class="col"><i [c8yIcon]="item.value.icon"></i> {{item.value.icon}}</div>
         <div class="col">{{item.value.groupTemplate ? 'Children of: ' : ''}}{{item.value.deviceId || '-'}}</div>
         <div>
-            <button class="btn btn-default"
+            <button class="btn btn-default" id="editDashboardButton-{{item.value.id}}" 
                 (click)="showEditDashboardDialog(app, app.applicationBuilder.dashboards, index)">Edit</button>
-            <button class="btn btn-default"
+            <button class="btn btn-default" id="deleteDashboardButton-{{item.value.id}}" 
                 (click)="deleteDashboard(app, app.applicationBuilder.dashboards, index)">Delete</button>
         </div>
     </ng-template>
@@ -83,7 +83,7 @@
                         <h1 c8yIcon="c8y-chart" class="c8y-icon-duocolor" style="font-size: 90px;"></h1>
                         <h3>No dashboards to list.</h3>
                         <p>Please add dashboards to this application.</p>
-                        <button class="btn btn-primary" style="margin-top: 10px;"
+                        <button class="btn btn-primary" id="addDashboardPrimaryButton" style="margin-top: 10px;"
                             (click)="showCreateDashboardDialog(app)">Add dashboard</button>
                     </div>
                     <ng-container *ngIf="app.applicationBuilder.dashboards?.length">
