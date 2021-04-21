@@ -4,25 +4,40 @@ The Application Builder for Cumulocity provides a simple, coding-free way to cre
 ![](https://user-images.githubusercontent.com/38696279/72333172-47cec300-36b3-11ea-9abf-1bb29b490a22.png)
 
 ## What's new?
-* **Support for the Latest Cumulocity Version:** Based on Cumulocity 1006.6.
-* **Clone Existing Application:** User can now clone existing application while creating new one.
-* **Dashboard Configuration Updates:** Now additional fields are visible such as device group, tab group in dashboard configuration page.
+* **Support for the Cumulocity Version:** Based on Cumulocity 1007.2.0.
+* **DTDL Simulator:** User can now create simulators based on [DTDL](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md)(Digital Twins Definition Language).
+* **Group Simulator:** User can create simulator for existing device group or new device group.
+* **Position Simulator:** New simulator for device positions.
+* **New Home Page:** New Home Page with quick start videos, help and support information.
+* **GainSight Integration:** Ability for user to enabled/disabled GainSight for Application Builder.
+* **Dashboard Configuration Updates:** Now user can select device or group instead of manual typing deviceId/groupId.
 * **Various bug fixes**
 
 ## Features
 * **Browser-based Device Simulators:** Create device simulators that run directly in your browser.
-* **[Runtime widget loading](https://github.com/SoftwareAG/cumulocity-runtime-widget-loader):** Install widgets without re-compiling
-* **Group template dashboards:** Give every device in a group an identical dashboard (but customized to the device)
-* **Create an App with a custom contextPath:** Change the URL used to access a particular app
-* **Tabs:** Group your dashboards into tabs
+* **[Runtime widget loading](https://github.com/SoftwareAG/cumulocity-runtime-widget-loader):** Install widgets without re-compiling.
+* **Group template dashboards:** Give every device in a group an identical dashboard (but customized to the device).
+* **Create an App with a custom contextPath:** Change the URL used to access a particular app.
+* **Application Clone**: User can now clone existing application while creating new one.
+* **Tabs:** Group your dashboards into tabs.
 
 ## Installation
+**First Time:**
 1. Grab the **[Latest Release Zip](https://github.com/SoftwareAG/cumulocity-app-builder/releases)**
 2. Go to the **Administration view** in your tenant (/apps/administration)
 3. Open the **Own applications** section in the navigator
 4. Click **Add application**
 5. Select **Upload web application**
 6. Select the Zip you downloaded earlier
+
+**Incremental Upgrade:**
+1. Grab the **[Latest Release Zip](https://github.com/SoftwareAG/cumulocity-app-builder/releases)**
+2. Go to the **Administration view** in your tenant (/apps/administration)
+3. Open the **Own applications** section in the navigator
+4. Click **Application Builder**
+5. Click **Archives**
+6. Click **Upload Archive**
+7. Select the Zip you downloaded earlier
 
 ## Build Instructions
 **Note:** It is only necessary to follow these instructions if you are modifying/extending the Application Builder (such as adding custom widgets, branding, etc.), otherwise see the [Installation Guide](#Installation).
@@ -43,7 +58,7 @@ cd cumulocity-app-builder
 ```
 2. (Optional) Checkout a specific version: 
 ```
-git checkout v1.2.2
+git checkout v1.2.5
 ```
 3. Install the dependencies: 
 ```
@@ -79,30 +94,14 @@ This guide will teach you how to create your first application using the Applica
 Congratulations! You have created an application and added your first screen.
 
 ## User Guide
-A more detailed user guide is available in the Help section of the Application Builder app.
+A more detailed user guide and quick start videos are available in the Home section of the Application Builder app.
 
 **NOTE:** This is only shown in the main page of the Application Builder, not when editing an individual application
 
 ## Runtime Widgets
 
 Application Builder supports runtime widgets deployment. 
-Here are some of runtime widgets which are available to download and install.
-
-* **[Data Points Map](https://github.com/SoftwareAG/cumulocity-data-points-map-widget)**
-* **[Smart Map](https://github.com/SoftwareAG/cumulocity-smart-map-widget)**
-* **[Smart Map Settings](https://github.com/SoftwareAG/cumulocity-smart-map-settings-widget)**
-* **[Compass](https://github.com/SoftwareAG/cumulocity-compass-widget)**
-* **[Device Chart](https://github.com/SoftwareAG/cumulocity-device-chart-widget)**
-* **[Process](https://github.com/SoftwareAG/cumulocity-processing-widget)**
-* **[Weather Forcast](https://github.com/SoftwareAG/cumulocity-weather-forecast-widget)**
-* **[Event Chart](https://github.com/SoftwareAG/cumulocity-event-chart-widget)**
-* **[Event Image Viewer](https://github.com/SoftwareAG/cumulocity-event-image-viewer-widget)**
-* **[Image Animation](https://github.com/SoftwareAG/cumulocity-image-animation-widget)**
-* **[KPI Trend](https://github.com/SoftwareAG/cumulocity-kpi-trend-widget)**
-* **[Markdown](https://github.com/SoftwareAG/cumulocity-markdown-widget)**
-* **[Silo Capacity](https://github.com/SoftwareAG/cumulocity-silo-capacity-widget)**
-* **[Employee Proximity Check](https://github.com/SoftwareAG/cumulocity-employee-proximity-check-widget)**
-* **[Safe Interaction Overview](https://github.com/SoftwareAG/cumulocity-safe-interaction-overview-widget)**
+You can find runtime widgets at [Software AG Open Source](https://open-source.softwareag.com/iot-analytics?search=runtime&topic=cumulocity-iot&repository=widget)
 
 Would you like to create your own Custom Runtime widget? Please refer our [Demo Widget](https://github.com/SoftwareAG/cumulocity-demo-widget).
 
