@@ -22,7 +22,7 @@ import {
 } from "./random-value.config.component";
 import {SimulationStrategy} from "../../builder/simulator/simulation-strategy.decorator";
 import {DeviceIntervalSimulator} from "../../builder/simulator/device-interval-simulator";
-import {Injectable} from "@angular/core";
+import {Injectable, Injector} from "@angular/core";
 import {SimulationStrategyFactory} from "../../builder/simulator/simulation-strategy";
 import {MeasurementService} from "@c8y/client";
 import {SimulatorConfig} from "../../builder/simulator/simulator-config";
@@ -34,19 +34,23 @@ import {SimulatorConfig} from "../../builder/simulator/simulator-config";
     configComponent: RandomValueSimulationStrategyConfigComponent
 })
 export class RandomValueSimulationStrategy extends DeviceIntervalSimulator {
-    constructor(private measurementService: MeasurementService, private config: RandomValueSimulationStrategyConfig) {
-        super();
+    constructor(protected injector: Injector, private measurementService: MeasurementService, 
+        private config: RandomValueSimulationStrategyConfig) {
+        super(injector)
     }
 
     get interval() {
         return this.config.interval * 1000;
     }
+    get strategyConfig() {
+        return this.config;
+    } 
 
-    onTick() {
+    onTick(groupDeviceId?: any) {
         const measurementValue = Math.floor(Math.random() * (this.config.maxValue - this.config.minValue + 1)) + this.config.minValue;
 
         this.measurementService.create({
-            sourceId: this.config.deviceId,
+            sourceId: (groupDeviceId? groupDeviceId : this.config.deviceId),
             time: new Date(),
             [this.config.fragment]: {
                 [this.config.series]: {
@@ -60,12 +64,12 @@ export class RandomValueSimulationStrategy extends DeviceIntervalSimulator {
 
 @Injectable()
 export class RandomValueSimulationStrategyFactory extends SimulationStrategyFactory<RandomValueSimulationStrategy> {
-    constructor(private measurementService: MeasurementService) {
+    constructor(private injector: Injector, private measurementService: MeasurementService) {
         super();
     }
 
     createInstance(config: SimulatorConfig<RandomValueSimulationStrategyConfig>): RandomValueSimulationStrategy {
-        return new RandomValueSimulationStrategy(this.measurementService, config.config);
+        return new RandomValueSimulationStrategy(this.injector, this.measurementService, config.config);
     }
 
     getSimulatorClass(): typeof RandomValueSimulationStrategy {

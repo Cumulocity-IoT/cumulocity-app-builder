@@ -16,7 +16,7 @@
 * limitations under the License.
  */
 
-import {Component, OnDestroy, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap/modal';
 import {ApplicationService, InventoryService} from '@c8y/client';
 import {WizardComponent} from "../../wizard/wizard.component";
@@ -26,13 +26,14 @@ import {IApplicationBuilderApplication} from "../iapplication-builder-applicatio
 @Component({
     templateUrl: './edit-dashboard-modal.component.html'
 })
-export class EditDashboardModalComponent {
+export class EditDashboardModalComponent implements OnInit{
     busy = false;
 
     dashboardType: 'standard'|'group-template' = 'standard';
     dashboardName: string = '';
     dashboardIcon: string = 'th';
     deviceId: string = '';
+    deviceName: string ='';
     tabGroup: string = '';
     dashboardVisibility: '' | 'hidden' | 'no-nav' = '';
 
@@ -43,7 +44,18 @@ export class EditDashboardModalComponent {
     @ViewChild(WizardComponent, {static: true}) wizard: WizardComponent;
 
     constructor(public bsModalRef: BsModalRef, private appService: ApplicationService, private inventoryService: InventoryService, private navigation: AppBuilderNavigationService) {}
-
+    
+    async ngOnInit() {
+        if(this.deviceId) {
+            const device = (await this.inventoryService.detail(this.deviceId)).data;
+            if(device) { this.deviceName = device.name; }
+        }
+    }
+    
+    getSelectedDevice(device: any) {
+        this.deviceId = device.id;
+        this.deviceName = device.name;
+    }
     async save() {
         this.busy = true;
 

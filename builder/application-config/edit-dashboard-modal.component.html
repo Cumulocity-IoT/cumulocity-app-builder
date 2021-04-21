@@ -11,8 +11,8 @@
 <div class="modal-inner-scroll">
     <form name="editDashboardForm"  #editDashboardForm="ngForm" class="c8y-wizard-form">
         <div class="form-group">
-            <label for="name"><span>Path</span></label>
-            <input type="text" class="form-control" id="name" name="name" placeholder="e.g. Some Folder/My First Application (required)" required autofocus="true" [(ngModel)]="dashboardName">
+            <label for="dashboardPath"><span>Path</span></label>
+            <input type="text" class="form-control" id="dashboardPath" name="dashboardPath" placeholder="e.g. Some Folder/My First Application (required)" required autofocus="true" [(ngModel)]="dashboardName">
         </div>
 
         <div class="form-group">
@@ -38,24 +38,28 @@
             </div>
         </ng-template>
 
+        <div class="form-group" style="min-height: 50px;"  *ngIf="dashboardType === 'group-template' else nonGroupTemplate">
+            <label for="group"><span>Group </span></label>
+            <!-- <input type="text" class="form-control" id="group" name="group" placeholder="e.g. 12345" [(ngModel)]="deviceId"> -->
+            <device-selector id="groupId" name="groupId" [isGroup]="true" [(value)]="deviceName" [placeHolder]="'Type your Group Name'" [required]="true"
+                    (selectedDevice)= "getSelectedDevice($event)"></device-selector>
+        </div>
+        <ng-template #nonGroupTemplate>
+            <div class="form-group" style="min-height: 50px;" >
+                <label for="device"><span>Device Name (Optional)</span></label>
+                <!-- <input type="text" class="form-control" id="device" name="device" placeholder="e.g. 12345 (optional)" [(ngModel)]="deviceId"> -->
+                <device-selector id="device" name="device" [(value)]="deviceName" [placeHolder]="'Type your Device Name'" [required]="false"
+                (selectedDevice)= "getSelectedDevice($event)"></device-selector>
+            </div>
+        </ng-template>
+
         <div class="form-group">
             <label for="icon"><span>Icon</span></label>
             <icon-selector id="icon" name="icon" [(value)]="dashboardIcon"></icon-selector>
         </div>
-
-        <div class="form-group" *ngIf="dashboardType === 'group-template' else nonGroupTemplate">
-            <label for="group"><span>Group ID</span></label>
-            <input type="text" class="form-control" id="group" name="group" placeholder="e.g. 12345" [(ngModel)]="deviceId">
-        </div>
-        <ng-template #nonGroupTemplate>
-            <div class="form-group">
-                <label for="device"><span>Device ID (Optional)</span></label>
-                <input type="text" class="form-control" id="device" name="device" placeholder="e.g. 12345 (optional)" [(ngModel)]="deviceId">
-            </div>
-        </ng-template>
     </form>
 </div>
 <div class="c8y-wizard-footer">
     <button class="btn btn-default" (click)="bsModalRef.hide()">Cancel</button>
-    <button class="btn btn-primary" (click)="save()" [disabled]="busy || !editDashboardForm.form.valid">Save</button>
+    <button class="btn btn-primary" id="editDashboardButton" (click)="save()" [disabled]="busy || !editDashboardForm.form.valid">Save</button>
 </div>

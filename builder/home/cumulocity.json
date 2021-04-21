@@ -1,0 +1,14 @@
+{
+  "name": "Home",
+  "ngModules": [
+  ],
+  "copy":[
+    "images/c8y-app-image.svg",
+    "images/c8y-app-color-dropper.png",
+    "images/c8y-app-installing-updates.png",
+    "images/c8y-app-play.png",
+    "images/c8y-app-query.png",
+    "images/c8y-app-simulate.png",
+    "images/c8y-app-upgrade.png"
+  ]
+}

@@ -26,7 +26,7 @@ import {
 } from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap/modal';
 import {WizardComponent} from "../../wizard/wizard.component";
-import {InventoryService, ApplicationService} from '@c8y/client';
+import {InventoryService, ApplicationService, IManagedObject} from '@c8y/client';
 import {AppIdService} from "../app-id.service";
 import {SimulationStrategyConfigComponent, SimulationStrategyFactory} from "../simulator/simulation-strategy";
 import {SimulationStrategiesService} from "../simulator/simulation-strategies.service";
@@ -46,6 +46,10 @@ export class NewSimulatorModalComponent {
     newConfig: any;
     deviceId: string | undefined;
     simulatorName: string = '';
+    deviceName: string | undefined;
+    groupName: string | undefined;
+    numberOfDevice: number | 0;
+    isGroup: boolean = false;
 
     constructor(
         private simSvc: SimulatorCommunicationService,
@@ -66,37 +70,57 @@ export class NewSimulatorModalComponent {
             const componentRef: ComponentRef<SimulationStrategyConfigComponent> = this.configWrapper.createComponent(factory);
             componentRef.instance.config = this.newConfig = {};
             componentRef.instance.initializeConfig();
+            if(componentRef.instance.config.modalSize) {
+                this.bsModalRef.setClass(componentRef.instance.config.modalSize);
+            }
         }
     }
 
+    resetDialogSize() {
+        this.bsModalRef.setClass('modal-sm');
+    }
     async saveAndClose() {
         this.busy = true;
 
         const metadata = this.selectedStrategyFactory.getSimulatorMetadata();
-
+        // get simulator Name from strategy's deviceName field
+        if(metadata.hideSimulatorName) {
+            this.simulatorName = this.newConfig.deviceName;
+        }
         let device;
         if (!this.deviceId) {
-            // createDevice
-            device = (await this.inventoryService.create({
-                c8y_IsDevice: {},
-                name: this.simulatorName
-            })).data;
+            if(this.isGroup) {
+                // Create Group and Devices
+                device = await this.AddGroupAndDevices();    
+                this.deviceName = this.groupName;
+                this.deviceId = device.id;
+            } else {
+                // createDevice
+                device = (await this.inventoryService.create({
+                    c8y_IsDevice: {},
+                    name: this.simulatorName
+                })).data;
+                this.deviceName = this.simulatorName;
+                this.deviceId = device.id;
+            }
+            
         } else {
             // getExistingDevice
-            device = (await this.inventoryService.detail(this.deviceId)).data;
+            // device = (await this.inventoryService.detail(this.deviceId)).data;
         }
-        this.deviceId = device.id;
+      //  this.deviceId = device.id;
         
         const appId = this.appIdService.getCurrentAppId();
         let appServiceData;
         if(appId){
             appServiceData = (await this.appService.detail(appId)).data;
-        
         }
         // updateDevice
         const simulators = appServiceData.applicationBuilder.simulators || [];
         const simulatorId = Math.floor(Math.random() * 1000000);
         this.newConfig.deviceId = this.deviceId;
+        this.newConfig.deviceName = this.deviceName;
+        this.newConfig.isGroup = this.isGroup;
         const newSimulatorObject = {
             id: simulatorId,
             name: this.simulatorName,
@@ -115,5 +139,26 @@ export class NewSimulatorModalComponent {
         await this.simSvc.simulator.checkForSimulatorConfigChanges();
 
         this.bsModalRef.hide();
+    }
+    getSelectedDevice(device: any) {
+        this.deviceId = device.id;
+        this.deviceName = device.name;
+    }
+
+    private async AddGroupAndDevices() {
+        let group = null;
+        group = (await this.inventoryService.create({
+            c8y_IsDeviceGroup: {},
+            name: this.groupName,
+            type: "c8y_DeviceGroup"
+        })).data;
+        for (let index = 0; index < this.numberOfDevice; index++) {
+            const childManageObject: Partial<IManagedObject> = {
+                c8y_IsDevice: {},
+                name: this.simulatorName + '-' + (index + 1),
+            };
+            await this.inventoryService.childAssetsCreate(childManageObject, group.id);
+        }
+        return group;
     }
 }

@@ -22,7 +22,7 @@ import {
 } from "./wave.config.component";
 import {SimulationStrategy} from "../../builder/simulator/simulation-strategy.decorator";
 import {DeviceIntervalSimulator} from "../../builder/simulator/device-interval-simulator";
-import {Injectable} from "@angular/core";
+import {Injectable, Injector} from "@angular/core";
 import {SimulationStrategyFactory} from "../../builder/simulator/simulation-strategy";
 import {MeasurementService} from "@c8y/client";
 import {SimulatorConfig} from "../../builder/simulator/simulator-config";
@@ -34,14 +34,19 @@ import {SimulatorConfig} from "../../builder/simulator/simulator-config";
     configComponent: WaveSimulationStrategyConfigComponent
 })
 export class WaveSimulationStrategy extends DeviceIntervalSimulator {
+
     startTime: number = 0;
 
-    constructor(private measurementService: MeasurementService, private config: WaveSimulationStrategyConfig) {
-        super();
+    constructor(protected injector: Injector, private measurementService: MeasurementService, private config: WaveSimulationStrategyConfig) {
+        super(injector);
     }
 
     protected get interval() {
         return this.config.interval * 1000;
+    }
+
+    get strategyConfig() {
+        return this.config;
     }
 
     onStart() {
@@ -49,14 +54,14 @@ export class WaveSimulationStrategy extends DeviceIntervalSimulator {
         this.startTime = Date.now();
     }
 
-    onTick() {
+    onTick(groupDeviceId?: any) {
         const t = (Date.now() - this.startTime) / 1000;
         const w = 2 * Math.PI / this.config.wavelength;
 
-        const wt = w *t;
+        const wt = w * t;
 
         let measurementValue = 0;
-        switch(this.config.waveType) {
+        switch (this.config.waveType) {
             case "sine":
                 measurementValue = this.config.height * Math.sin(wt);
                 break;
@@ -67,20 +72,20 @@ export class WaveSimulationStrategy extends DeviceIntervalSimulator {
                 const max_fourier_terms = 8;
                 let fourier_expansion = 0;
                 for (let i = 1; i <= max_fourier_terms; i++) {
-                    const x = 2*i - 1;
-                    fourier_expansion = fourier_expansion + 1/x * Math.sin(x * wt);
+                    const x = 2 * i - 1;
+                    fourier_expansion = fourier_expansion + 1 / x * Math.sin(x * wt);
                 }
                 measurementValue = this.config.height * 4 / Math.PI * fourier_expansion;
                 break;
         }
 
         this.measurementService.create({
-            sourceId: this.config.deviceId,
+            sourceId: (groupDeviceId? groupDeviceId : this.config.deviceId),
             time: new Date(),
             [this.config.fragment]: {
                 [this.config.series]: {
                     value: measurementValue,
-                    ...this.config.unit && {unit: this.config.unit}
+                    ...this.config.unit && { unit: this.config.unit }
                 }
             }
         });
@@ -89,12 +94,12 @@ export class WaveSimulationStrategy extends DeviceIntervalSimulator {
 
 @Injectable()
 export class WaveSimulationStrategyFactory extends SimulationStrategyFactory<WaveSimulationStrategy> {
-    constructor(private measurementService: MeasurementService) {
+    constructor(private injector: Injector, private measurementService: MeasurementService) {
         super();
     }
 
     createInstance(config: SimulatorConfig<WaveSimulationStrategyConfig>): WaveSimulationStrategy {
-        return new WaveSimulationStrategy(this.measurementService, config.config);
+        return new WaveSimulationStrategy(this.injector, this.measurementService, config.config);
     }
 
     getSimulatorClass(): typeof WaveSimulationStrategy {

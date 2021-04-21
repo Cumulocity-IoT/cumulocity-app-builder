@@ -2,8 +2,11 @@
 
 <ng-container *ngIf="app | async as app">
     <c8y-action-bar-item [placement]="'right'">
-        <button class="btn btn-link" (click)="showCreateDashboardDialog(app)">
+        <button class="btn btn-link" (click)="showCreateDashboardDialog(app)" id="addDashboardButton">
             <i c8yIcon="plus-circle"></i> Add dashboard
+        </button>
+        <button *ngIf="isDashboardCatalogEnabled" id="addDashboardCatalogButton" class="btn btn-link" (click)="showTemplateCatalogModalDialog(app)">
+            <i c8yIcon="book"></i> Dashboard catalog
         </button>
     </c8y-action-bar-item>
 
@@ -23,25 +26,28 @@
                 <div class="card-header">
                     <h4 translate>Details</h4>
                 </div>
-                <hr/>
+                <hr />
                 <div class="card-block">
                     <form name="editAppBuilderAppForm" #editAppBuilderAppForm="ngForm">
-                    <div class="form-group">
-                        <label for="name"><span>Name</span></label>
-                        <input type="text" class="form-control" id="name" name="name" placeholder="e.g. My First Application (required)" required [(ngModel)]="newAppName">
-                    </div>
+                        <div class="form-group">
+                            <label for="name"><span>Name</span></label>
+                            <input type="text" class="form-control" id="name" name="name"
+                                placeholder="e.g. My First Application (required)" required [(ngModel)]="newAppName">
+                        </div>
 
-                    <div class="form-group" *ngIf="app.contextPath != undefined">
-                        <label for="contextpath"><span>Context Path</span></label>
-                        <input type="text" class="form-control" id="contextpath" name="contextpath" placeholder="e.g. my-app (required)" required [(ngModel)]="newAppContextPath">
-                    </div>
+                        <div class="form-group" *ngIf="app.contextPath != undefined">
+                            <label for="contextpath"><span>Context Path</span></label>
+                            <input type="text" class="form-control" id="contextpath" name="contextpath"
+                                placeholder="e.g. my-app (required)" required [(ngModel)]="newAppContextPath">
+                        </div>
 
-                    <div class="form-group">
-                        <label for="icon"><span>Icon</span></label>
-                        <icon-selector id="icon" name="icon" [(value)]="newAppIcon"></icon-selector>
-                    </div>
+                        <div class="form-group">
+                            <label for="icon"><span>Icon</span></label>
+                            <icon-selector id="icon" name="icon" [(value)]="newAppIcon"></icon-selector>
+                        </div>
                     </form>
-                    <button class="btn btn-primary" [disabled]="!editAppBuilderAppForm.form.valid" (click)="saveAppChanges(app)">Save</button>
+                    <button class="btn btn-primary" id="saveApplicationDetails" [disabled]="!editAppBuilderAppForm.form.valid"
+                        (click)="saveAppChanges(app)">Save</button>
                 </div>
             </div>
         </div>
@@ -57,8 +63,10 @@
         <div class="col"><i [c8yIcon]="item.value.icon"></i> {{item.value.icon}}</div>
         <div class="col">{{item.value.groupTemplate ? 'Children of: ' : ''}}{{item.value.deviceId || '-'}}</div>
         <div>
-            <button class="btn btn-default" (click)="showEditDashboardDialog(app, app.applicationBuilder.dashboards, index)">Edit</button>
-            <button class="btn btn-default" (click)="deleteDashboard(app, app.applicationBuilder.dashboards, index)">Delete</button>
+            <button class="btn btn-default" id="editDashboardButton-{{item.value.id}}" 
+                (click)="showEditDashboardDialog(app, app.applicationBuilder.dashboards, index)">Edit</button>
+            <button class="btn btn-default" id="deleteDashboardButton-{{item.value.id}}" 
+                (click)="deleteDashboard(app, app.applicationBuilder.dashboards, index)">Delete</button>
         </div>
     </ng-template>
 
@@ -68,13 +76,15 @@
                 <div class="card-header">
                     <h4 translate>Dashboards</h4>
                 </div>
-                <hr/>
+                <hr />
                 <div class="card-block">
-                    <div class="c8y-empty-state text-center" style="flex-direction: column; align-items: center;" *ngIf="!app.applicationBuilder.dashboards?.length">
+                    <div class="c8y-empty-state text-center" style="flex-direction: column; align-items: center;"
+                        *ngIf="!app.applicationBuilder.dashboards?.length">
                         <h1 c8yIcon="c8y-chart" class="c8y-icon-duocolor" style="font-size: 90px;"></h1>
                         <h3>No dashboards to list.</h3>
                         <p>Please add dashboards to this application.</p>
-                        <button class="btn btn-primary" style="margin-top: 10px;" (click)="showCreateDashboardDialog(app)">Add dashboard</button>
+                        <button class="btn btn-primary" id="addDashboardPrimaryButton" style="margin-top: 10px;"
+                            (click)="showCreateDashboardDialog(app)">Add dashboard</button>
                     </div>
                     <ng-container *ngIf="app.applicationBuilder.dashboards?.length">
                         <div class="sortable-grid-header">
@@ -85,16 +95,12 @@
                             <div class="col">Tab Group</div>
                             <div class="col">Icon</div>
                             <div class="col">Device(s)</div>
-                            <div class="invisible"><button class="btn btn-default">Edit</button><button class="btn btn-default">Delete</button></div>
+                            <div class="invisible"><button class="btn btn-default">Edit</button><button
+                                    class="btn btn-default">Delete</button></div>
                         </div>
-                        <bs-sortable
-                            [ngModel]="app.applicationBuilder.dashboards"
-                            [itemTemplate]="itemTemplate"
-                            itemClass="sortable-item"
-                            itemActiveClass="sortable-item-active"
-                            wrapperClass="sortable-grid"
-                            (onChange)="reorderDashboards(app, $event)"
-                        ></bs-sortable>
+                        <bs-sortable [ngModel]="app.applicationBuilder.dashboards" [itemTemplate]="itemTemplate"
+                            itemClass="sortable-item" itemActiveClass="sortable-item-active"
+                            wrapperClass="sortable-grid" (onChange)="reorderDashboards(app, $event)"></bs-sortable>
                     </ng-container>
                 </div>
             </div>

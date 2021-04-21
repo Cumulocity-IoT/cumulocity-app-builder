@@ -1,0 +1,80 @@
+<div class="modal-header text-center bg-primary">
+    <h4 class="text-uppercase" style="margin:0; letter-spacing: 0.15em;">
+        {{dashboardConfig.templateDashboard.name}}</h4>
+</div>
+<div class="modal-body">
+    <rectangle-spinner *ngIf="isLoadingIndicatorDisplayed" style="position: relative; left: 47%; top: 200px;">
+    </rectangle-spinner>
+
+    <div *ngIf="templateDetails" class="row template-detail-container modal-inner-scroll">
+        <div class="col-md-12 template-description">
+            <p>{{templateDetails.description}}</p>
+        </div>
+        <div class="col-md-6">
+            <form name="newDashboardCreationForm" #newDashboardCreationForm="ngForm" class="">
+                <div class="form-group">
+                    <label for="name"><span>Path</span></label>
+                    <input type="text" class="form-control" id="name" name="name"
+                        placeholder="e.g. Some Folder/My First Application (required)" required
+                        [(ngModel)]="dashboardConfig.name">
+                </div>
+
+                <div class="form-group">
+                    <label for="visibility"><span>Visibility</span></label>
+                    <select name="visibility" id="visibility" [(ngModel)]="dashboardConfig.visibility">
+                        <option value="">Navigation and Tabs</option>
+                        <option value="no-nav">Tabs Only</option>
+                        <option value="hidden">Hidden</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="tabgroup"><span>Tab Group</span></label>
+                    <input type="text" class="form-control" id="tabgroup" name="tabgroup" placeholder="e.g. TabGroup1"
+                        [(ngModel)]="dashboardConfig.tabGroup">
+                </div>
+
+                <div class="form-group">
+                    <label for="icon"><span>Icon</span></label>
+                    <icon-selector id="icon" name="icon" [(value)]="dashboardConfig.icon">
+                    </icon-selector>
+                </div>
+
+                <div *ngIf="templateDetails.input?.devices?.length > 0">
+                    <div class="form-group" *ngFor="let device of templateDetails.input.devices; let i = index">
+                        <label for="device"><span>Device/Sensor - Type: {{device.type}}</span></label>
+                        <form class="form-inline">
+                            <div class="form-group" style="width: 60%; padding:0px">
+                                <label class="sr-only" for="selected-device">Device/Sensor</label>
+                                <input [readonly]="true" name="selected-device" class="form-control"
+                                    style="width: 100%;" id="selected-device" placeholder="Device/Sensor" type="text"
+                                    [ngModel]="templateDetails.input.devices[i].reprensentation?.name">
+                            </div>
+                            <button type="button" style="width: 40%;" class="btn btn-primary"
+                                (click)="openDeviceSelectorDialog(i)">Select Device</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div *ngIf="templateDetails.input?.images?.length > 0">
+                    <div class="form-group" *ngFor="let image of templateDetails.input.images; let i = index">
+                        <label for="exampleInputFile">Image - Type: {{image.type}}</label>
+                        <input type="file" id="exampleInputFile" aria-describedby="helpinput" class="form-control"
+                            (change)="onImageSelected($event.target.files, i)" />
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <div class="template-preview">
+                <label for="Preview"><span>Preview:</span></label>
+                <img style="width: 100%;" [src]="templateDetails.preview" />
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-default" (click)="onCancelButtonClicked()">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="onSaveButtonClicked()"
+        [disabled]="!isSaveButtonEnabled()">Update</button>
+</div>

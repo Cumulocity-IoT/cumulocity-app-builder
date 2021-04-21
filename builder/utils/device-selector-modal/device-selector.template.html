@@ -1,0 +1,28 @@
+<div class="modal-header text-center bg-primary">
+    <div style="font-size: 62px;">
+        <span c8yIcon="c8y-device-connect"></span>
+    </div>
+    <h4 class="text-uppercase" style="margin:0; letter-spacing: 0.15em;">Select Device</h4>
+</div>
+<div>
+    <form name="searchForm" class="search-input-container">
+        <div id="search" class="input-group input-group-search">
+            <input type="search" name="device-search" class="form-control" placeholder="Search…"
+                [(ngModel)]="searchString" (keyup.enter)="searchForDevice()" />
+            <span class="input-group-addon">
+                <i c8yIcon="search" *ngIf="!searchString || searchString.length === 0"></i>
+                <i c8yIcon="times" class="text-muted" *ngIf="searchString && searchString.length > 0"
+                    (click)="clearSearch()"></i>
+            </span>
+        </div>
+    </form>
+    <div class="list-group device-list">
+        <button *ngFor="let device of devices" type="button" [ngClass]="{'device-selected': isDeviceSelected(device)}"
+            class="list-group-item" (click)="selectDevice(device)">{{device.name}} <i c8yIcon="check"
+                *ngIf="isDeviceSelected(device)"></i></button>
+    </div>
+</div>
+<div class="c8y-wizard-footer">
+    <button class="btn btn-default" (click)="closeDialog()">Cancel</button>
+    <button class="btn btn-primary" [disabled]="!isSelectButtonEnabled()" (click)="onSelectButtonClicked()">Select</button>
+</div>

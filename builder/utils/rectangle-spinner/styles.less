@@ -1,0 +1,156 @@
+@import '~font-awesome/less/font-awesome.less';
+@import '~@c8y/style/main.less';
+@import '~@c8y/style/extend.less';
+
+rectangle-spinner {
+  position   : relative;
+  display    : block;
+  min-height : 40px;
+  min-width  : 50px;
+  padding-top: 45px;
+  font-size  : @font-size-base;
+  text-align : center;
+  color      : @text-muted;
+
+  .spinner {
+    left       : 50%;
+    margin-left: -25px;
+  }
+
+  &.spinner-xs {
+    min-height : 30px;
+    min-width  : 30px;
+    padding-top: 35px;
+
+    .spinner {
+      margin-left: -15px;
+    }
+  }
+
+  &.spinner-inline {
+    display       : inline-block;
+    padding-left  : 50px;
+    padding-top   : 11px;
+    text-align    : left;
+    vertical-align: middle;
+
+    .spinner {
+      left       : 0;
+      margin-left: 0;
+    }
+
+    &.spinner-xs {
+      padding-left: 35px;
+      padding-top : 5px;
+    }
+  }
+}
+
+.spinner {
+  margin    : 0 auto;
+  width     : 50px;
+  height    : 40px;
+  text-align: center;
+  font-size : 10px;
+  position  : absolute;
+  top       : 0;
+  left      : 0;
+  opacity   : 0.5;
+
+  &.spinner-xs,
+  .spinner-xs & {
+    height: 30px;
+    width : 30px;
+
+    >div {
+      width : 4px;
+      margin: 0;
+    }
+  }
+}
+
+.spinner>div {
+  background-color: @spinner-color;
+  height          : 100%;
+  width           : 6px;
+  margin-right    : 1px;
+  display         : inline-block;
+  animation       : stretchdelay 1.2s infinite ease-in-out;
+}
+
+.spinner .rect2 {
+  animation-delay: -1.1s;
+}
+
+.spinner .rect3 {
+  animation-delay: -1.0s;
+}
+
+.spinner .rect4 {
+  animation-delay: -0.9s;
+}
+
+.spinner .rect5 {
+  animation-delay: -0.8s;
+}
+
+@keyframes stretchdelay {
+
+  0%,
+  40%,
+  100% {
+    transform        : scaleY(0.4);
+    -webkit-transform: scaleY(0.4);
+  }
+
+  20% {
+    transform        : scaleY(1.0);
+    -webkit-transform: scaleY(1.0);
+  }
+}
+
+// To use in dashboard panels
+.spinner-panel-wrapper {
+  position        : absolute;
+  top             : 0;
+  right           : 0;
+  bottom          : 0;
+  left            : 0;
+  background-color: rgba(255, 255, 255, .7);
+  height          : 100%;
+  z-index         : 100;
+  display         : flex;
+  align-items     : center;
+
+  .grid-stack-item & {
+    right: 10px;
+    left : 10px;
+  }
+
+  .spinner {
+    left       : 50%;
+    margin-left: -25px;
+    top        : 0;
+  }
+}
+
+//To place the spinner inline
+.spinner-inline-wrapper {
+  display       : inline-block;
+  position      : relative;
+  width         : 60px;
+  vertical-align: middle;
+
+  .spinner {
+    .translate(0, -50%);
+  }
+}
+
+// to use inside buttons
+.spinner-btn {
+  display          : inline-block;
+  position         : relative;
+  width            : 45px;
+  -webkit-transform: scale(0.5) translateY(-28px);
+  transform        : scale(0.5) translateY(-28px);
+}

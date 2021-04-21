@@ -21,6 +21,7 @@ import {SimulationStrategyConfigComponent} from "../../builder/simulator/simulat
 
 export interface FirmwareUpdateSimulationStrategyConfig {
     deviceId: string,
+    isGroup?: boolean,
     firmwareVersions: {
         name: string,
         version: string,

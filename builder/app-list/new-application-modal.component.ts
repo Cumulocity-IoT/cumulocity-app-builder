@@ -23,6 +23,7 @@ import {AlertService, AppStateService} from "@c8y/ngx-components";
 import {UpdateableAlert} from "../utils/UpdateableAlert";
 import {contextPathFromURL} from "../utils/contextPathFromURL";
 import { Observable } from 'rxjs';
+import { SettingsService } from './../settings/settings.service';
 
 @Component({
     template: `
@@ -45,10 +46,10 @@ import { Observable } from 'rxjs';
             </div>
 
             <div class="form-group">
-                <label for="name"><span>Context Path</span></label>
+                <label for="contextPath"><span>Context Path</span></label>
                 <div class="input-group">
                     <div class="input-group-addon">/apps/</div>
-                    <input type="text" class="form-control" id="name" name="name" [placeholder]="currentContextPath() + ' (optional, cannot be changed)'" [(ngModel)]="appPath">
+                    <input type="text" class="form-control" id="contextPath" name="contextPath" [placeholder]="currentContextPath() + ' (optional, cannot be changed)'" [(ngModel)]="appPath">
                 </div>
             </div>
 
@@ -77,7 +78,9 @@ export class NewApplicationModalComponent implements OnInit {
     appList: any = [];
     appNameList: any = [];
 
-    constructor(public bsModalRef: BsModalRef, private appService: ApplicationService, private appStateService: AppStateService, private fetchClient: FetchClient, private inventoryService: InventoryService, private alertService: AlertService) {}
+    constructor(public bsModalRef: BsModalRef, private appService: ApplicationService, private appStateService: AppStateService, 
+        private fetchClient: FetchClient, private inventoryService: InventoryService, private alertService: AlertService,
+        private settingsService: SettingsService) {}
    
     ngOnInit() {
         this.loadApplicationsForClone();
@@ -135,6 +138,7 @@ export class NewApplicationModalComponent implements OnInit {
                 "class": `fa fa-${this.appIcon}`
             },
         };
+        let appId : any = '';
         
         // If the appPath option has been set then we copy the full AppBuilder into a new application
         if (this.appPath) {
@@ -155,7 +159,10 @@ export class NewApplicationModalComponent implements OnInit {
             let isClone = false;
             let appList = (await this.appService.list({pageSize: 2000})).data;
             let appBuilder: any;
-            appBuilder = appList.find(app => app.contextPath === contextPathFromURL() && app.availability === 'PRIVATE');
+            appBuilder = appList.find((app: any) => app.contextPath === contextPathFromURL() && app.availability === 'PRIVATE');
+            let existingAppBuilderId: any = '';
+            if(appBuilder) { existingAppBuilderId = appBuilder.id; }
+
             if (!appBuilder) {
                 creationAlert.update('Searching Application Builder...');
                 const appBuilderMarket = appList.find(app => app.contextPath === contextPathFromURL());
@@ -163,9 +170,10 @@ export class NewApplicationModalComponent implements OnInit {
                  throw Error('Could not find application builder');
                 else {
                     // Own Application not found... cloning subscribed application to access binary
+                    existingAppBuilderId = appBuilderMarket.id;
                     appBuilder = await this.fetchClient.fetch(`application/applications/${appBuilderMarket.id}/clone`, {method: 'POST'}) as Response;
                     appList = (await this.appService.list({pageSize: 2000})).data;
-                    appBuilder = appList.find(app => app.contextPath && app.contextPath.indexOf('app-builder') !== -1 && app.availability === 'PRIVATE');
+                    appBuilder = appList.find((app: any) => app.contextPath && app.contextPath.indexOf('app-builder') !== -1 && app.availability === 'PRIVATE');
                     isClone =  true;
                     if(!appBuilderMarket) 
                         throw Error('Could not find application builder');
@@ -233,11 +241,15 @@ export class NewApplicationModalComponent implements OnInit {
 
                     // Update the app
                     creationAlert.update(`Creating application...\nSaving...`);
+                    appId = app.id;
                     await this.appService.update({
                         id: app.id,
                         activeVersionId,
                         ...defaultAppBuilderData
                     } as any);
+
+                    // Update App Builder Custom Properties
+                    await this.updateAppBuilderConfiguration(existingAppBuilderId, appId);
 
                     // deleting cloned app
                     if(isClone){
@@ -257,15 +269,34 @@ export class NewApplicationModalComponent implements OnInit {
                 key: `application-builder-${this.appName}-app-key`,
                 externalUrl: `${window.location.pathname}#/application-builder`
             })).data;
+            appId = app.id;
             await this.appService.update({
                 id: app.id,
                 externalUrl: `${window.location.pathname}#/application/${app.id}`,
                 ...defaultAppBuilderData
             } as any);
         }
-
+        // Track app creation if gainsight is configured
+        if(window && window['aptrinsic'] ){
+            window['aptrinsic']('track', 'gp_appbuilder_createapp_clicked', {
+                "appName": this.appName, 
+                "appId" : appId,
+                "tenantId":  this.settingsService.getTenantName()
+            });
+        }
         // Refresh the applications list
         this.appStateService.currentUser.next(this.appStateService.currentUser.value);
+    }
+
+    private async updateAppBuilderConfiguration(appBuilderId: any, newAppId: any) {
+        const AppBuilderConfigList = (await this.inventoryService.list( {pageSize: 50, query: `type eq AppBuilder-Configuration and appBuilderId eq '${appBuilderId}'`})).data;
+        const appBuilderConfig = (AppBuilderConfigList.length > 0 ? AppBuilderConfigList[0] : null);
+        await this.inventoryService.create({
+            c8y_Global: {},
+            type: "AppBuilder-Configuration",
+            customProperties: (appBuilderConfig.customProperties ? appBuilderConfig.customProperties : {}),
+            appBuilderId: newAppId
+        });
     }
 
     currentContextPath(): string {

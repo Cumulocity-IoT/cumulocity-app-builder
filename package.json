@@ -1,6 +1,6 @@
 {
   "name": "app-builder",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "Application builder for Cumulocity (written by Software AG Global Presales)",
   "main": "index.ts",
   "scripts": {
@@ -25,15 +25,16 @@
     "@angular/platform-webworker-dynamic": "^8.2.13",
     "@angular/router": "8.2.13",
     "@angular/upgrade": "8.2.13",
-    "@c8y/ng1-modules": "1006.6.26",
-    "@c8y/ngx-components": "1006.6.26",
-    "@c8y/style": "1006.6.26",
+    "@c8y/ng1-modules": "1007.2.0",
+    "@c8y/ngx-components": "1007.2.0",
+    "@c8y/style": "1007.2.0",
     "@ng-reactive/async-input": "0.0.1",
     "@ng-select/ng-select": "^3.7.3",
     "angular": "1.6.9",
+    "app-builder-external-assets": "file:binary/app-builder-external-assets-1.0.0.tgz",
     "comlink": "^4.3.0",
     "core-js": "^3.4.0",
-    "cumulocity-runtime-widget-loader": "file:binary/cumulocity-runtime-widget-loader-1006.6.24-1.0.0.tgz",
+    "cumulocity-runtime-widget-loader": "file:binary/cumulocity-runtime-widget-loader-1006.6.24-1.0.2.tgz",
     "d3-color": "^1.4.1",
     "delay": "^4.3.0",
     "fontawesome": "4.7.2",
@@ -45,13 +46,14 @@
     "url-search-params-polyfill": "6.0.0",
     "webpack-external-import": "^2.2.4",
     "worker-plugin": "^4.0.3",
-    "zone.js": "~0.9.1"
+    "zone.js": "~0.9.1",
+    "crypto-js": "^4.0.0"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "0.803.23",
     "@angular/compiler-cli": "8.2.13",
     "@angular/language-service": "8.2.13",
-    "@c8y/cli": "1006.6.26",
+    "@c8y/cli": "1007.2.0",
     "@types/lodash-es": "^4.17.3",
     "patch-package": "^6.2.2",
     "typescript": "3.5.3"
@@ -66,12 +68,11 @@
       "upgrade": true,
       "rightDrawer": true,
       "sensorAppOneLink": "http://onelink.to/pca6qe",
-      "contentSecurityPolicy": "base-uri 'none'; default-src 'self' 'unsafe-inline' http: https: ws: wss:; connect-src 'self' *.billwerk.com http: https: ws: wss:;  script-src 'self' open.mapquestapi.com *.twitter.com *.twimg.com 'unsafe-inline' 'unsafe-eval' data:; style-src * 'unsafe-inline' blob:; img-src * data:; font-src * data: blob:; frame-src *;",
+      "contentSecurityPolicy": "base-uri 'none'; default-src 'self' 'unsafe-inline' http: https: ws: wss: blob:; connect-src 'self' *.webmethodscloud.com *.aptrinsic.com *.billwerk.com http: https: ws: wss: blob:;  script-src 'self' open.mapquestapi.com *.twitter.com *.twimg.com *.aptrinsic.com 'unsafe-inline' 'unsafe-eval' data:; style-src * 'unsafe-inline' blob:; img-src * data: blob:; font-src * data:; frame-src *;",
       "icon": {
         "class": "fa fa-magic"
       }
     },
     "cli": {}
   }
-
 }

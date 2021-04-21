@@ -27,7 +27,7 @@ import {BsDropdownModule} from "ngx-bootstrap/dropdown";
 import { TypeaheadModule } from 'ngx-bootstrap/typeahead';
 import {NewApplicationModalComponent} from "./new-application-modal.component";
 import {IconSelectorModule} from "../../icon-selector/icon-selector.module";
-import {ApplicationService, IApplication} from "@c8y/client";
+import {ApplicationService, IApplication, UserService} from "@c8y/client";
 import { filter, first } from "rxjs/operators";
 import {contextPathFromURL} from "../utils/contextPathFromURL";
 
@@ -36,7 +36,8 @@ import {contextPathFromURL} from "../utils/contextPathFromURL";
  */
 @Injectable({ providedIn: 'root' })
 export class RedirectToDefaultApplicationOrBuilder implements CanActivate {
-    constructor(private appService: ApplicationService, private router: Router, private appStateService: AppStateService) {}
+    constructor(private appService: ApplicationService, private router: Router, private appStateService: AppStateService, 
+        private userService: UserService) {}
 
     async canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise<boolean | UrlTree> {
         // Wait for the user to log in
@@ -45,17 +46,24 @@ export class RedirectToDefaultApplicationOrBuilder implements CanActivate {
                 filter(user => user != undefined),
                 first()
             ).toPromise();
-
+         
+        const userHasAdminRights = this.userService.hasRole(this.appStateService.currentUser.value, "ROLE_APPLICATION_MANAGEMENT_ADMIN")
         // Find the current application (The one the user has accessed: /apps/<application-context-path>)
-        const appList = (await this.appService.list({pageSize: 2000})).data;
+        let appList = [];
+        if(userHasAdminRights) {
+            appList = (await this.appService.list({pageSize: 2000})).data;
+        } else {
+            appList = (await this.appService.listByUser(this.appStateService.currentUser.value, { pageSize: 2000 })).data;
+        }
+        
         const app = appList.find(app => app.contextPath === contextPathFromURL());
 
         // Find out if the current application has an applicationBuilder fragment (This is the default application config)
         if (app && (app as IApplication & {applicationBuilder?:any}).applicationBuilder) {
-            console.debug('Found a default application, loading it...');
+            // console.debug('Found a default application, loading it...');
             return this.router.parseUrl(`/application/${app.id}`);
         } else {
-            console.debug('No default application, loading the the application builder...');
+           // console.debug('No default application, loading the the application builder...');
             return this.router.parseUrl('application-builder');
         }
     }

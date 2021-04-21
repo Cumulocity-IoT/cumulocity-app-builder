@@ -44,7 +44,7 @@ export class SimulatorCommunicationService {
             this.alertService.danger("Unable to start simulators", await result.res.text());
         }
 
-        const userWithRoles = (await this.userService.currentWithEffectiveRoles()).data as IUser;
+        const userWithRoles = ((await this.userService.currentWithEffectiveRoles()).data as any) as IUser;
         if (!this.userService.hasRole(userWithRoles, "ROLE_INVENTORY_ADMIN")) {
             this.alertService.danger("User does not have the required permissions to start simulators", "Missing Inventory Admin Permission");
         }

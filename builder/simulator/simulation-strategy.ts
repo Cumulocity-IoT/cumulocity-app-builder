@@ -28,7 +28,6 @@ declare module Reflect {
 
 export abstract class SimulationStrategyConfigComponent {
     abstract config: any;
-
     abstract initializeConfig(): void
 }
 

@@ -17,6 +17,7 @@
  */
 import {NgModule} from "@angular/core";
 // import {DemoWidgetModule} from "./demo-widget/demo-widget.module";
+import {MarkdownWidgetModule} from './markdown-widget/markdown-widget.module';
 
 // Add ng1 widgets here
 // import './collada-widget/cumulocity'
@@ -25,6 +26,7 @@ import {NgModule} from "@angular/core";
     imports: [
         // Add ngx widgets here
         // DemoWidgetModule
+        MarkdownWidgetModule
     ]
 })
 export class CustomWidgetsModule {}

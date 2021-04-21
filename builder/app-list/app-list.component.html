@@ -10,7 +10,7 @@
     <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2" *ngFor="let app of applications | async">
         <div class="card clickable" (click)="openApp(app)">
             <div class="dropdown card-actions" dropdown (click)="$event.stopPropagation()" *ngIf="userHasAdminRights">
-                <button title="Settings" class="dropdown-toggle c8y-dropdown" dropdownToggle type="button">
+                <button title="Settings" id="appSettings-{{app.name}}" class="dropdown-toggle c8y-dropdown" dropdownToggle type="button">
                     <i c8yIcon="ellipsis-v"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-right" *dropdownMenu role="menu">

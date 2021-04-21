@@ -17,16 +17,20 @@
  */
 
 import {Injectable} from "@angular/core";
-import {NavigatorNode, NavigatorNodeFactory} from "@c8y/ngx-components";
+import {AppStateService, NavigatorNode, NavigatorNodeFactory} from "@c8y/ngx-components";
+import { UserService } from '@c8y/ngx-components/api';
 import {BehaviorSubject} from "rxjs";
 import {map, startWith} from "rxjs/operators";
 import {AppIdService} from "../app-id.service";
+
 
 @Injectable()
 export class AppListNavigation implements NavigatorNodeFactory {
     nodes = new BehaviorSubject<NavigatorNode[]>([]);
 
-    constructor(appIdService: AppIdService) {
+    constructor(appIdService: AppIdService, private appStateService: AppStateService, private userService: UserService) {
+
+        
         // Only show the app-list navigation if we aren't in an app-builder application
         appIdService.appId$
             .pipe(
@@ -34,20 +38,34 @@ export class AppListNavigation implements NavigatorNodeFactory {
                     if (appId != undefined) {
                         return []
                     } else {
-                        return [
-                            new NavigatorNode({
-                                label: 'All Applications',
-                                icon: 'wrench',
-                                path: `/application-builder`,
-                                priority: 0
-                            }),
-                            new NavigatorNode({
-                                label: 'Help',
-                                icon: 'question',
-                                path: `/help`,
-                                priority: 0
-                            })
-                        ];
+                        const appNode = [];
+                        appNode.push(new NavigatorNode({
+                            label: 'Home',
+                            icon: 'home',
+                            path: `/home`,
+                            priority: 3
+                        }));
+                        appNode.push(new NavigatorNode({
+                            label: 'All Applications',
+                            icon: 'wrench',
+                            path: `/application-builder`,
+                            priority: 2
+                        }));
+                        const settingsNode =  new NavigatorNode({
+                            label: 'Settings',
+                            icon: 'cogs',
+                            priority: 0
+                        });
+                        settingsNode.add(new NavigatorNode({
+                            label: 'Custom Properties',
+                            icon: 'cog',
+                            path: `/settings-properties`,
+                            priority: 1
+                        }));
+                        if (this.userService.hasAllRoles(this.appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN","ROLE_APPLICATION_MANAGEMENT_ADMIN"])) {
+                            appNode.push(settingsNode);
+                        }
+                        return appNode;
                     }
                 }),
                 startWith([])

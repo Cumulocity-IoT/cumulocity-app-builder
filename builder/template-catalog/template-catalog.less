@@ -1,0 +1,259 @@
+.modal-body {
+    min-height: 450px;
+}
+
+.modal-header {
+    color: white;
+}
+
+.template-detail-container {
+    padding-top: 15px;
+    overflow-y: auto;
+    max-height: 70vh;
+}
+
+.template-description {
+    margin-bottom: 20px;
+}
+
+.demo-list-container {
+    width: 100%;
+}
+
+.card-demo {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.4);
+    transition: 0.3s;
+    display   : inline-block;
+    min-width : 200px;
+    width     : 100%;
+}
+
+.card-demo:hover {
+    box-shadow: 0 8px 16px 0 rgb(8 136 175);
+}
+
+.card-demo-small:hover {
+    box-shadow: 0 8px 16px 0 rgb(8 136 175);
+}
+
+.card-data {
+    text-align: center;
+}
+
+.card-data h3 {
+    min-width         : 180px;
+    width             : 100%;
+    max-height        : 55px;
+    font-size         : 14px;
+    display           : -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow          : hidden;
+}
+
+.card-image {
+    width        : 100%;
+    height       : 135px;
+    display      : block;
+    margin-bottom: 10px;
+    object-fit   : cover;
+}
+
+.card-demo-container {
+    padding-right: 10px;
+    height       : 190px;
+    margin-top   : 20px;
+}
+
+.loader {
+    border       : 10px solid #0b385b;
+    border-top   : 10px solid #3498db;
+    border-radius: 50%;
+    width        : 80px;
+    height       : 80px;
+    animation    : spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.spinner-container {
+    position   : absolute;
+    top        : 50%;
+    left       : 50%;
+    margin-left: -40px;
+    margin-top : -40px;
+}
+
+.card-action {
+    display: inline-block;
+}
+
+.downloadbutton {
+    color: white;
+}
+
+.card-action:hover,
+.card-action:hover>i {
+    color : rgb(15 75 121);
+    cursor: pointer;
+}
+
+.card-action.disable-icon:hover>i,
+.card-action.disable-icon:hover {
+    color : grey;
+    cursor: not-allowed;
+}
+
+.button-grp {
+    position : absolute;
+    left     : 0;
+    right    : 0;
+    margin   : 0 auto;
+    bottom   : 0px;
+    font-size: 16px;
+}
+
+.grey-color {
+    background-color: black;
+    color           : white;
+}
+
+.flip-card {
+    background-color: transparent;
+    width           : 100%;
+    height          : 100%;
+    perspective     : 1000px;
+}
+
+.flip-card-inner {
+    position       : relative;
+    width          : 100%;
+    height         : 100%;
+    text-align     : center;
+    transition     : transform 0.8s;
+    transform-style: preserve-3d;
+}
+
+.flip-card:hover .flip-card-inner {
+    transform: rotateY(180deg);
+}
+
+.flip-card-front,
+.flip-card-back {
+    position                   : absolute;
+    width                      : 100%;
+    height                     : 100%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility        : hidden;
+}
+
+.flip-card-front {
+    color   : #4c4c4c;
+    overflow: hidden;
+    padding : 5px;
+}
+
+.flip-card-back {
+    background-color: #1776BF;
+    color           : white;
+    transform       : rotateY(180deg);
+    padding         : 5px;
+}
+
+.card-desc {
+    font-size : 12px;
+    max-height: 140px;
+    text-align: left;
+    overflow  : auto;
+    padding   : 5px;
+    z-index   : 999999;
+}
+
+/* width */
+.card-desc::-webkit-scrollbar {
+    width: 2px;
+}
+
+/* Track */
+.card-desc::-webkit-scrollbar-track {
+    box-shadow   : inset 0 0 20px #0b4f84;
+    border-radius: 5px;
+}
+
+/* Handle */
+.card-desc::-webkit-scrollbar-thumb {
+    background   : white;
+    border-radius: 5px;
+}
+
+/* Handle on hover */
+.card-desc::-webkit-scrollbar-thumb:hover {
+    background: white;
+}
+
+.flip-card-font-coming-soon {
+    background-color: rgba(0, 0, 0, 0.4);
+    position        : absolute;
+    top             : 0px;
+    bottom          : 0px;
+    right           : 0px;
+    left            : 0px;
+    transition      : top .1s linear .2s;
+}
+
+.coming-soon-tag {
+    position        : absolute;
+    width           : 172px;
+    padding         : 5px;
+    background-color: #1776BF;
+    color           : white;
+    top             : 0px;
+    left            : 0px;
+    text-align      : center;
+    z-index         : 3;
+    transform       : rotate(-45deg) translate(-53px, -8px);
+    box-shadow      : 5px 6px 3px #00000094
+}
+
+.flip-card:hover .coming-soon-tag-backside {
+    height     : 30px;
+    line-height: 30px;
+}
+
+.flip-card-back h3 {
+    font-size         : 20px;
+    transition        : margin-top .2s linear .4s;
+    display           : -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow          : hidden;
+}
+
+.flip-card:hover .flip-card-back.coming-soon-back h3 {
+    margin-top: 30px;
+}
+
+.flip-card:hover .flip-card-font-coming-soon {
+    top: 100%;
+}
+
+.coming-soon-tag-backside {
+    width           : 100%;
+    background-color: #0b385b;
+    top             : 0px;
+    padding         : 0px;
+    height          : 0px;
+    line-height     : 0px;
+    left            : 0px;
+    position        : absolute;
+    overflow        : hidden;
+    transition      : height .2s linear .4s, line-height .2s linear .4s;
+}

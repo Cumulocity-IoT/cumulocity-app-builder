@@ -80,13 +80,16 @@ export class SimulatorManagerService {
 
                     return merge(
                         of(appId).pipe(
-                            tap((appId) => { console.debug("AppID changed:", appId); })
+                            tap((appId) => { //console.debug("AppID changed:", appId); 
+                        })
                         ),
                         lockStatusChanges$.pipe(
-                            tap((lockStatus) => { console.debug("Lock status changed:", lockStatus); })
+                            tap((lockStatus) => { //console.debug("Lock status changed:", lockStatus); 
+                        })
                         ),
                         simulatorConfigChanges$.pipe(
-                            tap((simulatorConfigs) => { console.debug("Simulator config changed:", simulatorConfigs); })
+                            tap((simulatorConfigs) => { //console.debug("Simulator config changed:", simulatorConfigs); 
+                        })
                         )
                     ).pipe(
                         withLatestFrom(lockStatusChanges$),
@@ -103,23 +106,23 @@ export class SimulatorManagerService {
         appIdLockOrConfigChange.subscribe(({appId, isLocked, isLockOwned}) => {
             this.lockRefreshSubscription.unsubscribe();
             if (appId == undefined) {
-                console.debug("No appId: Clearing simulators");
+                // console.debug("No appId: Clearing simulators");
                 this.clearSimulators();
                 this.simulatorConfigById.clear();
                 this.simulatorWorkerAPI._simulatorConfig$.next(this.simulatorConfigById);
             } else {
                 const simulatorConfigLoaded = this.loadSimulatorConfig(appId);
                 if (isLockOwned) {
-                    console.debug("Lock owned: Creating/Recreating simulators");
+                   // console.debug("Lock owned: Creating/Recreating simulators");
                     simulatorConfigLoaded.then(() => this.reloadSimulators());
                     // Refresh the lock every LOCK_TIMEOUT/2
                     this.lockRefreshSubscription = interval(LOCK_TIMEOUT/2).subscribe(() => this.lockService.refreshLock(appId));
                 } else if (!isLocked) {
-                    console.debug("Unlocked: Clearing simulators and attempting to take lock");
+                   // console.debug("Unlocked: Clearing simulators and attempting to take lock");
                     this.clearSimulators();
                     this.lockService.takeLock(appId); // After successfully taking the lock we'll get a lockStatus change so the simulators will be reloaded automatically
                 } else {
-                    console.debug("Locked: Clearing simulators");
+                  //  console.debug("Locked: Clearing simulators");
                     this.clearSimulators();
                 }
             }
@@ -141,7 +144,8 @@ export class SimulatorManagerService {
 
         const app = (await this.appService.detail(appId)).data as IApplication & {applicationBuilder: any};
         if (app.applicationBuilder.simulators) {
-            for (let simulatorConfig of app.applicationBuilder.simulators as SimulatorConfig[]) {
+            const sortedSimulators = app.applicationBuilder.simulators.sort((a, b) => a.name > b.name ? 1 : -1);
+            for (let simulatorConfig of sortedSimulators as SimulatorConfig[]) {
                 this.simulatorConfigById.set(simulatorConfig.id, simulatorConfig);
             }
         }

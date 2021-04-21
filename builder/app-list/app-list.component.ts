@@ -43,24 +43,31 @@ export class AppListComponent {
     bsModalRef: BsModalRef;
 
     constructor(private router: Router, private appService: ApplicationService, private appStateService: AppStateService, private modalService: BsModalService, private userService: UserService) {
-        // Get a list of the applications on the tenant (This includes live updates)
-        this.applications = from(this.appService.list$({ pageSize: 100, withTotalPages: true }, {
-            hot: true,
-            pagingStrategy: PagingStrategy.ALL,
-            realtime: true,
-            realtimeAction: RealtimeAction.FULL,
-            pagingDelay: 0.1
-        }))
-            .pipe(
-                // Some users can't get the full list of applications (they don't have permission) so we get them by user instead (without live updates)
-                catchError(() =>
-                    from(this.appService.listByUser(appStateService.currentUser.value, { pageSize: 2000 }).then(res => res.data))
-                ),
-                map(apps => apps.filter(app => app.hasOwnProperty('applicationBuilder'))),
-                map(apps => apps.sort((a, b) => a.id > b.id ? 1 : -1) )
-            );
-
+        
         this.userHasAdminRights = userService.hasRole(appStateService.currentUser.value, "ROLE_APPLICATION_MANAGEMENT_ADMIN")
+        
+        // Get a list of the applications on the tenant (This includes live updates)
+        if(this.userHasAdminRights){
+            this.applications = from(this.appService.list$({ pageSize: 100, withTotalPages: true }, {
+                hot: true,
+                pagingStrategy: PagingStrategy.ALL,
+                realtime: true,
+                realtimeAction: RealtimeAction.FULL,
+                pagingDelay: 0.1
+            }))
+                .pipe(
+                    // Some users can't get the full list of applications (they don't have permission) so we get them by user instead (without live updates)
+                    catchError(() =>
+                        from(this.appService.listByUser(appStateService.currentUser.value, { pageSize: 2000 }).then(res => res.data))
+                    ),
+                    map(apps => apps.filter(app => app.hasOwnProperty('applicationBuilder'))),
+                    map(apps => apps.sort((a, b) => a.id > b.id ? 1 : -1) )
+                );
+        } else {
+            this.applications = from(this.appService.listByUser(appStateService.currentUser.value, { pageSize: 2000 }).then(res => res.data))
+            .pipe(map(apps => apps.filter(app => app.hasOwnProperty('applicationBuilder'))),
+            map(apps => apps.sort((a, b) => a.id > b.id ? 1 : -1) ) );
+        }
     }
 
     createAppWizard() {
