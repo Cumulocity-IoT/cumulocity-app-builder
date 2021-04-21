@@ -5,7 +5,7 @@ The Application Builder for Cumulocity provides a simple, coding-free way to cre
 
 ## What's new?
 * **Support for the Cumulocity Version:** Based on Cumulocity 1007.2.0.
-* **DTDL Simulator:** User can now create simulators based on [DTDL](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md)(Digital Twins Definition Language).
+* **DTDL Simulator:** User can now create simulator based on [DTDL](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md)(Digital Twins Definition Language).
 * **Group Simulator:** User can create simulator for existing device group or new device group.
 * **Position Simulator:** New simulator for device positions.
 * **New Home Page:** New Home Page with quick start videos, help and support information.
