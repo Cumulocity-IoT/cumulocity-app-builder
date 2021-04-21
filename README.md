@@ -135,9 +135,11 @@ Would you like to create your own Custom Runtime widget? Please refer our [Demo 
     
     ```
    5. Save file
-   6. Goto /cumulocity_app_builder/patches and delete nvd3+0.0.1.patch file
-   7. Execute "npx patch-package nvd3" command in your terminal
-   8. Start the server
+   6. Goto /cumulocity_app_builder/patches 
+   7. Delete nvd3+0.0.1.patch file
+   8. Goto /cumulocity_app_builder 
+   9. Execute "npx patch-package nvd3" command in your terminal
+   10. Start the server
 ------------------------------
 
 These tools are provided as-is and without warranty or support. They do not constitute part of the Software AG product suite. Users are free to use, fork and modify them, subject to the license agreement. While Software AG welcomes contributions, we cannot guarantee to include every contribution in the master project.
