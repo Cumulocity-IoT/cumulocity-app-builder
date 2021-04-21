@@ -4,14 +4,14 @@ The Application Builder for Cumulocity provides a simple, coding-free way to cre
 ![](https://user-images.githubusercontent.com/38696279/72333172-47cec300-36b3-11ea-9abf-1bb29b490a22.png)
 
 ## What's new?
-* **Support for the Cumulocity Version:** Based on Cumulocity 1007.2.0.
 * **DTDL Simulator:** User can now create simulator based on [DTDL](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md)(Digital Twins Definition Language).
 * **Group Simulator:** User can create simulator for existing device group or new device group.
 * **Position Simulator:** New simulator for device positions.
 * **New Home Page:** New Home Page with quick start videos, help and support information.
-* **GainSight Integration:** Ability for user to enabled/disabled GainSight for Application Builder.
+* **GainSight Integration:** Gainsight is integrated with app builder and user can control it from settings page.
 * **Dashboard Configuration Updates:** Now user can select device or group instead of manual typing deviceId/groupId.
 * **Welcome Screen Updates:** Welcome screen template updated with Markdown widget for better user experience.
+* **Cumulocity Version:** Based on Cumulocity 1007.2.0.
 * **Various bug fixes**
 
 ## Features
