@@ -5,7 +5,7 @@
   "main": "index.ts",
   "scripts": {
     "start": "c8ycli server --env.extraWebpackConfig=./extra-webpack.config.js ",
-    "build": "node --max-old-space-size=4096 && c8ycli build --env.extraWebpackConfig=./extra-webpack.config.js --env.mode=production",
+    "build": "set NODE_OPTIONS=--max_old_space_size=4096 && c8ycli build --env.extraWebpackConfig=./extra-webpack.config.js --env.mode=production",
     "deploy": "c8ycli deploy  -u ${{ secrets.KEY1 }} -T ${{ secrets.KEY1 }} -U ${{ secrets.KEY1 }} -P ${{ secrets.KEY1 }}",
     "postinstall": "patch-package && patch-package --patch-dir node_modules/cumulocity-runtime-widget-loader/patches"
   },
