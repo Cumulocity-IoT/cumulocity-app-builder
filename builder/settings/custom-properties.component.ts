@@ -36,7 +36,7 @@ import { SettingsService } from './settings.service';
                         (ngModelChange)="changeGainsightStatus()" [disabled]="!userHasAdminRights || isGainsightParent" 
                         [class.disabled]="!userHasAdminRights || isGainsightParent" btnCheckbox tabindex="0">{{gainsightEnabled? 'Enabled' : 'Disabled' }}</button>
             </div>
-            <div class="form-group" *ngIf="false">
+            <div class="form-group" >
                 <label translate="" for="dashboardCataglogEnabled" >Dashboard Catalog Enabled</label>
                 <input type="text" class="form-control" [disabled]="!userHasAdminRights " name="dashboardCataglogEnabled" id="dashboardCataglogEnabled" 
                 placeholder="e.g. true/false (required)" required autofocus [(ngModel)]="customProperties.dashboardCataglogEnabled" >
