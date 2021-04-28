@@ -27,19 +27,20 @@ import { SettingsService } from './settings.service';
 @Component({
     template: `
     <c8y-title>Custom Properties</c8y-title>
-    <div class="col-xs-12 col-sm-8 col-md-8 card" >
+    <div class="col-xs-12 col-sm-6 col-md-6 card" >
         <form name="customPropertiesForm" #customPropertiesForm="ngForm">
         <div class="card-block" *ngIf="!isBusy">
             <div class="form-group">
-                <label translate="" for="gainsightEnabled" >Gainsight</label>
+                <label translate="" for="gainsightEnabled" >Gainsight Product Experience Tracking</label>
                 <button class="btn btn-default" id="gainsightEnabled" name="gainsightEnabled" [(ngModel)]="gainsightEnabled" 
                         (ngModelChange)="changeGainsightStatus()" [disabled]="!userHasAdminRights || isGainsightParent" 
                         [class.disabled]="!userHasAdminRights || isGainsightParent" btnCheckbox tabindex="0">{{gainsightEnabled? 'Enabled' : 'Disabled' }}</button>
             </div>
             <div class="form-group" >
-                <label translate="" for="dashboardCataglogEnabled" >Dashboard Catalog Enabled</label>
-                <input type="text" class="form-control" [disabled]="!userHasAdminRights " name="dashboardCataglogEnabled" id="dashboardCataglogEnabled" 
-                placeholder="e.g. true/false (required)" required autofocus [(ngModel)]="customProperties.dashboardCataglogEnabled" >
+                <label translate="" for="dashboardCataglogEnabled" >Dashboard Catalog</label>
+                <button class="btn btn-default" id="dashboardCataglogEnabled" name="dashboardCataglogEnabled" [(ngModel)]="dashboardCataglogEnabled" 
+                        (ngModelChange)="changeDashboardCatalogStatus()" [disabled]="!userHasAdminRights" 
+                        [class.disabled]="!userHasAdminRights " btnCheckbox tabindex="1">{{dashboardCataglogEnabled? 'Enabled' : 'Disabled' }}</button>
             </div>
         </div>
         <div *ngIf="isBusy" class="col-xs-12 col-sm-12 col-md-12" style="padding-bottom:50px;padding-top:20px">
@@ -61,6 +62,7 @@ export class CustomPropertiesComponent implements OnInit, OnDestroy{
     isBusy: boolean = false;
     isGainsightParent: boolean = false;
     gainsightEnabled = false;
+    dashboardCataglogEnabled = false;
     customProperties = {
         gainsightEnabled: "false",
         dashboardCataglogEnabled: "false"
@@ -86,6 +88,7 @@ export class CustomPropertiesComponent implements OnInit, OnDestroy{
             this.customProperties.dashboardCataglogEnabled = 'false';
         }
         if(this.customProperties.gainsightEnabled === 'true') { this.gainsightEnabled = true;}
+        if(this.customProperties.dashboardCataglogEnabled === 'true') { this.dashboardCataglogEnabled = true;}
         this.isBusy = false;
     }
 
@@ -93,6 +96,11 @@ export class CustomPropertiesComponent implements OnInit, OnDestroy{
         if(this.gainsightEnabled) { this.customProperties.gainsightEnabled = 'true';}
         else { this.customProperties.gainsightEnabled = 'false'; }
 
+    }
+
+    changeDashboardCatalogStatus() {
+        if(this.dashboardCataglogEnabled) { this.customProperties.dashboardCataglogEnabled = 'true';}
+        else { this.customProperties.dashboardCataglogEnabled = 'false'; }
     }
     isFormValid() {
         return ((this.customProperties.gainsightEnabled === 'true' || this.customProperties.gainsightEnabled === 'false') && 
