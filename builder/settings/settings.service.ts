@@ -52,7 +52,7 @@ export class SettingsService {
     async getAPPBuilderId() {
         if(this.appbuilderId) { return this.appbuilderId; }
         else {
-            const appList = (await this.appService.list({pageSize: 2000})).data;
+            const appList = (await this.appService.listByUser(this.appStateService.currentUser.value, { pageSize: 2000 })).data;
             let app: IApplication & {widgetContextPaths?: string[]} = appList.find(app => app.contextPath === contextPathFromURL() &&
              String(app.availability) === 'PRIVATE');
             if (!app) {
