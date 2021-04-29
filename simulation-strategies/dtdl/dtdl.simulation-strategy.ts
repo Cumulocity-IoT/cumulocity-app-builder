@@ -52,12 +52,30 @@ export class DtdlSimulationStrategy extends DeviceIntervalSimulator {
     onTick(groupDeviceId?: any) {
         
         const dtdlConfigModel = this.config.dtdlModelConfig;
-        dtdlConfigModel.forEach( modelConfig => {
-            const deviceId =(groupDeviceId? groupDeviceId : this.config.deviceId);
-            if(modelConfig.simulationType && modelConfig.simulationType === 'positionUpdate') {
-                this.updatePosition(deviceId, modelConfig);
-            } else { this.createMeasurements(deviceId, modelConfig); }
-        });
+        const deviceId =(groupDeviceId? groupDeviceId : this.config.deviceId);
+        if(dtdlConfigModel) {
+            // Existing implementation
+            const dtdlConfigModelParents = dtdlConfigModel.filter(model => !model.isFieldModel || model.simulationType === 'positionUpdate');
+            if(dtdlConfigModelParents && dtdlConfigModelParents.length > 0) {
+                dtdlConfigModelParents.forEach( modelConfig => {
+                    if(modelConfig.simulationType && modelConfig.simulationType === 'positionUpdate') {
+                        this.updatePosition(deviceId, modelConfig);
+                    } else { this.createMeasurements(deviceId, modelConfig); }
+                });
+            }
+
+            const dtdlConfigModelFields = dtdlConfigModel.filter(
+                (model, i, arr) => arr.findIndex(t => t.parentId  &&  t.parentId === model.parentId) === i
+              );
+            
+            if(dtdlConfigModelFields && dtdlConfigModelFields.length > 0) {
+                dtdlConfigModelFields.forEach( modelConfig => {
+                   this.createMeasuerementsSeries(deviceId, modelConfig.parentId, modelConfig.fragment); 
+                });
+            }
+        }
+         
+        
     }
 
     private getRandomValue(modelConfig: any) {
@@ -135,6 +153,28 @@ export class DtdlSimulationStrategy extends DeviceIntervalSimulator {
                 break;
         }
         return mValue;
+    }
+
+    private createMeasuerementsSeries(deviceId: any, parentId:string, fragment: string) {
+        const dtdlConfigModel = this.config.dtdlModelConfig;
+        const childModelConfigs = dtdlConfigModel.filter( model => model.parentId === parentId && model.simulationType !== 'positionUpdate');
+        if(childModelConfigs && childModelConfigs.length > 0) {
+            let fragementmap = new Map();
+            childModelConfigs.forEach(field => {
+                fragementmap.set(field.series, {
+                    value: this.getMeasurementValue(field, deviceId),
+                    ...field.unit && {unit: field.unit}
+                })
+            });
+            const modelFragmentObject = Array.from(fragementmap.entries()).reduce((main, [key, value]) => ({...main, [key]: value}), {});
+            this.measurementService.create({
+                    sourceId: deviceId,
+                    time: new Date(),
+                    [fragment]: {
+                        ...modelFragmentObject
+                    }
+                });
+        }
     }
     private createMeasurements(deviceId: any, modelConfig:any) {
         if(modelConfig.schema && modelConfig.schema['@type'] === 'Object' && modelConfig.schema.fields) {

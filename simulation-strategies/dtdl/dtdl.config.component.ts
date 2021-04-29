@@ -34,7 +34,7 @@ export interface DtdlSimulationModel {
     fragment?: string,
     series?: string,
     unit?: string,
-    schema?: string,
+    schema?: any,
     id?: string,
     minValue?: number, // random value, random walk
     maxValue?: number, // random value, random walk
@@ -46,6 +46,9 @@ export interface DtdlSimulationModel {
     altitude?: string, // position update
     deviceId?: string;
     simulationType?: string;
+    isObjectType?: boolean;
+    parentId?: string;
+    isFieldModel?: boolean;
 }
 @Component({
     template: `
@@ -96,7 +99,7 @@ export interface DtdlSimulationModel {
                             </select>
                         </div>     
                     </div>
-                    <div class="col-xs-12 col-sm-4 col-md-4" *ngIf="config.dtdlModelConfig[index].simulationType !== 'positionUpdate'">
+                    <div class="col-xs-12 col-sm-4 col-md-4" *ngIf="!config.dtdlModelConfig[index].isFieldModel && config.dtdlModelConfig[index].simulationType !== 'positionUpdate'">
                     <div class="measurement-accordion">
                         <label for="fragment"><span>Fragment</span></label>
                         <input type="text" class="form-control"  name="fragment{{model.id}}" placeholder="e.g. temperature_measurement (required)" required autofocus [(ngModel)]="config.dtdlModelConfig[index].fragment">
@@ -282,12 +285,12 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
         if(dtdlM && dtdlM.length > 0) {
             dtdlM.forEach((content: any) => {
                 if(content['@type'].includes("Telemetry")) {
-                    this.processTeletry(content, deviceId);
+                    this.processTelemetry(content, deviceId);
                 } else if (content['@type'].includes("Component")) {
                     const schemaContent = (content.schema && content.schema.contents ? content.schema.contents : []);
                     schemaContent.forEach((content: any) => {
                         if(content['@type'].includes("Telemetry")) {
-                            this.processTeletry(content,deviceId);
+                            this.processTelemetry(content,deviceId);
                         } 
                     });
                 }
@@ -295,18 +298,42 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
         }
     }
 
-    private processTeletry(content: any, deviceId?: string) {
+    private processTelemetry(content: any, deviceId?: string) {
         const typeLength = (Array.isArray(content['@type']) ? content['@type'].length : 0);
         const model: DtdlSimulationModel = {
             simulationType: 'randomValue'
         };
         model.measurementName = (content.displayName && content.displayName.constructor === Object ? content.displayName.en : content.displayName);
         model.fragment = ( typeLength > 0 ? content['@type'][typeLength - 1] : content['@type']);
-        model.id = content['@id'];
+        model.id = (content['@id'] ?  content['@id']: Math.floor(Math.random() * 1000000));
         model.schema = content.schema;
         model.series = content.name;
         model.unit = content.unit;
         model.deviceId = deviceId;
-        this.configModel.push(model);
+        model.isObjectType = (model.schema['@type'] === 'Object');
+        if(model.isObjectType && model.schema.fields) {
+            const fields = model.schema.fields;
+            if(fields && fields.length > 0 ) {
+                fields.forEach(field => {
+                    const fieldModel: DtdlSimulationModel = {
+                        simulationType: 'randomValue'
+                    };
+                    fieldModel.measurementName = model.measurementName + " : " + field.displayName;
+                    fieldModel.fragment = model.fragment;
+                    fieldModel.id = (field['@id'] ?  field['@id']: Math.floor(Math.random() * 1000000));
+                    fieldModel.schema = field.schema;
+                    fieldModel.series = content.name +":" + field.name;
+                    fieldModel.unit = field.unit;
+                    fieldModel.deviceId = deviceId;
+                    fieldModel.isObjectType = false;
+                    fieldModel.isFieldModel = true;
+                    fieldModel.parentId = model.id;
+                    this.configModel.push(fieldModel);
+                });
+            }
+        } else  {
+            this.configModel.push(model);
+        }
+        
     }
 }
