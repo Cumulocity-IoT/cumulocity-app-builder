@@ -48,7 +48,7 @@ import { SettingsService } from './settings.service';
             </rectangle-spinner>
         </div>
         <div class="card-footer" style="text-align:center" *ngIf="userHasAdminRights">
-            <button class="btn btn-primary" (click)="save(customProperties)" [disabled]="!customPropertiesForm.form.valid || !isFormValid()">Save</button>
+            <button class="btn btn-primary" id="saveCustomProperties" (click)="save(customProperties)" [disabled]="!customPropertiesForm.form.valid || !isFormValid()">Save</button>
         </div>
         </form>
     </div>
