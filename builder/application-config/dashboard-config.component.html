@@ -55,13 +55,13 @@
 
     <ng-template #itemTemplate let-item="item" let-index="index">
         <div class="drag-handle"><i class="fa custom-icon-drag-handle"></i></div>
-        <div class="col">{{item.value.name}}</div>
-        <div class="col" id="dashboard-id-{{item.value.name}}-{{index}}">{{item.value.id}}</div>
-        <div class="col">{{item.value.visibility === 'no-nav' ? 'Tabs Only' : 
+        <div class="col col-overflow" title="{{item.value.name}}">{{item.value.name}}</div>
+        <div class="col col-overflow" title="{{item.value.id}}" id="dashboard-id-{{item.value.name}}-{{index}}">{{item.value.id}}</div>
+        <div class="col col-overflow" >{{item.value.visibility === 'no-nav' ? 'Tabs Only' : 
             item.value.visibility === 'hidden' ? 'Hidden': item.value.visibility}}</div>
-        <div class="col">{{item.value.tabGroup}}</div>
-        <div class="col"><i [c8yIcon]="item.value.icon"></i> {{item.value.icon}}</div>
-        <div class="col">{{item.value.groupTemplate ? 'Children of: ' : ''}}{{item.value.deviceId || '-'}}</div>
+        <div class="col col-overflow" title="{{item.value.tabGroup}}">{{item.value.tabGroup}}</div>
+        <div class="col col-overflow"><i [c8yIcon]="item.value.icon"></i> {{item.value.icon}}</div>
+        <div class="col col-overflow" title="{{item.value.deviceId}}">{{item.value.groupTemplate ? 'Children of: ' : ''}}{{item.value.deviceId || '-'}}</div>
         <div>
             <button class="btn btn-default" id="editDashboardButton-{{item.value.id}}" 
                 (click)="showEditDashboardDialog(app, app.applicationBuilder.dashboards, index)">Edit</button>

@@ -33,7 +33,8 @@ import { DtdlSimulationStrategyConfig, DtdlSimulationStrategyConfigComponent } f
     configComponent: DtdlSimulationStrategyConfigComponent
 })
 export class DtdlSimulationStrategy extends DeviceIntervalSimulator {
-    simulatorTypeConfigParam: simulatorTypeConfigParam[] = [];
+    simulatorTypeConfigParam: simulatorTypeConfigParam ;
+    simulatorTypeConfig: simulatorTypeConfigI[] = [];
     private invService: InventoryService;
     constructor(protected injector: Injector, private measurementService: MeasurementService, 
         private config: DtdlSimulationStrategyConfig, private eventService: EventService) {
@@ -83,55 +84,78 @@ export class DtdlSimulationStrategy extends DeviceIntervalSimulator {
     }
 
     private getValueSeries(modelConfig: any, deviceId: any) {
-        let valueSeriesConfigParam:simulatorTypeConfigParam  = this.getSimulatorConfigParam(deviceId, 'valueSeries', modelConfig.fragment);
+        let valueSeriesConfigParam:simulatorTypeConfigI = this.getSimulatorConfigParam('', 'valueSeries', modelConfig.fragment, modelConfig.series);
+        let simulatorTypeConfigParam: simulatorTypeConfigParam = {};
         if(valueSeriesConfigParam == null) {
-            valueSeriesConfigParam = { deviceId, simulatorType: 'valueSeries', fragment: modelConfig.fragment};
-            valueSeriesConfigParam.seriesvalues = modelConfig.value.split(',').map(value => parseFloat(value.trim()));
-            valueSeriesConfigParam.seriesValueMeasurementCounter = 0;
+            simulatorTypeConfigParam = {
+                seriesvalues: modelConfig.value.split(',').map(value => parseFloat(value.trim())),
+                seriesValueMeasurementCounter: 0
+            };
+            valueSeriesConfigParam = { 
+                deviceId: '',
+                simulatorType: 'valueSeries', 
+                fragment: modelConfig.fragment,
+                series: modelConfig.series,
+                simulatorTypeConfigParam
+            };
         }
-        if (valueSeriesConfigParam.seriesValueMeasurementCounter >= valueSeriesConfigParam.seriesvalues.length) {
-            valueSeriesConfigParam.seriesValueMeasurementCounter = 0;
+        simulatorTypeConfigParam = valueSeriesConfigParam.simulatorTypeConfigParam;
+        if (simulatorTypeConfigParam.seriesValueMeasurementCounter >= simulatorTypeConfigParam.seriesvalues.length) {
+            simulatorTypeConfigParam.seriesValueMeasurementCounter = 0;
         }
-        const seriesValue = valueSeriesConfigParam.seriesvalues[valueSeriesConfigParam.seriesValueMeasurementCounter++];
-        this.updateSimulatorConfigParam(valueSeriesConfigParam);
+        const seriesValue = simulatorTypeConfigParam.seriesvalues[simulatorTypeConfigParam.seriesValueMeasurementCounter++];
+        this.updateSimulatorConfigParam(valueSeriesConfigParam, simulatorTypeConfigParam);
         return seriesValue;
     }
 
     private getRandomWalk(modelConfig: any, deviceId: any) {
-        let randomWalkConfigParam:simulatorTypeConfigParam  = this.getSimulatorConfigParam(deviceId, 'randomWalk', modelConfig.fragment);
+        let randomWalkConfigParam:simulatorTypeConfigI  = this.getSimulatorConfigParam(deviceId, 'randomWalk', modelConfig.fragment, modelConfig.series);
+        let simulatorTypeConfigParam: simulatorTypeConfigParam = {};
         if (randomWalkConfigParam == null) {
-            randomWalkConfigParam = { deviceId, simulatorType: 'randomWalk', fragment: modelConfig.fragment};
-            randomWalkConfigParam.randomWalkMeasurementValue = modelConfig.startingValue;
-            randomWalkConfigParam.randomWalkPreviousValue = 0;
+            simulatorTypeConfigParam = {
+                randomWalkMeasurementValue: modelConfig.startingValue,
+                randomWalkPreviousValue: 0
+            };
+            randomWalkConfigParam = { 
+                deviceId, simulatorType: 'randomWalk', 
+                fragment: modelConfig.fragment, 
+                series: modelConfig.series,
+                simulatorTypeConfigParam
+            };
+            
         } else {
+            simulatorTypeConfigParam = randomWalkConfigParam.simulatorTypeConfigParam;
             const max = Math.max(modelConfig.minValue, modelConfig.maxValue);
             const min = Math.min(modelConfig.minValue, modelConfig.maxValue);
             const maxDelta = Math.abs(modelConfig.maxDelta);
             const delta = maxDelta * 2 * Math.random() - maxDelta;
-            randomWalkConfigParam.randomWalkMeasurementValue = Math.min(Math.max(randomWalkConfigParam.randomWalkPreviousValue + delta, min), max);
+            simulatorTypeConfigParam.randomWalkMeasurementValue = Math.min(Math.max(simulatorTypeConfigParam.randomWalkPreviousValue + delta, min), max);
         }
 
-        randomWalkConfigParam.randomWalkPreviousValue = randomWalkConfigParam.randomWalkMeasurementValue;
-        this.updateSimulatorConfigParam(randomWalkConfigParam);
-        return Math.round(randomWalkConfigParam.randomWalkMeasurementValue * 100) / 100 ;
+        simulatorTypeConfigParam.randomWalkPreviousValue = simulatorTypeConfigParam.randomWalkMeasurementValue;
+
+        this.updateSimulatorConfigParam(randomWalkConfigParam, simulatorTypeConfigParam);
+        return Math.round(simulatorTypeConfigParam.randomWalkMeasurementValue * 100) / 100 ;
     }
 
-    private getSimulatorConfigParam(deviceId: any, simulatorType: string, fragment: string) {
-        if(this.simulatorTypeConfigParam && this.simulatorTypeConfigParam.length > 0) {
-            const configParams = this.simulatorTypeConfigParam.find((param) => param.deviceId === deviceId && 
-            param.simulatorType === simulatorType && param.fragment === fragment);
+    private getSimulatorConfigParam(deviceId: any, simulatorType: string, fragment: string, series: string) {
+        if(this.simulatorTypeConfig && this.simulatorTypeConfig.length > 0) {
+            const configParams = this.simulatorTypeConfig.find((param) => param.deviceId === deviceId && 
+            param.simulatorType === simulatorType && param.fragment === fragment && param.series === series);
             return configParams ? configParams : null;
         }
         return null;
     }
 
-    private updateSimulatorConfigParam(configParam: simulatorTypeConfigParam) {
-        const matchingIndex = this.simulatorTypeConfigParam.findIndex( config => config.deviceId === configParam.deviceId && 
-            config.simulatorType === configParam.simulatorType && config.fragment === configParam.fragment);
+    private updateSimulatorConfigParam(configParam: simulatorTypeConfigI, simulatorConfigParam: simulatorTypeConfigParam) {
+        const matchingIndex = this.simulatorTypeConfig.findIndex( config => config.deviceId === configParam.deviceId && 
+            config.simulatorType === configParam.simulatorType && config.fragment === configParam.fragment 
+            && config.series === configParam.series);
         if (matchingIndex > -1) {
-            this.simulatorTypeConfigParam[matchingIndex] = configParam;
+            configParam.simulatorTypeConfigParam = simulatorConfigParam;
+            this.simulatorTypeConfig[matchingIndex] = configParam;
         } else {
-            this.simulatorTypeConfigParam.push(configParam)
+            this.simulatorTypeConfig.push(configParam)
         }
     }
     private getMeasurementValue(modelConfig: any, deviceId: any) {
@@ -213,24 +237,34 @@ export class DtdlSimulationStrategy extends DeviceIntervalSimulator {
     }
     private updatePosition(deviceId: string, modelConfig: any){
         const time = new Date().toISOString();
-        let positionUpdateConfigParam:simulatorTypeConfigParam  = this.getSimulatorConfigParam(deviceId, 'positionUpdate', modelConfig.fragment);
+        let positionUpdateConfigParam:simulatorTypeConfigI  = this.getSimulatorConfigParam('', 'positionUpdate', modelConfig.measurementName, modelConfig.series);
+        let simulatorTypeConfigParam: simulatorTypeConfigParam = {};
         if(positionUpdateConfigParam == null) {
-            positionUpdateConfigParam = { deviceId, simulatorType: 'positionUpdate', fragment: modelConfig.fragment};
-            positionUpdateConfigParam.positionLatitude = modelConfig.latitude.split(',').map(value => parseFloat(value.trim()));
-            positionUpdateConfigParam.positionLongitude = modelConfig.longitude.split(',').map(value => parseFloat(value.trim()));
-            positionUpdateConfigParam.positionAltitude = modelConfig.altitude.split(',').map(value => parseFloat(value.trim()));
-            positionUpdateConfigParam.positionCounter = 0;
+            simulatorTypeConfigParam = {
+                positionLatitude: modelConfig.latitude.split(',').map(value => parseFloat(value.trim())),
+                positionLongitude: modelConfig.longitude.split(',').map(value => parseFloat(value.trim())),
+                positionAltitude:modelConfig.altitude.split(',').map(value => parseFloat(value.trim())),
+                positionCounter: 0
+            }
+            positionUpdateConfigParam = { 
+                deviceId: '', 
+                simulatorType: 'positionUpdate', 
+                fragment: modelConfig.measurementName,
+                series: modelConfig.series,
+                simulatorTypeConfigParam
+            };
         }
-        if (positionUpdateConfigParam.positionCounter >= positionUpdateConfigParam.positionLatitude.length || positionUpdateConfigParam.positionCounter >= positionUpdateConfigParam.positionLatitude.length) {
-            positionUpdateConfigParam.positionCounter = 0;
+        simulatorTypeConfigParam = positionUpdateConfigParam.simulatorTypeConfigParam;
+        if (simulatorTypeConfigParam.positionCounter >= simulatorTypeConfigParam.positionLatitude.length || simulatorTypeConfigParam.positionCounter >= simulatorTypeConfigParam.positionLatitude.length) {
+            simulatorTypeConfigParam.positionCounter = 0;
         }
         
         const c8yPsition: C8yPosition = {
-            lat: positionUpdateConfigParam.positionLatitude[positionUpdateConfigParam.positionCounter],
-            alt: positionUpdateConfigParam.positionLongitude[positionUpdateConfigParam.positionCounter],
-            lng: positionUpdateConfigParam.positionAltitude[positionUpdateConfigParam.positionCounter++] 
+            lat: simulatorTypeConfigParam.positionLatitude[simulatorTypeConfigParam.positionCounter],
+            lng: simulatorTypeConfigParam.positionLongitude[simulatorTypeConfigParam.positionCounter],
+            alt: simulatorTypeConfigParam.positionAltitude[simulatorTypeConfigParam.positionCounter++] 
         };
-        this.updateSimulatorConfigParam(positionUpdateConfigParam);
+        this.updateSimulatorConfigParam(positionUpdateConfigParam,simulatorTypeConfigParam);
         
         const deviceToUpdate: Partial<IManagedObject> = {
             id: deviceId,
@@ -244,7 +278,7 @@ export class DtdlSimulationStrategy extends DeviceIntervalSimulator {
             },
             type: "c8y_LocationUpdate",
             time: time,
-            text: "LocationUpdate",
+            text: modelConfig.measurementName,
             c8y_Position: c8yPsition
         });
     }
@@ -267,9 +301,6 @@ export class DtdlSimulationStrategyFactory extends SimulationStrategyFactory<Dtd
 
 export interface simulatorTypeConfigParam {
  
-    deviceId: string,
-    simulatorType: string,
-    fragment: string,
     seriesValueMeasurementCounter?: number,
     seriesvalues?: number[],
     randomWalkFirstValue?: boolean
@@ -279,6 +310,14 @@ export interface simulatorTypeConfigParam {
     positionLongitude?: number[],
     positionAltitude?: number[],
     positionCounter?: number;
+}
+
+export interface simulatorTypeConfigI {
+    series: string,
+    deviceId: string,
+    simulatorType: string,
+    fragment: string,
+    simulatorTypeConfigParam: simulatorTypeConfigParam
 }
 
 export interface C8yPosition {
