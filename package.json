@@ -1,12 +1,13 @@
 {
   "name": "app-builder",
-  "version": "1.2.5",
+  "version": "1.2.6-Dev-1",
   "description": "Application builder for Cumulocity (written by Software AG Global Presales)",
   "main": "index.ts",
   "scripts": {
     "start": "c8ycli server --env.extraWebpackConfig=./extra-webpack.config.js ",
-    "build": "c8ycli build --env.extraWebpackConfig=./extra-webpack.config.js --env.mode=production",
-    "deploy": "c8ycli deploy",
+    "build": "set NODE_OPTIONS=--max_old_space_size=4096 && c8ycli build --env.extraWebpackConfig=./extra-webpack.config.js --env.mode=production",
+    "deploy-ci": "c8ycli deploy  -u $npm_config_param1 -T $npm_config_param2 -U $npm_config_param3 -P $npm_config_param4",
+    "deploy": "c8ycli deploy ",
     "postinstall": "patch-package && patch-package --patch-dir node_modules/cumulocity-runtime-widget-loader/patches"
   },
   "keywords": [],
@@ -25,9 +26,9 @@
     "@angular/platform-webworker-dynamic": "^8.2.13",
     "@angular/router": "8.2.13",
     "@angular/upgrade": "8.2.13",
-    "@c8y/ng1-modules": "1007.2.0",
-    "@c8y/ngx-components": "1007.2.0",
-    "@c8y/style": "1007.2.0",
+    "@c8y/ng1-modules": "1009.11.0",
+    "@c8y/ngx-components": "1009.11.0",
+    "@c8y/style": "1009.11.0",
     "@ng-reactive/async-input": "0.0.1",
     "@ng-select/ng-select": "^3.7.3",
     "angular": "1.6.9",
@@ -53,7 +54,7 @@
     "@angular-devkit/build-angular": "0.803.23",
     "@angular/compiler-cli": "8.2.13",
     "@angular/language-service": "8.2.13",
-    "@c8y/cli": "1007.2.0",
+    "@c8y/cli": "1009.11.0",
     "@types/lodash-es": "^4.17.3",
     "patch-package": "^6.2.2",
     "typescript": "3.5.3"
