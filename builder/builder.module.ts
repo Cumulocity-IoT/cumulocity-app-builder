@@ -196,7 +196,10 @@ export class BuilderModule {
                 identity, this.settingService.getTenantName());
         } else {
             if(window && window['aptrinsic'] ){
-                window['aptrinsic']('track', 'Applications', {"appId": appId });
+                window['aptrinsic']('track', 'gp_appbuilder_app_viewed', {
+                    "appId": appId,
+                    "tenantId": this.settingService.getTenantName(), 
+                 });
             }
         }
     }

@@ -120,6 +120,8 @@ export class SettingsService {
         if(this.currentTenant && this.currentTenant.customProperties && this.currentTenant.customProperties.gainsightEnabled) {
             return (this.currentTenant.customProperties.gainsightEnabled === 'true');
         }  
+        // Workaround for 1009 - Incase custom properties null and gainsight active
+        if(document && document.getElementById('apt-widget') !== null) { return true; }
         return false;     
     }
 
@@ -142,7 +144,7 @@ export class SettingsService {
         // if(this.isGaisigntEnabledFromParent() || this.isAnalyticsProviderLoaded) { return false;} //Required for 1009.x.x
         if(this.isAnalyticsProviderLoaded) { return false;}
         else {
-            if(this.isGaisigntEnabledFromParent()) { return true; }
+            if(this.isGaisigntEnabledFromParent()) { return false; }
             const isProviderActive =  await this.isAnalyticsProviderActive();
             return isProviderActive;
         }

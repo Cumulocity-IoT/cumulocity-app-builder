@@ -50,28 +50,45 @@ export class DtdlSimulationStrategy extends DeviceIntervalSimulator {
         return this.config;
     } 
 
+    // call every time based on interval
     onTick(groupDeviceId?: any) {
         
         const dtdlConfigModel = this.config.dtdlModelConfig;
         const deviceId =(groupDeviceId? groupDeviceId : this.config.deviceId);
         if(dtdlConfigModel) {
             // Existing implementation
-            const dtdlConfigModelParents = dtdlConfigModel.filter(model => !model.isFieldModel || model.simulationType === 'positionUpdate');
+            const dtdlConfigModelParents = dtdlConfigModel.filter(model => !model.isFieldModel 
+                || model.simulationType === 'positionUpdate'
+                || model.simulationType === 'eventCreation');
             if(dtdlConfigModelParents && dtdlConfigModelParents.length > 0) {
                 dtdlConfigModelParents.forEach( modelConfig => {
-                    if(modelConfig.simulationType && modelConfig.simulationType === 'positionUpdate') {
-                        this.updatePosition(deviceId, modelConfig);
-                    } else { this.createMeasurements(deviceId, modelConfig); }
+                    if(modelConfig.simulationType){
+                        switch (modelConfig.simulationType) {
+                            case 'positionUpdate':
+                                this.updatePosition(deviceId, modelConfig);
+                                break;
+
+                            case 'eventCreation':
+                                this.createEvents(deviceId, modelConfig);
+                                break;
+
+                            default:
+                                this.createMeasurements(deviceId, modelConfig);
+                                break;
+                        }
+                    }
                 });
             }
 
+            // idenfity parentId for field series
             const dtdlConfigModelFields = dtdlConfigModel.filter(
                 (model, i, arr) => arr.findIndex(t => t.parentId  &&  t.parentId === model.parentId) === i
               );
             
+            // execute measurement for each unique parentId
             if(dtdlConfigModelFields && dtdlConfigModelFields.length > 0) {
                 dtdlConfigModelFields.forEach( modelConfig => {
-                   this.createMeasuerementsSeries(deviceId, modelConfig.parentId, modelConfig.fragment); 
+                   this.createMeasurementsSeries(deviceId, modelConfig.parentId, modelConfig.fragment); 
                 });
             }
         }
@@ -138,6 +155,7 @@ export class DtdlSimulationStrategy extends DeviceIntervalSimulator {
         return Math.round(simulatorTypeConfigParam.randomWalkMeasurementValue * 100) / 100 ;
     }
 
+    // Find simulator configuration parameters. used to track list of parameters and counter applicable to devices,series,locations, etc.
     private getSimulatorConfigParam(deviceId: any, simulatorType: string, fragment: string, series: string) {
         if(this.simulatorTypeConfig && this.simulatorTypeConfig.length > 0) {
             const configParams = this.simulatorTypeConfig.find((param) => param.deviceId === deviceId && 
@@ -179,9 +197,11 @@ export class DtdlSimulationStrategy extends DeviceIntervalSimulator {
         return mValue;
     }
 
-    private createMeasuerementsSeries(deviceId: any, parentId:string, fragment: string) {
+    // Create measurements series for given dtdl fields details
+    private createMeasurementsSeries(deviceId: any, parentId:string, fragment: string) {
         const dtdlConfigModel = this.config.dtdlModelConfig;
-        const childModelConfigs = dtdlConfigModel.filter( model => model.parentId === parentId && model.simulationType !== 'positionUpdate');
+        const childModelConfigs = dtdlConfigModel.filter( model => model.parentId === parentId && model.simulationType !== 'positionUpdate'
+        && model.simulationType !== 'eventCreation' );
         if(childModelConfigs && childModelConfigs.length > 0) {
             let fragementmap = new Map();
             childModelConfigs.forEach(field => {
@@ -234,6 +254,44 @@ export class DtdlSimulationStrategy extends DeviceIntervalSimulator {
             });
         }
         
+    }
+
+    private createEvents(deviceId: string, modelConfig: any) {
+        const time = new Date().toISOString();
+        let eventCreationConfigParam:simulatorTypeConfigI  = this.getSimulatorConfigParam('', 'eventCreation', modelConfig.measurementName, modelConfig.series);
+        let simulatorTypeConfigParam: simulatorTypeConfigParam = {};
+        if(eventCreationConfigParam == null) {
+            simulatorTypeConfigParam = {
+                eventType: modelConfig.eventType.split(','),
+                eventText: modelConfig.eventText.split(','),
+                eventCounter: 0
+            }
+            eventCreationConfigParam = { 
+                deviceId: '', 
+                simulatorType: 'eventCreation', 
+                fragment: modelConfig.measurementName,
+                series: modelConfig.series,
+                simulatorTypeConfigParam
+            };
+        }
+
+        simulatorTypeConfigParam = eventCreationConfigParam.simulatorTypeConfigParam;
+        if (simulatorTypeConfigParam.eventCounter >= simulatorTypeConfigParam.eventType.length || simulatorTypeConfigParam.eventCounter >= simulatorTypeConfigParam.eventType.length) {
+            simulatorTypeConfigParam.eventCounter = 0;
+        }
+        
+        const eventType = simulatorTypeConfigParam.eventType[simulatorTypeConfigParam.eventCounter];
+        const eventText = simulatorTypeConfigParam.eventText[simulatorTypeConfigParam.eventCounter++];
+        this.updateSimulatorConfigParam(eventCreationConfigParam,simulatorTypeConfigParam);
+        
+        this.eventService.create({
+            source: {
+                id: deviceId
+            },
+          type: eventType,
+          time: time,
+          text: eventText
+        })
     }
     private updatePosition(deviceId: string, modelConfig: any){
         const time = new Date().toISOString();
@@ -310,6 +368,9 @@ export interface simulatorTypeConfigParam {
     positionLongitude?: number[],
     positionAltitude?: number[],
     positionCounter?: number;
+    eventType?: string[];
+    eventText?: string[];
+    eventCounter?: number;
 }
 
 export interface simulatorTypeConfigI {

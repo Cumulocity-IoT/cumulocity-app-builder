@@ -49,6 +49,8 @@ export interface DtdlSimulationModel {
     isObjectType?: boolean;
     parentId?: string;
     isFieldModel?: boolean;
+    eventType?: string; // event creation
+    eventText?: string; // event creation
 }
 @Component({
     template: `
@@ -96,16 +98,17 @@ export interface DtdlSimulationModel {
                                 <option value="valueSeries" >Value Series</option>
                                 <option value="randomWalk" >Random Walk</option>
                                 <option value="positionUpdate" >Position Update</option>
+                                <option value="eventCreation" >Event Creation</option>
                             </select>
                         </div>     
                     </div>
-                    <div class="col-xs-12 col-sm-4 col-md-4" *ngIf="!config.dtdlModelConfig[index].isFieldModel && config.dtdlModelConfig[index].simulationType !== 'positionUpdate'">
+                    <div class="col-xs-12 col-sm-4 col-md-4" *ngIf="!config.dtdlModelConfig[index].isFieldModel && config.dtdlModelConfig[index].simulationType !== 'positionUpdate' && config.dtdlModelConfig[index].simulationType !== 'eventCreation'">
                     <div class="measurement-accordion">
                         <label for="fragment"><span>Fragment</span></label>
                         <input type="text" class="form-control"  name="fragment{{model.id}}" placeholder="e.g. temperature_measurement (required)" required autofocus [(ngModel)]="config.dtdlModelConfig[index].fragment">
                     </div>
                     </div>
-                    <div class="col-xs-12 col-sm-4 col-md-4" *ngIf="config.dtdlModelConfig[index].simulationType !== 'positionUpdate'">
+                    <div class="col-xs-12 col-sm-4 col-md-4" *ngIf="config.dtdlModelConfig[index].simulationType !== 'positionUpdate' && config.dtdlModelConfig[index].simulationType !== 'eventCreation'">
                         <div class="measurement-accordion">
                             <label for="series"><span>Series</span></label>
                             <input type="text" class="form-control" name="series{{model.id}}" placeholder="e.g. T (required)" required autofocus [(ngModel)]="config.dtdlModelConfig[index].series">
@@ -146,6 +149,20 @@ export interface DtdlSimulationModel {
                                 </div>
                             </div>
                         </ng-container>
+                        <ng-container *ngSwitchCase="'eventCreation'">
+                            <div class="col-xs-12 col-sm-4 col-md-4">
+                                <div class="measurement-accordion">
+                                    <label for="eventType"><span>Event Type</span></label>
+                                    <input type="text" class="form-control"  name="eventType{{model.id}}" placeholder="c8y_locationUpdate,c8y_BeaconUpdate" required [(ngModel)]="config.dtdlModelConfig[index].eventType">
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-sm-4 col-md-4">
+                                <div class="measurement-accordion">
+                                    <label for="eventText"><span>Event Text</span></label>
+                                    <input type="text" class="form-control"  name="eventText{{model.id}}" placeholder="c8y_locationUpdate,c8y_BeaconUpdate (required)" required [(ngModel)]="config.dtdlModelConfig[index].eventText">
+                                </div>
+                            </div>
+                        </ng-container>
                         <ng-container *ngSwitchCase="'valueSeries'">
                             <div class="col-xs-12 col-sm-4 col-md-4">
                                 <div class="measurement-accordion">
@@ -181,7 +198,7 @@ export interface DtdlSimulationModel {
                             </div>
                         </ng-container>
                     </ng-container>
-                    <div class="col-xs-12 col-sm-4 col-md-4" *ngIf="config.dtdlModelConfig[index].simulationType !== 'positionUpdate'">
+                    <div class="col-xs-12 col-sm-4 col-md-4" *ngIf="config.dtdlModelConfig[index].simulationType !== 'positionUpdate' && config.dtdlModelConfig[index].simulationType !== 'eventCreation'">
                         <div class="measurement-accordion">
                             <label for="unit"><span>Unit</span></label>
                             <input type="text" class="form-control"  name="unit{{model.id}}" placeholder="e.g. C (optional)" [(ngModel)]="config.dtdlModelConfig[index].unit">
@@ -310,6 +327,8 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
         model.series = content.name;
         model.unit = content.unit;
         model.deviceId = deviceId;
+        model.eventText = model.measurementName;
+        model.eventType = content.name;
         model.isObjectType = (model.schema['@type'] === 'Object');
         if(model.isObjectType && model.schema.fields) {
             const fields = model.schema.fields;
@@ -328,6 +347,8 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
                     fieldModel.isObjectType = false;
                     fieldModel.isFieldModel = true;
                     fieldModel.parentId = model.id;
+                    fieldModel.eventText = fieldModel.measurementName;
+                    fieldModel.eventType = field.name;
                     this.configModel.push(fieldModel);
                 });
             }
