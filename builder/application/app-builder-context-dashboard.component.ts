@@ -190,6 +190,9 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
                 }
             }
 
+            // Removing undefined tab for group template
+            this.tabs = this.tabs.filter( tab => tab !== undefined);
+
             // Bug ? mutliple active tabs while routing. Hack by hijacking DOM
             const tabOutletInt = interval(50);
             const tabOutletSub = tabOutletInt.subscribe(async val => {

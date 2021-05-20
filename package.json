@@ -1,10 +1,10 @@
 {
   "name": "app-builder",
-  "version": "1.2.6-RC-1.1",
+  "version": "1.2.6-RC-1.2",
   "description": "Application builder for Cumulocity (written by Software AG Global Presales)",
   "main": "index.ts",
   "scripts": {
-    "start": "c8ycli server --env.extraWebpackConfig=./extra-webpack.config.js ",
+    "start": "c8ycli server --env.extraWebpackConfig=./extra-webpack.config.js",
     "build": "set NODE_OPTIONS=--max_old_space_size=4096 && c8ycli build --env.extraWebpackConfig=./extra-webpack.config.js --env.mode=production",
     "deploy-ci": "c8ycli deploy  -u $npm_config_param1 -T $npm_config_param2 -U $npm_config_param3 -P $npm_config_param4",
     "deploy": "c8ycli deploy ",
@@ -35,7 +35,8 @@
     "app-builder-external-assets": "file:binary/app-builder-external-assets-1.0.0.tgz",
     "comlink": "^4.3.0",
     "core-js": "^3.4.0",
-    "cumulocity-runtime-widget-loader": "file:binary/cumulocity-runtime-widget-loader-1006.6.24-1.0.2.tgz",
+    "crypto-js": "^4.0.0",
+    "cumulocity-runtime-widget-loader": "file:binary/cumulocity-runtime-widget-loader-1009.0.4-1.0.0.tgz",
     "d3-color": "^1.4.1",
     "delay": "^4.3.0",
     "fontawesome": "4.7.2",
@@ -47,8 +48,7 @@
     "url-search-params-polyfill": "6.0.0",
     "webpack-external-import": "^2.2.4",
     "worker-plugin": "^4.0.3",
-    "zone.js": "~0.9.1",
-    "crypto-js": "^4.0.0"
+    "zone.js": "~0.9.1"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "0.803.23",

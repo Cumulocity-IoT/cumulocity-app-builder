@@ -64,7 +64,7 @@ export class RedirectToDefaultApplicationOrBuilder implements CanActivate {
             return this.router.parseUrl(`/application/${app.id}`);
         } else {
            // console.debug('No default application, loading the the application builder...');
-            return this.router.parseUrl('application-builder');
+            return this.router.parseUrl('home');
         }
     }
 }
