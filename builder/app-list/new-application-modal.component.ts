@@ -294,7 +294,7 @@ export class NewApplicationModalComponent implements OnInit {
         await this.inventoryService.create({
             c8y_Global: {},
             type: "AppBuilder-Configuration",
-            customProperties: (appBuilderConfig.customProperties ? appBuilderConfig.customProperties : {}),
+            customProperties: ((appBuilderConfig && appBuilderConfig.customProperties) ? appBuilderConfig.customProperties : {}),
             appBuilderId: newAppId
         });
     }

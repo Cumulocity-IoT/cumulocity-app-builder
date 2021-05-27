@@ -251,4 +251,12 @@ export class TemplateCatalogModalComponent implements OnInit {
     private isNameAvailable(): boolean {
         return this.dashboardConfiguration.dashboardName && this.dashboardConfiguration.dashboardName.length >= 0;
     }
+
+    downloadDTDL(uri: string) {
+        const dtdlLink = document.createElement("a");
+        dtdlLink.href = uri;
+        document.body.appendChild(dtdlLink);
+        dtdlLink.click();
+        document.body.removeChild(dtdlLink);
+      }
 }
