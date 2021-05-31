@@ -4,22 +4,22 @@ The Application Builder for Cumulocity provides a simple, coding-free way to cre
 ![](https://user-images.githubusercontent.com/38696279/72333172-47cec300-36b3-11ea-9abf-1bb29b490a22.png)
 
 ## What's new?
-* **DTDL Simulator:** User can now create simulator based on [DTDL](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md)(Digital Twins Definition Language).
-* **Group Simulator:** User can create simulator for existing device group or new device group.
-* **Position Simulator:** New simulator for device positions.
-* **New Home Page:** New Home Page with quick start videos, help and support information.
-* **GainSight Integration:** Gainsight is integrated with app builder and user can control it from settings page.
-* **Dashboard Configuration Updates:** Now user can select device or group instead of manual typing deviceId/groupId.
-* **Welcome Screen Updates:** Welcome screen template updated with Markdown widget for better user experience.
-* **Cumulocity Version:** Based on Cumulocity 1007.2.0.
+* **Dashboard Catalog:** User can select any pre-designed template for dashboard and also ability to install dependent runtime widgets. This feature is disabled by default. User can enable via Application Builder -> Settings
+* **DTDL Simulator:** Event Creation simulation type is now supported.
+* **DTDL Simulator:** Performance improvement.
+* **Cumulocity Version:** Based on Cumulocity 1009.0.4
 * **Various bug fixes**
 
 ## Features
 * **Browser-based Device Simulators:** Create device simulators that run directly in your browser.
+* **DTDL Simulator:** User can now create simulator based on [DTDL](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md)(Digital Twins Definition Language).
+* **Group Simulator:** User can create simulator for existing device group or new device group.
 * **[Runtime widget loading](https://github.com/SoftwareAG/cumulocity-runtime-widget-loader):** Install widgets without re-compiling.
 * **Group template dashboards:** Give every device in a group an identical dashboard (but customized to the device).
 * **Create an App with a custom contextPath:** Change the URL used to access a particular app.
 * **Application Clone**: User can now clone existing application while creating new one.
+* **GainSight Integration:** Gainsight is integrated with app builder and user can control it from settings page.
+* **New Home Page:** New Home Page with quick start videos, help and support information.
 * **Tabs:** Group your dashboards into tabs.
 
 ## Installation
@@ -59,7 +59,7 @@ cd cumulocity-app-builder
 ```
 2. (Optional) Checkout a specific version: 
 ```
-git checkout v1.2.5
+git checkout v1.2.6
 ```
 3. Install the dependencies: 
 ```
