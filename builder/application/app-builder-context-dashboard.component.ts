@@ -24,7 +24,7 @@ import {last} from "lodash-es";
 import {SMART_RULES_AVAILABILITY_TOKEN} from "./smartrules/smart-rules-availability.upgraded-provider";
 import {IApplicationBuilderApplication} from "../iapplication-builder-application";
 import {AppStateService} from "@c8y/ngx-components";
-import {RuntimeWidgetInstallerModalService} from "cumulocity-runtime-widget-loader";
+// import {RuntimeWidgetInstallerModalService} from "cumulocity-runtime-widget-loader";
 import { timeout } from 'rxjs/operators';
 
 @Component({
@@ -87,7 +87,7 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
         @Inject(SMART_RULES_AVAILABILITY_TOKEN) private c8ySmartRulesAvailability: any,
         private userService: UserService,
         private appStateService: AppStateService,
-        private runtimeWidgetInstallerModalService: RuntimeWidgetInstallerModalService
+   //     private runtimeWidgetInstallerModalService: RuntimeWidgetInstallerModalService
     ) {
         this.subscriptions.add(this.activatedRoute.paramMap.subscribe(async paramMap => {
             // Always defined
@@ -151,8 +151,9 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
                 tabs.push(...await Promise.all(dashboardsInTabgroup.map(async (dashboard, i) => {
                     const isGroupTemplate = (dashboard && dashboard.groupTemplate) || false;
                     if (isGroupTemplate) {
-                        const childAssets = (await this.inventoryService.childAssetsList(dashboard.deviceId, {pageSize: 2000, query: 'has(c8y_IsDevice)'})).data;
-                        const matchingDevice = childAssets.find(device => device.id === this.tabGroup);
+                        //  const childAssets = (await this.inventoryService.childAssetsList(dashboard.deviceId, {pageSize: 2000, query: 'has(c8y_IsDevice)'})).data;
+                        const childAssets = (await this.inventoryService.childAssetsList(dashboard.deviceId, {pageSize: 2000, query: `$filter=(has(c8y_IsDevice) and (id eq '${this.tabGroup}'`})).data;
+                        const matchingDevice = (childAssets && childAssets.length > 0 ? childAssets[0] : null);
                         if (matchingDevice) {
                             return {
                                 label: last(dashboard.name.split(/[/\\]/)),
@@ -239,7 +240,7 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
     }
 
     showInstallModal() {
-        this.runtimeWidgetInstallerModalService.show();
+//        this.runtimeWidgetInstallerModalService.show();
     }
 
     hasAdminRights() {

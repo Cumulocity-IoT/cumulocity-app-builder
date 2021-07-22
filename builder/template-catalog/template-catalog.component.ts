@@ -19,7 +19,7 @@
 import { Component, OnInit, ViewEncapsulation } from "@angular/core";
 import { IManagedObject } from '@c8y/client';
 import { DeviceSelectorModalComponent } from "../utils/device-selector-modal/device-selector.component";
-import { BsModalRef, BsModalService } from "ngx-bootstrap";
+import { BsModalRef, BsModalService } from "ngx-bootstrap/modal";
 import { DependencyDescription, TemplateCatalogEntry, TemplateDetails } from "./template-catalog.model";
 import { TemplateCatalogService } from "./template-catalog.service";
 import { AlertService, DynamicComponentDefinition, DynamicComponentService } from "@c8y/ngx-components";

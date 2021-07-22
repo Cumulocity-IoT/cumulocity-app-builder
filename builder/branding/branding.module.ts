@@ -53,7 +53,7 @@ export class BrandingModule {
             });
     }
 
-    static forRoot(): ModuleWithProviders {
+    static forRoot(): ModuleWithProviders<BrandingModule> {
         return {
             ngModule: BrandingModule,
             providers: [
