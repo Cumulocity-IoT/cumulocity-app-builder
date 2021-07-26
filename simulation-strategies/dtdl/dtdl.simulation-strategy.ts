@@ -27,7 +27,7 @@ import { DtdlSimulationStrategyConfig, DtdlSimulationStrategyConfigComponent } f
 
 @SimulationStrategy({
     name: "DTDL",
-    icon: "windows",
+    icon: "window-restore",
     description: "Simulate a device based on DTDL (Digital Twin Definition Language)",
     hideSimulatorName: true, // hide default simulator name field
     configComponent: DtdlSimulationStrategyConfigComponent

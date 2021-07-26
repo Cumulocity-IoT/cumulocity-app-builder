@@ -4,7 +4,7 @@
   "description": "Application builder for Cumulocity (written by Software AG Global Presales)",
   "main": "index.ts",
   "scripts": {
-    "start": "c8ycli server --env.extraWebpackConfig=./extra-webpack.config.js ",
+    "start": "c8ycli server --env.extraWebpackConfig=./extra-webpack.config.js",
     "build": "set NODE_OPTIONS=--max_old_space_size=4096 && c8ycli build --env.extraWebpackConfig=./extra-webpack.config.js --env.mode=production",
     "deploy-ci": "c8ycli deploy  -u $npm_config_param1 -T $npm_config_param2 -U $npm_config_param3 -P $npm_config_param4",
     "deploy": "c8ycli deploy ",
@@ -39,7 +39,8 @@
     "cumulocity-runtime-widget-loader": "file:binary/cumulocity-runtime-widget-loader-1009.0.4-1.0.0.tgz",
     "d3-color": "^3.0.1",
     "delay": "^5.0.0",
-    "fontawesome": "4.7.0",
+    "font-awesome": "^4.7.0",
+    "fontawesome": "^4.7.2",
     "jszip": "^3.6.0",
     "lodash-es": "^4.0.0",
     "ngx-bootstrap": "6.1.0",
@@ -47,9 +48,9 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "~6.6.3",
     "url-search-params-polyfill": "8.1.1",
+    "webpack-external-import": "^2.2.4",
     "worker-plugin": "^5.0.1",
-    "zone.js": "~0.11.4",
-    "webpack-external-import": "^2.2.4"
+    "zone.js": "~0.11.4"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "0.1101.4",
