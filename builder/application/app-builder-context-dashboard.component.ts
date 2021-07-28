@@ -152,7 +152,7 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
                     const isGroupTemplate = (dashboard && dashboard.groupTemplate) || false;
                     if (isGroupTemplate) {
                         //  const childAssets = (await this.inventoryService.childAssetsList(dashboard.deviceId, {pageSize: 2000, query: 'has(c8y_IsDevice)'})).data;
-                        const childAssets = (await this.inventoryService.childAssetsList(dashboard.deviceId, {pageSize: 2000, query: `$filter=(has(c8y_IsDevice) and (id eq '${this.tabGroup}'`})).data;
+                        const childAssets = (await this.inventoryService.childAssetsList(dashboard.deviceId, {pageSize: 2000, query: `$filter=(has(c8y_IsDevice) and (id eq '${this.tabGroup}')) `})).data;
                         const matchingDevice = (childAssets && childAssets.length > 0 ? childAssets[0] : null);
                         if (matchingDevice) {
                             return {
