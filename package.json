@@ -1,10 +1,10 @@
 {
   "name": "app-builder",
-  "version": "1.2.6",
+  "version": "1.2.7-dev-1-1",
   "description": "Application builder for Cumulocity (written by Software AG Global Presales)",
   "main": "index.ts",
   "scripts": {
-    "start": "c8ycli server --env.extraWebpackConfig=./extra-webpack.config.js ",
+    "start": "c8ycli server --env.extraWebpackConfig=./extra-webpack.config.js",
     "build": "set NODE_OPTIONS=--max_old_space_size=4096 && c8ycli build --env.extraWebpackConfig=./extra-webpack.config.js --env.mode=production",
     "deploy-ci": "c8ycli deploy  -u $npm_config_param1 -T $npm_config_param2 -U $npm_config_param3 -P $npm_config_param4",
     "deploy": "c8ycli deploy ",
@@ -26,9 +26,9 @@
     "@angular/platform-webworker-dynamic": "^8.2.13",
     "@angular/router": "8.2.13",
     "@angular/upgrade": "8.2.13",
-    "@c8y/ng1-modules": "1009.0.4",
-    "@c8y/ngx-components": "1009.0.4",
-    "@c8y/style": "1009.0.4",
+    "@c8y/ng1-modules": "1010.0.8",
+    "@c8y/ngx-components": "1010.0.8",
+    "@c8y/style": "1010.0.8",
     "@ng-reactive/async-input": "0.0.1",
     "@ng-select/ng-select": "^3.7.3",
     "angular": "1.6.9",
@@ -48,13 +48,14 @@
     "url-search-params-polyfill": "6.0.0",
     "webpack-external-import": "^2.2.4",
     "worker-plugin": "^4.0.3",
-    "zone.js": "~0.9.1"
+    "zone.js": "~0.9.1",
+    "font-awesome": "^4.7.0"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "0.803.23",
     "@angular/compiler-cli": "8.2.13",
     "@angular/language-service": "8.2.13",
-    "@c8y/cli": "1009.0.4",
+    "@c8y/cli": "1010.0.8",
     "@types/lodash-es": "^4.17.3",
     "patch-package": "^6.2.2",
     "typescript": "3.5.3"
