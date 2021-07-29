@@ -48,7 +48,7 @@ export class AppListComponent {
         
         // Get a list of the applications on the tenant (This includes live updates)
         if(this.userHasAdminRights){
-            this.applications = from(this.appService.list$({ pageSize: 100, withTotalPages: true }, {
+            this.applications = from(this.appService.list$({ pageSize: 2000, withTotalPages: true }, {
                 hot: true,
                 pagingStrategy: PagingStrategy.ALL,
                 realtime: true,

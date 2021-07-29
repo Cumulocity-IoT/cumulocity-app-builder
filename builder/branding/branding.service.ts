@@ -19,7 +19,6 @@
 import {Injectable} from "@angular/core";
 import * as fa from "fontawesome";
 import * as d3 from "d3-color";
-
 declare const FontFace: any;
 
 /**
@@ -44,6 +43,7 @@ export class BrandingService {
         this.favicon = document.head.querySelector('[rel=icon]');
 
         if (typeof FontFace != 'undefined') {
+          //  this.fontAwesomeLoaded = new FontFace('FontAwesome', 'url(./fontawesome-webfont-20fd1704ea223900efa9fd4e869efb08.woff2)').load();
             this.fontAwesomeLoaded = new FontFace('FontAwesome', 'url(./fontawesome-webfont.woff2)').load();
         } else {
             this.fontAwesomeLoaded = Promise.resolve();
