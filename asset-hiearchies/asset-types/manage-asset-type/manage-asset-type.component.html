@@ -1,0 +1,38 @@
+<div class="card">
+    <div class="card-header">
+        <span>
+            <h4 class="card-title">{{ 'Add asset type' | translate }}</h4>
+        </span>
+    </div>
+    <div class="card-block">
+        <c8y-form-group>
+            <div [formGroup]="formGroup">
+                <c8y-form-group>
+                    <label translate>Name</label>
+                    <input class="form-control" type="text" formControlName="name"
+                        placeholder="{{ 'e.g. Pump' | translate }} " #nameRef required />
+                    <c8y-messages>
+                        <c8y-message *ngIf="!formGroup.untouched && !nameRef.value" translate>This field is
+                            required.</c8y-message>
+                    </c8y-messages>
+                </c8y-form-group>
+                <c8y-form-group>
+                    <label translate>Description</label>
+                    <textarea class="form-control" rows="4" formControlName="description"
+                        placeholder="Brief description on what this asset type is about"></textarea>
+                </c8y-form-group>
+                <c8y-form-group>
+                    <label translate>Properties</label>
+                    <ng-select formControlName="properties" [items]="(properties | async)?.data" [multiple]="true"
+                        [closeOnSelect]="false" bindLabel="name" bindValue="id" placeholder="Select multiple properties"
+                        [appendTo]="'body'" [(ngModel)]="selectedProperties">
+                    </ng-select>
+                </c8y-form-group>
+            </div>
+        </c8y-form-group>
+    </div>
+    <div class="card-footer separator text-center">
+        <button class="btn btn-default" (click)="onCancel()">{{ 'Cancel' | translate }}</button>
+        <button class="btn btn-primary" (click)="onSaveButtonClicked()">{{ 'Save' | translate }}</button>
+    </div>
+</div>

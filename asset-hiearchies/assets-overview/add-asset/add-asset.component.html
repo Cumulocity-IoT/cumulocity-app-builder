@@ -1,0 +1,147 @@
+<c8y-stepper class="flex-col flex-nowrap no-align-items fit-h c8y-stepper--no-btns"
+    [disableDefaultIcons]="{ edit: true, done: false }"
+    [customClasses]="['col-md-6', 'col-md-offset-3', 'p-t-16', 'p-b-32', 'flex-no-shrink']" linear>
+    <cdk-step [stepControl]="formGroupStepOne" [label]="isAssetUpdate() ? 'Update asset' : 'New asset' | translate">
+        <div class="p-16 p-t-0 flex-no-shrink separator-bottom col-xs-12">
+            <div class="row">
+                <div class="col-md-6 col-md-offset-3 col-lg-4 col-lg-offset-4">
+                    <h4 class="text-center text-medium">
+                        {{ isAssetUpdate() ? 'Update asset' : 'New asset' | translate }}
+                    </h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 flex-grow no-gutter">
+            <div class="card-inner-scroll fit-h">
+                <div class="card-block p-b-0">
+                    <div class="row">
+                        <div class="col-md-6 col-md-offset-3 col-lg-4 col-lg-offset-4">
+                            <c8y-form-group>
+                                <div [formGroup]="formGroupStepOne">
+                                    <c8y-form-group>
+                                        <label translate>Name</label>
+                                        <input class="form-control" type="text" formControlName="name"
+                                            placeholder="{{ 'e.g. Pump' | translate }} " #nameRef required />
+                                        <c8y-messages>
+                                            <c8y-message *ngIf="!formGroupStepOne.untouched && !nameRef.value"
+                                                translate>This field is required.</c8y-message>
+                                        </c8y-messages>
+                                    </c8y-form-group>
+
+                                    <c8y-form-group>
+                                        <label translate>Description</label>
+                                        <textarea class="form-control" rows="4" formControlName="description"
+                                            placeholder="Brief description on what this asset is about"></textarea>
+                                    </c8y-form-group>
+
+                                    <c8y-form-group>
+                                        <label translate>Asset Type</label>
+                                        <div class="c8y-select-wrapper">
+                                            <select id="selectExample" class="form-control" formControlName="type">
+                                                <option *ngFor="let assetType of (assetTypePromise | async)?.data"
+                                                    [ngValue]="assetType">
+                                                    {{assetType.name}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </c8y-form-group>
+                                </div>
+                            </c8y-form-group>
+                            <c8y-form-group>
+                                <div [formGroup]="formGroupStepOne"></div>
+                            </c8y-form-group>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <c8y-stepper-buttons class="d-block card-footer p-24 separator" (onCancel)="onCancel.emit()"
+            (onNext)="onNextStepTwo($event)" [labels]="{ next: 'Next', cancel: 'Cancel' }">
+        </c8y-stepper-buttons>
+    </cdk-step>
+    <cdk-step [stepControl]="formGroupStepTwo"
+        [label]="isAssetUpdate() ? 'Update description' : 'Add description' | translate">
+        <div class="p-16 p-t-0 flex-no-shrink separator-bottom col-xs-12">
+            <div class="row">
+                <div class="col-md-6 col-md-offset-3 col-lg-4 col-lg-offset-4">
+                    <h4 class="text-center text-medium">
+                        {{ 'Description' | translate }}
+                    </h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 flex-grow no-gutter">
+            <div class="card-inner-scroll fit-h">
+                <div class="card-block p-b-0">
+                    <div class="row">
+                        <div class="col-md-6 col-md-offset-3 col-lg-4 col-lg-offset-4">
+                            <div [formGroup]="formGroupStepTwo">
+                                <c8y-form-group>
+                                    <formly-form [form]="formGroupStepTwo" [fields]="jsonSchemaFormFields"
+                                        [model]="model"></formly-form>
+                                </c8y-form-group>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <c8y-stepper-buttons class="d-block card-footer p-24 separator" (onCancel)="onCancel.emit()"
+            [labels]="{ next: 'Next', cancel: 'Cancel' }">
+        </c8y-stepper-buttons>
+    </cdk-step>
+    <cdk-step [label]="isAssetUpdate() ? 'Update devices' : 'Assign devices' | translate">
+        <div class="p-16 p-t-0 flex-no-shrink separator-bottom col-xs-12">
+            <div class="row">
+                <div class="col-md-6 col-md-offset-3 col-lg-4 col-lg-offset-4">
+                    <h4 class="text-center text-medium">
+                        {{ isAssetUpdate() ? 'Update devices' : 'Assign devices' | translate }}
+                    </h4>
+                </div>
+            </div>
+        </div>
+        <div class="overflow-auto col-xs-12">
+            <div *ngIf="isAssetUpdate()">
+                <c8y-device-grid [title]="'Assigned devices' | translate" [baseQuery]="baseQuery"
+                    [actionControls]="actionControlsAssignedDevices" [refresh]="refreshAssignedDevicesList"
+                    [infiniteScroll]="'auto'" [pagination]="pagination" class="d-contents">
+                    <div class="c8y-empty-state">
+                        <h1 c8yIcon="search"></h1>
+                        <div>
+                            <p>
+                                <strong>{{ 'No matching devices.' | translate }}</strong>
+                            </p>
+                            <small>{{ 'Refine your search terms' | translate }}</small>
+                        </div>
+                    </div>
+                </c8y-device-grid>
+            </div>
+
+            <div>
+                <c8y-device-grid [title]="'Select target devices' | translate" [actionControls]="[]"
+                    [infiniteScroll]="'auto'" [selectable]="'true'" [pagination]="pagination"
+                    (itemsSelect)="onSelected($event)" [itemsSelectLimit]="ITEMS_SELECT_LIMIT" class="d-contents">
+                    <div class="c8y-empty-state">
+                        <h1 c8yIcon="search"></h1>
+                        <div>
+                            <p>
+                                <strong>{{ 'No matching devices.' | translate }}</strong>
+                            </p>
+                            <small>{{ 'Refine your search terms' | translate }}</small>
+                        </div>
+                    </div>
+                </c8y-device-grid>
+            </div>
+        </div>
+        <c8y-stepper-buttons *ngIf="!isAssetUpdate()" class="d-block card-footer p-24 separator"
+            (onCancel)="onCancel.emit()" (onCustom)="createAsset()" [labels]="{ custom: 'Create Asset' }"
+            [pending]="pendingStatus">
+        </c8y-stepper-buttons>
+        <c8y-stepper-buttons *ngIf="isAssetUpdate()" class="d-block card-footer p-24 separator"
+            (onCancel)="onCancel.emit()" (onCustom)="updateAsset()" [labels]="{ back: 'Back', custom: 'Update Asset' }"
+            [pending]="pendingStatus">
+        </c8y-stepper-buttons>
+    </cdk-step>
+</c8y-stepper>

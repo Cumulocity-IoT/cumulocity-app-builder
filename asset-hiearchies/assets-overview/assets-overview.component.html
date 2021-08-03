@@ -1,0 +1,42 @@
+<c8y-title>
+    {{ 'Assets Overview' | translate }}
+</c8y-title>
+
+<c8y-action-bar-item [placement]="'right'">
+    <button class="btn btn-link" title="{{ 'Add asset' | translate }}" (click)="showAddAsset = !showAddAsset">
+        <i class="fa fa-plus-circle"></i>&nbsp;<span translate>Add asset</span>
+    </button>
+</c8y-action-bar-item>
+
+
+<c8y-data-grid style="height: calc(100vh - 200px);" [title]="'Assets' | translate" class="scroll-column"
+    [columns]="columns" [serverSideDataCallback]="datasource.serverSideDataCallback"
+    [pagination]="datasource.pagination" [selectable]="true" [actionControls]="actionControls"
+    [bulkActionControls]="bulkActionControls" (itemsSelect)="handleItemsSelect($event)" [refresh]="refresh">
+
+    <div class="c8y-empty-state">
+        <h1 c8yIcon="c8y-enterprise" class="c8y-icon-duocolor"></h1>
+        <div>
+            <p>
+                <strong>{{ 'No assets to display.' | translate }}</strong>
+            </p>
+            <small>{{
+                'Add your first asset using the button on the toolbar.' | translate
+                }}</small>
+        </div>
+    </div>
+</c8y-data-grid>
+
+
+<div [ngClass]="{ drawerOpen: showAddAsset }">
+    <div class="bottom-drawer">
+        <c8y-add-asset *ngIf="showAddAsset" (onCancel)="showAddAsset = false" [refresh]="refresh"></c8y-add-asset>
+    </div>
+</div>
+
+<div [ngClass]="{ drawerOpen: showUpdateAsset }">
+    <div class="bottom-drawer">
+        <c8y-add-asset *ngIf="showUpdateAsset" [assetToUpdate]="selectedAsset" (onCancel)="showUpdateAsset = false"
+            [refresh]="refresh"></c8y-add-asset>
+    </div>
+</div>

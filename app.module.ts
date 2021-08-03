@@ -29,6 +29,7 @@ import {CustomWidgetsModule} from "./custom-widgets/custom-widgets.module";
 import {RuntimeWidgetInstallerModule, RuntimeWidgetLoaderService} from "cumulocity-runtime-widget-loader";
 import { interval } from 'rxjs';
 import { SettingsService } from './builder/settings/settings.service';
+import { AssetsOverviewModule } from './asset-hiearchies/assets-overview/assets-overview.module';
 @NgModule({
   imports: [
     // Upgrade module must be the first
@@ -42,7 +43,8 @@ import { SettingsService } from './builder/settings/settings.service';
     BuilderModule,
     SimulationStrategiesModule,
     CustomWidgetsModule,
-    RuntimeWidgetInstallerModule
+    RuntimeWidgetInstallerModule,
+    AssetsOverviewModule
   ]
 })
 export class AppModule extends HybridAppModule {

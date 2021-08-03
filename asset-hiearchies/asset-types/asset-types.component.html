@@ -1,0 +1,17 @@
+<c8y-title>
+    {{ 'Asset Types' | translate }}
+</c8y-title>
+
+<c8y-action-bar-item [placement]="'right'">
+    <button class="btn btn-link" title="{{ 'Add asset type' | translate }}"
+        (click)="showAddAssetType = !showAddAssetType">
+        <i class="fa fa-plus-circle"></i>&nbsp;<span translate>Add asset type</span>
+    </button>
+</c8y-action-bar-item>
+
+<div class="row">
+    <c8y-asset-types-list class="col-lg-6" (onEditEntry)="onEditAssetType($event)" [refresh]=refresh>
+    </c8y-asset-types-list>
+    <c8y-manage-asset-type class="col-lg-6 animated slideInRight" *ngIf="showAddAssetType" [refresh]=refresh
+        [assetType]="assetTypeToUpdate" (onClose)="onCloseDialog()"></c8y-manage-asset-type>
+</div>

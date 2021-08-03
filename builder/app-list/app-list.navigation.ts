@@ -16,12 +16,12 @@
 * limitations under the License.
  */
 
-import {Injectable} from "@angular/core";
-import {AppStateService, NavigatorNode, NavigatorNodeFactory} from "@c8y/ngx-components";
+import { Injectable } from "@angular/core";
+import { AppStateService, NavigatorNode, NavigatorNodeFactory } from "@c8y/ngx-components";
 import { UserService } from '@c8y/ngx-components/api';
-import {BehaviorSubject} from "rxjs";
-import {map, startWith} from "rxjs/operators";
-import {AppIdService} from "../app-id.service";
+import { BehaviorSubject } from "rxjs";
+import { map, startWith } from "rxjs/operators";
+import { AppIdService } from "../app-id.service";
 
 
 @Injectable()
@@ -30,7 +30,7 @@ export class AppListNavigation implements NavigatorNodeFactory {
 
     constructor(appIdService: AppIdService, private appStateService: AppStateService, private userService: UserService) {
 
-        
+
         // Only show the app-list navigation if we aren't in an app-builder application
         appIdService.appId$
             .pipe(
@@ -45,13 +45,22 @@ export class AppListNavigation implements NavigatorNodeFactory {
                             path: `/home`,
                             priority: 3
                         }));
+
                         appNode.push(new NavigatorNode({
                             label: 'All Applications',
                             icon: 'wrench',
                             path: `/application-builder`,
                             priority: 2
                         }));
-                        const settingsNode =  new NavigatorNode({
+
+                        appNode.push(new NavigatorNode({
+                            label: 'Assets',
+                            icon: 'decentralized-network',
+                            path: `/assets`,
+                            priority: 1
+                        }));
+
+                        const settingsNode = new NavigatorNode({
                             label: 'Settings',
                             icon: 'cogs',
                             priority: 0
@@ -62,7 +71,7 @@ export class AppListNavigation implements NavigatorNodeFactory {
                             path: `/settings-properties`,
                             priority: 1
                         }));
-                        if (this.userService.hasAllRoles(this.appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN","ROLE_APPLICATION_MANAGEMENT_ADMIN"])) {
+                        if (this.userService.hasAllRoles(this.appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN", "ROLE_APPLICATION_MANAGEMENT_ADMIN"])) {
                             appNode.push(settingsNode);
                         }
                         return appNode;

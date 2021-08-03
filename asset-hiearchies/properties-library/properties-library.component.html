@@ -1,0 +1,22 @@
+<c8y-title>
+    {{ 'Properties Library' | translate }}
+</c8y-title>
+
+<c8y-action-bar-item [placement]="'right'">
+    <button class="btn btn-link" title="{{ 'Add property' | translate }}" (click)="showAddProperty = !showAddProperty">
+        <i class="fa fa-plus-circle"></i>&nbsp;<span translate>Add property</span>
+    </button>
+</c8y-action-bar-item>
+
+<div class="row">
+    <c8y-properties-library-list [refresh]="refresh" (onEditEntry)="onEditProperty($event)" class="col-md-8">
+    </c8y-properties-library-list>
+</div>
+
+<div [ngClass]="{ drawerOpen: showAddProperty }">
+    <div class="bottom-drawer">
+        <c8y-properties-library-manage-property (onClose)="onClosePropertyDialog();" [property]="propertyToUpdate"
+            [refresh]="refresh" class="d-contents">
+        </c8y-properties-library-manage-property>
+    </div>
+</div>

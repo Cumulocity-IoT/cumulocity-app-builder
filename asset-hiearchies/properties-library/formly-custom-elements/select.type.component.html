@@ -1,0 +1,7 @@
+<div class="c8y-select-wrapper">
+    <select [formControl]="formControl" [formlyAttributes]="field" class="form-control" [value]="to.selected">
+        <option *ngFor="let item of to.options" [value]="item.value">
+            {{item.label}}
+        </option>
+    </select>
+</div>

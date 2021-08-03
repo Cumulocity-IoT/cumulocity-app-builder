@@ -1,0 +1,17 @@
+<c8y-data-grid  style="height: calc(100vh - 200px);" [title]="'Asset Types' | translate" class="scroll-column" [columns]="columns"
+    [serverSideDataCallback]="assetTypesListService.serverSideDataCallback"
+    [pagination]="assetTypesListService.pagination" [selectable]="true" [actionControls]="actionControls"
+    [bulkActionControls]="bulkActionControls" (itemsSelect)="handleItemsSelect($event)" [refresh]="refresh">
+
+    <div class="c8y-empty-state">
+        <h1 c8yIcon="c8y-enterprise" class="c8y-icon-duocolor"></h1>
+        <div>
+            <p>
+                <strong>{{ 'No asset types to display.' | translate }}</strong>
+            </p>
+            <small>{{
+                'Add your first asset type using the button on the toolbar.' | translate
+                }}</small>
+        </div>
+    </div>
+</c8y-data-grid>
