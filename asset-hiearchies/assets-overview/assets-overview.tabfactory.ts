@@ -14,18 +14,21 @@ export class AssetTabFactory implements TabFactory {
                 path: 'assets/overview',
                 priority: 100,
                 label: 'Overview',
+                icon: 'overview'
             } as Tab);
 
             tabs.push({
                 path: 'assets/types',
                 priority: 90,
                 label: 'Types',
+                icon: 'slides'
             } as Tab);
 
             tabs.push({
                 path: 'assets/property-library',
                 priority: 80,
                 label: 'Property Library',
+                icon: 'card'
             } as Tab);
         }
 
