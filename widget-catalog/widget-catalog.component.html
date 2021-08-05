@@ -1,0 +1,85 @@
+<c8y-title>Widget Catalog</c8y-title>
+    <div *ngIf="isBusy" class="col-xs-12 col-sm-12 col-md-12" style="padding-bottom:50px;padding-top:20px">
+        <rectangle-spinner  style="position: relative; left: 47%;">
+        </rectangle-spinner>
+    </div>
+    <div class="card-group interact-grid" *ngIf="!isBusy">
+        <ng-template #itemTemplate let-item="item" let-index="index">
+            <div class="widget-icon" ><i [c8yIcon]="item.value.icon"></i></div>
+            <div class="col col-overflow" title="{{item.value.title}}">{{item.value.title}}</div>
+            <div class="col col-overflow" title="{{item.value.version}}" >{{item.value.version}}</div>
+            <div class="col col-overflow" title="{{item.value.version}}" >1.0.0</div>
+            <div class="col col-overflow" title="{{item.value.license}}">{{item.value.license}}</div>
+            <div class="col col-overflow" title="{{item.value.author}}">{{item.value.author}}</div>
+            <div class="action-icon text-info" title="Preview"><i c8yIcon="eye" (click)="preview(item.value.preview)"></i></div>
+            <div class="action-icon text-primary" title="Update"><i c8yIcon="cloud-upload"></i></div>
+            <div class="action-icon text-success" title="Documentation"><i c8yIcon="external-link" (click)="openDocumentation(item.value.repository)"></i></div>
+        </ng-template>
+
+        <div class="card-group col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <div class="card">
+                    <div class="card-header">
+                       <!-- Search -->
+                        <div id="searchWidget" class="input-group input-group-search">
+                            <input
+                            type="search"
+                            class="form-control"
+                            placeholder="Search widget..."
+                            [(ngModel)]="searchWidget"
+                            (keyup)="applyFilter()"
+                            />
+                            <span class="input-group-addon">
+                            <i c8yIcon="search" *ngIf="!searchString || searchString.length === 0"></i>
+                            <i
+                                c8yIcon="times"
+                                class="text-muted"
+                                *ngIf="searchWidget && searchWidget.length > 0"
+                                (click)="searchWidget = '';applyFilter() "
+                            ></i>
+                            </span>
+                        </div>
+                        <div>
+                            <button class="btn btn-link" id="update-widget" (click)="save()">
+                                <i c8yIcon="cloud-upload"></i>Update All
+                            </button>
+                        </div>
+                        <div>
+                            <button class="btn btn-link" id="refresh-widget" (click)="reload()">
+                                <i c8yIcon="refresh"></i>Reload
+                            </button>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="card-block">
+                        <div class="c8y-empty-state text-center" style="flex-direction: column; align-items: center;"
+                            *ngIf="!widgetCatalog?.widgets?.length">
+                            <h1 c8yIcon="package" class="c8y-icon-duocolor" style="font-size: 90px;"></h1>
+                            <h3>No Widget to list.</h3>
+                            <p>Please Install widgets.</p>
+                        </div>
+                        <div class="c8y-empty-state text-center" style="flex-direction: column; align-items: center;"
+                            *ngIf="widgetCatalog?.widgets?.length && !filterWidgets?.length">
+                            <h3>No Widget to list.</h3>
+                        </div>
+                        <ng-container *ngIf="filterWidgets?.length">
+                            <div class="sortable-grid-header">
+                                <div class="invisible widget-icon"><i class="fa custom-icon-drag-handle"></i></div>
+                                <div class="col" >Widget</div>
+                                <div class="col">Latest Version</div>
+                                <div class="col">Current Version</div>
+                                <div class="col">License</div>
+                                <div class="col">Author</div>
+                                <div class="invisible widget-icon text-info"  style="width: 20px;"><i [c8yIcon]="eye"></i></div>
+                                <div class="invisible widget-icon text-primary" style="width: 20px;" ><i [c8yIcon]="cloud-upload"></i></div>
+                                <div class="invisible widget-icon text-success" style="width: 20px;"><i [c8yIcon]="external-link"></i></div>
+                            </div>
+                            <bs-sortable [ngModel]="filterWidgets" [itemTemplate]="itemTemplate"
+                                itemClass="sortable-item" itemActiveClass="sortable-item-active"
+                                wrapperClass="sortable-grid" ></bs-sortable>
+                        </ng-container>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
