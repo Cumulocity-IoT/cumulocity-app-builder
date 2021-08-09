@@ -110,8 +110,8 @@ export class AddAssetComponent implements OnInit, OnChanges {
             return;
         }
 
-        if (!this.assetToUpdate.childDevices || !this.assetToUpdate.childDevices.references
-            || this.assetToUpdate.childDevices.references.length === 0) {
+        if (!this.assetToUpdate.childAssets || !this.assetToUpdate.childAssets.references
+            || this.assetToUpdate.childAssets.references.length === 0) {
             return;
         }
 
@@ -119,7 +119,7 @@ export class AddAssetComponent implements OnInit, OnChanges {
             __or: []
         };
 
-        this.assetToUpdate.childDevices.references.forEach(reference => this.baseQuery.__or.push({ __eq: { id: reference.managedObject.id } }));
+        this.assetToUpdate.childAssets.references.forEach(reference => this.baseQuery.__or.push({ __eq: { id: reference.managedObject.id } }));
     }
 
     async onNextStepTwo(event: { stepper: C8yStepper, step: CdkStep }) {

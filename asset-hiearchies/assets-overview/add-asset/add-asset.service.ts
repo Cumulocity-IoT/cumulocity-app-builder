@@ -15,7 +15,7 @@ export class AddAssetService {
             return;
         }
 
-        const assetManagedObject = (await this.inventory.create({ ...asset, c8y_IsAsset: {} })).data;
+        const assetManagedObject = (await this.inventory.create({ ...asset, c8y_IsAsset: {}, c8y_IsDeviceGroup: {} })).data;
         await this.assignDevicesToAsset(assetManagedObject.id, deviceIds);
     }
 
@@ -34,7 +34,7 @@ export class AddAssetService {
         }
 
         const promisses: Promise<IResult<IIdentified>>[] = [];
-        deviceIds.forEach(deviceId => promisses.push(this.inventory.childDevicesAdd(deviceId, assetId)));
+        deviceIds.forEach(deviceId => promisses.push(this.inventory.childAssetsAdd(deviceId, assetId)));
 
         return Promise.all(promisses);
     }
@@ -44,7 +44,7 @@ export class AddAssetService {
             return;
         }
 
-        await this.inventory.childDevicesRemove(deviceId, assetId);
+        await this.inventory.childAssetsRemove(deviceId, assetId);
     }
 
     async queryAssetTypes(): Promise<IResultList<IManagedObject>> {
