@@ -129,7 +129,7 @@
                 </div>
                 <ng-template #nonGroupTemplate>
                 <div class="form-group" style="min-height: 50px;">
-                    <label for="device"><span>Device Name (Optional)</span></label>
+                    <label for="device"><span>Device/Asset (Optional)</span></label>
                    <!--  <input type="text" class="form-control" id="device" name="device" placeholder="e.g. 12345 (optional)" [(ngModel)]="deviceId"> -->
                     <device-selector id="device" name="device" [(value)]="deviceName" [placeHolder]="'Type your Device Name'" [required]="false"
                     (selectedDevice)= "getSelectedDevice($event)" (onBlurDevice)= "getSelectedDevice($event)"></device-selector>
