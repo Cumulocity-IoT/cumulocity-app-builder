@@ -38,7 +38,7 @@
                                         <label translate>Asset Type</label>
                                         <div class="c8y-select-wrapper">
                                             <select id="selectExample" class="form-control" formControlName="type">
-                                                <option *ngFor="let assetType of (assetTypePromise | async)?.data"
+                                                    <option *ngFor="let assetType of assetTypes?.data"
                                                     [ngValue]="assetType">
                                                     {{assetType.name}}
                                                 </option>
@@ -140,8 +140,8 @@
             [pending]="pendingStatus">
         </c8y-stepper-buttons>
         <c8y-stepper-buttons *ngIf="isAssetUpdate()" class="d-block card-footer p-24 separator"
-            (onCancel)="onCancel.emit()" (onCustom)="updateAsset()" [labels]="{ back: 'Back', custom: 'Update Asset' }"
-            [pending]="pendingStatus">
+                (onCancel)="onCancel.emit()" (onCustom)="updateAsset()"
+                [labels]="{ back: 'Back', custom: 'Update Asset' }" [pending]="pendingStatus">
         </c8y-stepper-buttons>
     </cdk-step>
 </c8y-stepper>

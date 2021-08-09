@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { InventoryService } from '@c8y/ngx-components/api';
-import { Asset } from '../asset.model';
 import { IResult, IResultList, IIdentified, IManagedObject } from '@c8y/client';
 import { get, has, keys } from 'lodash-es';
 import { FormlyFieldConfig } from '@ngx-formly/core';
@@ -11,7 +10,7 @@ import { JSONSchema7 } from 'json-schema';
 export class AddAssetService {
     constructor(private inventory: InventoryService, private jsonschema: C8yJSONSchema) { }
 
-    async createAsset(asset: Asset, deviceIds: string[]): Promise<void> {
+    async createAsset(asset: Partial<IManagedObject>, deviceIds: string[]): Promise<void> {
         if (!asset) {
             return;
         }
@@ -20,7 +19,7 @@ export class AddAssetService {
         await this.assignDevicesToAsset(assetManagedObject.id, deviceIds);
     }
 
-    async updateAsset(assetId: string, asset: Asset, deviceIds: string[]): Promise<void> {
+    async updateAsset(assetId: string, asset: Partial<IManagedObject>, deviceIds: string[]): Promise<void> {
         if (!asset) {
             return;
         }

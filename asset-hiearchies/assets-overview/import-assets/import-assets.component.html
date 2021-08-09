@@ -1,0 +1,14 @@
+<div class="modal-header text-center bg-primary">
+    <h4 class="text-uppercase" style="margin:0; letter-spacing: 0.15em; color:white">Import Assets</h4>
+</div>
+<div class="modal-body">
+    <div class="m-t-24">
+        <c8y-drop-area class="drop-area-sm" (dropped)="processFile($event)" [title]="'Drop CSV file here'"
+            [icon]="'upload'" [loadingMessage]="'Processing CSV file'" [loading]="isLoading">
+        </c8y-drop-area>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-default" (click)="closeDialog()">Cancel</button>
+    <button type="button" class="btn btn-primary" [disabled]="!isFileSelected()" (click)="importCSV()">Import</button>
+</div>

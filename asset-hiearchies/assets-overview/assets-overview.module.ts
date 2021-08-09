@@ -9,6 +9,7 @@ import { AddAssetModule } from './add-asset/add-asset.module';
 import { AssetsOverviewComponent } from './assets-overview.component';
 import { AssetOverviewFactory } from './assets-overview.factory';
 import { AssetTabFactory } from './assets-overview.tabfactory';
+import { ImportAssetsComponent } from './import-assets/import-assets.component';
 
 
 const routes: Routes = [
@@ -39,8 +40,8 @@ const routes: Routes = [
         AssetTypesModule
     ],
     exports: [],
-    declarations: [AssetsOverviewComponent],
-    entryComponents: [AssetsOverviewComponent],
+    declarations: [AssetsOverviewComponent, ImportAssetsComponent],
+    entryComponents: [AssetsOverviewComponent, ImportAssetsComponent],
     providers: [
         {
             provide: HOOK_TABS, useClass: AssetTabFactory, multi: true

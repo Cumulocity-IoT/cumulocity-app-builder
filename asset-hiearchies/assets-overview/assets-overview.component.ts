@@ -7,8 +7,10 @@ import {
     Column,
     Pagination
 } from '@c8y/ngx-components';
+import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import { IManagedObject } from '@c8y/client';
 import { AssetOverviewDatasourceService } from './assets-overview.service';
+import { ImportAssetsComponent } from './import-assets/import-assets.component';
 
 @Component({
     selector: 'c8y-assets-overview',
@@ -58,7 +60,9 @@ export class AssetsOverviewComponent implements OnInit {
 
     selectedAsset: IManagedObject;
 
-    constructor(public datasource: AssetOverviewDatasourceService) { }
+    bsModalRef: BsModalRef;
+
+    constructor(public datasource: AssetOverviewDatasourceService, private modalService: BsModalService) { }
 
     ngOnInit() {
         this.fakeData = getFakeData();
@@ -76,6 +80,13 @@ export class AssetsOverviewComponent implements OnInit {
     updateAsset(asset: IManagedObject) {
         this.selectedAsset = asset;
         this.showUpdateAsset = true;
+    }
+
+    showUploadCSVFileModal(): void {
+        this.bsModalRef = this.modalService.show(ImportAssetsComponent, { backdrop: 'static', class: 'modal-sm' });
+        this.bsModalRef.content.onImportFinished.subscribe(() => {
+            this.refresh.emit();
+        });
     }
 
     async onDeleteAssets(assetIds: string[]) {

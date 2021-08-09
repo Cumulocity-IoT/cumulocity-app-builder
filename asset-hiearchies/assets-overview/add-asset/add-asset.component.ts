@@ -1,5 +1,5 @@
-import { AfterViewInit, Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AfterViewInit, Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { CdkStep } from '@angular/cdk/stepper';
 import { ActionControl, BuiltInActionType, BulkActionControl, C8yJSONSchema, C8yStepper, gettext, Pagination } from '@c8y/ngx-components';
 import { IManagedObject, IResultList, IResult } from '@c8y/client';
@@ -14,22 +14,20 @@ import { JSONSchema7 } from 'json-schema';
     templateUrl: './add-asset.component.html'
 })
 
-export class AddAssetComponent implements OnInit {
+export class AddAssetComponent implements OnInit, OnChanges {
 
     readonly ITEMS_SELECT_LIMIT = 15;
 
     @Input() refresh = new EventEmitter<any>();
 
-    @Input() assetToUpdate: IManagedObject;
+    @Input() assetToUpdate: Asset;
 
     @ViewChild(C8yStepper, { static: false })
     stepper: C8yStepper;
 
     @Output() onCancel = new EventEmitter<any>();
 
-    assetTypePromise: Promise<IResultList<IManagedObject>>;
-
-    assetToCreate: Asset;
+    assetTypes: IResultList<IManagedObject>;
 
     formGroupStepOne: FormGroup;
 
@@ -37,7 +35,7 @@ export class AddAssetComponent implements OnInit {
 
     jsonSchemaFormFields: FormlyFieldConfig[] = [];
 
-    model = {};
+    model: object = {};
 
     pendingStatus: boolean = false;
 
@@ -73,6 +71,12 @@ export class AddAssetComponent implements OnInit {
 
     }
 
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes.hasOwnProperty('assetToUpdate') && changes['assetToUpdate'].currentValue) {
+            this.assetToUpdate = Object.assign(new Asset(), changes['assetToUpdate'].currentValue);
+        }
+    }
+
     ngOnInit(): void {
         this.initFormOne();
         this.initFormTwo();
@@ -80,22 +84,11 @@ export class AddAssetComponent implements OnInit {
         this.initAssignedDevicesBaseQuery();
     }
 
-    // initForm(): void {
-    //     this.formGroupStepOne = this.formBuilder.group({
-    //         name: [this.isAssetUpdate() ? this.assetToUpdate['name'] : '', Validators.required],
-    //         type: [this.isAssetUpdate() ? this.assetToUpdate['type'] : '', Validators.required],
-    //         description: [this.isAssetUpdate() ? this.assetToUpdate['description'] : ''],
-    //         externalAssetId: [this.isAssetUpdate() ? this.assetToUpdate['c8y_ExternalAssetId'] : ''],
-    //         ownerName: [this.isAssetUpdate() ? get(this.assetToUpdate, 'c8y_AssetOwner.name') : ''],
-    //         ownerEmail: [this.isAssetUpdate() ? get(this.assetToUpdate, 'c8y_AssetOwner.email') : '']
-    //     });
-    // }
-
     initFormOne(): void {
         this.formGroupStepOne = this.formBuilder.group({
             name: [this.isAssetUpdate() ? this.assetToUpdate['name'] : '', Validators.required],
             description: [this.isAssetUpdate() ? this.assetToUpdate['description'] : ''],
-            type: [''],
+            type: new FormControl(null),
         });
     }
 
@@ -103,8 +96,13 @@ export class AddAssetComponent implements OnInit {
         this.formGroupStepTwo = new FormGroup({});
     }
 
-    initAssetTypes(): void {
-        this.assetTypePromise = this.addAssetService.queryAssetTypes();
+    async initAssetTypes(): Promise<void> {
+        this.assetTypes = await this.addAssetService.queryAssetTypes();
+
+        if (this.isAssetUpdate()) {
+            const assetTypeSelected: IManagedObject = this.assetTypes.data.find((assetType) => assetType.name === this.assetToUpdate.getType());
+            this.formGroupStepOne.patchValue({ type: assetTypeSelected });
+        }
     }
 
     initAssignedDevicesBaseQuery(): void {
@@ -127,6 +125,17 @@ export class AddAssetComponent implements OnInit {
     async onNextStepTwo(event: { stepper: C8yStepper, step: CdkStep }) {
         event.stepper.next();
         this.jsonSchemaFormFields = await this.addAssetService.loadPropertiesJsonSchemas(this.formGroupStepOne.value)
+
+        if (this.isAssetUpdate()) {
+            // brief timeout necessary to ensure formGroupStepTwo has been initialized
+            setTimeout(() => {
+                Object.keys(this.formGroupStepTwo.value).forEach((key) => {
+                    if (this.assetToUpdate.hasOwnProperty(key)) {
+                        this.formGroupStepTwo.patchValue({ [key]: this.assetToUpdate[key] });
+                    }
+                });
+            }, 100);
+        }
     }
 
     onSelected(selectedDevicesIds: string[]) {
@@ -134,16 +143,16 @@ export class AddAssetComponent implements OnInit {
     }
 
     isAssetUpdate(): boolean {
-        return (this.assetToUpdate != undefined && this.assetToUpdate != null);
+        return !!this.assetToUpdate;
     }
 
     async updateAsset(): Promise<void> {
-        // this.pendingStatus = true;
+        this.pendingStatus = true;
 
-        // await this.addAssetService.updateAsset(this.assetToUpdate.id, this.getAssetRepresentation(this.formGroupStepOne.value), this.selectedDeviceIds);
+        await this.addAssetService.updateAsset(this.assetToUpdate.id, this.getAssetRepresentation(this.formGroupStepOne.value, this.model), this.selectedDeviceIds);
 
-        // this.resetStepper();
-        // this.emitEvents();
+        this.resetStepper();
+        this.emitEvents();
     }
 
     async createAsset(): Promise<void> {
@@ -186,7 +195,7 @@ export class AddAssetComponent implements OnInit {
         this.refresh.emit();
     }
 
-    private getAssetRepresentation({ name, type, description }, customProperties: object): Asset {
+    private getAssetRepresentation({ name, type, description }, customProperties: object): Partial<IManagedObject> {
         return {
             name,
             type: type.name,
