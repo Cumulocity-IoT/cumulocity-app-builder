@@ -29,18 +29,18 @@ export class PropertiesLibraryManagePropertyService {
                     },
                 },
                 {
-                    className: 'col-lg-3',
+                    className: 'col-lg-4',
                     type: 'select',
                     key: 'dataType',
                     defaultValue: 'input',
                     templateOptions: {
                         label: 'Type',
-                        options: [{ value: 'input', label: 'Text' }, { value: 'number-ext', label: 'Number' }],
+                        options: [{ value: 'input', label: 'Text' }, { value: 'number-ext', label: 'Number' }, { value: 'file', label: 'Image Upload' }],
                         selected: 'input'
                     },
                 },
                 {
-                    className: 'col-lg-3',
+                    className: 'col-lg-4',
                     type: 'dynamic-input',
                     fieldGroup: [{
                         key: 'default',
@@ -56,7 +56,7 @@ export class PropertiesLibraryManagePropertyService {
                     }],
                 },
                 {
-                    className: 'col-lg-6',
+                    className: 'col-lg-4',
                     key: 'required',
                     type: 'checkbox',
                     templateOptions: {
@@ -194,6 +194,12 @@ export class PropertiesLibraryManagePropertyService {
                 default: value.default,
                 title: value.name,
             };
+            console.log('get json schema');
+            console.log(value.dataType);
+            if (value.dataType === 'file') {
+                console.log('is file type');
+                jsonSchemaDescription[value.label] = Object.assign(jsonSchemaDescription[value.label], { accept: 'image/*' });
+            }
         };
 
         return jsonSchemaDescription;

@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { CdkStep } from '@angular/cdk/stepper';
-import { ActionControl, BuiltInActionType, BulkActionControl, C8yJSONSchema, C8yStepper, gettext, Pagination } from '@c8y/ngx-components';
+import { ActionControl, BuiltInActionType, BulkActionControl, C8yJSONSchema, C8yStepper, DroppedFile, gettext, Pagination } from '@c8y/ngx-components';
 import { IManagedObject, IResultList, IResult } from '@c8y/client';
 import { Asset } from '../asset.model';
 import { AddAssetService } from './add-asset.service';
@@ -40,6 +40,8 @@ export class AddAssetComponent implements OnInit, OnChanges {
     pendingStatus: boolean = false;
 
     selectedDeviceIds: string[] = [];
+
+    modelFileFields: string[] = [];
 
     pagination: Pagination = { pageSize: 20, currentPage: 1 };
 
@@ -124,7 +126,16 @@ export class AddAssetComponent implements OnInit, OnChanges {
 
     async onNextStepTwo(event: { stepper: C8yStepper, step: CdkStep }) {
         event.stepper.next();
-        this.jsonSchemaFormFields = await this.addAssetService.loadPropertiesJsonSchemas(this.formGroupStepOne.value)
+        this.jsonSchemaFormFields = await this.addAssetService.loadPropertiesJsonSchemas(this.formGroupStepOne.value);
+        // filter for file type fields and store key for later processing of file
+        this.jsonSchemaFormFields.forEach((field) => {
+            const imageField = field.fieldGroup.find((entry) => entry.type === 'file');
+            if (!!imageField) {
+                this.modelFileFields.push(imageField.key.toString());
+            }
+        });
+
+        console.log(this.jsonSchemaFormFields);
 
         if (this.isAssetUpdate()) {
             // brief timeout necessary to ensure formGroupStepTwo has been initialized
@@ -158,6 +169,7 @@ export class AddAssetComponent implements OnInit, OnChanges {
     async createAsset(): Promise<void> {
         this.pendingStatus = true;
 
+        await this.updateFilesInModel();
         await this.addAssetService.createAsset(this.getAssetRepresentation(this.formGroupStepOne.value, this.model), this.selectedDeviceIds);
 
         this.resetStepper();
@@ -181,6 +193,15 @@ export class AddAssetComponent implements OnInit, OnChanges {
                 this.baseQuery = undefined;
             }
         });
+    }
+
+    private async updateFilesInModel(): Promise<void> {
+        for (const key of Object.keys(this.model)) {
+            if (this.modelFileFields.includes(key)) {
+                const file: DroppedFile = this.model[key][0];
+                this.model[key] = (await this.addAssetService.convertFileToBase64(file)).split(',')[1];
+            }
+        }
     }
 
     private resetStepper() {

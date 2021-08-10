@@ -3,7 +3,7 @@ import { InventoryService } from '@c8y/ngx-components/api';
 import { IResult, IResultList, IIdentified, IManagedObject } from '@c8y/client';
 import { get, has, keys } from 'lodash-es';
 import { FormlyFieldConfig } from '@ngx-formly/core';
-import { C8yJSONSchema } from '@c8y/ngx-components';
+import { C8yJSONSchema, DroppedFile } from '@c8y/ngx-components';
 import { JSONSchema7 } from 'json-schema';
 
 @Injectable()
@@ -55,6 +55,10 @@ export class AddAssetService {
         return this.inventory.detail(jsonSchemaId);
     }
 
+    async convertFileToBase64(fileUploaded: DroppedFile): Promise<string> {
+        return await fileUploaded.readAsDataURL();
+    }
+
     async loadPropertiesJsonSchemas({ type }): Promise<FormlyFieldConfig[]> {
         if (!has(type, 'c8y_IsAssetType.propertyIds')) {
             throw new Error('Failed to load JsonSchema');
@@ -83,14 +87,14 @@ export class AddAssetService {
                         };
                     }
 
-                    if (result.fieldGroup) {
-                        result.fieldGroup.push({
-                            key: '_schemaId',
-                            type: 'input',
-                            hideExpression: 'true',
-                            defaultValue: jsonSchema.id
-                        });
-                    }
+                    // if (result.fieldGroup) {
+                    //     result.fieldGroup.push({
+                    //         key: '_schemaId',
+                    //         type: 'input',
+                    //         hideExpression: 'true',
+                    //         defaultValue: jsonSchema.id
+                    //     });
+                    // }
 
                     return result;
                 }
