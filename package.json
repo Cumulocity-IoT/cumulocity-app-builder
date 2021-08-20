@@ -1,6 +1,6 @@
 {
   "name": "app-builder",
-  "version": "1.2.7-dev-2",
+  "version": "1.2.7-dev-4",
   "description": "Application builder for Cumulocity (written by Software AG Global Presales)",
   "main": "index.ts",
   "scripts": {
@@ -39,17 +39,18 @@
     "cumulocity-runtime-widget-loader": "file:binary/cumulocity-runtime-widget-loader-1010.0.8-0.0.1.tgz",
     "d3-color": "^1.4.1",
     "delay": "^4.3.0",
+    "font-awesome": "^4.7.0",
     "fontawesome": "4.7.2",
     "jszip": "^3.4.0",
     "lodash-es": "^4.0.0",
     "ngx-bootstrap": "5.6.1",
     "ngx-markdown": "^8.2.2",
     "rxjs": "~6.4.0",
+    "semver": "^7.3.5",
     "url-search-params-polyfill": "6.0.0",
     "webpack-external-import": "^2.2.4",
     "worker-plugin": "^4.0.3",
-    "zone.js": "~0.9.1",
-    "font-awesome": "^4.7.0"
+    "zone.js": "~0.9.1"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "0.803.23",

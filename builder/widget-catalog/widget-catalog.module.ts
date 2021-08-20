@@ -16,18 +16,19 @@
 * limitations under the License.
  */
 
-import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CoreModule, HOOK_TABS } from '@c8y/ngx-components';
 import { WidgetCatalogComponent } from './widget-catalog.component';
-import { RectangleSpinnerModule } from "../builder/utils/rectangle-spinner/rectangle-spinner.module";
+import { RectangleSpinnerModule } from "../utils/rectangle-spinner/rectangle-spinner.module";
 import { ButtonsModule } from 'ngx-bootstrap/buttons';
 import { WidgetCatalogService } from './widget-catalog.service';
 import {WidgetCatalogTabFactory} from './widget-catalog.tabfactory';
 import { RouterModule, Routes } from '@angular/router';
 import { SortableModule } from 'ngx-bootstrap/sortable';
 import { previewModalComponent } from './preview-modal/preview.-modal.component';
+import { ProgressIndicatorModalModule } from '../utils/progress-indicator-modal/progress-indicator-modal.module';
+import { MyWidgetsComponent } from './my-widgets/my-widgets.component';
 
 const routes: Routes = [
     {
@@ -36,7 +37,7 @@ const routes: Routes = [
     },
     {
         path: 'widget-catalog/my-widgets',
-        component: WidgetCatalogComponent
+        component: MyWidgetsComponent
     },
     {
         path: 'widget-catalog/get-widgets',
@@ -55,9 +56,10 @@ const routes: Routes = [
     ],
     declarations: [
         WidgetCatalogComponent,
-        previewModalComponent
+        previewModalComponent,
+        MyWidgetsComponent
     ],
-    entryComponents: [WidgetCatalogComponent, previewModalComponent],
+    entryComponents: [WidgetCatalogComponent, previewModalComponent, MyWidgetsComponent],
     providers: [
         WidgetCatalogService,
         {

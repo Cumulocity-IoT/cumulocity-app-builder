@@ -20,41 +20,54 @@ import {Component, OnDestroy, OnInit} from "@angular/core";
 import {
     UserService
 } from "@c8y/client";
-import {AppStateService} from "@c8y/ngx-components";
-import { BsModalService } from 'ngx-bootstrap/modal';
-import { Subscription } from 'rxjs';
-import { previewModalComponent } from './preview-modal/preview.-modal.component';
-import { WidgetCatalog, WidgetModel } from './widget-catalog.model';
-import { WidgetCatalogService } from './widget-catalog.service';
+import {AlertService, AppStateService, DynamicComponentService} from "@c8y/ngx-components";
+import { ProgressIndicatorModalComponent } from '../../utils/progress-indicator-modal/progress-indicator-modal.component';
+import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
+import { previewModalComponent } from '../preview-modal/preview.-modal.component';
+import { WidgetCatalog, WidgetModel } from '../widget-catalog.model';
+import { WidgetCatalogService } from '../widget-catalog.service';
 
 @Component({
-    templateUrl: './widget-catalog.component.html',
-    styleUrls: ['./widget-catalog.component.less']
+    templateUrl: './my-widgets.component.html',
+    styleUrls: ['./my-widgets.component.less']
 })
 
 // Custom property settings for Application Builder
-export class WidgetCatalogComponent implements OnInit, OnDestroy{
+export class MyWidgetsComponent implements OnInit, OnDestroy{
 
+    private progressModal: BsModalRef;
+    
     userHasAdminRights: boolean;
     isBusy: boolean = false;
     widgetCatalog: WidgetCatalog;
     searchWidget = '';
     filterWidgets: any = [];
+
     constructor( private appStateService: AppStateService, private modalService: BsModalService, 
-        private userService: UserService, private widgetCatalogService: WidgetCatalogService) {
+        private userService: UserService, private widgetCatalogService: WidgetCatalogService, 
+        private alertService: AlertService, private componentService: DynamicComponentService) {
         this.userHasAdminRights = userService.hasAllRoles(appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN","ROLE_APPLICATION_MANAGEMENT_ADMIN"]);
     }
                         
 
-    async ngOnInit() {
-        this.isBusy = true;
+    ngOnInit() {
         this.loadWidgetsFromCatalog();
     }
 
+    reload() {
+        this.filterWidgets = [];
+        this.loadWidgetsFromCatalog();
+    }
+
+    refresh() {
+        window.location.reload();
+    }
     private loadWidgetsFromCatalog() {
 
+        this.isBusy = true;
         this.widgetCatalogService.fetchWidgetCatalog().subscribe((widgetCatalog: WidgetCatalog) => {
             this.widgetCatalog = widgetCatalog;
+            this.filterInstalledWidgets();
             this.filterWidgets = (this.widgetCatalog ? this.widgetCatalog.widgets : []);
             this.isBusy = false;
         })
@@ -77,6 +90,55 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy{
     save() {
         console.log('widgets', this.widgetCatalog.widgets);
     }
+
+    showProgressModalDialog(message: string): void {
+        this.progressModal = this.modalService.show(ProgressIndicatorModalComponent, { class: 'c8y-wizard', initialState: { message } });
+    }
+
+    hideProgressModalDialog(): void {
+        this.progressModal.hide();
+    }
+    async installWidget(widget: WidgetModel): Promise<void> {
+        const currentHost = window.location.host.split(':')[0];
+        if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
+            this.alertService.warning("Runtime widget installation isn't supported when running Application Builder on localhost.");
+            return;
+        }
+
+        this.showProgressModalDialog(`Install ${widget.title}`)
+        this.widgetCatalogService.downloadBinary(widget.link).subscribe(data => {
+            const blob = new Blob([data], {
+                type: 'application/zip'
+            });
+
+            this.widgetCatalogService.installWidget(blob).then(() => {
+                widget.installed = true;
+                widget.isReloadRequired = true;
+                this.hideProgressModalDialog();
+            });
+        });
+    }
+
+    private filterInstalledWidgets() {
+        if (!this.widgetCatalog || !this.widgetCatalog.widgets 
+            || this.widgetCatalog.widgets.length === 0) {
+            return;
+        }
+
+        this.widgetCatalog.widgets.forEach(widget => {
+            /* this.componentService.getById$(widget.id).subscribe(widgetObj => {
+                console.log('widget obj', widgetObj);
+                widget.installed = (widgetObj != undefined);
+            }); */
+            if(widget.id === 'smart-map-widget' || widget.id === 'smart-map-settings') {
+              //  widget.installed = true;
+            } else {
+                widget.installed = true;
+                widget.isReloadRequired = true;
+            }
+        });
+    }
+
     private async getInstalledWidgetList() {
         // Find the current app so that we can pull a list of installed widgets from it
        /*  const appList = (await this.appService.list({pageSize: 2000})).data;

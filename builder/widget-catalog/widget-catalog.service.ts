@@ -32,4 +32,17 @@ export class WidgetCatalogService {
     fetchWidgetCatalog(): Observable<WidgetCatalog> {
         return this.http.get<WidgetCatalog>(`${this.GATEWAY_URL}${this.CATALOG_LABCASE_ID}`, this.HTTP_HEADERS);
     }
+
+    async installWidget(binary: Blob) {
+      await this.runtimeWidgetInstallerService.installWidget(binary, (msg, type) => { });
+      this.alertService.success("Widget Installed!");
+      await new Promise<void>((resolve => setTimeout(() => resolve(), 5000)));
+      this.alertService.clearAll();
+    }
+
+    downloadBinary(binaryId: string): Observable<ArrayBuffer> {
+      return this.http.get(`${this.GATEWAY_URL}${binaryId}`, {
+          responseType: 'arraybuffer'
+      });
+    }
 }

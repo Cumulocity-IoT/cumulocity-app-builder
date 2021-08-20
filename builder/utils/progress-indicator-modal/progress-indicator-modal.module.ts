@@ -3,6 +3,7 @@ import { NgModule } from "@angular/core";
 import { CoreModule } from "@c8y/ngx-components";
 import { RectangleSpinnerModule } from "../rectangle-spinner/rectangle-spinner.module";
 import { ProgressIndicatorModalComponent } from "./progress-indicator-modal.component";
+import { ProgressIndicatorService } from './progress-indicator.service';
 
 @NgModule({
     imports: [
@@ -16,7 +17,7 @@ import { ProgressIndicatorModalComponent } from "./progress-indicator-modal.comp
     entryComponents: [
         ProgressIndicatorModalComponent
     ],
-    providers: []
+    providers: [ProgressIndicatorService]
 })
 export class ProgressIndicatorModalModule {
 

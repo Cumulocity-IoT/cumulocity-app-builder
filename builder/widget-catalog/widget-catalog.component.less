@@ -1,0 +1,68 @@
+.custom-icon-drag-handle:before {
+    content: "\f142 \f142";
+    letter-spacing: 0.1em;
+  }
+  
+  .sortable-grid-header {
+    margin-left: -16px;
+    margin-right: -16px;
+    padding: 0 16px 5px;
+    display: flex;
+    font-weight: bold;
+  
+    .drag-handle {
+      margin-right: 10px;
+    }
+  
+    .col {
+      flex: 1;
+    }
+  }
+  
+  :host /deep/ .sortable-grid {
+    margin-left: -16px;
+    margin-right: -16px;
+  }
+  
+  :host /deep/ .sortable-item {
+    display: flex;
+    border-top: 1px solid rgba(88, 101, 109, 0.1);
+    padding: 5px 16px;
+  
+    &:nth-child(odd) {
+      background-color: #fbfbfc;
+    }
+  
+    &:hover {
+      background-color: #EFF1F3;
+    }
+  
+    .drag-handle {
+      cursor: grab;
+      margin-right: 10px;
+    }
+  
+    .col {
+      flex: 1;
+    }
+  
+    .col-overflow {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+  } 
+  .widget-icon {
+    font-size: 22px;
+    margin-right: 5px;
+  }
+  .action-icon {
+    font-size: 22px;
+    margin-right: 5px;
+    cursor: pointer;
+  }
+  .checkbox-padding {
+    padding-right: 16px;
+    padding-left: 15px;
+    padding-top: 5px;
+  } 
