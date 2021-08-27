@@ -6,20 +6,20 @@
     <div class="card-group interact-grid" *ngIf="!isBusy">
         <ng-template #itemTemplate let-item="item" let-index="index">
             <div class="text-warning">
-                <button class="btn btn-clean btn-icon btn-md" title="Update" *ngIf="!item.value.installed">
-                    <i c8yIcon="cloud-upload" class="action-icon" (click)="installWidget(item.value)"></i>
+                <button class="btn btn-clean btn-icon btn-md" title="Update" *ngIf="isUpdateAvailable(item.value) && !item.value.isReloadRequired">
+                    <i c8yIcon="cloud-upload" class="action-icon" (click)="updateWidget(item.value)"></i>
                 </button>
-                <button class="btn btn-clean btn-icon btn-md" title="Refresh" *ngIf="item.value.installed && item.value.isReloadRequired">
+                <button class="btn btn-clean btn-icon btn-md" title="Refresh" *ngIf="!isUpdateAvailable(item.value) && item.value.isReloadRequired">
                     <i c8yIcon="refresh" class="action-icon text-info" (click)="refresh()"></i>
                 </button>
-                <button class="invisible btn btn-clean btn-icon btn-md" title="Refresh" *ngIf="item.value.installed && !item.value.isReloadRequired">
+                <button class="invisible btn btn-clean btn-icon btn-md" title="Refresh" *ngIf="!isUpdateAvailable(item.value) && !item.value.isReloadRequired">
                     <i c8yIcon="refresh" class="action-icon text-info" (click)="refresh()"></i>
                 </button>
             </div>
             <div class="widget-icon" ><i [c8yIcon]="item.value.icon"></i></div>
             <div class="col col-overflow" title="{{item.value.title}}">{{item.value.title}}</div>
             <div class="col col-overflow" title="{{item.value.version}}" >{{item.value.version}}</div>
-            <div class="col col-overflow" title="{{item.value.version}}" >1.0.0</div>
+            <div class="col col-overflow" title="{{item.value.installedVersion}}" >{{item.value.installedVersion}}</div>
             <div class="col col-overflow" title="{{item.value.license}}">{{item.value.license}}</div>
             <div class="col col-overflow" title="{{item.value.author}}">{{item.value.author}}</div>
             <div class="action-icon text-info" title="Preview"><i c8yIcon="eye" (click)="preview(item.value.preview)"></i></div>
@@ -53,7 +53,7 @@
                                 <button class="btn btn-link pull-right" id="refresh-widget" (click)="reload()">
                                     <i c8yIcon="refresh"></i> Reload
                                 </button>
-                                <button class="btn btn-link pull-right" id="update-widget" (click)="save()">
+                                <button class="btn btn-link pull-right" id="update-widget" (click)="updateAll()">
                                     <i c8yIcon="cloud-upload" style="font-size: 16px;"></i> Update all
                                 </button>
                                <!--  <label class="c8y-switch pull-right" title="Select Multiple">

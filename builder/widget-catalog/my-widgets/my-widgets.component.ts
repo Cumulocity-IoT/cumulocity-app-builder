@@ -18,7 +18,10 @@
 
 import {Component, OnDestroy, OnInit} from "@angular/core";
 import {
-    UserService
+    ApplicationService,
+    UserService,
+    IApplication,
+    InventoryService
 } from "@c8y/client";
 import {AlertService, AppStateService, DynamicComponentService} from "@c8y/ngx-components";
 import { ProgressIndicatorModalComponent } from '../../utils/progress-indicator-modal/progress-indicator-modal.component';
@@ -26,16 +29,19 @@ import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { previewModalComponent } from '../preview-modal/preview.-modal.component';
 import { WidgetCatalog, WidgetModel } from '../widget-catalog.model';
 import { WidgetCatalogService } from '../widget-catalog.service';
-
+import { interval } from 'rxjs';
+import { RuntimeWidgetLoaderService } from 'cumulocity-runtime-widget-loader';
+import { contextPathFromURL } from 'builder/utils/contextPathFromURL';
+import { IAppRuntimeContext } from 'cumulocity-runtime-widget-loader/runtime-widget-loader/runtime-widget-loader.service';
 @Component({
     templateUrl: './my-widgets.component.html',
     styleUrls: ['./my-widgets.component.less']
 })
 
-// Custom property settings for Application Builder
 export class MyWidgetsComponent implements OnInit, OnDestroy{
 
     private progressModal: BsModalRef;
+    private appList = [];
     
     userHasAdminRights: boolean;
     isBusy: boolean = false;
@@ -45,29 +51,47 @@ export class MyWidgetsComponent implements OnInit, OnDestroy{
 
     constructor( private appStateService: AppStateService, private modalService: BsModalService, 
         private userService: UserService, private widgetCatalogService: WidgetCatalogService, 
-        private alertService: AlertService, private componentService: DynamicComponentService) {
+        private alertService: AlertService, private componentService: DynamicComponentService, 
+        private runtimeWidgetLoaderService: RuntimeWidgetLoaderService, private appService: ApplicationService, 
+        private invService: InventoryService) {
         this.userHasAdminRights = userService.hasAllRoles(appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN","ROLE_APPLICATION_MANAGEMENT_ADMIN"]);
+        this.runtimeWidgetLoaderService.isLoaded$.subscribe( isLoaded => {
+            this.widgetCatalogService.runtimeLoadingCompleted = isLoaded;
+        })   
     }
                         
 
     ngOnInit() {
-        this.loadWidgetsFromCatalog();
+        if(this.widgetCatalogService.runtimeLoadingCompleted) {
+            this.loadWidgetsFromCatalog();
+        } else {
+            this.isBusy = true;
+            const waitForWidgetLoaderInt = interval(1000);
+            const waitForWidgetLoaderSub = waitForWidgetLoaderInt.subscribe(async val => {
+                if (this.widgetCatalogService.runtimeLoadingCompleted) {
+                        waitForWidgetLoaderSub.unsubscribe();
+                        this.loadWidgetsFromCatalog();
+                }
+            });
+        }
     }
 
     reload() {
-        this.filterWidgets = [];
-        this.loadWidgetsFromCatalog();
+        /* this.filterWidgets = [];
+        this.loadWidgetsFromCatalog(); */
+        window.location.reload();
     }
 
     refresh() {
         window.location.reload();
     }
-    private loadWidgetsFromCatalog() {
+    private async loadWidgetsFromCatalog() {
 
         this.isBusy = true;
-        this.widgetCatalogService.fetchWidgetCatalog().subscribe((widgetCatalog: WidgetCatalog) => {
+        this.appList = (await this.appService.list({pageSize: 2000})).data;
+        await this.widgetCatalogService.fetchWidgetCatalog().subscribe(async (widgetCatalog: WidgetCatalog) => {
             this.widgetCatalog = widgetCatalog;
-            this.filterInstalledWidgets();
+            await this.filterInstalledWidgets();
             this.filterWidgets = (this.widgetCatalog ? this.widgetCatalog.widgets : []);
             this.isBusy = false;
         })
@@ -87,7 +111,7 @@ export class MyWidgetsComponent implements OnInit, OnDestroy{
             this.filterWidgets = [...this.filterWidgets];
         } 
     }
-    save() {
+    updateAll() {
         console.log('widgets', this.widgetCatalog.widgets);
     }
 
@@ -98,67 +122,56 @@ export class MyWidgetsComponent implements OnInit, OnDestroy{
     hideProgressModalDialog(): void {
         this.progressModal.hide();
     }
-    async installWidget(widget: WidgetModel): Promise<void> {
+    async updateWidget(widget: WidgetModel): Promise<void> {
         const currentHost = window.location.host.split(':')[0];
         if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
             this.alertService.warning("Runtime widget installation isn't supported when running Application Builder on localhost.");
             return;
         }
 
-        this.showProgressModalDialog(`Install ${widget.title}`)
+        this.showProgressModalDialog(`Updating ${widget.title}`)
         this.widgetCatalogService.downloadBinary(widget.link).subscribe(data => {
             const blob = new Blob([data], {
                 type: 'application/zip'
             });
-
-            this.widgetCatalogService.installWidget(blob).then(() => {
+            const fileOfBlob = new File([blob], widget.fileName);
+            this.widgetCatalogService.installWidget(fileOfBlob, widget).then(() => {
                 widget.installed = true;
                 widget.isReloadRequired = true;
+                widget.installedVersion = widget.version;
                 this.hideProgressModalDialog();
             });
         });
     }
 
-    private filterInstalledWidgets() {
+    private async filterInstalledWidgets() {
         if (!this.widgetCatalog || !this.widgetCatalog.widgets 
             || this.widgetCatalog.widgets.length === 0) {
             return;
         }
 
-        this.widgetCatalog.widgets.forEach(widget => {
-            /* this.componentService.getById$(widget.id).subscribe(widgetObj => {
-                console.log('widget obj', widgetObj);
-                widget.installed = (widgetObj != undefined);
-            }); */
-            if(widget.id === 'smart-map-widget' || widget.id === 'smart-map-settings') {
-              //  widget.installed = true;
-            } else {
-                widget.installed = true;
-                widget.isReloadRequired = true;
-            }
+        await this.widgetCatalog.widgets.forEach(async widget => {
+            const widgetObj = await new Promise<any>((resolve) => {
+                this.componentService.getById$(widget.id).subscribe(widgetObj => {
+                    console.log('widget obj in subscribe', widgetObj);
+                    resolve(widgetObj);
+                });
+            });
+            widget.installed = (widgetObj != undefined);
+            widget.isCompatible = this.widgetCatalogService.isCompatiblieVersion(widget);
+            const appObj = this.appList.find( app => app.contextPath === widget.contextPath);
+            widget.installedVersion = (appObj && appObj.manifest  && appObj.manifest.version ? appObj.manifest.version : '');
         });
+        this.widgetCatalog.widgets = this.widgetCatalog.widgets.filter(widget => widget.installed);
     }
 
-    private async getInstalledWidgetList() {
-        // Find the current app so that we can pull a list of installed widgets from it
-       /*  const appList = (await this.appService.list({pageSize: 2000})).data;
-        
-        // Updated to check for own app builder first
-        let app: IApplication & {widgetContextPaths?: string[]} | undefined = appList.find(app => app.contextPath === contextPathFromURL() &&
-        app.availability === 'PRIVATE') ;
-        if (!app) {
-            // Own App builder not found. Looking for subscribed one
-            app = appList.find(app => app.contextPath === contextPathFromURL());
-            if(!app) { throw Error('Could not find current application.');}
-        } 
-        const AppRuntimePathList = (await this.invService.list( {pageSize: 2000, query: `type eq app_runtimeContext`})).data;
-        const AppRuntimePath: IAppRuntimeContext & {widgetContextPaths?: string[]} = AppRuntimePathList.find(path => path.appId === app.id);
-        
-        const contextPaths = Array.from(new Set([
-            ...(app && app.widgetContextPaths) || [],
-            ...(AppRuntimePath && AppRuntimePath.widgetContextPaths) || []
-        ])); */
+    isUpdateAvailable(widget: WidgetModel) {
+        if(!widget.installedVersion && widget.installedVersion === ''){
+            return true;
+        }
+        return this.widgetCatalogService.isLatestVersionAvailable(widget);
     }
+
     ngOnDestroy() {
     }
 }

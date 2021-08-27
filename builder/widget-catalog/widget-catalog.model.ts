@@ -23,4 +23,5 @@ export interface WidgetModel {
     preview?: string;
     isReloadRequired?: boolean;
     isCompatible?: boolean;
+    installedVersion?: string;
 }
