@@ -31,14 +31,12 @@ import { WidgetCatalog, WidgetModel } from '../widget-catalog.model';
 import { WidgetCatalogService } from '../widget-catalog.service';
 import { interval } from 'rxjs';
 import { RuntimeWidgetLoaderService } from 'cumulocity-runtime-widget-loader';
-import { contextPathFromURL } from 'builder/utils/contextPathFromURL';
-import { IAppRuntimeContext } from 'cumulocity-runtime-widget-loader/runtime-widget-loader/runtime-widget-loader.service';
 @Component({
     templateUrl: './my-widgets.component.html',
     styleUrls: ['./my-widgets.component.less']
 })
 
-export class MyWidgetsComponent implements OnInit, OnDestroy{
+export class MyWidgetsComponent implements OnInit{
 
     private progressModal: BsModalRef;
     private appList = [];
@@ -52,8 +50,7 @@ export class MyWidgetsComponent implements OnInit, OnDestroy{
     constructor( private appStateService: AppStateService, private modalService: BsModalService, 
         private userService: UserService, private widgetCatalogService: WidgetCatalogService, 
         private alertService: AlertService, private componentService: DynamicComponentService, 
-        private runtimeWidgetLoaderService: RuntimeWidgetLoaderService, private appService: ApplicationService, 
-        private invService: InventoryService) {
+        private runtimeWidgetLoaderService: RuntimeWidgetLoaderService, private appService: ApplicationService) {
         this.userHasAdminRights = userService.hasAllRoles(appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN","ROLE_APPLICATION_MANAGEMENT_ADMIN"]);
         this.runtimeWidgetLoaderService.isLoaded$.subscribe( isLoaded => {
             this.widgetCatalogService.runtimeLoadingCompleted = isLoaded;
@@ -62,17 +59,19 @@ export class MyWidgetsComponent implements OnInit, OnDestroy{
                         
 
     ngOnInit() {
-        if(this.widgetCatalogService.runtimeLoadingCompleted) {
-            this.loadWidgetsFromCatalog();
-        } else {
-            this.isBusy = true;
-            const waitForWidgetLoaderInt = interval(1000);
-            const waitForWidgetLoaderSub = waitForWidgetLoaderInt.subscribe(async val => {
-                if (this.widgetCatalogService.runtimeLoadingCompleted) {
-                        waitForWidgetLoaderSub.unsubscribe();
-                        this.loadWidgetsFromCatalog();
-                }
-            });
+        if(this.userHasAdminRights){
+            if(this.widgetCatalogService.runtimeLoadingCompleted) {
+                this.loadWidgetsFromCatalog();
+            } else {
+                this.isBusy = true;
+                const waitForWidgetLoaderInt = interval(1000);
+                const waitForWidgetLoaderSub = waitForWidgetLoaderInt.subscribe(async val => {
+                    if (this.widgetCatalogService.runtimeLoadingCompleted) {
+                            waitForWidgetLoaderSub.unsubscribe();
+                            this.loadWidgetsFromCatalog();
+                    }
+                });
+            }
         }
     }
 
@@ -111,8 +110,12 @@ export class MyWidgetsComponent implements OnInit, OnDestroy{
             this.filterWidgets = [...this.filterWidgets];
         } 
     }
-    updateAll() {
-        console.log('widgets', this.widgetCatalog.widgets);
+    async updateAll() {
+        for (const widget of this.widgetCatalog.widgets){
+            if(!widget.isReloadRequired && this.isUpdateAvailable(widget)) {
+                await this.updateWidget(widget);
+            }
+        };
     }
 
     showProgressModalDialog(message: string): void {
@@ -130,16 +133,21 @@ export class MyWidgetsComponent implements OnInit, OnDestroy{
         }
 
         this.showProgressModalDialog(`Updating ${widget.title}`)
-        this.widgetCatalogService.downloadBinary(widget.link).subscribe(data => {
-            const blob = new Blob([data], {
-                type: 'application/zip'
+        const blob = await new Promise<any>((resolve) => {
+            this.widgetCatalogService.downloadBinary(widget.link).subscribe(data => {
+                const blob = new Blob([data], {
+                    type: 'application/zip'
+                });
+                resolve(blob);
             });
-            const fileOfBlob = new File([blob], widget.fileName);
+        });
+        const fileOfBlob = new File([blob], widget.fileName);
+        await new Promise<any>((resolve) => {
             this.widgetCatalogService.installWidget(fileOfBlob, widget).then(() => {
-                widget.installed = true;
                 widget.isReloadRequired = true;
                 widget.installedVersion = widget.version;
                 this.hideProgressModalDialog();
+                resolve(true);
             });
         });
     }
@@ -153,7 +161,6 @@ export class MyWidgetsComponent implements OnInit, OnDestroy{
         await this.widgetCatalog.widgets.forEach(async widget => {
             const widgetObj = await new Promise<any>((resolve) => {
                 this.componentService.getById$(widget.id).subscribe(widgetObj => {
-                    console.log('widget obj in subscribe', widgetObj);
                     resolve(widgetObj);
                 });
             });
@@ -172,6 +179,4 @@ export class MyWidgetsComponent implements OnInit, OnDestroy{
         return this.widgetCatalogService.isLatestVersionAvailable(widget);
     }
 
-    ngOnDestroy() {
-    }
 }

@@ -13,7 +13,7 @@ export class WidgetCatalogService {
 
     C8Y_VERSION = '1010.0.8';
     private GATEWAY_URL = '';
-    private CATALOG_LABCASE_ID = 'd20d060ed02f84b42e9f759b5fe50b72';
+    private CATALOG_LABCASE_ID = '';
     runtimeLoadingCompleted = false;
     private readonly HTTP_HEADERS = {
         headers: new HttpHeaders({
@@ -27,8 +27,8 @@ export class WidgetCatalogService {
         private binaryService: InventoryBinaryService, private alertService: AlertService,
         private runtimeWidgetInstallerService: RuntimeWidgetInstallerService,
         private externalService: AppBuilderExternalAssetsService) {
-        this.GATEWAY_URL = this.externalService.getURL('DBCATALOG', 'gatewayURL');
-        // this.CATALOG_LABCASE_ID = this.externalService.getURL('DBCATALOG', 'labcaseId');
+        this.GATEWAY_URL = this.externalService.getURL('WIDGETCATALOG', 'gatewayURL');
+        this.CATALOG_LABCASE_ID = this.externalService.getURL('WIDGETCATALOG', 'labcaseId');
     }
 
 
@@ -38,9 +38,6 @@ export class WidgetCatalogService {
 
     async installWidget(binary: Blob, widget: WidgetModel) {
       await this.runtimeWidgetInstallerService.installWidget(binary, (msg, type) => { }, widget);
-   //   this.alertService.success("Widget Installed!");
-      await new Promise<void>((resolve => setTimeout(() => resolve(), 5000)));
-      this.alertService.clearAll();
     }
 
     downloadBinary(binaryId: string): Observable<ArrayBuffer> {

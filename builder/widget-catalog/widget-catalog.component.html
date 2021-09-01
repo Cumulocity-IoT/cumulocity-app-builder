@@ -7,7 +7,7 @@
         <ng-template #itemTemplate let-item="item" let-index="index">
             <div class="text-warning" >
                 <button class="btn btn-clean btn-icon btn-md" [disabled]="!item.value.isCompatible" title="{{item.value.isCompatible ? 'Install' : 'Platform not supported!'}}"
-                 *ngIf="!item.value.installed && !selectMultipe" (click)="installWidget(item.value)">
+                 *ngIf="userHasAdminRights && !item.value.installed && !selectMultipe" (click)="installWidget(item.value)">
                     <i c8yIcon="upload" class="action-icon" ></i>
                 </button>
                 <!-- <label title="Select for Install"  class="btn btn-clean btn-icon btn-md c8y-checkbox checkbox-padding" *ngIf="!item.value.installed && selectMultipe">

@@ -8,8 +8,32 @@
     <rectangle-spinner *ngIf="isLoadingIndicatorDisplayed" style="position: relative; left: 47%; top: 200px;">
     </rectangle-spinner>
 
-    <div *ngIf="isCatalogDisplayed()" class="row  modal-inner-scroll " style="padding-bottom: 20px;">
-        <div *ngFor="let template of templates" class="col-md-4 col-sm-6 col-xs-12 card-demo-container">
+    <div *ngIf="isCatalogDisplayed()" >
+        <div class="">
+            <div class="card-header">
+            <!-- Search -->
+            <div id="searchWidget" class="col-xs-12 col-sm-12 col-md-12 col-lg-12 input-group input-group-search" style="padding-right: 0px;padding-left: 0px;">
+                <input
+                type="search"
+                class="form-control"
+                placeholder="Search Dashboard..."
+                [(ngModel)]="searchTemplate"
+                (keyup)="applyFilter()"
+                />
+                <span class="input-group-addon">
+                <i c8yIcon="search" *ngIf="!searchString || searchString.length === 0"></i>
+                <i
+                    c8yIcon="times"
+                    class="text-muted"
+                    *ngIf="searchTemplate && searchTemplate.length > 0"
+                    (click)="searchTemplate = '';applyFilter() "
+                ></i>
+                </span>
+            </div>
+            </div>
+        </div>
+        <div class="row  modal-inner-scroll " style="padding-bottom: 20px;">
+        <div *ngFor="let template of filterTemplates" class="col-md-4 col-sm-6 col-xs-12 card-demo-container">
             <div class="flip-card">
                 <div class="card-demo flip-card-inner">
                     <div class="flip-card-front">
@@ -36,6 +60,7 @@
                     </div>
                 </div>
             </div>
+        </div>
         </div>
     </div>
     <div *ngIf="isDetailPageDisplayed() && templateDetails" class="row template-detail-container modal-inner-scroll">

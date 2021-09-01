@@ -1,10 +1,10 @@
 {
   "name": "app-builder",
-  "version": "1.2.7-dev-22",
+  "version": "1.2.7-RC-1.1",
   "description": "Application builder for Cumulocity (written by Software AG Global Presales)",
   "main": "index.ts",
   "scripts": {
-    "start": "c8ycli server --env.extraWebpackConfig=./extra-webpack.config.js  ",
+    "start": "c8ycli server --env.extraWebpackConfig=./extra-webpack.config.js ",
     "build": "set NODE_OPTIONS=--max_old_space_size=4096 && c8ycli build --env.extraWebpackConfig=./extra-webpack.config.js --env.mode=production",
     "deploy-ci": "c8ycli deploy  -u $npm_config_param1 -T $npm_config_param2 -U $npm_config_param3 -P $npm_config_param4",
     "deploy": "c8ycli deploy ",
@@ -32,11 +32,11 @@
     "@ng-reactive/async-input": "0.0.1",
     "@ng-select/ng-select": "^3.7.3",
     "angular": "1.6.9",
-    "app-builder-external-assets": "file:binary/app-builder-external-assets-1.0.0.tgz",
+    "app-builder-external-assets": "file:binary/app-builder-external-assets-1.1.0.tgz",
     "comlink": "^4.3.0",
     "core-js": "^3.4.0",
     "crypto-js": "^4.0.0",
-    "cumulocity-runtime-widget-loader": "file:binary/cumulocity-runtime-widget-loader-1010.0.8-1.0.0.tgz",
+    "cumulocity-runtime-widget-loader": "file:binary/cumulocity-runtime-widget-loader-1010.0.8-1.0.1.tgz",
     "d3-color": "^1.4.1",
     "delay": "^4.3.0",
     "font-awesome": "^4.7.0",
@@ -74,6 +74,15 @@
       "contentSecurityPolicy": "base-uri 'none'; default-src 'self' 'unsafe-inline' http: https: ws: wss: blob:; connect-src 'self' *.webmethodscloud.com *.aptrinsic.com *.billwerk.com http: https: ws: wss: blob:;  script-src 'self' open.mapquestapi.com *.twitter.com *.twimg.com *.aptrinsic.com 'unsafe-inline' 'unsafe-eval' data:; style-src * 'unsafe-inline' blob:; img-src * data: blob:; font-src * data:; frame-src *;",
       "icon": {
         "class": "fa fa-magic"
+      },
+      "cookieBanner": {
+        "cookieBannerTitle": "About cookies on this website",
+        "cookieBannerText": "Cookies are important to the proper functioning of a site. To improve your experience, we use cookies to remember log-in details and provide secure log-in, collect statistics to optimize site functionality, and deliver content tailored to your interests. Click Agree and Proceed to accept cookies and go directly to the site or click Configure preferences for further details and to manage your options. The consent can be revoked at any time.",
+        "policyUrl": "https://www.softwareag.com/en_corporate/privacy.html"
+      },
+      "cookiePreferences":{
+        "required": true,
+        "functional": "These cookies are used to support you during your first steps in the product, to deliver content tailored to your needs, and to collect usage statistics."
       }
     },
     "cli": {}

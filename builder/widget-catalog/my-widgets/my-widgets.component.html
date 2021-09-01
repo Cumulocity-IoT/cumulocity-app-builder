@@ -6,7 +6,7 @@
     <div class="card-group interact-grid" *ngIf="!isBusy">
         <ng-template #itemTemplate let-item="item" let-index="index">
             <div class="text-warning">
-                <button class="btn btn-clean btn-icon btn-md" title="Update" *ngIf="isUpdateAvailable(item.value) && !item.value.isReloadRequired">
+                <button class="btn btn-clean btn-icon btn-md" title="Update" *ngIf="userHasAdminRights && isUpdateAvailable(item.value) && !item.value.isReloadRequired">
                     <i c8yIcon="cloud-upload" class="action-icon" (click)="updateWidget(item.value)"></i>
                 </button>
                 <button class="btn btn-clean btn-icon btn-md" title="Refresh" *ngIf="!isUpdateAvailable(item.value) && item.value.isReloadRequired">
@@ -53,7 +53,7 @@
                                 <button class="btn btn-link pull-right" id="refresh-widget" (click)="reload()">
                                     <i c8yIcon="refresh"></i> Reload
                                 </button>
-                                <button class="btn btn-link pull-right" id="update-widget" (click)="updateAll()">
+                                <button *ngIf="userHasAdminRights" class="btn btn-link pull-right" id="update-widget" (click)="updateAll()">
                                     <i c8yIcon="cloud-upload" style="font-size: 16px;"></i> Update all
                                 </button>
                                <!--  <label class="c8y-switch pull-right" title="Select Multiple">
