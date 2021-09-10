@@ -68,6 +68,19 @@ export class SimulatorConfigComponent implements OnDestroy {
         
     }
 
+    public exportSimulatorConfig(simulatorConfig: SimulatorConfig) {
+        const configBlob = new Blob([JSON.stringify(simulatorConfig)], {type: 'text/plain'});
+        const url= window.URL.createObjectURL(configBlob);
+        let a = document.createElement('a');
+        document.body.appendChild(a);
+        a.setAttribute('style', 'display: none');
+        a.href = url;
+        a.download = simulatorConfig.name+"-config.json";
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
+    }
+
     async forceUnlock() {
         this.isUnlocking = true;
         await this.simSvc.simulator.forceTakeLock();
