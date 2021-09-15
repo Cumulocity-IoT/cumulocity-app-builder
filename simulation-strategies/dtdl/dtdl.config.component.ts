@@ -18,9 +18,11 @@
 
 import {Component} from "@angular/core";
 import { ControlContainer, NgForm } from '@angular/forms';
+import { OperationSupport } from "builder/simulator/simulator-config";
 import {SimulationStrategyConfigComponent} from "../../builder/simulator/simulation-strategy";
+import * as _ from 'lodash';
 
-export interface DtdlSimulationStrategyConfig {
+export interface DtdlSimulationStrategyConfig   extends OperationSupport<DtdlSimulationStrategyConfig>  {
     deviceId: string,
     modalSize?: string,
     deviceName: string,
@@ -237,13 +239,33 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
     dtdlFile: FileList;
     isUploading = false;
     isError = false;
-    initializeConfig() {
-        this.config.modalSize = "modal-md",
-        this.config.dtdlModelConfig = [];
-        this.config.dtdlDeviceId = "";
-        this.configModel = [];
-        this.config.interval = 5;
+
+
+    getNamedConfig(label: string) : DtdlSimulationStrategyConfig {
+        let c : DtdlSimulationStrategyConfig = this.getConfigAsAny(label);
+        return c;
     }
+
+    initializeConfig() {
+
+        this.configModel = [];
+        let c : DtdlSimulationStrategyConfig = {
+            deviceId: "",
+            modalSize:  "modal-md",
+            deviceName: "",
+            dtdlModelConfig : [],
+            dtdlDeviceId : "",
+            interval: 5,
+            operations : new Map()
+        }
+
+        //New objects can duplicate the default so it can be restored
+        //we will create the config entries if old simulators are edited
+        //duplication is to avoid changing old code.
+        this.config = _.cloneDeep(c);
+        this.config.operations['default'] = c;
+    }
+
 
     fileUploaded(events){
         this.isError = false;

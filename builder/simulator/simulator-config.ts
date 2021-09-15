@@ -17,12 +17,39 @@
  */
 
 /**
- * The interface that for simulator configuration that all simulators will be passed.
+ *  OperationDefinitions<T> contains instances of config attached to a 
+ *  label. Remember the default config lies on the config object as fields
+ *  instances of this are additional to the "default"
+ */
+export interface OperationDefinitions<T> {
+    deviceId: string,
+    payloadFragment: string,
+    matchingValue: string,
+    config: T
+}
+
+
+/**
+ *  Operation Definition. 
+ * 
+ *  The derived config interfaces now need to extend OperationSupport.
+ *  if the member exists we can use the configurations, if not use existing mechanism.
+ *  The default config will be the config object rather than an entry in this map.
+ */
+ 
+export interface OperationSupport<T> {
+    operations?: Map<string,OperationDefinitions<T>>
+}
+
+
+/**
+ *  The interface that for simulator configuration that all simulators will be passed.
+ *  N.B. The strategy stores only the config member (See Factory classes)
  */
 export interface SimulatorConfig<T=any> {
     id: number,
     name: string,
     type: string,
     config: T,
-    started?: boolean
+    started?: boolean,
 }

@@ -52,6 +52,7 @@ export class EditSimulatorModalComponent implements OnInit {
     }
 
     openSimulatorConfig() {
+        console.log("openSimulatorConfig",this.simulatorConfig.config)
         const strategyFactory = this.simulationStrategiesService.strategiesByName.get(this.simulatorConfig.type);
         if (strategyFactory == undefined) {
             console.error("Unknown simulator strategy:", this.simulatorConfig.type);
@@ -80,6 +81,7 @@ export class EditSimulatorModalComponent implements OnInit {
         this.bsModalRef.setClass('modal-sm');
     }
     async saveAndClose() {
+        console.log("saveAndClose",this.simulatorConfig)
         this.busy = true;
         let app = (await this.appService.detail(this.appIdService.getCurrentAppId())).data as any;
 
@@ -91,6 +93,7 @@ export class EditSimulatorModalComponent implements OnInit {
         } else {
             app.applicationBuilder.simulators.push(this.simulatorConfig)
         }
+
 
         await this.appService.update({
             id: app.id,

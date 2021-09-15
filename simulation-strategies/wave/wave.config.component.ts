@@ -18,9 +18,11 @@
 
 import {Component} from "@angular/core";
 import { ControlContainer, NgForm } from '@angular/forms';
+import { OperationSupport } from "builder/simulator/simulator-config";
 import {SimulationStrategyConfigComponent} from "../../builder/simulator/simulation-strategy";
+import * as _ from 'lodash';
 
-export interface WaveSimulationStrategyConfig {
+export interface WaveSimulationStrategyConfig extends OperationSupport<WaveSimulationStrategyConfig> {
     deviceId: string,
     fragment: string,
     series: string,
@@ -69,15 +71,31 @@ export interface WaveSimulationStrategyConfig {
     viewProviders: [ { provide: ControlContainer, useExisting: NgForm } ]
 })
 export class WaveSimulationStrategyConfigComponent extends SimulationStrategyConfigComponent {
+
+    getNamedConfig(label: string) : WaveSimulationStrategyConfig {
+        let c : WaveSimulationStrategyConfig = this.getConfigAsAny(label);
+        return c;
+    }
+
     config: WaveSimulationStrategyConfig;
 
     initializeConfig() {
-        this.config.fragment = "temperature_measurement";
-        this.config.series = "T";
-        this.config.waveType = 'sine';
-        this.config.height = 10;
-        this.config.wavelength = 60;
-        this.config.unit = "C";
-        this.config.interval = 5;
+        let c : WaveSimulationStrategyConfig = {
+            deviceId : "",
+            fragment: "temperature_measurement",
+            series : "T",
+            waveType : 'sine',
+            height : 10,
+            wavelength:  60,
+            unit : "C",
+            interval : 5,
+            operations : new Map()
+        }
+
+        //New objects can duplicate the default so it can be restored
+        //we will create the config entries if old simulators are edited
+        //duplication is to avoid changing old code.
+        this.config = _.cloneDeep(c);
+        this.config.operations['default'] = c;
     }
 }

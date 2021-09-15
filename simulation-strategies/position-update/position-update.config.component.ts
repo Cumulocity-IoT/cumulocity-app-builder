@@ -17,9 +17,11 @@
  */
 
 import {Component} from "@angular/core";
+import { OperationSupport } from "builder/simulator/simulator-config";
 import {SimulationStrategyConfigComponent} from "../../builder/simulator/simulation-strategy";
+import * as _ from 'lodash';
 
-export interface PositionUpdateSimulationStrategyConfig {
+export interface PositionUpdateSimulationStrategyConfig   extends OperationSupport<PositionUpdateSimulationStrategyConfig> {
     deviceId: string,
     interval: number,
     latitude: string,
@@ -48,9 +50,29 @@ export interface PositionUpdateSimulationStrategyConfig {
     `
 })
 export class PositionUpdateSimulationStrategyConfigComponent extends SimulationStrategyConfigComponent {
+
+    getNamedConfig(label: string) : PositionUpdateSimulationStrategyConfig {
+        let c : PositionUpdateSimulationStrategyConfig = this.getConfigAsAny(label);
+        return c;
+    }
+
     config: PositionUpdateSimulationStrategyConfig;
 
     initializeConfig() {
-        this.config.interval = 5;
-    }
+        let c : PositionUpdateSimulationStrategyConfig = {
+            deviceId: "",
+            latitude: "",
+            longitude: "",
+            altitude: "", 
+            interval : 5,
+            operations : new Map()
+        }
+
+        //New objects can duplicate the default so it can be restored
+        //we will create the config entries if old simulators are edited
+        //duplication is to avoid changing old code.
+        this.config = _.cloneDeep(c);
+        this.config.operations['default'] = c;
+   }
+    
 }

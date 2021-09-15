@@ -17,9 +17,11 @@
  */
 
 import {Component} from "@angular/core";
+import { OperationSupport } from "builder/simulator/simulator-config";
 import {SimulationStrategyConfigComponent} from "../../builder/simulator/simulation-strategy";
+import * as _ from 'lodash';
 
-export interface FirmwareUpdateSimulationStrategyConfig {
+export interface FirmwareUpdateSimulationStrategyConfig  extends OperationSupport<FirmwareUpdateSimulationStrategyConfig> {
     deviceId: string,
     isGroup?: boolean,
     firmwareVersions: {
@@ -58,15 +60,33 @@ export interface FirmwareUpdateSimulationStrategyConfig {
     `
 })
 export class FirmwareUpdateSimulationStrategyConfigComponent extends SimulationStrategyConfigComponent {
+
+
+    getNamedConfig(label: string) : FirmwareUpdateSimulationStrategyConfig {
+        let c : FirmwareUpdateSimulationStrategyConfig = this.getConfigAsAny(label);
+        return c;
+    }
+
     config: FirmwareUpdateSimulationStrategyConfig;
 
     initializeConfig() {
-        this.config.firmwareVersions = [
-            {name: "Version 1", version: "1.0.0", url: "https://firmware-repo.cumulocity.com/v1.0.0"},
-            {name: "Version 2", version: "2.0.0", url: "https://firmware-repo.cumulocity.com/v2.0.0"}
-        ];
-        this.config.resetOn = 'restart';
+        let c : FirmwareUpdateSimulationStrategyConfig = {
+            deviceId: "",
+            firmwareVersions : [
+                {name: "Version 1", version: "1.0.0", url: "https://firmware-repo.cumulocity.com/v1.0.0"},
+                {name: "Version 2", version: "2.0.0", url: "https://firmware-repo.cumulocity.com/v2.0.0"}
+            ],
+            resetOn : 'restart',
+            operations : new Map()
+        }
+
+        //New objects can duplicate the default so it can be restored
+        //we will create the config entries if old simulators are edited
+        //duplication is to avoid changing old code.
+        this.config = _.cloneDeep(c);
+        this.config.operations['default'] = c;
     }
+
 
     removeFirmware(firmware) {
         this.config.firmwareVersions = this.config.firmwareVersions.filter(fw => fw !== firmware);

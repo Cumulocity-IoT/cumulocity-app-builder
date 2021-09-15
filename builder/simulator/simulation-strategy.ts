@@ -20,6 +20,7 @@ import {DeviceSimulator} from "./device-simulator";
 import {SimulationStrategyMetadata} from "./simulation-strategy.decorator";
 import { Type } from "@angular/core";
 import { SimulatorConfig } from "./simulator-config";
+import * as _ from 'lodash';
 
 // Provided by the polyfills.ts - import '@angular-devkit/build-angular/src/angular-cli-files/models/jit-polyfills.js';
 declare module Reflect {
@@ -28,7 +29,80 @@ declare module Reflect {
 
 export abstract class SimulationStrategyConfigComponent {
     abstract config: any;
-    abstract initializeConfig(): void
+    abstract initializeConfig(): void;
+    abstract getNamedConfig(label: string): any;
+
+    /**
+     * hasOperations
+     * 
+     * @returns true if config supports operations
+     */
+    public hasOperations() : boolean {
+        return (_.has(this,"config") && _.has(this.config,"operations"));
+    }
+
+    /**
+     * add a set of parameters to the simulator for this label.
+     * 
+     * @param label entry into operations map
+     * @param config actual configuration for this label
+     * @returns true if the entry was added
+     */
+    public addOperation(label: string, config: any ) : boolean {
+        if( this.hasOperations() ) {
+            let ops = _.get(this.config,"operations");
+            ops[label]=config;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * remove a named entry from the simulator.
+     * 
+     * @param label the specific configuration to remove
+     * @returns true if the entry was removed. 
+     */
+    public removeOperation(label: string) : boolean {
+        if( this.hasOperations() ) {
+            let ops: Map<string,any> = _.get(this.config,"operations");
+            ops.delete(label);
+        } 
+        return false;
+    }
+
+    /**
+     * clear the operations entires
+     * @returns true if cleared. 
+     */
+    public removeAllOperations() : boolean {
+        if( this.hasOperations() ) {
+            let ops: Map<string,any> = _.get(this.config,"operations");
+            ops.clear();
+            return true;
+        } 
+        return false;
+    }
+
+    /**
+     * return an any or undefined when a label is queried.
+     * 
+     * This is a helper function for the extended class 
+     * to use in getNamedConfig so it can cast the return 
+     * to a specified interface for use. 
+     * 
+     * @param label is the entry required
+     * @returns 
+     */
+    public getConfigAsAny(label: string): any | undefined {
+        if( this.hasOperations() ) {
+            let ops: Map<string,any> = _.get(this.config,"operations");
+            if(ops.has(label)) {
+                return ops[label];
+            }
+        } 
+        return undefined;
+    }
 }
 
 export abstract class SimulationStrategyFactory<T extends DeviceSimulator = DeviceSimulator> {

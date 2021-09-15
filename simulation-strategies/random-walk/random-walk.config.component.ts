@@ -18,9 +18,11 @@
 
 import {Component} from "@angular/core";
 import { ControlContainer, NgForm } from '@angular/forms';
+import { OperationSupport } from "builder/simulator/simulator-config";
 import {SimulationStrategyConfigComponent} from "../../builder/simulator/simulation-strategy";
+import * as _ from 'lodash';
 
-export interface RandomWalkSimulationStrategyConfig {
+export interface RandomWalkSimulationStrategyConfig  extends OperationSupport<RandomWalkSimulationStrategyConfig>  {
     deviceId: string,
     fragment: string,
     series: string,
@@ -70,16 +72,32 @@ export interface RandomWalkSimulationStrategyConfig {
     viewProviders: [ { provide: ControlContainer, useExisting: NgForm } ]
 })
 export class RandomWalkSimulationStrategyConfigComponent extends SimulationStrategyConfigComponent {
+
+    getNamedConfig(label: string) : RandomWalkSimulationStrategyConfig {
+        let c : RandomWalkSimulationStrategyConfig = this.getConfigAsAny(label);
+        return c;
+    }
+        
     config: RandomWalkSimulationStrategyConfig;
 
     initializeConfig() {
-        this.config.fragment = "temperature_measurement";
-        this.config.series = "T";
-        this.config.startingValue = 15;
-        this.config.maxDelta = 3;
-        this.config.minValue = 10;
-        this.config.maxValue = 20;
-        this.config.unit = "C";
-        this.config.interval = 5;
+        let c : RandomWalkSimulationStrategyConfig = {
+            deviceId : "",
+            fragment: "temperature_measurement",
+            series : "T",
+            startingValue : 15,
+            maxDelta : 3,
+            minValue : 10,
+            maxValue :20,
+            unit : "C",
+            interval : 5,
+            operations : new Map()
+        }
+
+        //New objects can duplicate the default so it can be restored
+        //we will create the config entries if old simulators are edited
+        //duplication is to avoid changing old code.
+        this.config = _.cloneDeep(c);
+        this.config.operations['default'] = c;
     }
 }

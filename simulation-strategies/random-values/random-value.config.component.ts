@@ -18,9 +18,11 @@
 
 import {Component} from "@angular/core";
 import { ControlContainer, NgForm } from '@angular/forms';
+import { OperationSupport } from "builder/simulator/simulator-config";
 import {SimulationStrategyConfigComponent} from "../../builder/simulator/simulation-strategy";
+import * as _ from 'lodash';
 
-export interface RandomValueSimulationStrategyConfig {
+export interface RandomValueSimulationStrategyConfig   extends OperationSupport<RandomValueSimulationStrategyConfigComponent> {
     deviceId: string,
     fragment: string,
     series: string,
@@ -60,14 +62,30 @@ export interface RandomValueSimulationStrategyConfig {
     viewProviders: [ { provide: ControlContainer, useExisting: NgForm } ]
 })
 export class RandomValueSimulationStrategyConfigComponent extends SimulationStrategyConfigComponent {
+
+    getNamedConfig(label: string) : RandomValueSimulationStrategyConfig {
+        let c : RandomValueSimulationStrategyConfig = this.getConfigAsAny(label);
+        return c;
+    }
     config: RandomValueSimulationStrategyConfig;
 
     initializeConfig() {
-        this.config.fragment = "temperature_measurement";
-        this.config.series = "T";
-        this.config.minValue = 10;
-        this.config.maxValue = 20;
-        this.config.unit = "C";
-        this.config.interval = 5;
+        let c : RandomValueSimulationStrategyConfig = {
+            deviceId : "",
+            fragment: "temperature_measurement",
+            series : "T",
+            minValue : 10,
+            maxValue :20,
+            unit : "C",
+            interval : 5,
+            operations : new Map()
+        }
+
+        //New objects can duplicate the default so it can be restored
+        //we will create the config entries if old simulators are edited
+        //duplication is to avoid changing old code.
+        this.config = _.cloneDeep(c);
+        this.config.operations['default'] = c;
     }
+
 }
