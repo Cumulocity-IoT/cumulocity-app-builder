@@ -53,7 +53,7 @@
                                 <button class="btn btn-link pull-right" id="refresh-widget" (click)="reload()">
                                     <i c8yIcon="refresh"></i> Reload
                                 </button>
-                                <button *ngIf="userHasAdminRights" class="btn btn-link pull-right" id="update-widget" (click)="updateAll()">
+                                <button *ngIf="userHasAdminRights && isUpdateRequired" class="btn btn-link pull-right" id="update-widget" (click)="updateAll()">
                                     <i c8yIcon="cloud-upload" style="font-size: 16px;"></i> Update all
                                 </button>
                                <!--  <label class="c8y-switch pull-right" title="Select Multiple">

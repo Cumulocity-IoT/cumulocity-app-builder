@@ -27,8 +27,11 @@
             <div class="col col-overflow" title="{{item.value.requiredPlatformVersion}}" >{{item.value.requiredPlatformVersion}}</div>
             <div class="col col-overflow" title="{{item.value.license}}">{{item.value.license}}</div>
             <div class="col col-overflow" title="{{item.value.author}}">{{item.value.author}}</div>
-            <div class="action-icon text-info" title="Preview"><i c8yIcon="eye" (click)="preview(item.value.preview)"></i></div>
-            <div class="action-icon text-info" title="Documentation"><i c8yIcon="document-with-code" (click)="openDocumentation(item.value.repository)"></i></div>
+            <div class="text-info" >
+                <button class="btn btn-clean btn-icon btn-md" title="Preview" [disabled] = "!item.value.preview" (click)="preview(item.value.preview)"><i c8yIcon="eye" class="action-icon-button" ></i></button></div>
+            <div class="text-info" > 
+                <button class="btn btn-clean btn-icon btn-md" title="Documentation" [disabled] = "!item.value.repository" (click)="openDocumentation(item.value.repository)"><i c8yIcon="document-with-code"  class="action-icon-button"></i></button>
+            </div>
         </ng-template>
 
         <div class="card-group col-xs-12 col-sm-12 col-md-12 col-lg-12">

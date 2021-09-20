@@ -46,6 +46,7 @@ export class MyWidgetsComponent implements OnInit{
     widgetCatalog: WidgetCatalog;
     searchWidget = '';
     filterWidgets: any = [];
+    isUpdateRequired = false;
 
     constructor( private appStateService: AppStateService, private modalService: BsModalService, 
         private userService: UserService, private widgetCatalogService: WidgetCatalogService, 
@@ -168,6 +169,9 @@ export class MyWidgetsComponent implements OnInit{
             widget.isCompatible = this.widgetCatalogService.isCompatiblieVersion(widget);
             const appObj = this.appList.find( app => app.contextPath === widget.contextPath);
             widget.installedVersion = (appObj && appObj.manifest  && appObj.manifest.version ? appObj.manifest.version : '');
+            if(widget.installed && !widget.isReloadRequired && this.isUpdateAvailable(widget) ) {
+               this.isUpdateRequired = true;
+            }
         });
         this.widgetCatalog.widgets = this.widgetCatalog.widgets.filter(widget => widget.installed);
     }
