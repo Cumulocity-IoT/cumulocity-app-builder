@@ -60,12 +60,23 @@ export interface FirmwareUpdateSimulationStrategyConfig {
 export class FirmwareUpdateSimulationStrategyConfigComponent extends SimulationStrategyConfigComponent {
     config: FirmwareUpdateSimulationStrategyConfig;
 
-    initializeConfig() {
-        this.config.firmwareVersions = [
-            {name: "Version 1", version: "1.0.0", url: "https://firmware-repo.cumulocity.com/v1.0.0"},
-            {name: "Version 2", version: "2.0.0", url: "https://firmware-repo.cumulocity.com/v2.0.0"}
-        ];
-        this.config.resetOn = 'restart';
+    initializeConfig(existingConfig?: FirmwareUpdateSimulationStrategyConfig) {
+        if(existingConfig === undefined || existingConfig === null) {
+            this.config.firmwareVersions = [
+                {name: "Version 1", version: "1.0.0", url: "https://firmware-repo.cumulocity.com/v1.0.0"},
+                {name: "Version 2", version: "2.0.0", url: "https://firmware-repo.cumulocity.com/v2.0.0"}
+            ];
+            this.config.resetOn = 'restart';
+        } else {
+            this.config.resetOn = existingConfig.resetOn;
+            existingConfig.firmwareVersions.forEach(fv => {
+                this.config.firmwareVersions.push({
+                    name: fv.name,
+                    version: fv.version,
+                    url: fv.url
+                });
+            });
+        }
     }
 
     removeFirmware(firmware) {

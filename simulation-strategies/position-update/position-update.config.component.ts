@@ -50,7 +50,15 @@ export interface PositionUpdateSimulationStrategyConfig {
 export class PositionUpdateSimulationStrategyConfigComponent extends SimulationStrategyConfigComponent {
     config: PositionUpdateSimulationStrategyConfig;
 
-    initializeConfig() {
-        this.config.interval = 5;
+    initializeConfig(existingConfig?: PositionUpdateSimulationStrategyConfig) {
+        if(existingConfig === undefined || existingConfig === null) {
+            this.config.interval = 5;
+        } else {
+            this.config.interval = existingConfig.interval;
+            this.config.latitude = existingConfig.latitude;
+            this.config.longitude = existingConfig.longitude;
+            this.config.altitude = existingConfig.altitude;
+        }
+        
     }
 }

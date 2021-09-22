@@ -62,12 +62,22 @@ export interface RandomValueSimulationStrategyConfig {
 export class RandomValueSimulationStrategyConfigComponent extends SimulationStrategyConfigComponent {
     config: RandomValueSimulationStrategyConfig;
 
-    initializeConfig() {
-        this.config.fragment = "temperature_measurement";
-        this.config.series = "T";
-        this.config.minValue = 10;
-        this.config.maxValue = 20;
-        this.config.unit = "C";
-        this.config.interval = 5;
+    initializeConfig(existingConfig?: RandomValueSimulationStrategyConfig) {
+        if(existingConfig === undefined || existingConfig === null) {
+            this.config.fragment = "temperature_measurement";
+            this.config.series = "T";
+            this.config.minValue = 10;
+            this.config.maxValue = 20;
+            this.config.unit = "C";
+            this.config.interval = 5;
+        } else {
+            this.config.fragment = existingConfig.fragment;
+            this.config.series = existingConfig.series;
+            this.config.minValue = existingConfig.minValue;
+            this.config.maxValue = existingConfig.maxValue;
+            this.config.unit = existingConfig.unit;
+            this.config.interval = existingConfig.interval;
+        }
+        
     }
 }

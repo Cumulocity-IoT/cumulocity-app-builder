@@ -57,11 +57,20 @@ export interface SeriesValueSimulationStrategyConfig {
 export class SeriesValueSimulationStrategyConfigComponent extends SimulationStrategyConfigComponent {
     config: SeriesValueSimulationStrategyConfig;
 
-    initializeConfig() {
-        this.config.fragment = "temperature_measurement";
-        this.config.series = "T";
-        this.config.value = "10, 20, 30";
-        this.config.unit = "C";
-        this.config.interval = 5;
+    initializeConfig(existingConfig?: SeriesValueSimulationStrategyConfig) {
+        if(existingConfig === undefined || existingConfig === null) {
+            this.config.fragment = "temperature_measurement";
+            this.config.series = "T";
+            this.config.value = "10, 20, 30";
+            this.config.unit = "C";
+            this.config.interval = 5;
+        } else {
+            this.config.fragment = existingConfig.fragment;
+            this.config.series = existingConfig.series;
+            this.config.value = existingConfig.value;
+            this.config.unit = existingConfig.unit;
+            this.config.interval = existingConfig.interval;
+        }
+        
     }
 }

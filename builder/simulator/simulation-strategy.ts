@@ -28,7 +28,7 @@ declare module Reflect {
 
 export abstract class SimulationStrategyConfigComponent {
     abstract config: any;
-    abstract initializeConfig(): void
+    abstract initializeConfig(existingConfig?: any): void
 }
 
 export abstract class SimulationStrategyFactory<T extends DeviceSimulator = DeviceSimulator> {

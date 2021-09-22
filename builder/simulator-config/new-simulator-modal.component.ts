@@ -31,12 +31,15 @@ import {AppIdService} from "../app-id.service";
 import {SimulationStrategyConfigComponent, SimulationStrategyFactory} from "../simulator/simulation-strategy";
 import {SimulationStrategiesService} from "../simulator/simulation-strategies.service";
 import {SimulatorCommunicationService} from "../simulator/mainthread/simulator-communication.service";
+import { throwError } from 'rxjs';
 
 @Component({
     templateUrl: './new-simulator-modal.component.html'
 })
 export class NewSimulatorModalComponent {
     busy: boolean = false;
+    isConfigFileUploading: boolean = false;
+    isConfigFileError: boolean = false;
 
     @ViewChild(WizardComponent, {static: true}) wizard: WizardComponent;
 
@@ -50,6 +53,7 @@ export class NewSimulatorModalComponent {
     groupName: string | undefined;
     numberOfDevice: number | 0;
     isGroup: boolean = false;
+    configFromFile: any;
 
     constructor(
         private simSvc: SimulatorCommunicationService,
@@ -69,7 +73,12 @@ export class NewSimulatorModalComponent {
             const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(metadata.configComponent);
             const componentRef: ComponentRef<SimulationStrategyConfigComponent> = this.configWrapper.createComponent(factory);
             componentRef.instance.config = this.newConfig = {};
-            componentRef.instance.initializeConfig();
+            if(this.configFromFile === undefined || this.configFromFile === null) {
+                componentRef.instance.initializeConfig();
+            } else {
+                componentRef.instance.initializeConfig(this.configFromFile);
+            }
+            
             if(componentRef.instance.config.modalSize) {
                 this.bsModalRef.setClass(componentRef.instance.config.modalSize);
             }
@@ -79,6 +88,14 @@ export class NewSimulatorModalComponent {
     resetDialogSize() {
         this.bsModalRef.setClass('modal-sm');
     }
+
+    public isConfigFromFileUploaded() {
+        if(this.configFromFile === undefined || this.configFromFile === null) {
+            return false;
+        }
+        return true;
+    }
+
     async saveAndClose() {
         this.busy = true;
 
@@ -160,5 +177,52 @@ export class NewSimulatorModalComponent {
             await this.inventoryService.childAssetsCreate(childManageObject, group.id);
         }
         return group;
+    }
+
+    fileUploaded(events){
+        this.isConfigFileError = false;
+        this.isConfigFileUploading = true;
+        const file = events.target.files[0];
+        const reader = new FileReader();
+        let input = null;
+        reader.addEventListener('load', (event: any) => {
+            input = event.target.result;
+            const validJson = this.isValidJson(input);
+            if (validJson) {
+                this.selectedStrategyFactory = this.simulationStrategiesService.strategiesByName.get(validJson.type);
+                if(this.selectedStrategyFactory === undefined) {
+                    this.isConfigFileError = true;
+                } else {
+                    this.configFromFile = validJson.config;
+                    this.wizard.selectStep('device');
+                }
+            } else {
+                this.isConfigFileError = true;
+                events.srcElement.value = "";
+            }
+            this.isConfigFileUploading = false;
+        });
+        if(file) { 
+            reader.readAsText(file); 
+        } else {
+            this.configFromFile = null;
+            this.isConfigFileUploading = false;   
+        }
+    }
+
+    /**
+     *
+     * @param input Validate JSON Input
+     */
+     private isValidJson(input: any) {
+        try {
+            if (input) {
+                const o = JSON.parse(input);
+                if (o && (o.constructor === Object || o.constructor === Array)) {
+                    return o;
+                }
+            }
+        } catch (e) { }
+        return false;
     }
 }

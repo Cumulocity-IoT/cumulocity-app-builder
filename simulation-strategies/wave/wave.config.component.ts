@@ -71,13 +71,24 @@ export interface WaveSimulationStrategyConfig {
 export class WaveSimulationStrategyConfigComponent extends SimulationStrategyConfigComponent {
     config: WaveSimulationStrategyConfig;
 
-    initializeConfig() {
-        this.config.fragment = "temperature_measurement";
-        this.config.series = "T";
-        this.config.waveType = 'sine';
-        this.config.height = 10;
-        this.config.wavelength = 60;
-        this.config.unit = "C";
-        this.config.interval = 5;
+    initializeConfig(existingConfig?: WaveSimulationStrategyConfig) {
+        if(existingConfig === undefined || existingConfig === null) {
+            this.config.fragment = "temperature_measurement";
+            this.config.series = "T";
+            this.config.waveType = 'sine';
+            this.config.height = 10;
+            this.config.wavelength = 60;
+            this.config.unit = "C";
+            this.config.interval = 5;
+        } else {
+            this.config.fragment = existingConfig.fragment;
+            this.config.series = existingConfig.series;
+            this.config.waveType = existingConfig.waveType;
+            this.config.height = existingConfig.height;
+            this.config.wavelength = existingConfig.wavelength;
+            this.config.unit = existingConfig.unit;
+            this.config.interval = existingConfig.interval;
+        }
+        
     }
 }
