@@ -81,7 +81,7 @@ export class SettingsService {
 
     async isDashboardCatalogEnabled() {
         const customProp = await this.getCustomProperties();
-        return (customProp && customProp.dashboardCataglogEnabled === "true");
+        return (!customProp || (customProp  && ( !customProp.dashboardCataglogEnabled || customProp.dashboardCataglogEnabled === "true")));
     }
     
     async saveCustomProperties(customProperties) {
