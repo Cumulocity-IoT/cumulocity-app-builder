@@ -45,7 +45,7 @@ import { LockStatus } from "./simulator/worker/simulation-lock.service";
 import { fromEvent, Observable } from "rxjs";
 import { withLatestFrom } from "rxjs/operators";
 import { proxy } from "comlink";
-import { CookieAuth, TenantService } from '@c8y/client';
+import { Client , BasicAuth, CookieAuth, TenantService } from '@c8y/client';
 import { TemplateCatalogModule } from "./template-catalog/template-catalog.module";
 import { RectangleSpinnerModule } from "./utils/rectangle-spinner/rectangle-spinner.module";
 import { DeviceSelectorModalModule } from "./utils/device-selector-modal/device-selector.module";
@@ -146,8 +146,10 @@ export class BuilderModule {
             if (user != null) {
                 const tfa = localStorage.getItem(loginService.TFATOKEN_KEY) || sessionStorage.getItem(loginService.TFATOKEN_KEY);
                 if (token !== undefined && token) {
+                    const client = isCookieAuth? new Client(cookieAuth) : new Client(new BasicAuth({ token, tfa }));
                     return await simSvc.simulator.setUserAndCredentials(user, { token, tfa }, isCookieAuth, null);
                 } else {
+                    const client = isCookieAuth? new Client(cookieAuth) : new Client(new BasicAuth({ token, tfa }));
                     return await simSvc.simulator.setUserAndCredentials(user, { token, tfa }, isCookieAuth, xsrfToken);
                 }
             }

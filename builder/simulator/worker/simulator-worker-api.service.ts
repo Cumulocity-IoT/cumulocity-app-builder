@@ -17,12 +17,15 @@
  */
 
 import {Injectable} from "@angular/core";
-import {BasicAuth, FetchClient, IUser, ICurrentTenant, ICredentials} from "@c8y/client";
+import { BasicAuth, FetchClient, IUser, ICurrentTenant, ICredentials, IFetchOptions} from "@c8y/client";
 import {LockStatus, SimulationLockService} from "./simulation-lock.service";
 import {AppStateService} from "@c8y/ngx-components";
 import {AppIdService} from "../../app-id.service";
 import { SimulatorConfig } from "../simulator-config";
-import {BehaviorSubject, Subject, Subscription} from "rxjs";
+import {BehaviorSubject, interval, merge, Subject, Subscription} from "rxjs";
+import { of } from "rxjs";
+import { debounceTime, map, switchMap, tap } from "rxjs/operators";
+import { OperationService } from "@c8y/ngx-components/api";
 /**
  * The public api for talking to the simulators
  * Fields starting with _ are for use only by the worker
@@ -30,6 +33,8 @@ import {BehaviorSubject, Subject, Subscription} from "rxjs";
 @Injectable()
 export class SimulatorWorkerAPI {
     private _listenerId;
+    _incomingOperations = new BehaviorSubject<any[]> ( [] );
+    _incomingOperationsSub : Subscription = undefined;
     _lockStatus$ = new BehaviorSubject<{isLocked: boolean, isLockOwned: boolean, lockStatus?: LockStatus}>({isLocked: false, isLockOwned: false});
     _simulatorConfig$ = new BehaviorSubject<Map<number, SimulatorConfig>>(new Map());
     _listeners = new Map<number, Subscription>();
@@ -47,8 +52,31 @@ export class SimulatorWorkerAPI {
             this.fetchClient.defaultHeaders = {'X-XSRF-TOKEN': cookieAuth};
         }
         this.fetchClient.setAuth(new BasicAuth(credentials));
+        this.startRealtime();
         this.appStateService.currentUser.next(user);
     }
+
+    async startRealtime() {
+        //handle change here
+        if( this._incomingOperationsSub !== undefined) {
+            this._incomingOperationsSub.unsubscribe()
+        }
+
+        this._incomingOperationsSub = merge(
+            of(-1), // Check the current value immediately
+            interval(5000), // Check every 30 seconds
+        ).pipe(
+            debounceTime(100),
+            switchMap(() => 
+                this.fetchClient.fetch('/devicecontrol/operations')
+            ),
+            switchMap(res => res.json()),
+            map( data => data.operations ),
+//            tap( data => console.log("BEFORE", data)),
+            map( (data: any[]) => data.filter( element => element.status == "PENDING" ))
+        ).subscribe( ops => this._incomingOperations.next(ops));
+    }
+
     setTenant(tenant: ICurrentTenant | null) {
         this.appStateService.currentTenant.next(tenant);
     }

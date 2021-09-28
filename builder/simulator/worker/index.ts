@@ -24,7 +24,8 @@ import '@angular-devkit/build-angular/src/angular-cli-files/models/es5-polyfills
 import '@angular-devkit/build-angular/src/angular-cli-files/models/jit-polyfills.js';
 
 import {enableProdMode} from "@angular/core";
-import {platformWorkerAppDynamic} from "@angular/platform-webworker-dynamic";
+import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+//import {platformBrowserDynamic} from "@angular/platform-webworker-dynamic";
 import {SimulatorWorkerModule} from "./simulator-worker.module";
 
 declare const __MODE__: string;
@@ -33,4 +34,4 @@ if (__MODE__ === 'production') {
 }
 
 // TODO: deprecated, can probably just switch to platformBrowserDynamic because not creating ui on the worker
-platformWorkerAppDynamic().bootstrapModule(SimulatorWorkerModule, { ngZone: 'noop' });
+platformBrowserDynamic().bootstrapModule(SimulatorWorkerModule, { ngZone: 'noop' });

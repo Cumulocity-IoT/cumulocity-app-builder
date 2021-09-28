@@ -16,7 +16,7 @@
 * limitations under the License.
  */
 
-import {ApplicationService, IApplication} from "@c8y/client";
+import {ApplicationService, IApplication, IOperation} from "@c8y/client";
 import {DeviceSimulator} from "../device-simulator";
 import {SimulatorConfig} from "../simulator-config";
 import {SimulatorWorkerAPI} from "./simulator-worker-api.service";
@@ -30,11 +30,13 @@ import {
     withLatestFrom,
     debounceTime
 } from "rxjs/operators";
-import {from, interval, merge, of, Subject, Subscription} from "rxjs";
+import {BehaviorSubject, from, interval, merge, Observable, of, Subject, Subscription} from "rxjs";
 import * as deepEqual from "fast-deep-equal";
 import * as cloneDeep from "clone-deep";
 import {SimulationStrategiesService} from "../simulation-strategies.service";
+import {SimulationOperationService} from './simulation-operation.service'
 import {Injectable} from "@angular/core";
+import { OperationService, Realtime } from "@c8y/client";
 
 export interface DeviceSimulatorInstance {
     id: number,
@@ -50,13 +52,14 @@ export interface DeviceSimulatorInstance {
 export class SimulatorManagerService {
     simulatorInstances: DeviceSimulatorInstance[] = [];
     simulatorConfigById = new Map<number, SimulatorConfig>();
+    operations$ : Observable<any[]>;
 
     private lockRefreshSubscription = new Subscription();
 
     constructor(
         private simulatorWorkerAPI: SimulatorWorkerAPI, private appService: ApplicationService,
         private appIdService: AppIdService, private lockService: SimulationLockService,
-        private simulationStrategiesService: SimulationStrategiesService
+        private simulationStrategiesService: SimulationStrategiesService,
     ) {}
 
     initialize() {
@@ -137,6 +140,11 @@ export class SimulatorManagerService {
         })).subscribe(lockStatus => {
             this.simulatorWorkerAPI._lockStatus$.next(lockStatus);
         });
+
+        this.operations$ = this.simulatorWorkerAPI._incomingOperations.pipe(
+            distinctUntilChanged((prev, curr) => deepEqual(prev, curr))
+        )
+
     }
 
     async loadSimulatorConfig(appId: string) {
@@ -163,7 +171,7 @@ export class SimulatorManagerService {
     clearSimulators() {
         this.simulatorInstances.forEach(simInstance => {
             if (simInstance.instance.isStarted()) {
-                simInstance.instance.stop();
+                simInstance.instance.stop(); //handles unsub
             }
         });
         this.simulatorInstances = [];
@@ -187,7 +195,18 @@ export class SimulatorManagerService {
             deviceId: simulatorConfig.config.deviceId
         });
         instance.start();
+        instance.subscribeToOperations(this.operations$);
         return instance;
     }
 
+    updateSimulators(operations: any[]) : void {
+        let op: any;
+        for ( op in operations)  {
+            this.simulatorInstances.forEach( sim => {
+                sim.instance.onOperation(operations[op]);
+            })
+            
+        }
+        
+    }
 }
