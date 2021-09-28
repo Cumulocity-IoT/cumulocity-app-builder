@@ -4,7 +4,7 @@ The Application Builder for Cumulocity provides a simple, coding-free way to cre
 ![](https://user-images.githubusercontent.com/38696279/72333172-47cec300-36b3-11ea-9abf-1bb29b490a22.png)
 
 ## What's new?
-* **Widget Catalog:** Now user has ability to install/update runtime widgets directly from Widget Catalog. This is single place where user can also find documentation, image preview, widget version and auther details.
+* **Widget Catalog:** Now user has ability to install/update runtime widgets directly from Widget Catalog. This is single place where user can also find widget details such as documentation, preview, license and author details.
 * **Dashboard Catalog:** User can select any pre-designed template for dashboard and ability to install dependent runtime widgets.
 * **Dashboard Catalog:** User can search various dashboards.
 * **Cumulocity Version:** Based on Cumulocity 1010.0.8
