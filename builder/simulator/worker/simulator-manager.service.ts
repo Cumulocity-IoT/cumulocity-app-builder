@@ -28,7 +28,8 @@ import {
     distinctUntilChanged,
     tap,
     withLatestFrom,
-    debounceTime
+    debounceTime,
+    share
 } from "rxjs/operators";
 import {BehaviorSubject, from, interval, merge, Observable, of, Subject, Subscription} from "rxjs";
 import * as deepEqual from "fast-deep-equal";
@@ -142,6 +143,7 @@ export class SimulatorManagerService {
         });
 
         this.operations$ = this.simulatorWorkerAPI._incomingOperations.pipe(
+            //tap( data => console.log("MANAGER", data)),
             distinctUntilChanged((prev, curr) => deepEqual(prev, curr))
         )
 

@@ -52,11 +52,11 @@ export class SimulatorWorkerAPI {
             this.fetchClient.defaultHeaders = {'X-XSRF-TOKEN': cookieAuth};
         }
         this.fetchClient.setAuth(new BasicAuth(credentials));
-        this.startRealtime();
+        this.startOperationListener();
         this.appStateService.currentUser.next(user);
     }
 
-    async startRealtime() {
+    async startOperationListener() {
         //handle change here
         if( this._incomingOperationsSub !== undefined) {
             this._incomingOperationsSub.unsubscribe()
@@ -68,12 +68,13 @@ export class SimulatorWorkerAPI {
         ).pipe(
             debounceTime(100),
             switchMap(() => 
-                this.fetchClient.fetch('/devicecontrol/operations')
+                this.fetchClient.fetch('/devicecontrol/operations',{params:{
+                    pageSize: 20,
+                    revert: true
+                }})
             ),
             switchMap(res => res.json()),
-            map( data => data.operations ),
-//            tap( data => console.log("BEFORE", data)),
-            map( (data: any[]) => data.filter( element => element.status == "PENDING" ))
+            map( data => data.operations )
         ).subscribe( ops => this._incomingOperations.next(ops));
     }
 

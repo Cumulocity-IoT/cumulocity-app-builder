@@ -56,7 +56,8 @@ export abstract class DeviceSimulator {
      */
     public subscribeToOperations( opSource$ : Observable<any[]> ) : void {
         this.subs = []; //belt and braces
-        this.subs.push(opSource$.subscribe( v => console.log("SUB=>",v) ));
+        console.log("SUBSCRIBING", this);
+        this.subs.push(opSource$.subscribe( v => this.onOperation(v)) );
     }
 
     /**
