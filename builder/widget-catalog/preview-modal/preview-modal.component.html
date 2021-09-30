@@ -1,0 +1,20 @@
+<div class="modal-header text-center bg-primary">
+  <h4 class="text-uppercase" style="margin:0; letter-spacing: 0.15em;color:white">Widget Preview</h4>
+</div>
+<div class="modal-body"  style="margin: 5px;">
+  <img style="width:100%;" alt="Preview not available" [src]="imageURL ? imageURL : ''" />
+  <div *ngIf="showSpinner" class="col-xs-12 col-sm-12 col-md-12" style="padding-bottom:50px;padding-top:20px">
+    <rectangle-spinner  style="position: relative; left: 47%;">
+    </rectangle-spinner>
+</div>
+</div>
+<div class="modal-footer">
+  <div >
+    <button
+      title="Close"
+      class="btn btn-primary"
+      (click)="dismiss()">
+      Close
+    </button>
+  </div>
+</div>

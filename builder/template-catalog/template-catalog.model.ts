@@ -74,6 +74,7 @@ export interface DependencyDescription {
     repository: string;
     link: string;
     isInstalled?: boolean;
+    fileName?: string;
 }
 
 export interface CumulocityDashboard {
