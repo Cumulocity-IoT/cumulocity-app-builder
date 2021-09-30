@@ -28,8 +28,6 @@ import {CoreModule} from "@c8y/ngx-components";
 import {BrandingDirtyGuardService} from "./branding-dirty-guard.service";
 import { ButtonsModule } from 'ngx-bootstrap/buttons';
 import {AppIdService} from "../app-id.service";
-import * as delay from "delay";
-
 @NgModule({
     imports: [
         CommonModule,
@@ -50,7 +48,6 @@ export class BrandingModule {
             }
         }))
             .subscribe(async app => {
-                await delay(1000); // wait to load fontawosome for favicon
                 brandingService.updateStyleForApp(app);
             });
     }
