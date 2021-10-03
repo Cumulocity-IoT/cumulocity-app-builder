@@ -4,10 +4,10 @@ The Application Builder for Cumulocity provides a simple, coding-free way to cre
 ![](https://user-images.githubusercontent.com/38696279/72333172-47cec300-36b3-11ea-9abf-1bb29b490a22.png)
 
 ## What's new?
-* **Dashboard Catalog:** User can select any pre-designed template for dashboard and also ability to install dependent runtime widgets. This feature is disabled by default. User can enable via Application Builder -> Settings
-* **DTDL Simulator:** Event Creation simulation type is now supported.
-* **DTDL Simulator:** Performance improvement.
-* **Cumulocity Version:** Based on Cumulocity 1009.0.4
+* **Widget Catalog:** Now user has ability to install/update runtime widgets directly from Widget Catalog. This is single place where user can also find widget details such as documentation, preview, license and author details.
+* **Dashboard Catalog:** User can select any pre-designed template for dashboard and ability to install dependent runtime widgets.
+* **Dashboard Catalog:** User can search various dashboards.
+* **Cumulocity Version:** Based on Cumulocity 1010.0.8
 * **Various bug fixes**
 
 ## Features
@@ -45,7 +45,7 @@ The Application Builder for Cumulocity provides a simple, coding-free way to cre
 
 **Requirements:**
 * Git
-* NodeJS (release builds are currently built with `v12.19.0`)
+* NodeJS (release builds are currently built with `v16.9.1`)
 * NPM (Included with NodeJS)
 
 **Instructions**
@@ -59,7 +59,7 @@ cd cumulocity-app-builder
 ```
 2. (Optional) Checkout a specific version: 
 ```
-git checkout v1.2.6
+git checkout v1.2.7
 ```
 3. Install the dependencies: 
 ```
@@ -101,7 +101,7 @@ A more detailed user guide and quick start videos are available in the Home sect
 
 ## Runtime Widgets
 
-Application Builder supports runtime widgets deployment. 
+Application Builder supports runtime widgets deployment. Some of the runtime widgets are already available in widget catalog.
 You can find runtime widgets at [Software AG Open Source](https://open-source.softwareag.com/iot-analytics?search=runtime&topic=cumulocity-iot&repository=widget)
 
 Would you like to create your own Custom Runtime widget? Please refer our [Demo Widget](https://github.com/SoftwareAG/cumulocity-demo-widget).

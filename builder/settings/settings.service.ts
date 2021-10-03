@@ -66,7 +66,7 @@ export class SettingsService {
     }
     private async getAppBuilderConfig() {
         const appBuilderId = await this.getAPPBuilderId();
-        const AppBuilderConfigList = (await this.inventoryService.list( {pageSize: 50, query: `type eq AppBuilder-Configuration and appBuilderId eq '${appBuilderId}'`})).data;
+        const AppBuilderConfigList = (await this.inventoryService.list( {pageSize: 100, query: `type eq AppBuilder-Configuration and appBuilderId eq '${appBuilderId}'`})).data;
         this.appBuilderConfig = (AppBuilderConfigList.length > 0 ? AppBuilderConfigList[0] : null);
     }
 
@@ -81,7 +81,7 @@ export class SettingsService {
 
     async isDashboardCatalogEnabled() {
         const customProp = await this.getCustomProperties();
-        return (customProp && customProp.dashboardCataglogEnabled === "true");
+        return (!customProp || (customProp  && ( !customProp.dashboardCataglogEnabled || customProp.dashboardCataglogEnabled === "true")));
     }
     
     async saveCustomProperties(customProperties) {

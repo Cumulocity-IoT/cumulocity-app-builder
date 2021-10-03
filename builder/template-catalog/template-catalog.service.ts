@@ -112,6 +112,8 @@ export class TemplateCatalogService {
                     icon: dashboardConfiguration.dashboardIcon,
                     visibility: dashboardConfiguration.dashboardVisibility,
                     tabGroup: dashboardConfiguration.tabGroup,
+                    ...(templateDetails.input.devices && templateDetails.input.devices.length > 0 && templateDetails.input.devices[0].reprensentation &&
+                        templateDetails.input.devices[0].reprensentation.id  ? { deviceId: templateDetails.input.devices[0].reprensentation.id } : {}),
                     templateDashboard: {
                         id: templateCatalogEntry.dashboard,
                         name: templateCatalogEntry.title,
@@ -152,6 +154,8 @@ export class TemplateCatalogService {
             icon: dashboardConfig.icon,
             visibility: dashboardConfig.visibility,
             tabGroup: dashboardConfig.tabGroup,
+            ...(templateDetails.input.devices && templateDetails.input.devices.length > 0 && templateDetails.input.devices[0].reprensentation &&
+                templateDetails.input.devices[0].reprensentation.id  ? { deviceId: templateDetails.input.devices[0].reprensentation.id } : {}),
             templateDashboard: {
                 id: dashboard.templateDashboard.id,
                 name: dashboard.templateDashboard.title,

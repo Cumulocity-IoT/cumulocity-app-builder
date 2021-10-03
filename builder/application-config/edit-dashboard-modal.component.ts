@@ -55,6 +55,9 @@ export class EditDashboardModalComponent implements OnInit{
     getSelectedDevice(device: any) {
         this.deviceId = device.id;
         this.deviceName = device.name;
+        if(device && device.id === '') {
+            this.deviceName = '';
+        }
     }
     async save() {
         this.busy = true;

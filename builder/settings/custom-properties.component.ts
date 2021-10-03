@@ -62,10 +62,10 @@ export class CustomPropertiesComponent implements OnInit, OnDestroy{
     isBusy: boolean = false;
     isGainsightParent: boolean = false;
     gainsightEnabled = false;
-    dashboardCataglogEnabled = false;
+    dashboardCataglogEnabled = true;
     customProperties = {
         gainsightEnabled: "false",
-        dashboardCataglogEnabled: "false"
+        dashboardCataglogEnabled: "true"
     }
     delayedTenantSubscription: Subscription;
     constructor( private appStateService: AppStateService,
@@ -84,8 +84,9 @@ export class CustomPropertiesComponent implements OnInit, OnDestroy{
         this.customProperties = await this.settingsService.getCustomProperties();
         this.isGainsightParent = this.settingsService.isGaisigntEnabledFromParent();
         if(this.isGainsightParent) { this.customProperties.gainsightEnabled = 'true';}
-        if(this.customProperties && !this.customProperties.dashboardCataglogEnabled) {
+        if(this.customProperties && this.customProperties.dashboardCataglogEnabled === 'false') {
             this.customProperties.dashboardCataglogEnabled = 'false';
+            this.dashboardCataglogEnabled = false;
         }
         if(this.customProperties.gainsightEnabled === 'true') { this.gainsightEnabled = true;}
         if(this.customProperties.dashboardCataglogEnabled === 'true') { this.dashboardCataglogEnabled = true;}

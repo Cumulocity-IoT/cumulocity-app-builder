@@ -57,6 +57,7 @@ import { SettingsModule } from './settings/settings.module';
 import { CustomPropertiesComponent } from './settings/custom-properties.component';
 import { SettingsService } from './settings/settings.service';
 import { HomeComponent } from './home/home.component';
+import { WidgetCatalogModule } from './widget-catalog/widget-catalog.module';
 @NgModule({
     imports: [
         ApplicationModule,
@@ -104,7 +105,8 @@ import { HomeComponent } from './home/home.component';
         AppListModule,
         DeviceSelectorModule,
         MarkdownModule.forRoot(),
-        SettingsModule
+        SettingsModule,
+        WidgetCatalogModule
     ],
     declarations: [
         DashboardConfigComponent,

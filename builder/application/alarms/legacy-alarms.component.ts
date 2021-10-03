@@ -17,15 +17,18 @@
  */
 import { Directive, ElementRef, Injector } from '@angular/core';
 import { UpgradeComponent } from '@angular/upgrade/static';
+import * as _ from 'lodash';
 
 declare const angular: any;
 
 import './cumulocity.json';
+import './alarmListModule.js';
 
-angular.module("c8y.parts.alarmList", [])
-    .component('legacyAlarms', { template: require("@c8y/ng1-modules/devicemanagement-alarmList/views/index.html").default });
 
-import '@c8y/ng1-modules/devicemanagement-alarmList/controllers/alarmList.js'
+
+// import '@c8y/ng1-modules/devicemanagement-alarmList/controllers/alarmList.js'
+
+
 
 @Directive({
     selector: 'legacy-alarms'

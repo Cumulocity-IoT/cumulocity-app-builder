@@ -2,6 +2,6 @@
     [placeholder]="placeHolder" [required]="required" 
     [(ngModel)]="value" [typeahead]="suggestions$"  (typeaheadLoading)="changeTypeaheadLoading($event)"
     [typeaheadAsync]="true" typeaheadWaitMs="500" typeaheadOptionField="name" (typeaheadOnSelect)="onSelect($event)"
-    [isAnimated]="true" autocomplete="off" [typeaheadOptionsLimit]="5"  [typeaheadMinLength]="3">
+    [isAnimated]="true" autocomplete="off" [typeaheadOptionsLimit]="5"  [typeaheadMinLength]="3" (typeaheadOnBlur)="typeaheadOnBlur($event)">
     <div *ngIf="typeaheadLoading" style="color:blue;margin: 5px;"><i class="fa fa-circle-o-notch fa-spin"></i></div>
 </div>
