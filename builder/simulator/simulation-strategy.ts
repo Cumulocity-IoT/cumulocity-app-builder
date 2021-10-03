@@ -28,9 +28,9 @@ declare module Reflect {
 }
 
 export abstract class SimulationStrategyConfigComponent {
-    abstract config: any;
-    abstract initializeConfig(): void;
-    abstract getNamedConfig(label: string): any;
+    abstract config: any; //typed in extended
+    abstract initializeConfig(): void; //extended knows how to init
+    abstract getNamedConfig(label: string): any; //implemented in extended
 
     /**
      * hasOperations

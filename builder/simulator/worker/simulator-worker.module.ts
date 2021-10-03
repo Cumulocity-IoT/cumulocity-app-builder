@@ -29,8 +29,6 @@ import {WorkerAppIdService} from "./worker-app-id.service";
 import {WorkerAppStateService} from "./worker-app-state.service";
 import {SimulatorManagerService} from "./simulator-manager.service";
 import {SimulationStrategiesService} from "../simulation-strategies.service";
-import { SimulationOperationService } from "./simulation-operation.service";
-import { BasicAuth } from "@c8y/ngx-components/api";
 
 const client = new Client(new CookieAuth());
 
@@ -75,13 +73,12 @@ const client = new Client(new CookieAuth());
         SimulatorWorkerAPI,
         SimulationLockService,
         SimulationStrategiesService,
-        SimulationOperationService,
         SimulatorManagerService
 
     ]
 })
 export class SimulatorWorkerModule implements DoBootstrap {
-    constructor(simulatorAPI: SimulatorWorkerAPI, simulatorManager: SimulatorManagerService, simulatorOperations: SimulationOperationService) {
+    constructor(simulatorAPI: SimulatorWorkerAPI, simulatorManager: SimulatorManagerService) {
         // Expose the api of the worker to the main thread
         Comlink.expose(simulatorAPI);
 

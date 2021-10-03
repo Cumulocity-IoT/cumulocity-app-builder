@@ -34,7 +34,7 @@ export interface OperationDefinitions<T> {
  * 
  *  The derived config interfaces now need to extend OperationSupport.
  *  if the member exists we can use the configurations, if not use existing mechanism.
- *  The default config will be the config object rather than an entry in this map.
+ *  The default config will be the config object and duplicated in this map.
  */
  
 export interface OperationSupport<T> {

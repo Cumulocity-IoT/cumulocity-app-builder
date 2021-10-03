@@ -28,16 +28,12 @@ import {
     distinctUntilChanged,
     tap,
     withLatestFrom,
-    debounceTime,
-    share
+    debounceTime
 } from "rxjs/operators";
-import {BehaviorSubject, from, interval, merge, Observable, of, Subject, Subscription} from "rxjs";
+import {interval, merge, Observable, of, Subscription} from "rxjs";
 import * as deepEqual from "fast-deep-equal";
-import * as cloneDeep from "clone-deep";
 import {SimulationStrategiesService} from "../simulation-strategies.service";
-import {SimulationOperationService} from './simulation-operation.service'
 import {Injectable} from "@angular/core";
-import { OperationService, Realtime } from "@c8y/client";
 
 export interface DeviceSimulatorInstance {
     id: number,
