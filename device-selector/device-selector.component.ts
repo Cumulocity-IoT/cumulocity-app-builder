@@ -33,6 +33,7 @@ export class DeviceSelectorComponent implements OnInit{
     @Input() required: boolean;
     @Input() isGroup: boolean;
     @Output() selectedDevice = new EventEmitter<string>();
+    @Output() onBlurDevice = new EventEmitter<string>();
     suggestions$: Observable<any[]>;
     deviceList :any[] = [];
     typeaheadLoading: boolean = false;
@@ -73,7 +74,10 @@ export class DeviceSelectorComponent implements OnInit{
     onSelect(event: TypeaheadMatch): void {
         this.selectedDevice.emit(event.item);
     }
-    
+
+    typeaheadOnBlur(event: TypeaheadMatch): void {
+        this.onBlurDevice.emit(event.item);
+    }
     changeTypeaheadLoading(e: boolean): void {
         this.typeaheadLoading = e;
     }

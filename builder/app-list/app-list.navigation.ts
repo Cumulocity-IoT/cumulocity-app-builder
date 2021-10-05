@@ -43,26 +43,34 @@ export class AppListNavigation implements NavigatorNodeFactory {
                             label: 'Home',
                             icon: 'home',
                             path: `/home`,
-                            priority: 3
+                            priority: 4
                         }));
                         appNode.push(new NavigatorNode({
                             label: 'All Applications',
                             icon: 'wrench',
                             path: `/application-builder`,
-                            priority: 2
+                            priority: 3
                         }));
+
                         const settingsNode =  new NavigatorNode({
                             label: 'Settings',
                             icon: 'cogs',
-                            priority: 0
+                            priority: 1
                         });
                         settingsNode.add(new NavigatorNode({
                             label: 'Custom Properties',
                             icon: 'cog',
                             path: `/settings-properties`,
-                            priority: 1
+                            priority: 0
                         }));
+                        const widgetCatalogNode = new NavigatorNode({
+                            label: 'Widget Catalog',
+                            icon: 'registry-editor',
+                            path: `/widget-catalog/my-widgets`,
+                            priority: 2
+                        });
                         if (this.userService.hasAllRoles(this.appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN","ROLE_APPLICATION_MANAGEMENT_ADMIN"])) {
+                            appNode.push(widgetCatalogNode);
                             appNode.push(settingsNode);
                         }
                         return appNode;

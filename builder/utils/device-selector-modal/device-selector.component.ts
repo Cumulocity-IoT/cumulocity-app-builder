@@ -1,6 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { InventoryService, IManagedObject } from '@c8y/client';
-import { BsModalRef } from "ngx-bootstrap";
+import { BsModalRef } from "ngx-bootstrap/modal";
 import { Subject } from "rxjs";
 import { DeviceSelectorModalService } from "./device-selector.service";
 

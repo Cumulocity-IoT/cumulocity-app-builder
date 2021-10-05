@@ -42,14 +42,14 @@
             <label for="group"><span>Group </span></label>
             <!-- <input type="text" class="form-control" id="group" name="group" placeholder="e.g. 12345" [(ngModel)]="deviceId"> -->
             <device-selector id="groupId" name="groupId" [isGroup]="true" [(value)]="deviceName" [placeHolder]="'Type your Group Name'" [required]="true"
-                    (selectedDevice)= "getSelectedDevice($event)"></device-selector>
+                    (selectedDevice)= "getSelectedDevice($event)" (onBlurDevice)= "getSelectedDevice($event)"></device-selector>
         </div>
         <ng-template #nonGroupTemplate>
             <div class="form-group" style="min-height: 50px;" >
                 <label for="device"><span>Device Name (Optional)</span></label>
                 <!-- <input type="text" class="form-control" id="device" name="device" placeholder="e.g. 12345 (optional)" [(ngModel)]="deviceId"> -->
                 <device-selector id="device" name="device" [(value)]="deviceName" [placeHolder]="'Type your Device Name'" [required]="false"
-                (selectedDevice)= "getSelectedDevice($event)"></device-selector>
+                (selectedDevice)= "getSelectedDevice($event)" (onBlurDevice)= "getSelectedDevice($event)"></device-selector>
             </div>
         </ng-template>
 

@@ -19,7 +19,7 @@
 import { Component, OnInit, ViewEncapsulation } from "@angular/core";
 import { IManagedObject } from '@c8y/client';
 import { DeviceSelectorModalComponent } from "../utils/device-selector-modal/device-selector.component";
-import { BsModalRef, BsModalService } from "ngx-bootstrap";
+import { BsModalRef, BsModalService } from "ngx-bootstrap/modal";
 import { DependencyDescription, TemplateCatalogEntry, TemplateDetails } from "./template-catalog.model";
 import { TemplateCatalogService } from "./template-catalog.service";
 import { AlertService, DynamicComponentDefinition, DynamicComponentService } from "@c8y/ngx-components";
@@ -48,11 +48,15 @@ export class TemplateCatalogModalComponent implements OnInit {
 
     public templates: Array<TemplateCatalogEntry> = [];
 
+    public filterTemplates: Array<TemplateCatalogEntry> = [];
+
     public selectedTemplate: TemplateCatalogEntry;
 
     public templateDetails: TemplateDetails;
 
     public isLoadingIndicatorDisplayed = false;
+
+    public searchTemplate = '';
 
     public dashboardConfiguration = {
         dashboardId: '12598412',
@@ -86,6 +90,7 @@ export class TemplateCatalogModalComponent implements OnInit {
         this.catalogService.getTemplateCatalog().subscribe((catalog: Array<TemplateCatalogEntry>) => {
             this.hideLoadingIndicator();
             this.templates = catalog;
+            this.filterTemplates =  (this.templates ? this.templates : []);
         });
     }
 
@@ -211,8 +216,8 @@ export class TemplateCatalogModalComponent implements OnInit {
             const blob = new Blob([data], {
                 type: 'application/zip'
             });
-
-            this.catalogService.installWidget(blob).then(() => {
+            const fileOfBlob = new File([blob], dependency.fileName);
+            this.catalogService.installWidget(fileOfBlob).then(() => {
                 dependency.isInstalled = true;
                 this.isReloadRequired = true;
                 this.hideProgressModalDialog();
@@ -259,4 +264,13 @@ export class TemplateCatalogModalComponent implements OnInit {
         dtdlLink.click();
         document.body.removeChild(dtdlLink);
       }
+
+    applyFilter() {
+        if(this.templates && this.templates.length > 0) {
+            this.filterTemplates = this.templates.filter((template => template.title.toLowerCase().includes(this.searchTemplate.toLowerCase())));
+            this.filterTemplates = [...this.filterTemplates];
+        } 
+
+    }
+
 }

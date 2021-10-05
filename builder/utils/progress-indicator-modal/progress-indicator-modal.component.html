@@ -5,4 +5,13 @@
     <div class="row">
         <h4 class="text-uppercase" style="margin:0; letter-spacing: 0.15em;">{{message}}</h4>
     </div>
+    <div *ngIf="progressStatus !== '0'" class="progress progress-striped active " style="margin-top: 30px;">
+        <div
+          class="progress-bar progress-bar-warning "
+          role="progressbar"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          [style.width]="progressStatus"
+        >{{progressStatus}}</div>
+      </div>
 </div>
