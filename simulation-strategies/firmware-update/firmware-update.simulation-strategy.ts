@@ -23,7 +23,7 @@ import {
 import {SimulationStrategy} from "../../builder/simulator/simulation-strategy.decorator";
 import {Injectable} from "@angular/core";
 import {SimulationStrategyFactory} from "../../builder/simulator/simulation-strategy";
-import {InventoryService, OperationService, OperationStatus, PagingStrategy} from "@c8y/client";
+import {InventoryService, OperationService, OperationStatus, Realtime} from "@c8y/client";
 import {SimulatorConfig} from "../../builder/simulator/simulator-config";
 import {DeviceSimulator} from "../../builder/simulator/device-simulator";
 import {from, interval, Subscription} from "rxjs";
@@ -36,9 +36,10 @@ import {filter, flatMap, switchMap} from "rxjs/operators";
     configComponent: FirmwareUpdateSimulationStrategyConfigComponent
 })
 export class FirmwareUpdateSimulationStrategy extends DeviceSimulator {
-    subscriptions = new Subscription();
+    subscriptions: any;
 
-    constructor(private config: FirmwareUpdateSimulationStrategyConfig, private inventoryService: InventoryService, private operationService: OperationService) {
+    constructor(private config: FirmwareUpdateSimulationStrategyConfig, private inventoryService: InventoryService, 
+         private operationService: OperationService, private realTimeService: Realtime) {
         super();
     }
 
@@ -108,7 +109,29 @@ export class FirmwareUpdateSimulationStrategy extends DeviceSimulator {
         }
 
         // Start the firmware update listeners
-        this.subscriptions.add(interval(5000).pipe(
+        this.subscriptions = this.realTimeService.subscribe(
+            `/operations/${device.id}`,
+            async (response) => {
+              if (response && response.data) {
+                  const operation = (response.data &&  response.data.data ? response.data.data : null);
+                  if(operation && operation.c8y_Firmware !== undefined && 
+                    [OperationStatus.PENDING, OperationStatus.EXECUTING].includes(operation.status)){
+                        const nextStatus = this.nextOperationStatus(operation.status);
+                        await this.operationService.update({
+                            id: operation.id,
+                            status: nextStatus
+                        });
+            
+                        if (nextStatus == OperationStatus.SUCCESSFUL) {
+                            await this.inventoryService.update({
+                                id: device.id,
+                                c8y_Firmware: operation.c8y_Firmware
+                            });
+                        }
+                    }
+              }
+        });
+        /*  this.subscriptions.add(interval(5000).pipe(
             switchMap(() => from(this.operationService.list$({
                 pageSize: 2000,
                 withTotalPages: true,
@@ -133,11 +156,12 @@ export class FirmwareUpdateSimulationStrategy extends DeviceSimulator {
                     c8y_Firmware: operation.c8y_Firmware
                 });
             }
-        }));
+        })); */
     }
 
     onStop() {
-        this.subscriptions.unsubscribe();
+        this.realTimeService.unsubscribe(this.subscriptions);
+      //  this.subscriptions.unsubscribe();
     }
 
     private nextOperationStatus(opStatus: OperationStatus) {
@@ -160,12 +184,12 @@ export class FirmwareUpdateSimulationStrategy extends DeviceSimulator {
 
 @Injectable()
 export class FirmwareUpdateSimulationStrategyFactory extends SimulationStrategyFactory<FirmwareUpdateSimulationStrategy> {
-    constructor(private inventoryService: InventoryService, private operationService: OperationService) {
+    constructor(private inventoryService: InventoryService, private operationService: OperationService, private realTimeService: Realtime) {
         super();
     }
 
     createInstance(config: SimulatorConfig<FirmwareUpdateSimulationStrategyConfig>): FirmwareUpdateSimulationStrategy {
-        return new FirmwareUpdateSimulationStrategy(config.config, this.inventoryService, this.operationService);
+        return new FirmwareUpdateSimulationStrategy(config.config, this.inventoryService, this.operationService, this.realTimeService);
     }
 
     getSimulatorClass(): typeof FirmwareUpdateSimulationStrategy {

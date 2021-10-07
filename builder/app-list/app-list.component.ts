@@ -20,8 +20,8 @@ import {Component} from "@angular/core";
 import {
     ApplicationService,
     IApplication,
-    PagingStrategy,
-    RealtimeAction,
+   // PagingStrategy,
+   // RealtimeAction,
     UserService
 } from "@c8y/client";
 import {catchError, map} from "rxjs/operators";
@@ -48,7 +48,7 @@ export class AppListComponent {
         
         // Get a list of the applications on the tenant (This includes live updates)
         if(this.userHasAdminRights){
-            this.applications = from(this.appService.list$({ pageSize: 2000, withTotalPages: true }, {
+            /* this.applications = from(this.appService.list$({ pageSize: 2000, withTotalPages: true }, {
                 hot: true,
                 pagingStrategy: PagingStrategy.ALL,
                 realtime: true,
@@ -61,6 +61,16 @@ export class AppListComponent {
                         from(this.appService.listByUser(appStateService.currentUser.value, { pageSize: 2000 }).then(res => res.data))
                     ),
                     map(apps => apps.filter(app => app.hasOwnProperty('applicationBuilder'))),
+                    map(apps => apps.sort((a, b) => a.id > b.id ? 1 : -1) )
+                ); */
+            this.applications = from(new Observable(
+                this.appService.list({ pageSize: 2000, withTotalPages: true }) as any))
+                .pipe(
+                    // Some users can't get the full list of applications (they don't have permission) so we get them by user instead (without live updates)
+                    catchError(() =>
+                        from(this.appService.listByUser(appStateService.currentUser.value, { pageSize: 2000 }).then(res => res.data))
+                    ),
+                    map((apps: any) => apps.filter(app => app.hasOwnProperty('applicationBuilder'))),
                     map(apps => apps.sort((a, b) => a.id > b.id ? 1 : -1) )
                 );
         } else {
