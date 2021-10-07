@@ -1,10 +1,10 @@
 {
   "name": "app-builder",
-  "version": "1.3.0-dev-1",
+  "version": "1.3.0-dev-2",
   "description": "Application builder for Cumulocity (written by Software AG Global Presales)",
   "main": "index.ts",
   "scripts": {
-    "start": "c8ycli server --env.extraWebpackConfig=./extra-webpack.config.js",
+    "start": "c8ycli server --env.extraWebpackConfig=./extra-webpack.config.js ",
     "build": "set NODE_OPTIONS=--max_old_space_size=4096 && c8ycli build --env.extraWebpackConfig=./extra-webpack.config.js --env.mode=production",
     "deploy-ci": "c8ycli deploy  -u $npm_config_param1 -T $npm_config_param2 -U $npm_config_param3 -P $npm_config_param4",
     "deploy": "c8ycli deploy ",
@@ -25,25 +25,25 @@
     "@angular/platform-webworker-dynamic": "^10.2.3",
     "@angular/router": "11.1.2",
     "@angular/upgrade": "11.1.2",
-    "@c8y/ng1-modules": "1010.8.0",
-    "@c8y/ngx-components": "1010.8.0",
-    "@c8y/style": "1010.8.0",
+    "@c8y/ng1-modules": "1011.0.2",
+    "@c8y/ngx-components": "1011.0.2",
+    "@c8y/style": "1011.0.2",
     "@ng-reactive/async-input": "0.0.1",
     "@ng-select/ng-select": "^6.1.0",
-    "@ngx-translate/core": "12.1.1",
+    "@ngx-translate/core": "13.0.0",
     "angular": "1.6.9",
-    "app-builder-external-assets": "file:binary/app-builder-external-assets-1.0.0.tgz",
+    "app-builder-external-assets": "file:binary/app-builder-external-assets-1.1.0.tgz",
     "comlink": "^4.3.1",
     "core-js": "^3.15.2",
     "crypto-js": "^4.0.0",
-    "cumulocity-runtime-widget-loader": "file:binary/cumulocity-runtime-widget-loader-1009.0.4-1.0.0.tgz",
+    "cumulocity-runtime-widget-loader": "file:binary/cumulocity-runtime-widget-loader-1011.0.2-0.0.2.tgz",
     "d3-color": "^3.0.1",
     "delay": "^5.0.0",
     "font-awesome": "^4.7.0",
     "fontawesome": "^4.7.2",
     "jszip": "^3.6.0",
     "lodash-es": "^4.0.0",
-    "ngx-bootstrap": "6.1.0",
+    "ngx-bootstrap": "6.2.0",
     "ngx-markdown": "^11.1.3",
     "reflect-metadata": "^0.1.13",
     "rxjs": "~6.6.3",
@@ -57,7 +57,7 @@
     "@angular/compiler-cli": "11.1.2",
     "@angular/language-service": "11.1.2",
     "@angular/localize": "11.1.2",
-    "@c8y/cli": "1010.8.0",
+    "@c8y/cli": "1011.0.2",
     "@types/lodash-es": "^4.17.3",
     "@types/webpack": "^5.28.0",
     "autoprefixer": "10.2.6",
@@ -77,6 +77,15 @@
       "contentSecurityPolicy": "base-uri 'none'; default-src 'self' 'unsafe-inline' http: https: ws: wss: blob:; connect-src 'self' *.webmethodscloud.com *.aptrinsic.com *.billwerk.com http: https: ws: wss: blob:;  script-src 'self' open.mapquestapi.com *.twitter.com *.twimg.com *.aptrinsic.com 'unsafe-inline' 'unsafe-eval' data:; style-src * 'unsafe-inline' blob:; img-src * data: blob:; font-src * data:; frame-src *; worker-src 'self' blob:;",
       "icon": {
         "class": "fa fa-magic"
+      },
+      "cookieBanner": {
+        "cookieBannerTitle": "About cookies on this website",
+        "cookieBannerText": "Cookies are important to the proper functioning of a site. To improve your experience, we use cookies to remember log-in details and provide secure log-in, collect statistics to optimize site functionality, and deliver content tailored to your interests. Click Agree and Proceed to accept cookies and go directly to the site or click Configure preferences for further details and to manage your options. The consent can be revoked at any time.",
+        "policyUrl": "https://www.softwareag.com/en_corporate/privacy.html"
+      },
+      "cookiePreferences": {
+        "required": true,
+        "functional": "These cookies are used to support you during your first steps in the product, to deliver content tailored to your needs, and to collect usage statistics."
       }
     },
     "cli": {}

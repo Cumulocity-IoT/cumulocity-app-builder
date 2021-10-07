@@ -28,7 +28,6 @@ import {CoreModule} from "@c8y/ngx-components";
 import {BrandingDirtyGuardService} from "./branding-dirty-guard.service";
 import { ButtonsModule } from 'ngx-bootstrap/buttons';
 import {AppIdService} from "../app-id.service";
-
 @NgModule({
     imports: [
         CommonModule,
@@ -48,7 +47,7 @@ export class BrandingModule {
                 return of(undefined);
             }
         }))
-            .subscribe(app => {
+            .subscribe(async app => {
                 brandingService.updateStyleForApp(app);
             });
     }

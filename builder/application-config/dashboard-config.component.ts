@@ -62,7 +62,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     newAppName: string;
     newAppContextPath: string;
     newAppIcon: string;
-    isDashboardCatalogEnabled: boolean = false;
+    isDashboardCatalogEnabled: boolean = true;
 
     app: Observable<any>;
 

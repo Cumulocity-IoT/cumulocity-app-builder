@@ -19,6 +19,7 @@
 import {Injectable} from "@angular/core";
 import * as fa from "fontawesome";
 import * as d3 from "d3-color";
+import * as delay from "delay";
 declare const FontFace: any;
 
 /**
@@ -43,8 +44,8 @@ export class BrandingService {
         this.favicon = document.head.querySelector('[rel=icon]');
 
         if (typeof FontFace != 'undefined') {
-            this.fontAwesomeLoaded = new FontFace('FontAwesome', 'url(./fontawesome-webfont-20fd1704ea223900efa9fd4e869efb08.woff2)').load();
-          //  this.fontAwesomeLoaded = new FontFace('FontAwesome', 'url(~font-awesome/fonts/fontawesome-webfont.woff2)').load();
+          //  this.fontAwesomeLoaded = new FontFace('FontAwesome', 'url(./fontawesome-webfont-20fd1704ea223900efa9fd4e869efb08.woff2)').load();
+            this.fontAwesomeLoaded = new FontFace('FontAwesome', 'url(./fontawesome-webfont.woff2)').load();
         } else {
             this.fontAwesomeLoaded = Promise.resolve();
         }
@@ -111,9 +112,7 @@ export class BrandingService {
 `;
 
             if (app.applicationBuilder.branding && app.applicationBuilder.branding.enabled && app.applicationBuilder.branding.colors) {
-                const faviconUrl = this.createFaviconUrl(app.applicationBuilder.branding.colors.primary, app.applicationBuilder.icon);
-                this.favicon.setAttribute('type', 'image/png');
-                this.favicon.setAttribute('href', faviconUrl);
+                this.loadFaviconURL(app);
 
                 this.appBranding.innerText = `
 body {
@@ -153,9 +152,10 @@ body {
 }
 `;
             } else {
-                const faviconUrl = this.createFaviconUrl('#1776BF', app.applicationBuilder.icon);
+               /*  const faviconUrl = this.createFaviconUrl('#1776BF', app.applicationBuilder.icon);
                 this.favicon.setAttribute('type', 'image/png');
-                this.favicon.setAttribute('href', faviconUrl);
+                this.favicon.setAttribute('href', faviconUrl); */
+                this.loadFaviconURL(app);
 
                 this.appBranding.innerText = '';
             }
@@ -200,6 +200,20 @@ body {
         }
     }
 
+    private async loadFaviconURL(app) {
+        await delay(1000);
+        if (app.applicationBuilder.branding && app.applicationBuilder.branding.enabled && app.applicationBuilder.branding.colors)  {
+            const faviconUrl = this.createFaviconUrl(app.applicationBuilder.branding.colors.primary, app.applicationBuilder.icon);
+            this.favicon.setAttribute('type', 'image/png');
+            this.favicon.setAttribute('href', faviconUrl);
+        } else {
+            const faviconUrl = this.createFaviconUrl('#1776BF', app.applicationBuilder.icon);
+            this.favicon.setAttribute('type', 'image/png');
+            this.favicon.setAttribute('href', faviconUrl);
+        }
+        
+
+    }
     createFaviconUrl(primaryColor: string, icon: string): string {
         const color = this.colorToHex(primaryColor);
         const canvas = document.createElement('canvas');
