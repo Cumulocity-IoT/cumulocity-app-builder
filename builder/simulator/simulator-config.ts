@@ -16,6 +16,8 @@
 * limitations under the License.
  */
 
+import { SimulationStrategyMetadata } from "./simulation-strategy.decorator";
+
 /**
  *  OperationDefinitions<T> contains instances of config attached to a 
  *  label. Remember the default config lies on the config object as fields
@@ -36,9 +38,9 @@ export interface OperationDefinitions<T> {
  *  if the member exists we can use the configurations, if not use existing mechanism.
  *  The default config will be the config object and duplicated in this map.
  */
- 
+
 export interface OperationSupport<T> {
-    operations?: Map<string,OperationDefinitions<T>>
+    operations?: Array<OperationDefinitions<T>>;
 }
 
 
@@ -46,10 +48,11 @@ export interface OperationSupport<T> {
  *  The interface that for simulator configuration that all simulators will be passed.
  *  N.B. The strategy stores only the config member (See Factory classes)
  */
-export interface SimulatorConfig<T=any> {
+export interface SimulatorConfig<T = any> {
     id: number,
     name: string,
     type: string,
     config: T,
     started?: boolean,
+    metadata?: SimulationStrategyMetadata;
 }

@@ -16,13 +16,13 @@
 * limitations under the License.
  */
 
-import {Component} from "@angular/core";
+import { Component } from "@angular/core";
 import { ControlContainer, NgForm } from '@angular/forms';
-import { OperationSupport } from "builder/simulator/simulator-config";
-import {SimulationStrategyConfigComponent} from "../../builder/simulator/simulation-strategy";
+import { OperationDefinitions, OperationSupport } from "builder/simulator/simulator-config";
+import { SimulationStrategyConfigComponent } from "../../builder/simulator/simulation-strategy";
 import * as _ from 'lodash';
 
-export interface RandomWalkSimulationStrategyConfig  extends OperationSupport<RandomWalkSimulationStrategyConfig>  {
+export interface RandomWalkSimulationStrategyConfig extends OperationSupport<RandomWalkSimulationStrategyConfig> {
     deviceId: string,
     fragment: string,
     series: string,
@@ -31,7 +31,7 @@ export interface RandomWalkSimulationStrategyConfig  extends OperationSupport<Ra
     minValue: number,
     maxValue: number,
     unit: string,
-    interval: number
+    interval: number;
 }
 
 @Component({
@@ -69,35 +69,42 @@ export interface RandomWalkSimulationStrategyConfig  extends OperationSupport<Ra
             <input type="number" class="form-control" id="interval" name="interval" placeholder="e.g. 5 (required)" required [(ngModel)]="config.interval">
         </div>
     `,
-    viewProviders: [ { provide: ControlContainer, useExisting: NgForm } ]
+    viewProviders: [{ provide: ControlContainer, useExisting: NgForm }]
 })
 export class RandomWalkSimulationStrategyConfigComponent extends SimulationStrategyConfigComponent {
 
-    getNamedConfig(label: string) : RandomWalkSimulationStrategyConfig {
-        let c : RandomWalkSimulationStrategyConfig = this.getConfigAsAny(label);
+    getNamedConfig(label: string): RandomWalkSimulationStrategyConfig {
+        let c: RandomWalkSimulationStrategyConfig = this.getConfigAsAny(label);
         return c;
     }
-        
+
     config: RandomWalkSimulationStrategyConfig;
 
     initializeConfig() {
-        let c : RandomWalkSimulationStrategyConfig = {
-            deviceId : "",
+        let c: RandomWalkSimulationStrategyConfig = {
+            deviceId: "",
             fragment: "temperature_measurement",
-            series : "T",
-            startingValue : 15,
-            maxDelta : 3,
-            minValue : 10,
-            maxValue :20,
-            unit : "C",
-            interval : 5,
-            operations : new Map()
-        }
+            series: "T",
+            startingValue: 15,
+            maxDelta: 3,
+            minValue: 10,
+            maxValue: 20,
+            unit: "C",
+            interval: 5,
+            operations: new Array()
+        };
+
+        let opDef: OperationDefinitions<any> = {
+            config: c,
+            deviceId: "",
+            payloadFragment: "default",
+            matchingValue: ""
+        };
 
         //New objects can duplicate the default so it can be restored
         //we will create the config entries if old simulators are edited
         //duplication is to avoid changing old code.
         this.config = _.cloneDeep(c);
-        this.config.operations['default'] = c;
+        this.config.operations.push(opDef);
     }
 }

@@ -16,17 +16,18 @@
 * limitations under the License.
  */
 
-import {Component} from "@angular/core";
+import { Component } from "@angular/core";
 import { OperationSupport } from "builder/simulator/simulator-config";
-import {SimulationStrategyConfigComponent} from "../../builder/simulator/simulation-strategy";
+import { SimulationStrategyConfigComponent } from "../../builder/simulator/simulation-strategy";
 import * as _ from 'lodash';
+import { OperationDefinitions } from '../../builder/simulator/simulator-config';
 
-export interface PositionUpdateSimulationStrategyConfig   extends OperationSupport<PositionUpdateSimulationStrategyConfig> {
+export interface PositionUpdateSimulationStrategyConfig extends OperationSupport<PositionUpdateSimulationStrategyConfig> {
     deviceId: string,
     interval: number,
     latitude: string,
     longitude: string,
-    altitude: string
+    altitude: string;
 }
 
 @Component({
@@ -51,28 +52,35 @@ export interface PositionUpdateSimulationStrategyConfig   extends OperationSuppo
 })
 export class PositionUpdateSimulationStrategyConfigComponent extends SimulationStrategyConfigComponent {
 
-    getNamedConfig(label: string) : PositionUpdateSimulationStrategyConfig {
-        let c : PositionUpdateSimulationStrategyConfig = this.getConfigAsAny(label);
+    getNamedConfig(label: string): PositionUpdateSimulationStrategyConfig {
+        let c: PositionUpdateSimulationStrategyConfig = this.getConfigAsAny(label);
         return c;
     }
 
     config: PositionUpdateSimulationStrategyConfig;
 
     initializeConfig() {
-        let c : PositionUpdateSimulationStrategyConfig = {
+        let c: PositionUpdateSimulationStrategyConfig = {
             deviceId: "",
             latitude: "",
             longitude: "",
-            altitude: "", 
-            interval : 5,
-            operations : new Map()
-        }
+            altitude: "",
+            interval: 5,
+            operations: new Array()
+        };
+
+        let opDef: OperationDefinitions<any> = {
+            config: c,
+            deviceId: "",
+            payloadFragment: "default",
+            matchingValue: ""
+        };
 
         //New objects can duplicate the default so it can be restored
         //we will create the config entries if old simulators are edited
         //duplication is to avoid changing old code.
         this.config = _.cloneDeep(c);
-        this.config.operations['default'] = c;
-   }
-    
+        this.config.operations.push(opDef);
+    }
+
 }

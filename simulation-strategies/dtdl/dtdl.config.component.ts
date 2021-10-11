@@ -16,19 +16,20 @@
 * limitations under the License.
  */
 
-import {Component} from "@angular/core";
+import { Component } from "@angular/core";
 import { ControlContainer, NgForm } from '@angular/forms';
-import { OperationSupport } from "builder/simulator/simulator-config";
-import {SimulationStrategyConfigComponent} from "../../builder/simulator/simulation-strategy";
+import { OperationDefinitions, OperationSupport } from "builder/simulator/simulator-config";
+import { SimulationStrategyConfigComponent } from "../../builder/simulator/simulation-strategy";
 import * as _ from 'lodash';
 
-export interface DtdlSimulationStrategyConfig   extends OperationSupport<DtdlSimulationStrategyConfig>  {
+export interface DtdlSimulationStrategyConfig extends OperationSupport<DtdlSimulationStrategyConfig> {
     deviceId: string,
     modalSize?: string,
     deviceName: string,
     dtdlDeviceId: string,
     dtdlModelConfig: DtdlSimulationModel[],
-    interval: number
+    interval: number,
+    isEditMode?: boolean;
 }
 
 export interface DtdlSimulationModel {
@@ -214,7 +215,7 @@ export interface DtdlSimulationModel {
             <input type="number" class="form-control" id="interval" name="interval" placeholder="e.g. 5 (required)" required [(ngModel)]="config.interval">
         </div>
     `,
-    styles: [ `
+    styles: [`
     :host >>> .panel.dtdl-simulator-measurement-panel .panel-title{
          width: 100%;
      }
@@ -231,7 +232,7 @@ export interface DtdlSimulationModel {
     }
 
     `],
-    viewProviders: [ { provide: ControlContainer, useExisting: NgForm } ]
+    viewProviders: [{ provide: ControlContainer, useExisting: NgForm }]
 })
 export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyConfigComponent {
     config: DtdlSimulationStrategyConfig;
@@ -241,33 +242,40 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
     isError = false;
 
 
-    getNamedConfig(label: string) : DtdlSimulationStrategyConfig {
-        let c : DtdlSimulationStrategyConfig = this.getConfigAsAny(label);
+    getNamedConfig(label: string): DtdlSimulationStrategyConfig {
+        let c: DtdlSimulationStrategyConfig = this.getConfigAsAny(label);
         return c;
     }
 
     initializeConfig() {
 
         this.configModel = [];
-        let c : DtdlSimulationStrategyConfig = {
+        let c: DtdlSimulationStrategyConfig = {
             deviceId: "",
-            modalSize:  "modal-md",
+            modalSize: "modal-md",
             deviceName: "",
-            dtdlModelConfig : [],
-            dtdlDeviceId : "",
+            dtdlModelConfig: [],
+            dtdlDeviceId: "",
             interval: 5,
-            operations : new Map()
-        }
+            operations: new Array()
+        };
+
+        let opDef: OperationDefinitions<any> = {
+            config: c,
+            deviceId: "",
+            payloadFragment: "default",
+            matchingValue: ""
+        };
 
         //New objects can duplicate the default so it can be restored
         //we will create the config entries if old simulators are edited
         //duplication is to avoid changing old code.
         this.config = _.cloneDeep(c);
-        this.config.operations['default'] = c;
+        this.config.operations.push(opDef);
     }
 
 
-    fileUploaded(events){
+    fileUploaded(events) {
         this.isError = false;
         this.isUploading = true;
         const file = events.target.files[0];
@@ -285,8 +293,8 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
             }
             this.isUploading = false;
         });
-        if(file) { reader.readAsText(file); } 
-        else {  this.isUploading = false;   }
+        if (file) { reader.readAsText(file); }
+        else { this.isUploading = false; }
     }
 
     /**
@@ -308,12 +316,12 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
 
     private processDTDL(dtdl: any) {
         this.initializeConfig();
-        if(dtdl.constructor === Object) {
+        if (dtdl.constructor === Object) {
             this.config.deviceName = (dtdl.displayName && dtdl.displayName.constructor === Object ? dtdl.displayName.en : dtdl.displayName);
             this.processDTDLMeasurement(dtdl.contents);
         } else {
-            dtdl.forEach( (device, idx) => {
-                if(idx === 0) {
+            dtdl.forEach((device, idx) => {
+                if (idx === 0) {
                     this.config.deviceName = (device.displayName && device.displayName.constructor === Object ? device.displayName.en : device.displayName);
                 }
                 this.processDTDLMeasurement(device.contents);
@@ -321,16 +329,16 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
         }
     }
     private processDTDLMeasurement(dtdlM: any, deviceId?: string) {
-        if(dtdlM && dtdlM.length > 0) {
+        if (dtdlM && dtdlM.length > 0) {
             dtdlM.forEach((content: any) => {
-                if(content['@type'].includes("Telemetry")) {
+                if (content['@type'].includes("Telemetry")) {
                     this.processTelemetry(content, deviceId);
                 } else if (content['@type'].includes("Component")) {
                     const schemaContent = (content.schema && content.schema.contents ? content.schema.contents : []);
                     schemaContent.forEach((content: any) => {
-                        if(content['@type'].includes("Telemetry")) {
-                            this.processTelemetry(content,deviceId);
-                        } 
+                        if (content['@type'].includes("Telemetry")) {
+                            this.processTelemetry(content, deviceId);
+                        }
                     });
                 }
             });
@@ -343,8 +351,8 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
             simulationType: 'randomValue'
         };
         model.measurementName = (content.displayName && content.displayName.constructor === Object ? content.displayName.en : content.displayName);
-        model.fragment = ( typeLength > 0 ? content['@type'][typeLength - 1] : content['@type']);
-        model.id = (content['@id'] ?  content['@id']: Math.floor(Math.random() * 1000000));
+        model.fragment = (typeLength > 0 ? content['@type'][typeLength - 1] : content['@type']);
+        model.id = (content['@id'] ? content['@id'] : Math.floor(Math.random() * 1000000));
         model.schema = content.schema;
         model.series = content.name;
         model.unit = content.unit;
@@ -352,18 +360,18 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
         model.eventText = model.measurementName;
         model.eventType = content.name;
         model.isObjectType = (model.schema['@type'] === 'Object');
-        if(model.isObjectType && model.schema.fields) {
+        if (model.isObjectType && model.schema.fields) {
             const fields = model.schema.fields;
-            if(fields && fields.length > 0 ) {
+            if (fields && fields.length > 0) {
                 fields.forEach(field => {
                     const fieldModel: DtdlSimulationModel = {
                         simulationType: 'randomValue'
                     };
                     fieldModel.measurementName = model.measurementName + " : " + field.displayName;
                     fieldModel.fragment = model.fragment;
-                    fieldModel.id = (field['@id'] ?  field['@id']: Math.floor(Math.random() * 1000000));
+                    fieldModel.id = (field['@id'] ? field['@id'] : Math.floor(Math.random() * 1000000));
                     fieldModel.schema = field.schema;
-                    fieldModel.series = content.name +":" + field.name;
+                    fieldModel.series = content.name + ":" + field.name;
                     fieldModel.unit = field.unit;
                     fieldModel.deviceId = deviceId;
                     fieldModel.isObjectType = false;
@@ -374,9 +382,9 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
                     this.configModel.push(fieldModel);
                 });
             }
-        } else  {
+        } else {
             this.configModel.push(model);
         }
-        
+
     }
 }

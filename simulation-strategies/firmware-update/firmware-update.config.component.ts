@@ -16,20 +16,20 @@
 * limitations under the License.
  */
 
-import {Component} from "@angular/core";
-import { OperationSupport } from "builder/simulator/simulator-config";
-import {SimulationStrategyConfigComponent} from "../../builder/simulator/simulation-strategy";
+import { Component } from "@angular/core";
+import { OperationDefinitions, OperationSupport } from "builder/simulator/simulator-config";
+import { SimulationStrategyConfigComponent } from "../../builder/simulator/simulation-strategy";
 import * as _ from 'lodash';
 
-export interface FirmwareUpdateSimulationStrategyConfig  extends OperationSupport<FirmwareUpdateSimulationStrategyConfig> {
+export interface FirmwareUpdateSimulationStrategyConfig extends OperationSupport<FirmwareUpdateSimulationStrategyConfig> {
     deviceId: string,
     isGroup?: boolean,
     firmwareVersions: {
         name: string,
         version: string,
-        url: string
+        url: string;
     }[],
-    resetOn: 'restart' | 'never'
+    resetOn: 'restart' | 'never';
 }
 
 @Component({
@@ -62,29 +62,36 @@ export interface FirmwareUpdateSimulationStrategyConfig  extends OperationSuppor
 export class FirmwareUpdateSimulationStrategyConfigComponent extends SimulationStrategyConfigComponent {
 
 
-    getNamedConfig(label: string) : FirmwareUpdateSimulationStrategyConfig {
-        let c : FirmwareUpdateSimulationStrategyConfig = this.getConfigAsAny(label);
+    getNamedConfig(label: string): FirmwareUpdateSimulationStrategyConfig {
+        let c: FirmwareUpdateSimulationStrategyConfig = this.getConfigAsAny(label);
         return c;
     }
 
     config: FirmwareUpdateSimulationStrategyConfig;
 
     initializeConfig() {
-        let c : FirmwareUpdateSimulationStrategyConfig = {
+        let c: FirmwareUpdateSimulationStrategyConfig = {
             deviceId: "",
-            firmwareVersions : [
-                {name: "Version 1", version: "1.0.0", url: "https://firmware-repo.cumulocity.com/v1.0.0"},
-                {name: "Version 2", version: "2.0.0", url: "https://firmware-repo.cumulocity.com/v2.0.0"}
+            firmwareVersions: [
+                { name: "Version 1", version: "1.0.0", url: "https://firmware-repo.cumulocity.com/v1.0.0" },
+                { name: "Version 2", version: "2.0.0", url: "https://firmware-repo.cumulocity.com/v2.0.0" }
             ],
-            resetOn : 'restart',
-            operations : new Map()
-        }
+            resetOn: 'restart',
+            operations: new Array()
+        };
+
+        let opDef: OperationDefinitions<any> = {
+            config: c,
+            deviceId: "",
+            payloadFragment: "default",
+            matchingValue: ""
+        };
 
         //New objects can duplicate the default so it can be restored
         //we will create the config entries if old simulators are edited
         //duplication is to avoid changing old code.
         this.config = _.cloneDeep(c);
-        this.config.operations['default'] = c;
+        this.config.operations.push(opDef);
     }
 
 
@@ -94,6 +101,6 @@ export class FirmwareUpdateSimulationStrategyConfigComponent extends SimulationS
 
     addFirmware() {
         const versionNumber = this.config.firmwareVersions.length + 1;
-        this.config.firmwareVersions.push({name: `Version ${versionNumber}`, version: `${versionNumber}.0.0`, url: `https://firmware-repo.cumulocity.com/v${versionNumber}.0.0`})
+        this.config.firmwareVersions.push({ name: `Version ${versionNumber}`, version: `${versionNumber}.0.0`, url: `https://firmware-repo.cumulocity.com/v${versionNumber}.0.0` });
     }
 }

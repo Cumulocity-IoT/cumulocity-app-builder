@@ -67,13 +67,15 @@ export class EditSimulatorModalComponent implements OnInit {
         const metadata = strategyFactory.getSimulatorMetadata();
 
         this.configWrapper.clear();
-
+        
         if (metadata.configComponent != null) {
             const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(metadata.configComponent);
             const componentRef = this.configWrapper.createComponent(factory);
             componentRef.instance.config = this.simulatorConfig.config;
             //Accessing EditMode variable in simulator strategy
             componentRef.instance.config.isEditMode = true; 
+            console.log("openSimulatorConfig-meta", metadata);
+            this.simulatorConfig.metadata = metadata;
         }
     }
 

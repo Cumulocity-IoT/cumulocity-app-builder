@@ -25,12 +25,12 @@ import {
     ViewContainerRef
 } from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap/modal';
-import {WizardComponent} from "../../wizard/wizard.component";
-import {InventoryService, ApplicationService, IManagedObject} from '@c8y/client';
-import {AppIdService} from "../app-id.service";
-import {SimulationStrategyConfigComponent, SimulationStrategyFactory} from "../simulator/simulation-strategy";
-import {SimulationStrategiesService} from "../simulator/simulation-strategies.service";
-import {SimulatorCommunicationService} from "../simulator/mainthread/simulator-communication.service";
+import { WizardComponent } from "../../wizard/wizard.component";
+import { InventoryService, ApplicationService, IManagedObject } from '@c8y/client';
+import { AppIdService } from "../app-id.service";
+import { SimulationStrategyConfigComponent, SimulationStrategyFactory } from "../simulator/simulation-strategy";
+import { SimulationStrategiesService } from "../simulator/simulation-strategies.service";
+import { SimulatorCommunicationService } from "../simulator/mainthread/simulator-communication.service";
 
 @Component({
     templateUrl: './new-simulator-modal.component.html'
@@ -38,7 +38,7 @@ import {SimulatorCommunicationService} from "../simulator/mainthread/simulator-c
 export class NewSimulatorModalComponent {
     busy: boolean = false;
 
-    @ViewChild(WizardComponent, {static: true}) wizard: WizardComponent;
+    @ViewChild(WizardComponent, { static: true }) wizard: WizardComponent;
 
     @ViewChild("configWrapper", { read: ViewContainerRef, static: true }) configWrapper: ViewContainerRef;
 
@@ -56,7 +56,7 @@ export class NewSimulatorModalComponent {
         public bsModalRef: BsModalRef, public simulationStrategiesService: SimulationStrategiesService,
         private resolver: ComponentFactoryResolver, private injector: Injector, private inventoryService: InventoryService,
         private appService: ApplicationService, private appIdService: AppIdService
-    ) {}
+    ) { }
 
     openSimulatorConfig() {
         this.wizard.selectStep('config');
@@ -72,9 +72,12 @@ export class NewSimulatorModalComponent {
             //initialize via the instance to get object
             componentRef.instance.initializeConfig();
             this.newConfig = componentRef.instance.config;
-            if(componentRef.instance.config.modalSize) {
+            if (componentRef.instance.config.modalSize) {
                 this.bsModalRef.setClass(componentRef.instance.config.modalSize);
             }
+            console.log("createSimulatorConfig-meta", metadata);
+            this.newConfig.metadata = metadata;
+
         }
     }
 
@@ -86,14 +89,14 @@ export class NewSimulatorModalComponent {
 
         const metadata = this.selectedStrategyFactory.getSimulatorMetadata();
         // get simulator Name from strategy's deviceName field
-        if(metadata.hideSimulatorName) {
+        if (metadata.hideSimulatorName) {
             this.simulatorName = this.newConfig.deviceName;
         }
         let device;
         if (!this.deviceId) {
-            if(this.isGroup) {
+            if (this.isGroup) {
                 // Create Group and Devices
-                device = await this.AddGroupAndDevices();    
+                device = await this.AddGroupAndDevices();
                 this.deviceName = this.groupName;
                 this.deviceId = device.id;
             } else {
@@ -105,16 +108,16 @@ export class NewSimulatorModalComponent {
                 this.deviceName = this.simulatorName;
                 this.deviceId = device.id;
             }
-            
+
         } else {
             // getExistingDevice
             // device = (await this.inventoryService.detail(this.deviceId)).data;
         }
-      //  this.deviceId = device.id;
-        
+        //  this.deviceId = device.id;
+
         const appId = this.appIdService.getCurrentAppId();
         let appServiceData;
-        if(appId){
+        if (appId) {
             appServiceData = (await this.appService.detail(appId)).data;
         }
         // updateDevice
