@@ -42,43 +42,34 @@ export interface SeriesValueSimulationStrategyConfig extends OperationSupport<Se
             <label for="series"><span>Series</span></label>
             <input type="text" class="form-control" id="series" name="series" placeholder="e.g. T (required)" required autofocus [(ngModel)]="config.series">
         </div>
-        <div class="form-group">
-            <label for="value"><span>Value</span></label>
-            <input type="text" class="form-control" id="value" name="value" placeholder="e.g. 15,20,30 (required)" required [(ngModel)]="config.value">
-        </div>
-
-
         
         <div class="form-group">
-            <div> {{config.operations | json}}
-            <accordion  [isAnimated]="true" [closeOthers]="true">
-                <accordion-group panelClass="dtdl-simulator-measurement-panel"    #dtdlGroup>
-                    <button class="btn btn-link btn-block clearfix" accordion-heading type="button">
-                        <div class="pull-left float-left">test</div>
-                        <span class="float-right pull-right"><i *ngIf="dtdlGroup.isOpen" class="fa fa-caret-up"></i>
-                        <i *ngIf="!dtdlGroup.isOpen" class="fa fa-caret-down"></i></span>
-                    </button>
-                </accordion-group>
-            </accordion>
+            <!-- <div> {{config.operations | json}} </div> -->
+            <label for="value"><span>Default Value</span></label>
+            <input type="text" class="form-control" id="value" name="value" placeholder="e.g. 15,20,30 (required)" required [(ngModel)]="config.operations[0].config.value">
+            <div class="form-group" *ngIf="config.operations.length > 1">
+                <label for="opSource"><span>Operation Source</span></label>
+                <input type="text" class="form-control" id="opSource" name="opSource" placeholder="e.g. device Id" required autofocus [(ngModel)]="config.operations[1].deviceId">
+                <label for="opPayload"><span>payload key</span></label>
+                <input type="text" class="form-control" id="opPayload" name="opPayload" placeholder="e.g. c8y_command.text" required autofocus [(ngModel)]="config.operations[1].payloadFragment">
+                <div *ngFor="let op of config.operations; let i = index">
+                    <div class="form-group" *ngIf="i > 0">
+                        <label for="opMatch_{{i}}"><span>Matching</span></label>
+                        <input type="text" class="form-control" id="opMatch_{{i}}" name="opMatch_{{i}}" placeholder="e.g. WINDY" required [(ngModel)]="config.operations[i].matchingValue">
+                        <label for="opValue_{{i}}"><span>Values</span></label>
+                        <input type="text" class="form-control" id="opValue_{{i}}" name="opValue_{{i}}" placeholder="e.g. 15,20,30 (required)" required [(ngModel)]="config.operations[i].config.value">
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <button class="btn btn-link btn-block" type="button" (click)="newOperation()" >
+                    <div class="pull-left float-left">add operation</div>
+                </button>
+            </div>
         </div>
 
 
-
-
-
-
-        <ng-template *ngIf="config.operations.length > 1">
-            <div class="form-group">
-                <label for="opSource"><span>Operation Source</span></label>
-                <input type="text" class="form-control" id="opSource" name="opSource" placeholder="e.g. device Id" required autofocus [(ngModel)]="config.operations[1].deviceId">
-            </div>
-            <div *ngFor="let op of config.operations">
-                <div class="form-group">
-                    <label for="opValue"><span>Value</span></label>
-                    <input type="text" class="form-control" id="opValue" name="opValue" placeholder="e.g. 15,20,30 (required)" required [(ngModel)]="op.config.value">
-                </div>
-            </div>
-        </ng-template>
 
         <div class="form-group">
             <label for="unit"><span>Unit</span></label>
@@ -89,23 +80,6 @@ export interface SeriesValueSimulationStrategyConfig extends OperationSupport<Se
             <input type="number" class="form-control" id="interval" name="interval" placeholder="e.g. 5 (required)" required [(ngModel)]="config.interval">
         </div>  
     `,
-    styles: [`
-    :host >>> .panel.dtdl-simulator-measurement-panel .panel-title{
-         width: 100%;
-     }
-
-     .measurement-accordion {
-        padding-bottom: 10px;
-     }
-     .measurement-accordion label {
-        font-size: 12px;
-    }
-    .measurement-accordion input, .measurement-accordion select {
-        font-size: 12px;
-        height: 24px;
-    }
-
-    `],
     viewProviders: [{ provide: ControlContainer, useExisting: NgForm }]
 })
 export class SeriesValueSimulationStrategyConfigComponent extends SimulationStrategyConfigComponent {
@@ -116,6 +90,29 @@ export class SeriesValueSimulationStrategyConfigComponent extends SimulationStra
     }
 
     config: SeriesValueSimulationStrategyConfig;
+
+    newOperation() {
+
+        let c: SeriesValueSimulationStrategyConfig = {
+            deviceId: "",
+            fragment: "temperature_measurement",
+            series: "T",
+            value: "10, 20, 30",
+            unit: "C",
+            interval: 5,
+            operations: undefined
+        };
+
+        let opDef: OperationDefinitions<any> = {
+            config: c,
+            deviceId: "",
+            payloadFragment: "default",
+            matchingValue: "default"
+        };
+
+        this.config.operations.push(opDef);
+        console.log(this.config.operations);
+    }
 
     initializeConfig() {
         let c: SeriesValueSimulationStrategyConfig = {
@@ -132,7 +129,7 @@ export class SeriesValueSimulationStrategyConfigComponent extends SimulationStra
             config: c,
             deviceId: "",
             payloadFragment: "default",
-            matchingValue: ""
+            matchingValue: "default"
         };
 
         //New objects can duplicate the default so it can be restored
@@ -141,4 +138,5 @@ export class SeriesValueSimulationStrategyConfigComponent extends SimulationStra
         this.config = _.cloneDeep(c);
         this.config.operations.push(opDef);
     }
+
 }
