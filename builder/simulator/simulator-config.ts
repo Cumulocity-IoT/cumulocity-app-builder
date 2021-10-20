@@ -27,7 +27,8 @@ export interface OperationDefinitions<T> {
     deviceId: string,
     payloadFragment: string,
     matchingValue: string,
-    config: T
+    opReply: boolean,
+    config: T;
 }
 
 

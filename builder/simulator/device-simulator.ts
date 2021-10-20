@@ -17,8 +17,8 @@
  */
 
 import { InjectionToken } from '@angular/core';
-import { Observable, Subscription } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { Observable, Subscription, from } from 'rxjs';
+import { mergeAll, mergeMap, tap } from 'rxjs/operators';
 
 export const HOOK_SIMULATION_STRATEGY_FACTORY = new InjectionToken('SimulationStrategy');
 
@@ -26,7 +26,7 @@ export const HOOK_SIMULATION_STRATEGY_FACTORY = new InjectionToken('SimulationSt
  * An abstract simulator interface, all simulators should extend this
  */
 export abstract class DeviceSimulator {
-    
+
     private subs: Subscription[];
 
     started = false;
@@ -40,10 +40,10 @@ export abstract class DeviceSimulator {
         if (!this.started) throw Error("Simulator already stopped");
         this.started = false;
         this.onStop();
-        if( this.subs ) {
-            this.subs.forEach( s => s.unsubscribe() );
+        if (this.subs) {
+            this.subs.forEach(s => s.unsubscribe());
         }
-        
+
     }
 
     abstract onStart();
@@ -54,11 +54,20 @@ export abstract class DeviceSimulator {
      * subscribe to an observable that channels the 
      * operations to the simulator
      */
-    public subscribeToOperations( opSource$ : Observable<any[]> ) : void {
+    public subscribeToOperations(opSource$: Observable<any[]>): void {
         this.subs = []; //belt and braces
-        
+
         //if we have config for operations - skip otherwise
-        this.subs.push(opSource$.subscribe( v => this.onOperation(v)) );
+        this.subs.push(
+            opSource$.pipe(
+                mergeAll(),
+            ).subscribe(v => {
+                if (v.status != "FAILED" && v.status != "SUCCESSFUL") {
+                    this.onOperation(v);
+                }
+
+            })
+        );
     }
 
     /**
@@ -69,14 +78,14 @@ export abstract class DeviceSimulator {
      * @param param The parameters passed to the operation
      * @returns true if operation succeeds
      */
-    public onOperation(param:any) : boolean {
-        console.log("SIM operation = ", param )
+    public async onOperation(param: any): Promise<boolean> {
+        console.log("SIM operation = ", param);
         return false;
     }
 
     isStarted() {
-        return this.started
+        return this.started;
     };
 
-    onReset() {};
+    onReset() { };
 }

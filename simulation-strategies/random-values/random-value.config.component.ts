@@ -22,7 +22,7 @@ import { OperationDefinitions, OperationSupport } from "builder/simulator/simula
 import { SimulationStrategyConfigComponent } from "../../builder/simulator/simulation-strategy";
 import * as _ from 'lodash';
 
-export interface RandomValueSimulationStrategyConfig extends OperationSupport<RandomValueSimulationStrategyConfigComponent> {
+export interface RandomValueSimulationStrategyConfig extends OperationSupport<RandomValueSimulationStrategyConfig> {
     deviceId: string,
     fragment: string,
     series: string,
@@ -42,14 +42,52 @@ export interface RandomValueSimulationStrategyConfig extends OperationSupport<Ra
             <label for="series"><span>Series</span></label>
             <input type="text" class="form-control" id="series" name="series" placeholder="e.g. T (required)" required autofocus [(ngModel)]="config.series">
         </div>
+
         <div class="form-group">
-            <label for="minvalue"><span>Minimum Value</span></label>
-            <input type="number" class="form-control" id="minvalue" name="minvalue" placeholder="e.g. 10 (required)" required [(ngModel)]="config.minValue">
-        </div> 
-        <div class="form-group">
-            <label for="maxvalue"><span>Maximum Value</span></label>
-            <input type="number" class="form-control" id="maxvalue" name="maxvalue" placeholder="e.g. 20 (required)" required [(ngModel)]="config.maxValue">
-        </div> 
+            <!-- <div> {{config.operations | json}} </div> -->
+            <label for="value"><span>Default Value</span></label>
+            <div class="form-group">
+                <label for="minvalue"><span>Minimum Value</span></label>
+                <input type="number" class="form-control" id="minvalue" name="minvalue" placeholder="e.g. 10 (required)" required [(ngModel)]="config.operations[0].config.minValue">
+            </div>
+            <div class="form-group">
+                <label for="maxvalue"><span>Maximum Value</span></label>
+                <input type="number" class="form-control" id="maxvalue" name="maxvalue" placeholder="e.g. 20 (required)" required [(ngModel)]="config.operations[0].config.maxValue">
+            </div>
+            <!-- <input type="text" class="form-control" id="value" name="value" placeholder="e.g. 15,20,30 (required)" required [(ngModel)]="config.operations[0].config.value"> -->
+            <div class="form-group" *ngIf="config.operations.length > 1">
+                <label for="opSource"><span>Operation Source</span></label>
+                <input type="text" class="form-control" id="opSource" name="opSource" placeholder="e.g. device Id" required autofocus [(ngModel)]="config.operations[1].deviceId">
+                <label for="opPayload"><span>payload key</span></label>
+                <input type="text" class="form-control" id="opPayload" name="opPayload" placeholder="e.g. c8y_command.text" required autofocus [(ngModel)]="config.operations[1].payloadFragment">
+                <label for="opReply"><span>mark operation handled</span></label>
+                <input class="form-check-input" type="checkbox" id="opReply" name="opReply" [(ngModel)]="config.operations[1].opReply">
+            </div>
+            <div class="form-group" *ngIf="config.operations.length > 1">
+                <div *ngFor="let op of config.operations; let i = index">
+                    <div class="form-group" *ngIf="i > 0">
+                        <label for="opMatch_{{i}}"><span>Matching</span></label>
+                        <input type="text" class="form-control" id="opMatch_{{i}}" name="opMatch_{{i}}" placeholder="e.g. WINDY" required [(ngModel)]="config.operations[i].matchingValue">
+                        <div class="form-group">
+                            <label for="minvalue_{{i}}"><span>Minimum Value</span></label>
+                            <input type="number" class="form-control" id="minvalue_{{i}}" name="minvalue_{{i}}" placeholder="e.g. 10 (required)" required [(ngModel)]="config.operations[i].config.minValue">
+                        </div>
+                        <div class="form-group">
+                            <label for="maxvalue_{{i}}"><span>Maximum Value</span></label>
+                            <input type="number" class="form-control" id="maxvalue_{{i}}" name="maxvalue_{{i}}" placeholder="e.g. 20 (required)" required [(ngModel)]="config.operations[i].config.maxValue">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <button class="btn btn-link btn-block" type="button" (click)="newOperation()" >
+                    <div class="pull-left float-left">add operation</div>
+                </button>
+            </div>
+        </div>
+
+
+
         <div class="form-group">
             <label for="unit"><span>Unit</span></label>
             <input type="text" class="form-control" id="unit" name="unit" placeholder="e.g. C (optional)" [(ngModel)]="config.unit">
@@ -68,6 +106,29 @@ export class RandomValueSimulationStrategyConfigComponent extends SimulationStra
         return c;
     }
     config: RandomValueSimulationStrategyConfig;
+    newOperation() {
+        let c: RandomValueSimulationStrategyConfig = {
+            deviceId: "",
+            fragment: "temperature_measurement",
+            series: "T",
+            minValue: 10,
+            maxValue: 20,
+            unit: "C",
+            interval: 5,
+            operations: undefined
+        };
+
+        let opDef: OperationDefinitions<any> = {
+            config: c,
+            deviceId: "",
+            payloadFragment: "default",
+            matchingValue: "default",
+            opReply: false
+        };
+
+        this.config.operations.push(opDef);
+        console.log(this.config.operations);
+    }
 
     initializeConfig() {
         let c: RandomValueSimulationStrategyConfig = {
@@ -85,7 +146,8 @@ export class RandomValueSimulationStrategyConfigComponent extends SimulationStra
             config: c,
             deviceId: "",
             payloadFragment: "default",
-            matchingValue: ""
+            matchingValue: "default",
+            opReply: false
         };
 
         //New objects can duplicate the default so it can be restored

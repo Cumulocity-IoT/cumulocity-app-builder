@@ -16,12 +16,12 @@
 * limitations under the License.
  */
 
-import {ApplicationService, IApplication, IOperation} from "@c8y/client";
-import {DeviceSimulator} from "../device-simulator";
-import {SimulatorConfig} from "../simulator-config";
-import {SimulatorWorkerAPI} from "./simulator-worker-api.service";
-import {AppIdService} from "../../app-id.service";
-import {LOCK_TIMEOUT, SimulationLockService} from "./simulation-lock.service";
+import { ApplicationService, IApplication, IOperation } from "@c8y/client";
+import { DeviceSimulator } from "../device-simulator";
+import { SimulatorConfig } from "../simulator-config";
+import { SimulatorWorkerAPI } from "./simulator-worker-api.service";
+import { AppIdService } from "../../app-id.service";
+import { LOCK_TIMEOUT, SimulationLockService } from "./simulation-lock.service";
 import {
     switchMap,
     map,
@@ -30,16 +30,16 @@ import {
     withLatestFrom,
     debounceTime
 } from "rxjs/operators";
-import {interval, merge, Observable, of, Subscription} from "rxjs";
+import { interval, merge, Observable, of, Subscription } from "rxjs";
 import * as deepEqual from "fast-deep-equal";
-import {SimulationStrategiesService} from "../simulation-strategies.service";
-import {Injectable} from "@angular/core";
+import { SimulationStrategiesService } from "../simulation-strategies.service";
+import { Injectable } from "@angular/core";
 
 export interface DeviceSimulatorInstance {
     id: number,
     type: string,
     instance: DeviceSimulator,
-    deviceId: string
+    deviceId: string;
 }
 
 /**
@@ -49,7 +49,7 @@ export interface DeviceSimulatorInstance {
 export class SimulatorManagerService {
     simulatorInstances: DeviceSimulatorInstance[] = [];
     simulatorConfigById = new Map<number, SimulatorConfig>();
-    operations$ : Observable<any[]>;
+    operations$: Observable<any[]>;
 
     private lockRefreshSubscription = new Subscription();
 
@@ -57,7 +57,7 @@ export class SimulatorManagerService {
         private simulatorWorkerAPI: SimulatorWorkerAPI, private appService: ApplicationService,
         private appIdService: AppIdService, private lockService: SimulationLockService,
         private simulationStrategiesService: SimulationStrategiesService,
-    ) {}
+    ) { }
 
     initialize() {
         const appIdLockOrConfigChange = this.appIdService.appIdDelayedUntilAfterLogin$.pipe(
@@ -73,7 +73,7 @@ export class SimulatorManagerService {
                         debounceTime(100),
                         switchMap(() => this.appService.detail(appId)),
                         map(res => res.data),
-                        map((application: IApplication & { applicationBuilder: any })  => application.applicationBuilder.simulators || []),
+                        map((application: IApplication & { applicationBuilder: any; }) => application.applicationBuilder.simulators || []),
                         // Check to see if the simulator config has changed
                         distinctUntilChanged((prev, curr) => deepEqual(prev, curr))
                     );
@@ -81,29 +81,29 @@ export class SimulatorManagerService {
                     return merge(
                         of(appId).pipe(
                             tap((appId) => { //console.debug("AppID changed:", appId); 
-                        })
+                            })
                         ),
                         lockStatusChanges$.pipe(
                             tap((lockStatus) => { //console.debug("Lock status changed:", lockStatus); 
-                        })
+                            })
                         ),
                         simulatorConfigChanges$.pipe(
                             tap((simulatorConfigs) => { //console.debug("Simulator config changed:", simulatorConfigs); 
-                        })
+                            })
                         )
                     ).pipe(
                         withLatestFrom(lockStatusChanges$),
-                        map(([_, lockStatus]) => ({appId, isLocked: lockStatus.isLocked, isLockOwned: lockStatus.isLockOwned}))
-                    )
+                        map(([_, lockStatus]) => ({ appId, isLocked: lockStatus.isLocked, isLockOwned: lockStatus.isLockOwned }))
+                    );
                 } else {
                     // If there's no app id then we just say that it's locked and we don't own the lock....
-                    return of({appId: undefined, isLocked: true, isLockOwned: false});
+                    return of({ appId: undefined, isLocked: true, isLockOwned: false });
                 }
             })
         );
 
         // Listen for any of appId, simulatorConfig, or lockStatus changes and then reload or clear the simulators
-        appIdLockOrConfigChange.subscribe(({appId, isLocked, isLockOwned}) => {
+        appIdLockOrConfigChange.subscribe(({ appId, isLocked, isLockOwned }) => {
             this.lockRefreshSubscription.unsubscribe();
             if (appId == undefined) {
                 // console.debug("No appId: Clearing simulators");
@@ -113,16 +113,16 @@ export class SimulatorManagerService {
             } else {
                 const simulatorConfigLoaded = this.loadSimulatorConfig(appId);
                 if (isLockOwned) {
-                   // console.debug("Lock owned: Creating/Recreating simulators");
+                    // console.debug("Lock owned: Creating/Recreating simulators");
                     simulatorConfigLoaded.then(() => this.reloadSimulators());
                     // Refresh the lock every LOCK_TIMEOUT/2
-                    this.lockRefreshSubscription = interval(LOCK_TIMEOUT/2).subscribe(() => this.lockService.refreshLock(appId));
+                    this.lockRefreshSubscription = interval(LOCK_TIMEOUT / 2).subscribe(() => this.lockService.refreshLock(appId));
                 } else if (!isLocked) {
-                   // console.debug("Unlocked: Clearing simulators and attempting to take lock");
+                    // console.debug("Unlocked: Clearing simulators and attempting to take lock");
                     this.clearSimulators();
                     this.lockService.takeLock(appId); // After successfully taking the lock we'll get a lockStatus change so the simulators will be reloaded automatically
                 } else {
-                  //  console.debug("Locked: Clearing simulators");
+                    //  console.debug("Locked: Clearing simulators");
                     this.clearSimulators();
                 }
             }
@@ -132,7 +132,7 @@ export class SimulatorManagerService {
             if (appId) {
                 return this.lockService.lockStatus$(appId);
             } else {
-                return of({isLocked: false, isLockOwned: false});
+                return of({ isLocked: false, isLockOwned: false });
             }
         })).subscribe(lockStatus => {
             this.simulatorWorkerAPI._lockStatus$.next(lockStatus);
@@ -141,14 +141,14 @@ export class SimulatorManagerService {
         this.operations$ = this.simulatorWorkerAPI._incomingOperations.pipe(
             //tap( data => console.log("MANAGER", data)),
             distinctUntilChanged((prev, curr) => deepEqual(prev, curr))
-        )
+        );
 
     }
 
     async loadSimulatorConfig(appId: string) {
         this.simulatorConfigById.clear();
 
-        const app = (await this.appService.detail(appId)).data as IApplication & {applicationBuilder: any};
+        const app = (await this.appService.detail(appId)).data as IApplication & { applicationBuilder: any; };
         if (app.applicationBuilder.simulators) {
             const sortedSimulators = app.applicationBuilder.simulators.sort((a, b) => a.name > b.name ? 1 : -1);
             for (let simulatorConfig of sortedSimulators as SimulatorConfig[]) {
@@ -176,7 +176,7 @@ export class SimulatorManagerService {
     }
 
     createInstance(simulatorConfig: SimulatorConfig): DeviceSimulator | undefined {
-        if (!simulatorConfig.started){
+        if (!simulatorConfig.started) {
             return undefined;
         }
 
@@ -195,16 +195,5 @@ export class SimulatorManagerService {
         instance.start();
         instance.subscribeToOperations(this.operations$);
         return instance;
-    }
-
-    updateSimulators(operations: any[]) : void {
-        let op: any;
-        for ( op in operations)  {
-            this.simulatorInstances.forEach( sim => {
-                sim.instance.onOperation(operations[op]);
-            })
-            
-        }
-        
     }
 }

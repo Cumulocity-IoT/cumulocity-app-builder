@@ -52,6 +52,10 @@ export interface SeriesValueSimulationStrategyConfig extends OperationSupport<Se
                 <input type="text" class="form-control" id="opSource" name="opSource" placeholder="e.g. device Id" required autofocus [(ngModel)]="config.operations[1].deviceId">
                 <label for="opPayload"><span>payload key</span></label>
                 <input type="text" class="form-control" id="opPayload" name="opPayload" placeholder="e.g. c8y_command.text" required autofocus [(ngModel)]="config.operations[1].payloadFragment">
+                <label for="opReply"><span>mark operation handled</span></label>
+                <input class="form-check-input" type="checkbox" id="opReply" name="opReply" [(ngModel)]="config.operations[1].opReply">
+            </div>
+            <div class="form-group" *ngIf="config.operations.length > 1">
                 <div *ngFor="let op of config.operations; let i = index">
                     <div class="form-group" *ngIf="i > 0">
                         <label for="opMatch_{{i}}"><span>Matching</span></label>
@@ -61,15 +65,12 @@ export interface SeriesValueSimulationStrategyConfig extends OperationSupport<Se
                     </div>
                 </div>
             </div>
-
             <div>
                 <button class="btn btn-link btn-block" type="button" (click)="newOperation()" >
                     <div class="pull-left float-left">add operation</div>
                 </button>
             </div>
         </div>
-
-
 
         <div class="form-group">
             <label for="unit"><span>Unit</span></label>
@@ -107,7 +108,8 @@ export class SeriesValueSimulationStrategyConfigComponent extends SimulationStra
             config: c,
             deviceId: "",
             payloadFragment: "default",
-            matchingValue: "default"
+            matchingValue: "default",
+            opReply: false
         };
 
         this.config.operations.push(opDef);
@@ -129,7 +131,8 @@ export class SeriesValueSimulationStrategyConfigComponent extends SimulationStra
             config: c,
             deviceId: "",
             payloadFragment: "default",
-            matchingValue: "default"
+            matchingValue: "default",
+            opReply: false
         };
 
         //New objects can duplicate the default so it can be restored

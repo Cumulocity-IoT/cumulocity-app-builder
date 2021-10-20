@@ -264,7 +264,8 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
             config: c,
             deviceId: "",
             payloadFragment: "default",
-            matchingValue: ""
+            matchingValue: "",
+            opReply: false
         };
 
         //New objects can duplicate the default so it can be restored

@@ -84,7 +84,8 @@ export class FirmwareUpdateSimulationStrategyConfigComponent extends SimulationS
             config: c,
             deviceId: "",
             payloadFragment: "default",
-            matchingValue: ""
+            matchingValue: "",
+            opReply: false
         };
 
         //New objects can duplicate the default so it can be restored
