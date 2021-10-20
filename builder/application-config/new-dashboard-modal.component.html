@@ -122,7 +122,7 @@
                 </ng-template>
 
                 <div class="form-group" style="min-height: 50px;" *ngIf="creationMode === 'group-template' else nonGroupTemplate">
-                    <label for="group"><span>Group </span></label>
+                    <label for="group"><span>Group/Asset </span></label>
                    <!--  <input type="text" class="form-control" id="group" name="group" placeholder="e.g. 12345" [(ngModel)]="deviceId"> -->
                     <device-selector id="groupId" name="groupId" [isGroup]="true" [(value)]="deviceName" [placeHolder]="'Type your Group Name'" [required]="true"
                     (selectedDevice)= "getSelectedDevice($event)"  (onBlurDevice)= "getSelectedDevice($event)"></device-selector>

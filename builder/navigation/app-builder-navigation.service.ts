@@ -87,7 +87,7 @@ export class AppBuilderNavigationService implements NavigatorNodeFactory {
             }, hierarchy);
 
             if (dashboard.groupTemplate) {
-                const childAssets = (await this.inventoryService.childAssetsList(dashboard.deviceId, {pageSize: 2000, query: 'has(c8y_IsDevice)'})).data;
+                const childAssets = (await this.inventoryService.childAssetsList(dashboard.deviceId, {pageSize: 2000, query: 'hasany(c8y_IsDevice,c8y_IsAsset)'})).data;
                 for (const device of childAssets) {
                     const nodeName = device.name || device.id;
                     const navNode = new NavigatorNode({
