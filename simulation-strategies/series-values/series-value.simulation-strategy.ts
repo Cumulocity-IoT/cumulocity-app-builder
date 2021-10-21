@@ -57,15 +57,15 @@ export class SeriesValueSimulationStrategy extends DeviceIntervalSimulator {
     public async onOperation(param: any): Promise<boolean> {
         //console.log("Series operation = ", param);
         if (this.config.operations.length > 1) {
-            if (_.has(param, "deviceId") && _.get(param, "deviceId") == this.config.operations[1].deviceId) {
+            if (_.has(param, "deviceId") && _.get(param, "deviceId") == this.config.opSource) {
                 for (let cfg of this.config.operations) {
-                    if (_.has(param, this.config.operations[1].payloadFragment) && _.get(param, this.config.operations[1].payloadFragment) == cfg.matchingValue) {
+                    if (_.has(param, this.config.payloadFragment) && _.get(param, this.config.payloadFragment) == cfg.matchingValue) {
                         console.log(`Matched ${cfg.matchingValue} setting cfg = `, cfg.config);
                         this.config.value = cfg.config.value;
                         let vCfg = this.getValueSeriesConfigParam(this.config.deviceId);
                         vCfg.seriesvalues = this.config.value.split(',').map(value => parseFloat(value.trim()));
                         vCfg.seriesValueMeasurementCounter = 0;
-                        if (this.config.operations[1].opReply == true) {
+                        if (this.config.opReply == true) {
                             const partialUpdateObject: Partial<IOperation> = {
                                 id: param.id,
                                 status: OperationStatus.SUCCESSFUL

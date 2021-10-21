@@ -62,6 +62,10 @@ export class PositionUpdateSimulationStrategyConfigComponent extends SimulationS
     initializeConfig() {
         let c: PositionUpdateSimulationStrategyConfig = {
             deviceId: "",
+            opSource: "",
+            opSourceName: "",
+            payloadFragment:  "c8y_Command.text",
+            opReply: false,
             latitude: "",
             longitude: "",
             altitude: "",
@@ -71,10 +75,7 @@ export class PositionUpdateSimulationStrategyConfigComponent extends SimulationS
 
         let opDef: OperationDefinitions<any> = {
             config: c,
-            deviceId: "",
-            payloadFragment: "default",
-            matchingValue: "",
-            opReply: false
+            matchingValue: "default",
         };
 
         //New objects can duplicate the default so it can be restored

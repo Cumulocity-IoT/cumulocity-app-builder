@@ -69,11 +69,12 @@ export interface RandomWalkSimulationStrategyConfig extends OperationSupport<Ran
             <!-- <input type="text" class="form-control" id="value" name="value" placeholder="e.g. 15,20,30 (required)" required [(ngModel)]="config.operations[0].config.value"> -->
             <div class="form-group" *ngIf="config.operations.length > 1">
                 <label for="opSource"><span>Operation Source</span></label>
-                <input type="text" class="form-control" id="opSource" name="opSource" placeholder="e.g. device Id" required autofocus [(ngModel)]="config.operations[1].deviceId">
+                <device-selector id="opSource" name="opSource" [(value)]="config.opSourceName" [placeHolder]="'Type your Device Name'" [required]="true"
+                    (selectedDevice)= "getSelectedDevice($event)"></device-selector>
                 <label for="opPayload"><span>payload key</span></label>
-                <input type="text" class="form-control" id="opPayload" name="opPayload" placeholder="e.g. c8y_command.text" required autofocus [(ngModel)]="config.operations[1].payloadFragment">
+                <input type="text" class="form-control" id="opPayload" name="opPayload" placeholder="e.g. c8y_command.text" required autofocus [(ngModel)]="config.payloadFragment">
                 <label for="opReply"><span>mark operation handled</span></label>
-                <input class="form-check-input" type="checkbox" id="opReply" name="opReply" [(ngModel)]="config.operations[1].opReply">
+                <input class="form-check-input" type="checkbox" id="opReply" name="opReply" [(ngModel)]="config.opReply">
             </div>
             <div class="form-group" *ngIf="config.operations.length > 1">
                 <div *ngFor="let op of config.operations; let i = index">
@@ -100,7 +101,7 @@ export interface RandomWalkSimulationStrategyConfig extends OperationSupport<Ran
                 </div>
             </div>
             <div>
-                <button class="btn btn-link btn-block" type="button" (click)="newOperation()" >
+            <button class="btn btn-link btn-block" type="button" (click)='newOperation("rand_value",config.operations.length)'>
                     <div class="pull-left float-left">add operation</div>
                 </button>
             </div>
@@ -126,12 +127,22 @@ export class RandomWalkSimulationStrategyConfigComponent extends SimulationStrat
     }
 
     config: RandomWalkSimulationStrategyConfig;
-    newOperation() {
+
+    getSelectedDevice(device: any) {
+        this.config.opSource = device.id;
+        this.config.opSourceName = device.name;
+    }
+
+    newOperation(base: string, index: number ) {
 
         let c: RandomWalkSimulationStrategyConfig = {
             deviceId: "",
+            opSource: "",
+            opSourceName: "",
+            payloadFragment:  "c8y_Command.text",
+            opReply: false,
             fragment: "temperature_measurement",
-            series: "T",
+            series: `${base}_series_${index}`,
             startingValue: 15,
             maxDelta: 3,
             minValue: 10,
@@ -143,10 +154,7 @@ export class RandomWalkSimulationStrategyConfigComponent extends SimulationStrat
 
         let opDef: OperationDefinitions<any> = {
             config: c,
-            deviceId: "",
-            payloadFragment: "default",
-            matchingValue: "",
-            opReply: false
+            matchingValue: `${base}_match_${index}`,
         };
 
         this.config.operations.push(opDef);
@@ -156,6 +164,10 @@ export class RandomWalkSimulationStrategyConfigComponent extends SimulationStrat
     initializeConfig() {
         let c: RandomWalkSimulationStrategyConfig = {
             deviceId: "",
+            opSource: "",
+            opSourceName: "",
+            payloadFragment:  "c8y_Command.text",
+            opReply: false,
             fragment: "temperature_measurement",
             series: "T",
             startingValue: 15,
@@ -169,10 +181,7 @@ export class RandomWalkSimulationStrategyConfigComponent extends SimulationStrat
 
         let opDef: OperationDefinitions<any> = {
             config: c,
-            deviceId: "",
-            payloadFragment: "default",
             matchingValue: "default",
-            opReply: false
         };
 
         //New objects can duplicate the default so it can be restored

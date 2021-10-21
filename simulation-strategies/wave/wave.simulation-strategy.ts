@@ -58,14 +58,14 @@ export class WaveSimulationStrategy extends DeviceIntervalSimulator {
     public async onOperation(param: any): Promise<boolean> {
         //console.log("Wavelength operation = ", param);
         if (this.config.operations.length > 1) {
-            if (_.has(param, "deviceId") && _.get(param, "deviceId") == this.config.operations[1].deviceId) {
+            if (_.has(param, "deviceId") && _.get(param, "deviceId") == this.config.opSource) {
                 for (let cfg of this.config.operations) {
-                    if (_.has(param, this.config.operations[1].payloadFragment) && _.get(param, this.config.operations[1].payloadFragment) == cfg.matchingValue) {
+                    if (_.has(param, this.config.payloadFragment) && _.get(param, this.config.payloadFragment) == cfg.matchingValue) {
                         console.log(`Matched ${cfg.matchingValue} setting cfg = `, cfg.config);
                         this.config.waveType = cfg.config.waveType;
                         this.config.height = cfg.config.height;
                         this.config.wavelength = cfg.config.wavelength;
-                        if (this.config.operations[1].opReply == true) {
+                        if (this.config.opReply == true) {
                             const partialUpdateObject: Partial<IOperation> = {
                                 id: param.id,
                                 status: OperationStatus.SUCCESSFUL

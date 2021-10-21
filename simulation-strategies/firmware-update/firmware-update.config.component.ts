@@ -72,6 +72,10 @@ export class FirmwareUpdateSimulationStrategyConfigComponent extends SimulationS
     initializeConfig() {
         let c: FirmwareUpdateSimulationStrategyConfig = {
             deviceId: "",
+            opSource: "",
+            opSourceName: "",
+            payloadFragment:  "c8y_Command.text",
+            opReply: false,
             firmwareVersions: [
                 { name: "Version 1", version: "1.0.0", url: "https://firmware-repo.cumulocity.com/v1.0.0" },
                 { name: "Version 2", version: "2.0.0", url: "https://firmware-repo.cumulocity.com/v2.0.0" }
@@ -82,10 +86,7 @@ export class FirmwareUpdateSimulationStrategyConfigComponent extends SimulationS
 
         let opDef: OperationDefinitions<any> = {
             config: c,
-            deviceId: "",
-            payloadFragment: "default",
-            matchingValue: "",
-            opReply: false
+            matchingValue: "default",
         };
 
         //New objects can duplicate the default so it can be restored

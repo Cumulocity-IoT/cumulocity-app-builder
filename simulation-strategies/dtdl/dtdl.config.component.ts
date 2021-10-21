@@ -252,6 +252,10 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
         this.configModel = [];
         let c: DtdlSimulationStrategyConfig = {
             deviceId: "",
+            opSource: "",
+            opSourceName: "",
+            payloadFragment:  "c8y_Command.text",
+            opReply: false,
             modalSize: "modal-md",
             deviceName: "",
             dtdlModelConfig: [],
@@ -262,10 +266,7 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
 
         let opDef: OperationDefinitions<any> = {
             config: c,
-            deviceId: "",
-            payloadFragment: "default",
-            matchingValue: "",
-            opReply: false
+            matchingValue: "default",
         };
 
         //New objects can duplicate the default so it can be restored

@@ -22,12 +22,14 @@ import {WaveSimulationStrategyFactory} from "./wave.simulation-strategy";
 import {CommonModule} from "@angular/common";
 import {FormsModule} from "@angular/forms";
 import { HOOK_SIMULATION_STRATEGY_FACTORY } from '../../builder/simulator/device-simulator';
+import { DeviceSelectorModule } from '../../device-selector/device-selector.module';
 
 
 @NgModule({
     imports: [
         CommonModule,
-        FormsModule
+        FormsModule,
+        DeviceSelectorModule
     ],
     declarations: [
         WaveSimulationStrategyConfigComponent
