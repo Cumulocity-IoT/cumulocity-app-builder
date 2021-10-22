@@ -20,14 +20,14 @@ import {NgModule} from "@angular/core";
 import {NgSelectModule} from "@ng-select/ng-select";
 import {DeviceSelectorComponent} from "./device-selector.component";
 import {FormsModule} from "@angular/forms";
-import {CoreModule} from "@c8y/ngx-components";
+import { CommonModule } from '@angular/common';  
 import { TypeaheadModule } from 'ngx-bootstrap/typeahead';
 
 @NgModule({
     imports: [
         NgSelectModule,
         FormsModule,
-        CoreModule,
+        CommonModule,
         TypeaheadModule.forRoot(),
     ],
     declarations: [

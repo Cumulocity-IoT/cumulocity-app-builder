@@ -24,10 +24,7 @@ import { SimulationStrategyMetadata } from "./simulation-strategy.decorator";
  *  instances of this are additional to the "default"
  */
 export interface OperationDefinitions<T> {
-    deviceId: string,
-    payloadFragment: string,
     matchingValue: string,
-    opReply: boolean,
     config: T;
 }
 
@@ -41,6 +38,10 @@ export interface OperationDefinitions<T> {
  */
 
 export interface OperationSupport<T> {
+    opSource?: string, //device id
+    opSourceName?: string,
+    payloadFragment?: string,
+    opReply?: boolean,
     operations?: Array<OperationDefinitions<T>>;
 }
 

@@ -66,19 +66,22 @@ export interface SeriesValueSimulationStrategyConfig extends OperationSupport<Se
                             <i *ngIf="!opGroup.isOpen" class="fa fa-caret-down"></i></span>
                         </button>
                         <div class="row">
-                            <div class="col-lg-6" style="margin-bottom: 10px;">
+                            <div class="col-lg-6 op-field">
                                 <label for="opSource"><span>Operation Source</span></label>
-                                <input type="text" class="form-control" id="opSource" name="opSource" placeholder="e.g. device Id" required autofocus [(ngModel)]="config.operations[1].deviceId">
+                                <device-selector id="opSource" name="opSource" [(value)]="config.opSourceName" [placeHolder]="'Type your Device Name'" [required]="true" (selectedDevice)= "getSelectedDevice($event)"></device-selector>
                             </div>
-                            <div class="col-lg-6" style="margin-bottom: 10px;">
-                                <label for="opPayload"><span>Payload key</span></label>
-                                <input type="text" class="form-control" id="opPayload" name="opPayload" placeholder="e.g. c8y_command.text" required autofocus [(ngModel)]="config.operations[1].payloadFragment">
+                            <div class="col-lg-6 op-field">
+                                <label for="opPayload"><span>Payload Key</span></label>
+                                <input type="text" class="form-control" id="opPayload" name="opPayload" placeholder="e.g. c8y_command.text" required autofocus [(ngModel)]="config.payloadFragment">
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-lg-12" style="margin-bottom: 10px;">
-                                <label for="opReply"><span>Mark operation handled</span></label>
-                                <input class="form-check-input" type="checkbox" id="opReply" name="opReply" [(ngModel)]="config.operations[1].opReply">
+                            <div class="col-lg-12 op-field">
+                                <label class="c8y-checkbox">
+                                    <input type="checkbox" id="opReply" name="opReply" [(ngModel)]="config.opReply" />
+                                    <span></span>
+                                    <span>Mark operation handled</span>
+                                </label>
                             </div>
                         </div>
                         <hr /> 
@@ -86,17 +89,17 @@ export interface SeriesValueSimulationStrategyConfig extends OperationSupport<Se
                             <ng-container *ngIf="i > 0">
                                 <div class="col-lg-12">
                                     <div class="row">
-                                        <div class="col-lg-6" style="margin-bottom: 10px;">
+                                        <div class="col-lg-6 op-field">
                                             <label for="opMatch_{{i}}"><span>Matching</span></label>
                                             <input type="text" class="form-control" id="opMatch_{{i}}" name="opMatch_{{i}}" placeholder="e.g. WINDY" required [(ngModel)]="config.operations[i].matchingValue">
                                         </div>
-                                        <div class="col-lg-6" style="margin-bottom: 10px;">
+                                        <div class="col-lg-6 op-field">
                                             <label for="opValue_{{i}}"><span>Values</span></label>
                                             <input type="text" class="form-control" id="opValue_{{i}}" name="opValue_{{i}}" placeholder="e.g. 15,20,30 (required)" required [(ngModel)]="config.operations[i].config.value">
                                         </div>
                                     </div>
                                     <div class="row">
-                                        <div class="col-lg-6" style="margin-bottom: 10px;">
+                                        <div class="col-lg-6 op-field">
                                             <button class="btn btn-link btn-block" type="button" (click)="newOperation()">
                                                 <div class="pull-left float-left">Remove condition</div>
                                             </button>
@@ -128,6 +131,9 @@ export interface SeriesValueSimulationStrategyConfig extends OperationSupport<Se
     :host >>> .panel.dtdl-simulator-measurement-panel .panel-title{
          width: 100%;
      }
+    .op-field {
+        margin-bottom: 10px;
+    }
     `],
     viewProviders: [{ provide: ControlContainer, useExisting: NgForm }]
 })
@@ -140,12 +146,21 @@ export class SeriesValueSimulationStrategyConfigComponent extends SimulationStra
 
     config: SeriesValueSimulationStrategyConfig;
 
-    newOperation() {
+    getSelectedDevice(device: any) {
+        this.config.opSource = device.id;
+        this.config.opSourceName = device.name;
+    }
+
+    newOperation(base: string, index: number ) {
 
         let c: SeriesValueSimulationStrategyConfig = {
             deviceId: "",
+            opSource: "",
+            opSourceName: "",
+            payloadFragment:  "c8y_Command.text",
+            opReply: false,
             fragment: "temperature_measurement",
-            series: "T",
+            series: `${base}_series_${index}`,
             value: "10, 20, 30",
             unit: "C",
             interval: 5,
@@ -154,10 +169,7 @@ export class SeriesValueSimulationStrategyConfigComponent extends SimulationStra
 
         let opDef: OperationDefinitions<any> = {
             config: c,
-            deviceId: "",
-            payloadFragment: "default",
-            matchingValue: "default",
-            opReply: false
+            matchingValue: `${base}_match_${index}`,
         };
 
         this.config.operations.push(opDef);
@@ -167,6 +179,10 @@ export class SeriesValueSimulationStrategyConfigComponent extends SimulationStra
     initializeConfig() {
         let c: SeriesValueSimulationStrategyConfig = {
             deviceId: "",
+            opSource: "",
+            opSourceName: "",
+            payloadFragment:  "c8y_Command.text",
+            opReply: false,
             fragment: "temperature_measurement",
             series: "T",
             value: "10, 20, 30",
@@ -177,10 +193,7 @@ export class SeriesValueSimulationStrategyConfigComponent extends SimulationStra
 
         let opDef: OperationDefinitions<any> = {
             config: c,
-            deviceId: "",
-            payloadFragment: "default",
             matchingValue: "default",
-            opReply: false
         };
 
         //New objects can duplicate the default so it can be restored
