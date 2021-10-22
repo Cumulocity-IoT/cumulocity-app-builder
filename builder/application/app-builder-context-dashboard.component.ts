@@ -24,7 +24,7 @@ import {last} from "lodash-es";
 import {SMART_RULES_AVAILABILITY_TOKEN} from "./smartrules/smart-rules-availability.upgraded-provider";
 import {IApplicationBuilderApplication} from "../iapplication-builder-application";
 import {AppStateService} from "@c8y/ngx-components";
-// import {RuntimeWidgetInstallerModalService} from "cumulocity-runtime-widget-loader";
+import {RuntimeWidgetInstallerModalService} from "cumulocity-runtime-widget-loader";
 import { timeout } from 'rxjs/operators';
 
 @Component({
@@ -87,7 +87,7 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
         @Inject(SMART_RULES_AVAILABILITY_TOKEN) private c8ySmartRulesAvailability: any,
         private userService: UserService,
         private appStateService: AppStateService,
-   //     private runtimeWidgetInstallerModalService: RuntimeWidgetInstallerModalService
+        private runtimeWidgetInstallerModalService: RuntimeWidgetInstallerModalService
     ) {
         this.subscriptions.add(this.activatedRoute.paramMap.subscribe(async paramMap => {
             // Always defined
@@ -240,7 +240,7 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
     }
 
     showInstallModal() {
-//        this.runtimeWidgetInstallerModalService.show();
+        this.runtimeWidgetInstallerModalService.show();
     }
 
     hasAdminRights() {
