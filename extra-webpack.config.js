@@ -1,13 +1,22 @@
 const webpack = require("webpack");
 const WorkerPlugin = require('worker-plugin');
 const URLImportPlugin  = require("webpack-external-import/webpack");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = function config() {
     return {
-        output: {
+       output: {
             globalObject: "self"
         },
         plugins: [
+            new CopyWebpackPlugin(
+            {
+                patterns: [
+                   {
+                      from: "./ui-assets/fonts",
+                      to: "./fonts/",
+                }],
+            }),
             new webpack.DefinePlugin({
                 __VERSION__: JSON.stringify(require('./package').version),
                 /* Required to be able to run the @c8y/Client inside a Worker */

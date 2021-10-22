@@ -20,6 +20,7 @@ import {Component} from "@angular/core";
 import {
     ApplicationService,
     IApplication,
+   Realtime,
    // PagingStrategy,
    // RealtimeAction,
     UserService
@@ -31,53 +32,71 @@ import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import {NewApplicationModalComponent} from "./new-application-modal.component";
 import {Router} from "@angular/router";
 import {contextPathFromURL} from "../utils/contextPathFromURL";
+import { AppListService } from "./app-list.service";
 
 @Component({
     templateUrl: './app-list.component.html'
 })
 export class AppListComponent {
-    applications: Observable<IApplication[]>;
+ //   applications: Observable<IApplication[]>;
+    applications: IApplication[];
 
     userHasAdminRights: boolean;
 
     bsModalRef: BsModalRef;
 
-    constructor(private router: Router, private appService: ApplicationService, private appStateService: AppStateService, private modalService: BsModalService, private userService: UserService) {
+    constructor(private router: Router, private appService: ApplicationService, 
+        private appStateService: AppStateService, private modalService: BsModalService, 
+        private userService: UserService, private appListService: AppListService, private realTimeService: Realtime) {
         
         this.userHasAdminRights = userService.hasRole(appStateService.currentUser.value, "ROLE_APPLICATION_MANAGEMENT_ADMIN")
+        this.appListService.refreshAppList$.subscribe( () => {
+            console.log('subscribe refresh app list');
+            this.getListOfApplications();
+
+        });
+        this.realTimeService.subscribe(
+            `/applications`,
+            async (response) => {
+              if (response && response.data) {
+                console.log('application realtime', response.data);
+              }
+        });
+        this.getListOfApplications();
         
+    }
+
+    private async getListOfApplications() {
+
         // Get a list of the applications on the tenant (This includes live updates)
         if(this.userHasAdminRights){
-            /* this.applications = from(this.appService.list$({ pageSize: 2000, withTotalPages: true }, {
-                hot: true,
-                pagingStrategy: PagingStrategy.ALL,
-                realtime: true,
-                realtimeAction: RealtimeAction.FULL,
-                pagingDelay: 0.1
-            }))
-                .pipe(
-                    // Some users can't get the full list of applications (they don't have permission) so we get them by user instead (without live updates)
-                    catchError(() =>
-                        from(this.appService.listByUser(appStateService.currentUser.value, { pageSize: 2000 }).then(res => res.data))
-                    ),
-                    map(apps => apps.filter(app => app.hasOwnProperty('applicationBuilder'))),
-                    map(apps => apps.sort((a, b) => a.id > b.id ? 1 : -1) )
-                ); */
+            this.applications =  ( await this.appService.list({ pageSize: 2000, withTotalPages: true }) as any).data ;
+            if(!this.applications || this.applications.length  === 0) {
+                this.applications = ( await this.appService.listByUser(this.appStateService.currentUser.value, { pageSize: 2000 })).data;
+            }
+            this.applications = this.applications.filter(app => app.hasOwnProperty('applicationBuilder'));
+            this.applications = this.applications.sort((a, b) => a.id > b.id ? 1 : -1);   
+        } else {
+            this.applications = ( await this.appService.listByUser(this.appStateService.currentUser.value, { pageSize: 2000 })).data;
+            this.applications = this.applications.filter(app => app.hasOwnProperty('applicationBuilder'));
+            this.applications = this.applications.sort((a, b) => a.id > b.id ? 1 : -1);   
+        }
+        /* if(this.userHasAdminRights){
             this.applications = from(new Observable(
                 this.appService.list({ pageSize: 2000, withTotalPages: true }) as any))
                 .pipe(
                     // Some users can't get the full list of applications (they don't have permission) so we get them by user instead (without live updates)
                     catchError(() =>
-                        from(this.appService.listByUser(appStateService.currentUser.value, { pageSize: 2000 }).then(res => res.data))
+                        from(this.appService.listByUser(this.appStateService.currentUser.value, { pageSize: 2000 }).then(res => res.data))
                     ),
                     map((apps: any) => apps.filter(app => app.hasOwnProperty('applicationBuilder'))),
                     map(apps => apps.sort((a, b) => a.id > b.id ? 1 : -1) )
                 );
         } else {
-            this.applications = from(this.appService.listByUser(appStateService.currentUser.value, { pageSize: 2000 }).then(res => res.data))
+            this.applications = from(this.appService.listByUser(this.appStateService.currentUser.value, { pageSize: 2000 }).then(res => res.data))
             .pipe(map(apps => apps.filter(app => app.hasOwnProperty('applicationBuilder'))),
             map(apps => apps.sort((a, b) => a.id > b.id ? 1 : -1) ) );
-        }
+        } */
     }
 
     createAppWizard() {
@@ -90,6 +109,7 @@ export class AppListComponent {
 
         // Refresh the applications list
         this.appStateService.currentUser.next(this.appStateService.currentUser.value);
+        this.appListService.RefreshAppList();
     }
 
     openApp(app: IApplication & {applicationBuilder?: any}, subPath?: string) {

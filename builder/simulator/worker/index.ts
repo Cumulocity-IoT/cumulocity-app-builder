@@ -25,7 +25,7 @@
 
 import {enableProdMode} from "@angular/core";
 import { platformBrowserDynamic } from "@angular/platform-browser-dynamic";
-import {platformWorkerAppDynamic} from "@angular/platform-webworker-dynamic";
+// import {platformWorkerAppDynamic} from "@angular/platform-webworker-dynamic";
 import {SimulatorWorkerModule} from "./simulator-worker.module";
 
 declare const __MODE__: string;

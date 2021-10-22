@@ -44,8 +44,8 @@ export class BrandingService {
         this.favicon = document.head.querySelector('[rel=icon]');
 
         if (typeof FontFace != 'undefined') {
-          //  this.fontAwesomeLoaded = new FontFace('FontAwesome', 'url(./fontawesome-webfont-20fd1704ea223900efa9fd4e869efb08.woff2)').load();
-            this.fontAwesomeLoaded = new FontFace('FontAwesome', 'url(./fontawesome-webfont.woff2)').load();
+            // this.fontAwesomeLoaded = new FontFace('FontAwesome', 'url(./fontawesome-webfont-20fd1704ea223900efa9fd4e869efb08.woff2)').load();
+            this.fontAwesomeLoaded = new FontFace('FontAwesome', 'url(./fonts/fontawesome-webfont.woff2)').load();
         } else {
             this.fontAwesomeLoaded = Promise.resolve();
         }
