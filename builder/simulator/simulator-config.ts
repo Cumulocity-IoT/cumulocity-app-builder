@@ -38,6 +38,7 @@ export interface OperationDefinitions<T> {
  */
 
 export interface OperationSupport<T> {
+    opEnabled?: boolean, //device id
     opSource?: string, //device id
     opSourceName?: string,
     payloadFragment?: string,

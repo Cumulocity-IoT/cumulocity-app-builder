@@ -50,7 +50,7 @@ export interface SeriesValueSimulationStrategyConfig extends OperationSupport<Se
 
         <div class="form-group">
             <label class="c8y-checkbox">
-                <input type="checkbox" (click)="newOperation()" />
+                <input type="checkbox" (click)="newOperation('value',config.operations.length)" />
                 <span></span>
                 <span>Controlled by operation</span>
             </label>
