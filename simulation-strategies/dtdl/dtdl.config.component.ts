@@ -205,7 +205,7 @@ export interface DtdlSimulationModel {
                     <!-- multiple possible configs here -->
                     <div class="form-group">
                         <label class="c8y-checkbox">
-                            <input type="checkbox" [(ngModel)]="getOperationConfig(0).opEnabled"/>
+                            <input type="checkbox" name="opEnabled1" [(ngModel)]="getOperationConfig(0).opEnabled"/>
                             <span></span>
                             <span>Controlled by operation</span>
                         </label>
@@ -241,7 +241,7 @@ export interface DtdlSimulationModel {
                                         </div>
                                     </div>
                                     <hr /> 
-                                    <div class="row" *ngFor="let op of getOperationConfig(0).operations; let i = index">
+                                    <div class="row" *ngFor="let op of config.operations; let i = index">
                                         <ng-container *ngIf="i > 0">
                                             <div class="col-lg-12">
                                                 <div class="row">
@@ -413,11 +413,11 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
     isError = false;
 
 
-    getOperationConfig(i: number) : DtdlSimulationStrategyConfig {
+    getOperationConfig(i: number): DtdlSimulationStrategyConfig {
         let c: DtdlSimulationStrategyConfig = this.getConfigAsAny(i);
-        if( c != undefined) {
+        if (c != undefined) {
             return c;
-        } 
+        }
         return this.config;
     }
 
@@ -426,14 +426,14 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
         this.config.opSourceName = device.name;
     }
 
-    newOperation(base: string, index: number ) {
+    newOperation(base: string, index: number) {
         //        series: `${base}_series_${index}`,
         let c: DtdlSimulationStrategyConfig = {
             deviceId: "",
             opSource: "",
             opSourceName: "",
             matchingValue: `${base}_match_${index}`,
-            payloadFragment:  "c8y_Command.text",
+            payloadFragment: "c8y_Command.text",
             opReply: false,
             modalSize: "modal-md",
             deviceName: "",
@@ -458,7 +458,7 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
             opSource: "",
             opSourceName: "",
             matchingValue: "default",
-            payloadFragment:  "c8y_Command.text",
+            payloadFragment: "c8y_Command.text",
             opReply: false,
             modalSize: "modal-md",
             deviceName: "",
