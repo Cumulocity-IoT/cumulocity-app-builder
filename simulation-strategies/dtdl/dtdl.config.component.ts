@@ -351,7 +351,7 @@ export interface DtdlSimulationModel {
                                             <hr />          
                                         </ng-container>
                                     </div>
-                                    <button class="btn btn-link btn-block" type="button" (click)="newOperation('dtdl{{model.id}}_value',config.operations.length)">
+                                    <button class="btn btn-link btn-block" type="button" (click)="newOperation('dtdl_value',config.operations.length)">
                                         <div class="pull-left float-left">Add condition</div>
                                     </button>
                                 </accordion-group>
