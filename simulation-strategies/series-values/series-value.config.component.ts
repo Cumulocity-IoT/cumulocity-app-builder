@@ -50,7 +50,7 @@ export interface SeriesValueSimulationStrategyConfig extends OperationSupport<Se
 
         <div class="form-group">
             <label class="c8y-checkbox">
-                <input type="checkbox" (click)="newOperation('value',config.operations.length)" />
+                <input type="checkbox" (click)="newOperation('rand_value',config.operations.length)" />
                 <span></span>
                 <span>Controlled by operation</span>
             </label>
@@ -59,7 +59,7 @@ export interface SeriesValueSimulationStrategyConfig extends OperationSupport<Se
         <ng-container *ngIf="config.operations.length > 1">
             <div class="form-group">
                 <accordion  [isAnimated]="true" [closeOthers]="true">
-                    <accordion-group panelClass="dtdl-simulator-measurement-panel" #opGroup>
+                    <accordion-group panelClass="op-simulator-panel" #opGroup>
                         <button class="btn btn-link btn-block clearfix" accordion-heading type="button">
                             <div class="pull-left float-left">Operation details</div>
                             <span class="float-right pull-right"><i *ngIf="opGroup.isOpen" class="fa fa-caret-up"></i>
@@ -109,7 +109,7 @@ export interface SeriesValueSimulationStrategyConfig extends OperationSupport<Se
                                 <hr />          
                             </ng-container>
                         </div>
-                        <button class="btn btn-link btn-block" type="button" (click)="newOperation()">
+                        <button class="btn btn-link btn-block" type="button" (click)="newOperation('rand_value',config.operations.length)">
                             <div class="pull-left float-left">Add condition</div>
                         </button>
                     </accordion-group>
@@ -128,9 +128,9 @@ export interface SeriesValueSimulationStrategyConfig extends OperationSupport<Se
         </div>  
     `,
     styles: [`
-    :host >>> .panel.dtdl-simulator-measurement-panel .panel-title{
+    :host >>> .panel.op-simulator-panel .panel-title {
          width: 100%;
-     }
+    }
     .op-field {
         margin-bottom: 10px;
     }
