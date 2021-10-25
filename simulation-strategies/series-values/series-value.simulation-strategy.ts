@@ -60,8 +60,8 @@ export class SeriesValueSimulationStrategy extends DeviceIntervalSimulator {
             if (_.has(param, "deviceId") && _.get(param, "deviceId") == this.config.opSource) {
                 for (let cfg of this.config.operations) {
                     if (_.has(param, this.config.payloadFragment) && _.get(param, this.config.payloadFragment) == cfg.matchingValue) {
-                        console.log(`Matched ${cfg.matchingValue} setting cfg = `, cfg.config);
-                        this.config.value = cfg.config.value;
+                        console.log(`Matched ${cfg.matchingValue} setting cfg = `, cfg);
+                        this.config.value = cfg.value;
                         let vCfg = this.getValueSeriesConfigParam(this.config.deviceId);
                         vCfg.seriesvalues = this.config.value.split(',').map(value => parseFloat(value.trim()));
                         vCfg.seriesValueMeasurementCounter = 0;

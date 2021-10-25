@@ -62,18 +62,22 @@ export interface FirmwareUpdateSimulationStrategyConfig extends OperationSupport
 export class FirmwareUpdateSimulationStrategyConfigComponent extends SimulationStrategyConfigComponent {
 
 
-    getNamedConfig(label: string): FirmwareUpdateSimulationStrategyConfig {
-        let c: FirmwareUpdateSimulationStrategyConfig = this.getConfigAsAny(label);
-        return c;
-    }
-
     config: FirmwareUpdateSimulationStrategyConfig;
+
+    getOperationConfig(i: number) : FirmwareUpdateSimulationStrategyConfig {
+        let c: FirmwareUpdateSimulationStrategyConfig = this.getConfigAsAny(i);
+        if( c != undefined) {
+            return c;
+        } 
+        return this.config;
+    }
 
     initializeConfig() {
         let c: FirmwareUpdateSimulationStrategyConfig = {
             deviceId: "",
             opSource: "",
             opSourceName: "",
+            matchingValue: "default",
             payloadFragment:  "c8y_Command.text",
             opReply: false,
             firmwareVersions: [
@@ -84,16 +88,11 @@ export class FirmwareUpdateSimulationStrategyConfigComponent extends SimulationS
             operations: new Array()
         };
 
-        let opDef: OperationDefinitions<any> = {
-            config: c,
-            matchingValue: "default",
-        };
-
         //New objects can duplicate the default so it can be restored
         //we will create the config entries if old simulators are edited
         //duplication is to avoid changing old code.
         this.config = _.cloneDeep(c);
-        this.config.operations.push(opDef);
+        this.config.operations.push(c);
     }
 
 

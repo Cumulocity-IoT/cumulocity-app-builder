@@ -58,10 +58,10 @@ export class RandomWalkSimulationStrategy extends DeviceIntervalSimulator {
             if (_.has(param, "deviceId") && _.get(param, "deviceId") == this.config.opSource) {
                 for (let cfg of this.config.operations) {
                     if (_.has(param, this.config.payloadFragment) && _.get(param, this.config.payloadFragment) == cfg.matchingValue) {
-                        console.log(`Rand Matched ${cfg.matchingValue} setting cfg = `, cfg.config);
-                        this.config.minValue = cfg.config.minValue;
-                        this.config.maxValue = cfg.config.maxValue;
-                        this.config.maxDelta = cfg.config.maxDelta;
+                        console.log(`Rand Matched ${cfg.matchingValue} setting cfg = `, cfg);
+                        this.config.minValue = cfg.minValue;
+                        this.config.maxValue = cfg.maxValue;
+                        this.config.maxDelta = cfg.maxDelta;
 
                         if (this.config.opReply == true) {
                             const partialUpdateObject: Partial<IOperation> = {

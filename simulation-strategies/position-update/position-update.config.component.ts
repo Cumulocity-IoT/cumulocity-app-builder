@@ -52,18 +52,23 @@ export interface PositionUpdateSimulationStrategyConfig extends OperationSupport
 })
 export class PositionUpdateSimulationStrategyConfigComponent extends SimulationStrategyConfigComponent {
 
-    getNamedConfig(label: string): PositionUpdateSimulationStrategyConfig {
-        let c: PositionUpdateSimulationStrategyConfig = this.getConfigAsAny(label);
-        return c;
+    config: PositionUpdateSimulationStrategyConfig;
+
+    getOperationConfig(i: number) : PositionUpdateSimulationStrategyConfig {
+        let c: PositionUpdateSimulationStrategyConfig = this.getConfigAsAny(i);
+        if( c != undefined) {
+            return c;
+        } 
+        return this.config;
     }
 
-    config: PositionUpdateSimulationStrategyConfig;
 
     initializeConfig() {
         let c: PositionUpdateSimulationStrategyConfig = {
             deviceId: "",
             opSource: "",
             opSourceName: "",
+            matchingValue: "default",
             payloadFragment:  "c8y_Command.text",
             opReply: false,
             latitude: "",
@@ -73,16 +78,11 @@ export class PositionUpdateSimulationStrategyConfigComponent extends SimulationS
             operations: new Array()
         };
 
-        let opDef: OperationDefinitions<any> = {
-            config: c,
-            matchingValue: "default",
-        };
-
         //New objects can duplicate the default so it can be restored
         //we will create the config entries if old simulators are edited
         //duplication is to avoid changing old code.
         this.config = _.cloneDeep(c);
-        this.config.operations.push(opDef);
+        this.config.operations.push(c);
     }
 
 }

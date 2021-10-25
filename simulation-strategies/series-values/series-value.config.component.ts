@@ -45,18 +45,18 @@ export interface SeriesValueSimulationStrategyConfig extends OperationSupport<Se
 
         <div class="form-group">
             <label for="value"><span>Default Value</span></label>
-            <input type="text" class="form-control" id="value" name="value" placeholder="e.g. 15,20,30 (required)" required [(ngModel)]="config.operations[0].config.value">
+            <input type="text" class="form-control" id="value" name="value" placeholder="e.g. 15,20,30 (required)" required [(ngModel)]="getOperationConfig(0).value">
         </div>
 
         <div class="form-group">
             <label class="c8y-checkbox">
-                <input type="checkbox" (click)="newOperation('rand_value',config.operations.length)" />
+                <input name="opEnabled" type="checkbox" [(ngModel)]="getOperationConfig(0).opEnabled"/>
                 <span></span>
                 <span>Controlled by operation</span>
             </label>
         </div>
 
-        <ng-container *ngIf="config.operations.length > 1">
+        <ng-container *ngIf="getOperationConfig(0).opEnabled">
             <div class="form-group">
                 <accordion  [isAnimated]="true" [closeOthers]="true">
                     <accordion-group panelClass="op-simulator-panel" #opGroup>
@@ -68,11 +68,11 @@ export interface SeriesValueSimulationStrategyConfig extends OperationSupport<Se
                         <div class="row">
                             <div class="col-lg-6 op-field">
                                 <label for="opSource"><span>Operation Source</span></label>
-                                <device-selector id="opSource" name="opSource" [(value)]="config.opSourceName" [placeHolder]="'Type your Device Name'" [required]="true" (selectedDevice)= "getSelectedDevice($event)"></device-selector>
+                                <device-selector id="opSource" name="opSource" [(value)]="getOperationConfig(0).opSourceName" [placeHolder]="'Type your Device Name'" [required]="true" (selectedDevice)= "getSelectedDevice($event)"></device-selector>
                             </div>
                             <div class="col-lg-6 op-field">
                                 <label for="opPayload"><span>Payload Key</span></label>
-                                <input type="text" class="form-control" id="opPayload" name="opPayload" placeholder="e.g. c8y_command.text" required autofocus [(ngModel)]="config.payloadFragment">
+                                <input type="text" class="form-control" id="opPayload" name="opPayload" placeholder="e.g. c8y_command.text" required autofocus [(ngModel)]="getOperationConfig(0).payloadFragment">
                             </div>
                         </div>
                         <div class="row">
@@ -91,16 +91,16 @@ export interface SeriesValueSimulationStrategyConfig extends OperationSupport<Se
                                     <div class="row">
                                         <div class="col-lg-6 op-field">
                                             <label for="opMatch_{{i}}"><span>Matching</span></label>
-                                            <input type="text" class="form-control" id="opMatch_{{i}}" name="opMatch_{{i}}" placeholder="e.g. WINDY" required [(ngModel)]="config.operations[i].matchingValue">
+                                            <input type="text" class="form-control" id="opMatch_{{i}}" name="opMatch_{{i}}" placeholder="e.g. WINDY" required [(ngModel)]="getOperationConfig(i).matchingValue">
                                         </div>
                                         <div class="col-lg-6 op-field">
                                             <label for="opValue_{{i}}"><span>Values</span></label>
-                                            <input type="text" class="form-control" id="opValue_{{i}}" name="opValue_{{i}}" placeholder="e.g. 15,20,30 (required)" required [(ngModel)]="config.operations[i].config.value">
+                                            <input type="text" class="form-control" id="opValue_{{i}}" name="opValue_{{i}}" placeholder="e.g. 15,20,30 (required)" required [(ngModel)]="getOperationConfig(i).value">
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-6 op-field">
-                                            <button class="btn btn-link btn-block" type="button" (click)="newOperation()">
+                                            <button class="btn btn-link btn-block" type="button" (click)="deleteOperation(i)">
                                                 <div class="pull-left float-left">Remove condition</div>
                                             </button>
                                         </div>
@@ -109,7 +109,7 @@ export interface SeriesValueSimulationStrategyConfig extends OperationSupport<Se
                                 <hr />          
                             </ng-container>
                         </div>
-                        <button class="btn btn-link btn-block" type="button" (click)="newOperation('rand_value',config.operations.length)">
+                        <button class="btn btn-link btn-block" type="button" (click)="newOperation('series_value',config.operations.length)">
                             <div class="pull-left float-left">Add condition</div>
                         </button>
                     </accordion-group>
@@ -139,10 +139,8 @@ export interface SeriesValueSimulationStrategyConfig extends OperationSupport<Se
 })
 export class SeriesValueSimulationStrategyConfigComponent extends SimulationStrategyConfigComponent {
 
-    getNamedConfig(label: string): SeriesValueSimulationStrategyConfig | undefined {
-        let c: SeriesValueSimulationStrategyConfig = this.getConfigAsAny(label);
-        return c;
-    }
+
+
 
     config: SeriesValueSimulationStrategyConfig;
 
@@ -151,12 +149,22 @@ export class SeriesValueSimulationStrategyConfigComponent extends SimulationStra
         this.config.opSourceName = device.name;
     }
 
+    getOperationConfig(i: number) : SeriesValueSimulationStrategyConfig {
+        let c: SeriesValueSimulationStrategyConfig = this.getConfigAsAny(i);
+        if( c != undefined) {
+            return c;
+        } 
+        return this.config;
+    }
+
+
     newOperation(base: string, index: number ) {
 
         let c: SeriesValueSimulationStrategyConfig = {
             deviceId: "",
             opSource: "",
             opSourceName: "",
+            matchingValue: `${base}_match_${index}`,
             payloadFragment:  "c8y_Command.text",
             opReply: false,
             fragment: "temperature_measurement",
@@ -167,12 +175,7 @@ export class SeriesValueSimulationStrategyConfigComponent extends SimulationStra
             operations: undefined
         };
 
-        let opDef: OperationDefinitions<any> = {
-            config: c,
-            matchingValue: `${base}_match_${index}`,
-        };
-
-        this.config.operations.push(opDef);
+        this.config.operations.push(c);
         console.log(this.config.operations);
     }
 
@@ -181,6 +184,7 @@ export class SeriesValueSimulationStrategyConfigComponent extends SimulationStra
             deviceId: "",
             opSource: "",
             opSourceName: "",
+            matchingValue: "default",
             payloadFragment:  "c8y_Command.text",
             opReply: false,
             fragment: "temperature_measurement",
@@ -191,16 +195,11 @@ export class SeriesValueSimulationStrategyConfigComponent extends SimulationStra
             operations: new Array()
         };
 
-        let opDef: OperationDefinitions<any> = {
-            config: c,
-            matchingValue: "default",
-        };
-
         //New objects can duplicate the default so it can be restored
         //we will create the config entries if old simulators are edited
         //duplication is to avoid changing old code.
         this.config = _.cloneDeep(c);
-        this.config.operations.push(opDef);
+        this.config.operations.push(c);
     }
 
 }

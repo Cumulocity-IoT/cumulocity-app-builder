@@ -61,10 +61,10 @@ export class WaveSimulationStrategy extends DeviceIntervalSimulator {
             if (_.has(param, "deviceId") && _.get(param, "deviceId") == this.config.opSource) {
                 for (let cfg of this.config.operations) {
                     if (_.has(param, this.config.payloadFragment) && _.get(param, this.config.payloadFragment) == cfg.matchingValue) {
-                        console.log(`Matched ${cfg.matchingValue} setting cfg = `, cfg.config);
-                        this.config.waveType = cfg.config.waveType;
-                        this.config.height = cfg.config.height;
-                        this.config.wavelength = cfg.config.wavelength;
+                        console.log(`Matched ${cfg.matchingValue} setting cfg = `, cfg);
+                        this.config.waveType = cfg.waveType;
+                        this.config.height = cfg.height;
+                        this.config.wavelength = cfg.wavelength;
                         if (this.config.opReply == true) {
                             const partialUpdateObject: Partial<IOperation> = {
                                 id: param.id,

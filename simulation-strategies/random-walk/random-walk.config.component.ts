@@ -46,19 +46,19 @@ export interface RandomWalkSimulationStrategyConfig extends OperationSupport<Ran
         </div>
         <div class="form-group">
             <label for="startingvalue"><span>Starting Value</span></label>
-            <input type="number" class="form-control" id="startingvalue" name="startingvalue" placeholder="e.g. 10 (required)" required [(ngModel)]="config.operations[0].config.startingValue">
+            <input type="number" class="form-control" id="startingvalue" name="startingvalue" placeholder="e.g. 10 (required)" required [(ngModel)]="getOperationConfig(0).startingValue">
         </div>
         <div class="form-group">
             <label for="maxdelta"><span>Maximum Change Amount</span></label>
-            <input type="number" class="form-control" id="maxdelta" name="maxdelta" min="0" placeholder="e.g. 10 (required)" required [(ngModel)]="config.operations[0].config.maxDelta">
+            <input type="number" class="form-control" id="maxdelta" name="maxdelta" min="0" placeholder="e.g. 10 (required)" required [(ngModel)]="getOperationConfig(0).maxDelta">
         </div>
         <div class="form-group">
             <label for="minvalue"><span>Minimum Value</span></label>
-            <input type="number" class="form-control" id="minvalue" name="minvalue" placeholder="e.g. 10 (required)" required [(ngModel)]="config.operations[0].config.minValue">
+            <input type="number" class="form-control" id="minvalue" name="minvalue" placeholder="e.g. 10 (required)" required [(ngModel)]="getOperationConfig(0).minValue">
         </div>
         <div class="form-group">
             <label for="maxvalue"><span>Maximum Value</span></label>
-            <input type="number" class="form-control" id="maxvalue" name="maxvalue" placeholder="e.g. 20 (required)" required [(ngModel)]="config.operations[0].config.maxValue">
+            <input type="number" class="form-control" id="maxvalue" name="maxvalue" placeholder="e.g. 20 (required)" required [(ngModel)]="getOperationConfig(0).maxValue">
         </div>
         <div class="form-group">
             <label class="c8y-checkbox">
@@ -107,28 +107,28 @@ export interface RandomWalkSimulationStrategyConfig extends OperationSupport<Ran
                                         </div>
                                         <div class="col-lg-6 op-field">
                                             <label for="startingvalue_{{i}}"><span>Starting Value</span></label>
-                                            <input type="number" class="form-control" id="startingvalue_{{i}}" name="startingvalue_{{i}}" placeholder="e.g. 10 (required)" required [(ngModel)]="config.operations[i].config.startingValue">
+                                            <input type="number" class="form-control" id="startingvalue_{{i}}" name="startingvalue_{{i}}" placeholder="e.g. 10 (required)" required [(ngModel)]="getOperationConfig(i).startingValue">
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-6 op-field">
                                             <label for="maxdelta_{{i}}"><span>Maximum Change Amount</span></label>
-                                            <input type="number" class="form-control" id="maxdelta_{{i}}" name="maxdelta_{{i}}" min="0" placeholder="e.g. 10 (required)" required [(ngModel)]="config.operations[i].config.maxDelta">
+                                            <input type="number" class="form-control" id="maxdelta_{{i}}" name="maxdelta_{{i}}" min="0" placeholder="e.g. 10 (required)" required [(ngModel)]="getOperationConfig(i).maxDelta">
                                         </div>
                                         <div class="col-lg-6 op-field">
                                             <label for="minvalue_{{i}}"><span>Minimum Value</span></label>
-                                            <input type="number" class="form-control" id="minvalue_{{i}}" name="minvalue_{{i}}" placeholder="e.g. 10 (required)" required [(ngModel)]="config.operations[i].config.minValue">
+                                            <input type="number" class="form-control" id="minvalue_{{i}}" name="minvalue_{{i}}" placeholder="e.g. 10 (required)" required [(ngModel)]="getOperationConfig(i).minValue">
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-6 op-field">
                                             <label for="maxvalue_{{i}}"><span>Maximum Value</span></label>
-                                            <input type="number" class="form-control" id="maxvalue_{{i}}" name="maxvalue_{{i}}" placeholder="e.g. 20 (required)" required [(ngModel)]="config.operations[1].config.maxValue">
+                                            <input type="number" class="form-control" id="maxvalue_{{i}}" name="maxvalue_{{i}}" placeholder="e.g. 20 (required)" required [(ngModel)]="getOperationConfig(i).maxValue">
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-6 op-field">
-                                            <button class="btn btn-link btn-block" type="button" (click)="newOperation()">
+                                        <button class="btn btn-link btn-block" type="button" (click)="deleteOperation(i)">
                                                 <div class="pull-left float-left">Remove condition</div>
                                             </button>
                                         </div>
@@ -167,12 +167,15 @@ export interface RandomWalkSimulationStrategyConfig extends OperationSupport<Ran
 })
 export class RandomWalkSimulationStrategyConfigComponent extends SimulationStrategyConfigComponent {
 
-    getNamedConfig(label: string): RandomWalkSimulationStrategyConfig {
-        let c: RandomWalkSimulationStrategyConfig = this.getConfigAsAny(label);
-        return c;
-    }
-
     config: RandomWalkSimulationStrategyConfig;
+
+    getOperationConfig(i: number) : RandomWalkSimulationStrategyConfig {
+        let c: RandomWalkSimulationStrategyConfig = this.getConfigAsAny(i);
+        if( c != undefined) {
+            return c;
+        } 
+        return this.config;
+    }
 
     getSelectedDevice(device: any) {
         this.config.opSource = device.id;
@@ -185,6 +188,7 @@ export class RandomWalkSimulationStrategyConfigComponent extends SimulationStrat
             deviceId: "",
             opSource: "",
             opSourceName: "",
+            matchingValue: `${base}_match_${index}`,
             payloadFragment:  "c8y_Command.text",
             opReply: false,
             fragment: "temperature_measurement",
@@ -198,12 +202,7 @@ export class RandomWalkSimulationStrategyConfigComponent extends SimulationStrat
             operations: undefined
         };
 
-        let opDef: OperationDefinitions<any> = {
-            config: c,
-            matchingValue: `${base}_match_${index}`,
-        };
-
-        this.config.operations.push(opDef);
+        this.config.operations.push(c);
         console.log(this.config.operations);
     }
 
@@ -212,6 +211,7 @@ export class RandomWalkSimulationStrategyConfigComponent extends SimulationStrat
             deviceId: "",
             opSource: "",
             opSourceName: "",
+            matchingValue: "default",
             payloadFragment:  "c8y_Command.text",
             opReply: false,
             fragment: "temperature_measurement",
@@ -225,15 +225,10 @@ export class RandomWalkSimulationStrategyConfigComponent extends SimulationStrat
             operations: new Array()
         };
 
-        let opDef: OperationDefinitions<any> = {
-            config: c,
-            matchingValue: "default",
-        };
-
         //New objects can duplicate the default so it can be restored
         //we will create the config entries if old simulators are edited
         //duplication is to avoid changing old code.
         this.config = _.cloneDeep(c);
-        this.config.operations.push(opDef);
+        this.config.operations.push(c);
     }
 }

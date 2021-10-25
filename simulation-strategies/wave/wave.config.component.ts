@@ -45,7 +45,7 @@ export interface WaveSimulationStrategyConfig extends OperationSupport<WaveSimul
         </div>
         <div class="form-group">
             <label for="value"><span>Wave Type</span></label>
-            <select class="form-control" id="value" name="value" [(ngModel)]="config.operations[0].config.waveType">
+            <select class="form-control" id="value" name="value" [(ngModel)]="getOperationConfig(0).waveType">
                 <option value="sine">Sinusoid</option>
                 <option value="sqr">Square</option>
                 <option value="sqr-approx">Square (Approx)</option>
@@ -53,11 +53,11 @@ export interface WaveSimulationStrategyConfig extends OperationSupport<WaveSimul
         </div>
         <div class="form-group">
             <label for="height"><span>Height</span></label>
-            <input type="text" class="form-control" id="height" name="height" placeholder="e.g. 10 (required)" required [(ngModel)]="config.operations[0].config.height">
+            <input type="text" class="form-control" id="height" name="height" placeholder="e.g. 10 (required)" required [(ngModel)]="getOperationConfig(0).height">
         </div>
         <div class="form-group">
             <label for="wavelength"><span>Wavelength</span></label>
-            <input type="text" class="form-control" id="wavelength" name="wavelength" placeholder="e.g. 60 (required)" required [(ngModel)]="config.operations[0].config.wavelength">
+            <input type="text" class="form-control" id="wavelength" name="wavelength" placeholder="e.g. 60 (required)" required [(ngModel)]="getOperationConfig(0).wavelength">
         </div>
         <div class="form-group">
             <label class="c8y-checkbox">
@@ -102,11 +102,11 @@ export interface WaveSimulationStrategyConfig extends OperationSupport<WaveSimul
                                     <div class="row">
                                         <div class="col-lg-6 op-field">
                                             <label for="opMatch_{{i}}"><span>Matching</span></label>
-                                            <input type="text" class="form-control" id="opMatch_{{i}}" name="opMatch_{{i}}" placeholder="e.g. WINDY" required [(ngModel)]="config.operations[i].matchingValue">
+                                            <input type="text" class="form-control" id="opMatch_{{i}}" name="opMatch_{{i}}" placeholder="e.g. WINDY" required [(ngModel)]="getOperationConfig(i).matchingValue">
                                         </div>
                                         <div class="col-lg-6 op-field">
                                             <label for="value_{{i}}"><span>Wave Type</span></label>
-                                            <select class="form-control" id="value_{{i}}" name="value_{{i}}" [(ngModel)]="config.operations[i].config.waveType">
+                                            <select class="form-control" id="value_{{i}}" name="value_{{i}}" [(ngModel)]="getOperationConfig(i).waveType">
                                                 <option value="sine">Sinusoid</option>
                                                 <option value="sqr">Square</option>
                                                 <option value="sqr-approx">Square (Approx)</option>
@@ -116,16 +116,16 @@ export interface WaveSimulationStrategyConfig extends OperationSupport<WaveSimul
                                     <div class="row">
                                         <div class="col-lg-6 op-field">
                                             <label for="height_{{i}}"><span>Height</span></label>
-                                            <input type="text" class="form-control" id="height_{{i}}" name="height_{{i}}" placeholder="e.g. 10 (required)" required [(ngModel)]="config.operations[i].config.height">
+                                            <input type="text" class="form-control" id="height_{{i}}" name="height_{{i}}" placeholder="e.g. 10 (required)" required [(ngModel)]="getOperationConfig(i).height">
                                         </div>
                                         <div class="col-lg-6 op-field">
                                             <label for="wavelength_{{i}}"><span>Wavelength</span></label>
-                                            <input type="text" class="form-control" id="wavelength_{{i}}" name="wavelength_{{i}}" placeholder="e.g. 60 (required)" required [(ngModel)]="config.operations[i].config.wavelength">
+                                            <input type="text" class="form-control" id="wavelength_{{i}}" name="wavelength_{{i}}" placeholder="e.g. 60 (required)" required [(ngModel)]="getOperationConfig(i).wavelength">
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-6 op-field">
-                                            <button class="btn btn-link btn-block" type="button" (click)="newOperation()">
+                                            <button class="btn btn-link btn-block" type="button" (click)="deleteOperation(i)">
                                                 <div class="pull-left float-left">Remove condition</div>
                                             </button>
                                         </div>
@@ -134,7 +134,7 @@ export interface WaveSimulationStrategyConfig extends OperationSupport<WaveSimul
                                 <hr />          
                             </ng-container>
                         </div>
-                        <button class="btn btn-link btn-block" type="button" (click)="newOperation('rand_value',config.operations.length)">
+                        <button class="btn btn-link btn-block" type="button" (click)="newOperation('wave_value',config.operations.length)">
                             <div class="pull-left float-left">Add condition</div>
                         </button>
                     </accordion-group>
@@ -163,12 +163,15 @@ export interface WaveSimulationStrategyConfig extends OperationSupport<WaveSimul
 })
 export class WaveSimulationStrategyConfigComponent extends SimulationStrategyConfigComponent {
 
-    getNamedConfig(label: string): WaveSimulationStrategyConfig {
-        let c: WaveSimulationStrategyConfig = this.getConfigAsAny(label);
-        return c;
-    }
-
     config: WaveSimulationStrategyConfig;
+
+    getOperationConfig(i: number) : WaveSimulationStrategyConfig {
+        let c: WaveSimulationStrategyConfig = this.getConfigAsAny(i);
+        if( c != undefined) {
+            return c;
+        } 
+        return this.config;
+    }
 
     getSelectedDevice(device: any) {
         this.config.opSource = device.id;
@@ -180,6 +183,7 @@ export class WaveSimulationStrategyConfigComponent extends SimulationStrategyCon
             deviceId: "",
             opSource: "",
             opSourceName: "",
+            matchingValue: `${base}_match_${index}`,
             payloadFragment:  "c8y_Command.text",
             opReply: false,
             fragment: "temperature_measurement",
@@ -192,14 +196,7 @@ export class WaveSimulationStrategyConfigComponent extends SimulationStrategyCon
             operations: undefined
         };
 
-        let opDef: OperationDefinitions<any> = {
-            config: c,
-            matchingValue: `${base}_match_${index}`,
-        };
-
-
-
-        this.config.operations.push(opDef);
+        this.config.operations.push(c);
         console.log(this.config.operations);
     }
 
@@ -208,6 +205,7 @@ export class WaveSimulationStrategyConfigComponent extends SimulationStrategyCon
             deviceId: "",
             opSource: "",
             opSourceName: "",
+            matchingValue: "default",
             payloadFragment:  "c8y_Command.text",
             opReply: false,
             fragment: "temperature_measurement",
@@ -220,15 +218,10 @@ export class WaveSimulationStrategyConfigComponent extends SimulationStrategyCon
             operations: new Array()
         };
 
-        let opDef: OperationDefinitions<any> = {
-            config: c,
-            matchingValue: "default",
-        };
-
         //New objects can duplicate the default so it can be restored
         //we will create the config entries if old simulators are edited
         //duplication is to avoid changing old code.
         this.config = _.cloneDeep(c);
-        this.config.operations.push(opDef);
+        this.config.operations.push(c);
     }
 }

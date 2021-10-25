@@ -24,7 +24,6 @@ import { SimulationStrategyMetadata } from "./simulation-strategy.decorator";
  *  instances of this are additional to the "default"
  */
 export interface OperationDefinitions<T> {
-    matchingValue: string,
     config: T;
 }
 
@@ -43,7 +42,8 @@ export interface OperationSupport<T> {
     opSourceName?: string,
     payloadFragment?: string,
     opReply?: boolean,
-    operations?: Array<OperationDefinitions<T>>;
+    matchingValue: string,
+    operations?: Array<T>;
 }
 
 
