@@ -21,8 +21,9 @@ import { ControlContainer, NgForm } from '@angular/forms';
 import { OperationDefinitions, OperationSupport } from "builder/simulator/simulator-config";
 import { SimulationStrategyConfigComponent } from "../../builder/simulator/simulation-strategy";
 import * as _ from 'lodash';
+import { cloneDeep } from "lodash";
 
-export interface DtdlSimulationStrategyConfig extends OperationSupport<DtdlSimulationStrategyConfig> {
+export interface DtdlSimulationStrategyConfig {
     deviceId: string,
     modalSize?: string,
     deviceName: string,
@@ -32,7 +33,7 @@ export interface DtdlSimulationStrategyConfig extends OperationSupport<DtdlSimul
     isEditMode?: boolean;
 }
 
-export interface DtdlSimulationModel {
+export interface DtdlSimulationModel extends OperationSupport<DtdlSimulationModel> {
     measurementName?: string,
     fragment?: string,
     series?: string,
@@ -73,7 +74,7 @@ export interface DtdlSimulationModel {
              <div class="col-xs-12 col-sm-6 col-md-6">
              <div class="form-group">
                 <label for="name"><span>Name</span></label>
-                <input type="text" class="form-control" id="name" name="name" placeholder="e.g. My First Simulator (required)" required autofocus [(ngModel)]="getOperationConfig(0).deviceName">
+                <input type="text" class="form-control" id="name" name="name" placeholder="e.g. My First Simulator (required)" required autofocus [(ngModel)]="config.deviceName">
              </div>
             </div>
             
@@ -87,7 +88,7 @@ export interface DtdlSimulationModel {
         
         <div class="form-group">
             <accordion  [isAnimated]="true" [closeOthers]="true">
-                <accordion-group panelClass="dtdl-simulator-measurement-panel"  *ngFor="let model of getOperationConfig(0).dtdlModelConfig;let index = index"  #dtdlGroup>
+                <accordion-group panelClass="dtdl-simulator-measurement-panel"  *ngFor="let model of config.dtdlModelConfig;let index = index"  #dtdlGroup>
                     <button class="btn btn-link btn-block clearfix" accordion-heading type="button">
                         <div class="pull-left float-left">{{model.measurementName}}</div>
                         <span class="float-right pull-right"><i *ngIf="dtdlGroup.isOpen" class="fa fa-caret-up"></i>
@@ -96,7 +97,7 @@ export interface DtdlSimulationModel {
                     <div class="col-xs-12 col-sm-4 col-md-4">
                         <div class="measurement-accordion">
                             <label for="simulationType"><span>Simulation Type</span></label>
-                            <select name="simulationType{{model.id}}"  [(ngModel)]="getOperationConfig(0).dtdlModelConfig[index].simulationType" required >
+                            <select name="simulationType{{model.id}}"  [(ngModel)]="model.simulationType" required >
                                 <option value="randomValue" >Random Value</option>
                                 <option value="valueSeries" >Value Series</option>
                                 <option value="randomWalk" >Random Walk</option>
@@ -105,30 +106,30 @@ export interface DtdlSimulationModel {
                             </select>
                         </div>     
                     </div>
-                    <div class="col-xs-12 col-sm-4 col-md-4" *ngIf="!getOperationConfig(0).dtdlModelConfig[index].isFieldModel && getOperationConfig(0).dtdlModelConfig[index].simulationType !== 'positionUpdate' && getOperationConfig(0).dtdlModelConfig[index].simulationType !== 'eventCreation'">
+                    <div class="col-xs-12 col-sm-4 col-md-4" *ngIf="!model.isFieldModel && model.simulationType !== 'positionUpdate' && model.simulationType !== 'eventCreation'">
                     <div class="measurement-accordion">
                         <label for="fragment"><span>Fragment</span></label>
-                        <input type="text" class="form-control"  name="fragment{{model.id}}" placeholder="e.g. temperature_measurement (required)" required autofocus [(ngModel)]="getOperationConfig(0).dtdlModelConfig[index].fragment">
+                        <input type="text" class="form-control"  name="fragment{{model.id}}" placeholder="e.g. temperature_measurement (required)" required autofocus [(ngModel)]="model.fragment">
                     </div>
                     </div>
-                    <div class="col-xs-12 col-sm-4 col-md-4" *ngIf="getOperationConfig(0).dtdlModelConfig[index].simulationType !== 'positionUpdate' && getOperationConfig(0).dtdlModelConfig[index].simulationType !== 'eventCreation'">
+                    <div class="col-xs-12 col-sm-4 col-md-4" *ngIf="model.simulationType !== 'positionUpdate' && model.simulationType !== 'eventCreation'">
                         <div class="measurement-accordion">
                             <label for="series"><span>Series</span></label>
-                            <input type="text" class="form-control" name="series{{model.id}}" placeholder="e.g. T (required)" required autofocus [(ngModel)]="getOperationConfig(0).dtdlModelConfig[index].series">
+                            <input type="text" class="form-control" name="series{{model.id}}" placeholder="e.g. T (required)" required autofocus [(ngModel)]="model.series">
                         </div>
                     </div>
-                    <ng-container [ngSwitch]="getOperationConfig(0).dtdlModelConfig[index].simulationType">
+                    <ng-container [ngSwitch]="model.simulationType">
                         <ng-container *ngSwitchCase="'randomValue'">
                             <div class="col-xs-12 col-sm-4 col-md-4">
                                 <div class="measurement-accordion">
                                     <label for="minvalue"><span>Minimum Value</span></label>
-                                    <input type="number" class="form-control"  name="minvalue{{model.id}}" placeholder="e.g. 10 (required)" required [(ngModel)]="getOperationConfig(0).dtdlModelConfig[index].minValue">
+                                    <input type="number" class="form-control"  name="minvalue{{model.id}}" placeholder="e.g. 10 (required)" required [(ngModel)]="model.minValue">
                                 </div>
                             </div>
                             <div class="col-xs-12 col-sm-4 col-md-4">
                                 <div class="measurement-accordion">
                                     <label for="maxvalue"><span>Maximum Value</span></label>
-                                    <input type="number" class="form-control"  name="maxvalue{{model.id}}" placeholder="e.g. 20 (required)" required [(ngModel)]="getOperationConfig(0).dtdlModelConfig[index].maxValue">
+                                    <input type="number" class="form-control"  name="maxvalue{{model.id}}" placeholder="e.g. 20 (required)" required [(ngModel)]="model.maxValue">
                                 </div>
                             </div>
                         </ng-container>
@@ -136,19 +137,19 @@ export interface DtdlSimulationModel {
                             <div class="col-xs-12 col-sm-4 col-md-4">
                                 <div class="measurement-accordion">
                                     <label for="latitude"><span>Latitude Value</span></label>
-                                    <input type="text" class="form-control"  name="latitude{{model.id}}" placeholder="e.g. 40.66,50.40 (required)" required [(ngModel)]="getOperationConfig(0).dtdlModelConfig[index].latitude">
+                                    <input type="text" class="form-control"  name="latitude{{model.id}}" placeholder="e.g. 40.66,50.40 (required)" required [(ngModel)]="model.latitude">
                                 </div>
                             </div>
                             <div class="col-xs-12 col-sm-4 col-md-4">
                                 <div class="measurement-accordion">
                                     <label for="altitude"><span>Altitude Value</span></label>
-                                    <input type="text" class="form-control"  name="altitude{{model.id}}" placeholder="e.g. 40.66,50.40 (required)" required [(ngModel)]="getOperationConfig(0).dtdlModelConfig[index].altitude">
+                                    <input type="text" class="form-control"  name="altitude{{model.id}}" placeholder="e.g. 40.66,50.40 (required)" required [(ngModel)]="model.altitude">
                                 </div>
                             </div>
                             <div class="col-xs-12 col-sm-4 col-md-4">
                                 <div class="measurement-accordion">
                                     <label for="longitude"><span>Longitude value</span></label>
-                                    <input type="text" class="form-control"  name="longitude{{model.id}}" placeholder="e.g. 40.66,50.40 (required)" required [(ngModel)]="getOperationConfig(0).dtdlModelConfig[index].longitude">
+                                    <input type="text" class="form-control"  name="longitude{{model.id}}" placeholder="e.g. 40.66,50.40 (required)" required [(ngModel)]="model.longitude">
                                 </div>
                             </div>
                         </ng-container>
@@ -156,13 +157,13 @@ export interface DtdlSimulationModel {
                             <div class="col-xs-12 col-sm-4 col-md-4">
                                 <div class="measurement-accordion">
                                     <label for="eventType"><span>Event Type</span></label>
-                                    <input type="text" class="form-control"  name="eventType{{model.id}}" placeholder="c8y_locationUpdate,c8y_BeaconUpdate" required [(ngModel)]="getOperationConfig(0).dtdlModelConfig[index].eventType">
+                                    <input type="text" class="form-control"  name="eventType{{model.id}}" placeholder="c8y_locationUpdate,c8y_BeaconUpdate" required [(ngModel)]="model.eventType">
                                 </div>
                             </div>
                             <div class="col-xs-12 col-sm-4 col-md-4">
                                 <div class="measurement-accordion">
                                     <label for="eventText"><span>Event Text</span></label>
-                                    <input type="text" class="form-control"  name="eventText{{model.id}}" placeholder="c8y_locationUpdate,c8y_BeaconUpdate (required)" required [(ngModel)]="getOperationConfig(0).dtdlModelConfig[index].eventText">
+                                    <input type="text" class="form-control"  name="eventText{{model.id}}" placeholder="c8y_locationUpdate,c8y_BeaconUpdate (required)" required [(ngModel)]="model.eventText">
                                 </div>
                             </div>
                         </ng-container>
@@ -170,7 +171,7 @@ export interface DtdlSimulationModel {
                             <div class="col-xs-12 col-sm-4 col-md-4">
                                 <div class="measurement-accordion">
                                     <label for="value"><span>Value</span></label>
-                                    <input type="text" class="form-control" id="value" name="value{{model.id}}" placeholder="e.g. 15,20,30 (required)" required [(ngModel)]="getOperationConfig(0).dtdlModelConfig[index].value">
+                                    <input type="text" class="form-control" id="value" name="value{{model.id}}" placeholder="e.g. 15,20,30 (required)" required [(ngModel)]="model.value">
                                 </div> 
                             </div>
                         </ng-container>
@@ -178,25 +179,25 @@ export interface DtdlSimulationModel {
                             <div class="col-xs-12 col-sm-4 col-md-4">
                                 <div class="measurement-accordion">
                                 <label for="startingvalue"><span>Starting Value</span></label>
-                                <input type="number" class="form-control" id="startingvalue" name="startingvalue{{model.id}}" placeholder="e.g. 10 (required)" required [(ngModel)]="getOperationConfig(0).dtdlModelConfig[index].startingValue">
+                                <input type="number" class="form-control" id="startingvalue" name="startingvalue{{model.id}}" placeholder="e.g. 10 (required)" required [(ngModel)]="model.startingValue">
                                 </div>
                             </div>
                             <div class="col-xs-12 col-sm-4 col-md-4">
                                 <div class="measurement-accordion">
                                     <label for="maxdelta"><span>Maximum Change Amount</span></label>
-                                    <input type="number" class="form-control" id="maxdelta" name="maxdelta{{model.id}}" min="0" placeholder="e.g. 10 (required)" required [(ngModel)]="getOperationConfig(0).dtdlModelConfig[index].maxDelta">
+                                    <input type="number" class="form-control" id="maxdelta" name="maxdelta{{model.id}}" min="0" placeholder="e.g. 10 (required)" required [(ngModel)]="model.maxDelta">
                                 </div>
                             </div>
                             <div class="col-xs-12 col-sm-4 col-md-4">
                                 <div class="measurement-accordion">
                                     <label for="minvalue"><span>Minimum Value</span></label>
-                                    <input type="number" class="form-control"  name="minvalue{{model.id}}" placeholder="e.g. 10 (required)" required [(ngModel)]="getOperationConfig(0).dtdlModelConfig[index].minValue">
+                                    <input type="number" class="form-control"  name="minvalue{{model.id}}" placeholder="e.g. 10 (required)" required [(ngModel)]="model.minValue">
                                 </div>
                             </div>
                             <div class="col-xs-12 col-sm-4 col-md-4">
                                 <div class="measurement-accordion">
                                     <label for="maxvalue"><span>Maximum Value</span></label>
-                                    <input type="number" class="form-control"  name="maxvalue{{model.id}}" placeholder="e.g. 20 (required)" required [(ngModel)]="getOperationConfig(0).dtdlModelConfig[index].maxValue">
+                                    <input type="number" class="form-control"  name="maxvalue{{model.id}}" placeholder="e.g. 20 (required)" required [(ngModel)]="model.maxValue">
                                 </div>
                             </div>
                         </ng-container>
@@ -205,14 +206,14 @@ export interface DtdlSimulationModel {
                     <!-- multiple possible configs here -->
                     <div class="col-lg-12">
                         <label class="c8y-checkbox">
-                            <input type="checkbox" name="opEnabled1" [(ngModel)]="getOperationConfig(0).opEnabled"/>
+                            <input type="checkbox" name="opEnabled1" [(ngModel)]="model.opEnabled"/>
                             <span></span>
                             <span>Controlled by operation</span>
                         </label>
                     </div>
 
                     <!-- start fields --> 
-                    <ng-container *ngIf="getOperationConfig(0).opEnabled">
+                    <ng-container *ngIf="model.opEnabled">
                         <div class="col-lg-12">
                             <accordion  [isAnimated]="true" [closeOthers]="true">
                                 <accordion-group panelClass="op-simulator-panel" #opGroup>
@@ -225,27 +226,27 @@ export interface DtdlSimulationModel {
                                         <div class="col-lg-6">
                                             <div class="measurement-accordion">
                                                 <label for="opSource"><span>Operation Source</span></label>
-                                                <device-selector id="opSource" name="opSource" [(value)]="getOperationConfig(0).opSourceName" [placeHolder]="'Type your Device Name'" [required]="true" (selectedDevice)= "getSelectedDevice($event)"></device-selector>
+                                                <device-selector id="opSource" name="opSource" [(value)]="model.opSourceName" [placeHolder]="'Type your Device Name'" [required]="true" (selectedDevice)= "getSelectedDevice($event,model)"></device-selector>
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="measurement-accordion">
                                                 <label for="opPayload"><span>Payload Key</span></label>
-                                                <input type="text" class="form-control" id="opPayload" name="opPayload" placeholder="e.g. c8y_command.text" required autofocus [(ngModel)]="getOperationConfig(0).payloadFragment">
+                                                <input type="text" class="form-control" id="opPayload" name="opPayload" placeholder="e.g. c8y_command.text" required autofocus [(ngModel)]="model.payloadFragment">
                                             </div>                                            
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-12 op-field">
                                             <label class="c8y-checkbox">
-                                                <input type="checkbox" id="opReply" name="opReply" [(ngModel)]="getOperationConfig(0).opReply" />
+                                                <input type="checkbox" id="opReply" name="opReply" [(ngModel)]="model.opReply" />
                                                 <span></span>
                                                 <span>Mark operation handled</span>
                                             </label>
                                         </div>
                                     </div>
                                     <hr />
-                                    <div class="row" *ngFor="let op of getOperationConfig(0).operations; let i = index">
+                                    <div class="row" *ngFor="let op of model.operations; let i = index">
                                         <ng-container *ngIf="i > 0">
                                             <div class="col-lg-12">
                                                 <div class="row">
@@ -256,7 +257,7 @@ export interface DtdlSimulationModel {
                                                         </div>
                                                     </div>
                                                     <!-- dtdl field handling --> 
-                                                    <ng-container [ngSwitch]="getOperationConfig(0).dtdlModelConfig[index].simulationType">
+                                                    <ng-container [ngSwitch]="model.simulationType">
                                                         <ng-container *ngSwitchCase="'randomValue'">
                                                             <div class="col-xs-12 col-sm-4 col-md-4">
                                                                 <div class="measurement-accordion">
@@ -355,7 +356,7 @@ export interface DtdlSimulationModel {
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-12">
-                                            <button class="btn btn-link btn-block" type="button" (click)='newOperation("rand_value", getOperationConfig(0).operations.length)'>
+                                            <button class="btn btn-link btn-block" type="button" (click)='newOperation(model, "dtdl", model.operations.length)'>
                                                     <div class="pull-left float-left">Add condition</div>
                                             </button>
                                         </div>
@@ -426,33 +427,22 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
         return this.config;
     }
 
-    getSelectedDevice(device: any) {
-        this.config.opSource = device.id;
-        this.config.opSourceName = device.name;
+    getSelectedDevice(device: any, model: DtdlSimulationModel) {
+        // this.config.opSource = device.id;
+        // this.config.opSourceName = device.name;
     }
 
-    newOperation(base: string, index: number) {
+    newOperation(model: DtdlSimulationModel, base: string, index: number) {
         //        series: `${base}_series_${index}`,
-        let c: DtdlSimulationStrategyConfig = {
-            deviceId: "",
-            opSource: "",
-            opSourceName: "",
-            matchingValue: `${base}_match_${index}`,
-            payloadFragment: "c8y_Command.text",
-            opReply: false,
-            modalSize: "modal-md",
-            deviceName: "",
-            dtdlModelConfig: [],
-            dtdlDeviceId: "",
-            interval: 5,
-            operations: new Array()
-        };
+        let c: DtdlSimulationModel = cloneDeep(model);
+        _.set(c, "matchingValue", `${base}_match_${index}`);
+        //_.set(c, "operations", undefined);
 
         //New objects can duplicate the default so it can be restored
         //we will create the config entries if old simulators are edited
         //duplication is to avoid changing old code.
-        this.config.operations.push(c);
-        console.log(this.config.operations);
+        model.operations.push(c);
+        console.log(model.operations);
     }
 
     initializeConfig() {
@@ -460,24 +450,17 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
         this.configModel = [];
         let c: DtdlSimulationStrategyConfig = {
             deviceId: "",
-            opSource: "",
-            opSourceName: "",
-            matchingValue: "default",
-            payloadFragment: "c8y_Command.text",
-            opReply: false,
             modalSize: "modal-md",
             deviceName: "",
             dtdlModelConfig: [],
             dtdlDeviceId: "",
             interval: 5,
-            operations: new Array()
         };
 
         //New objects can duplicate the default so it can be restored
         //we will create the config entries if old simulators are edited
         //duplication is to avoid changing old code.
-        this.config = _.cloneDeep(c);
-        this.config.operations.push(c);
+        this.config = c;
     }
 
 
@@ -554,7 +537,8 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
     private processTelemetry(content: any, deviceId?: string) {
         const typeLength = (Array.isArray(content['@type']) ? content['@type'].length : 0);
         const model: DtdlSimulationModel = {
-            simulationType: 'randomValue'
+            simulationType: 'randomValue',
+            matchingValue: ""
         };
         model.measurementName = (content.displayName && content.displayName.constructor === Object ? content.displayName.en : content.displayName);
         model.fragment = (typeLength > 0 ? content['@type'][typeLength - 1] : content['@type']);
@@ -571,7 +555,8 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
             if (fields && fields.length > 0) {
                 fields.forEach(field => {
                     const fieldModel: DtdlSimulationModel = {
-                        simulationType: 'randomValue'
+                        simulationType: 'randomValue',
+                        matchingValue: ""
                     };
                     fieldModel.measurementName = model.measurementName + " : " + field.displayName;
                     fieldModel.fragment = model.fragment;
