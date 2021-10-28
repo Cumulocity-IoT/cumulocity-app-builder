@@ -32,11 +32,17 @@ export interface OperationSupport<T> {
     opSourceName?: string,
     payloadFragment?: string,
     opReply?: boolean,
+    configIndex: number;
     operations?: Array<T>;
 }
 
 
 export interface DtdlSimulationModel {
+    modalSize?: string,
+    deviceName?: string,
+    dtdlDeviceId?: string,
+    dtdlModelConfig?: DtdlSimulationModel[],
+    isEditMode?: boolean,
     matchingValue: string,
     measurementName?: string,
     fragment?: string,
