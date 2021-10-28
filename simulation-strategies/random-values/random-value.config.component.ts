@@ -18,11 +18,12 @@
 
 import { Component } from "@angular/core";
 import { ControlContainer, NgForm } from '@angular/forms';
-import { OperationDefinitions, OperationSupport } from "builder/simulator/simulator-config";
+import { DtdlSimulationModel, OperationSupport } from "builder/simulator/simulator-config";
 import { SimulationStrategyConfigComponent } from "../../builder/simulator/simulation-strategy";
 import * as _ from 'lodash';
 
-export interface RandomValueSimulationStrategyConfig extends OperationSupport<RandomValueSimulationStrategyConfig> {
+export interface RandomValueSimulationStrategyConfig {
+    matchingValue: string,
     deviceId: string,
     fragment: string,
     series: string,
@@ -30,6 +31,7 @@ export interface RandomValueSimulationStrategyConfig extends OperationSupport<Ra
     maxValue: number,
     unit: string,
     interval: number;
+    alternateConfigs?:  OperationSupport<RandomValueSimulationStrategyConfig>
 }
 
 @Component({
@@ -44,21 +46,21 @@ export interface RandomValueSimulationStrategyConfig extends OperationSupport<Ra
         </div>
         <div class="form-group">
             <label for="minvalue"><span>Minimum Value</span></label>
-            <input type="number" class="form-control" id="minvalue" name="minvalue" placeholder="e.g. 10 (required)" required [(ngModel)]="getOperationConfig(0).minValue">
+            <input type="number" class="form-control" id="minvalue" name="minvalue" placeholder="e.g. 10 (required)" required [(ngModel)]="config.minValue">
         </div>
         <div class="form-group">
             <label for="maxvalue"><span>Maximum Value</span></label>
-            <input type="number" class="form-control" id="maxvalue" name="maxvalue" placeholder="e.g. 20 (required)" required [(ngModel)]="getOperationConfig(0).maxValue">
+            <input type="number" class="form-control" id="maxvalue" name="maxvalue" placeholder="e.g. 20 (required)" required [(ngModel)]="config.maxValue">
         </div>
         <div class="form-group">
             <label class="c8y-checkbox">
-                <input type="checkbox" (click)="newOperation('rand_value',config.operations.length)" />
+            <input name="opEnabled" type="checkbox" [(ngModel)]="config.alternateConfigs.opEnabled"/>
                 <span></span>
                 <span>Controlled by operation</span>
             </label>
         </div>
 
-        <ng-container *ngIf="config.operations.length > 1">
+        <ng-container *ngIf="config.alternateConfigs && config.alternateConfigs.operations.length > 1">
             <div class="form-group">
                 <accordion  [isAnimated]="true" [closeOthers]="true">
                     <accordion-group panelClass="op-simulator-panel" #opGroup>
@@ -70,40 +72,40 @@ export interface RandomValueSimulationStrategyConfig extends OperationSupport<Ra
                         <div class="row">
                             <div class="col-lg-6 op-field">
                                 <label for="opSource"><span>Operation Source</span></label>
-                                <device-selector id="opSource" name="opSource" [(value)]="config.opSourceName" [placeHolder]="'Type your Device Name'" [required]="true" (selectedDevice)= "getSelectedDevice($event)"></device-selector>
+                                <device-selector id="opSource" name="opSource" [(value)]="config.alternateConfigs.opSourceName" [placeHolder]="'Type your Device Name'" [required]="true" (selectedDevice)= "getSelectedDevice($event)"></device-selector>
                             </div>
                             <div class="col-lg-6 op-field">
                                 <label for="opPayload"><span>Payload Key</span></label>
-                                <input type="text" class="form-control" id="opPayload" name="opPayload" placeholder="e.g. c8y_command.text" required autofocus [(ngModel)]="config.payloadFragment">
+                                <input type="text" class="form-control" id="opPayload" name="opPayload" placeholder="e.g. c8y_command.text" required autofocus [(ngModel)]="config.alternateConfigs.payloadFragment">
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-lg-12 op-field">
                                 <label class="c8y-checkbox">
-                                    <input type="checkbox" id="opReply" name="opReply" [(ngModel)]="config.opReply" />
+                                    <input type="checkbox" id="opReply" name="opReply" [(ngModel)]="config.alternateConfigs.opReply" />
                                     <span></span>
                                     <span>Mark operation handled</span>
                                 </label>
                             </div>
                         </div>
                         <hr /> 
-                        <div class="row" *ngFor="let op of config.operations; let i = index">
+                        <div class="row" *ngFor="let op of config.alternateConfigs.operations; let i = index">
                             <ng-container *ngIf="i > 0">
                                 <div class="col-lg-12">
                                     <div class="row">
                                         <div class="col-lg-6 op-field">
                                             <label for="opMatch_{{i}}"><span>Matching</span></label>
-                                            <input type="text" class="form-control" id="opMatch_{{i}}" name="opMatch_{{i}}" placeholder="e.g. WINDY" required [(ngModel)]="config.operations[i].matchingValue">
+                                            <input type="text" class="form-control" id="opMatch_{{i}}" name="opMatch_{{i}}" placeholder="e.g. WINDY" required [(ngModel)]="op.matchingValue">
                                         </div>
                                         <div class="col-lg-6 op-field">
                                             <label for="minvalue_{{i}}"><span>Minimum Value</span></label>
-                                            <input type="number" class="form-control" id="minvalue_{{i}}" name="minvalue_{{i}}" placeholder="e.g. 10 (required)" required [(ngModel)]="getOperationConfig(i).minValue">
+                                            <input type="number" class="form-control" id="minvalue_{{i}}" name="minvalue_{{i}}" placeholder="e.g. 10 (required)" required [(ngModel)]="config.alternateConfigs.operations[i].minValue">
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-6" op-field>
                                             <label for="maxvalue_{{i}}"><span>Maximum Value</span></label>
-                                            <input type="number" class="form-control" id="maxvalue_{{i}}" name="maxvalue_{{i}}" placeholder="e.g. 20 (required)" required [(ngModel)]="getOperationConfig(i).maxValue">
+                                            <input type="number" class="form-control" id="maxvalue_{{i}}" name="maxvalue_{{i}}" placeholder="e.g. 20 (required)" required [(ngModel)]="config.alternateConfigs.operations[i].maxValue">
                                         </div>
                                     </div>
                                     <div class="row">
@@ -117,7 +119,7 @@ export interface RandomValueSimulationStrategyConfig extends OperationSupport<Ra
                                 <hr />          
                             </ng-container>
                         </div>
-                        <button class="btn btn-link btn-block" type="button" (click)="newOperation('rand_value',config.operations.length)">
+                        <button class="btn btn-link btn-block" type="button" (click)="newOperation('rand_value',config.alternateConfigs.operations.length)">
                             <div class="pull-left float-left">Add condition</div>
                         </button>
                     </accordion-group>
@@ -145,64 +147,52 @@ export interface RandomValueSimulationStrategyConfig extends OperationSupport<Ra
 })
 export class RandomValueSimulationStrategyConfigComponent extends SimulationStrategyConfigComponent {
 
-    config: RandomValueSimulationStrategyConfig;
-
-    getOperationConfig(i: number) : RandomValueSimulationStrategyConfig {
-        let c: RandomValueSimulationStrategyConfig = this.getConfigAsAny(i);
-        if( c != undefined) {
-            return c;
-        } 
-        return this.config;
-    }
+    config: DtdlSimulationModel;
 
     getSelectedDevice(device: any) {
-        this.config.opSource = device.id;
-        this.config.opSourceName = device.name;
+        this.config.alternateConfigs.opSource = device.id;
+        this.config.alternateConfigs.opSourceName = device.name;
     }
 
     newOperation(base: string, index: number ) {
-        let c: RandomValueSimulationStrategyConfig = {
-            deviceId: "",
-            opSource: "",
-            opSourceName: "",
+
+        this.checkAlternateConfigs();
+
+        let c: DtdlSimulationModel = {
+            deviceId: this.config.deviceId,
             matchingValue: `${base}_match_${index}`,
-            payloadFragment:  "c8y_Command.text",
-            opReply: false,
             fragment: "temperature_measurement",
             series: `${base}_series_${index}`,
             minValue: 10,
             maxValue: 20,
             unit: "C",
-            interval: 5,
-            operations: undefined
+            alternateConfigs: undefined
         };
 
-        this.config.operations.push(c);
-        console.log(this.config.operations);
+        
+        this.config.alternateConfigs.operations.push(c);
+        console.log(this.config.alternateConfigs.operations);
     }
 
     initializeConfig() {
-        let c: RandomValueSimulationStrategyConfig = {
+
+        let c: DtdlSimulationModel = {
             deviceId: "",
-            opSource: "",
-            opSourceName: "",
-            matchingValue: "default",
-            payloadFragment:  "c8y_Command.text",
-            opReply: false,
             fragment: "temperature_measurement",
             series: "T",
             minValue: 10,
             maxValue: 20,
             unit: "C",
             interval: 5,
-            operations: new Array()
+            alternateConfigs: undefined,
+            matchingValue: "default"
         };
 
         //New objects can duplicate the default so it can be restored
         //we will create the config entries if old simulators are edited
         //duplication is to avoid changing old code.
         this.config = _.cloneDeep(c);
-        this.config.operations.push(c);
+        this.checkAlternateConfigs();
+        this.config.alternateConfigs.operations.push(c);
     }
-
 }

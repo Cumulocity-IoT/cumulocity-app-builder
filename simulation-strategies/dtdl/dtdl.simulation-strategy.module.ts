@@ -24,15 +24,13 @@ import {FormsModule} from "@angular/forms";
 import { HOOK_SIMULATION_STRATEGY_FACTORY } from '../../builder/simulator/device-simulator';
 import { AccordionModule } from 'ngx-bootstrap/accordion';
 import {NgSelectModule} from "@ng-select/ng-select";
-import { DeviceSelectorModule } from '../../device-selector/device-selector.module';
 
 @NgModule({
     imports: [
         CommonModule,
         FormsModule,
         NgSelectModule,
-        AccordionModule.forRoot(),
-        DeviceSelectorModule
+        AccordionModule.forRoot()
     ],
     declarations: [
         DtdlSimulationStrategyConfigComponent

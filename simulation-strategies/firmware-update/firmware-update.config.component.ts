@@ -17,20 +17,10 @@
  */
 
 import { Component } from "@angular/core";
-import { OperationDefinitions, OperationSupport } from "builder/simulator/simulator-config";
+import { DtdlSimulationModel } from "builder/simulator/simulator-config";
 import { SimulationStrategyConfigComponent } from "../../builder/simulator/simulation-strategy";
 import * as _ from 'lodash';
 
-export interface FirmwareUpdateSimulationStrategyConfig extends OperationSupport<FirmwareUpdateSimulationStrategyConfig> {
-    deviceId: string,
-    isGroup?: boolean,
-    firmwareVersions: {
-        name: string,
-        version: string,
-        url: string;
-    }[],
-    resetOn: 'restart' | 'never';
-}
 
 @Component({
     template: `
@@ -62,37 +52,26 @@ export interface FirmwareUpdateSimulationStrategyConfig extends OperationSupport
 export class FirmwareUpdateSimulationStrategyConfigComponent extends SimulationStrategyConfigComponent {
 
 
-    config: FirmwareUpdateSimulationStrategyConfig;
-
-    getOperationConfig(i: number) : FirmwareUpdateSimulationStrategyConfig {
-        let c: FirmwareUpdateSimulationStrategyConfig = this.getConfigAsAny(i);
-        if( c != undefined) {
-            return c;
-        } 
-        return this.config;
-    }
+    config: DtdlSimulationModel;
 
     initializeConfig() {
-        let c: FirmwareUpdateSimulationStrategyConfig = {
+        let c: DtdlSimulationModel = {
             deviceId: "",
-            opSource: "",
-            opSourceName: "",
             matchingValue: "default",
-            payloadFragment:  "c8y_Command.text",
-            opReply: false,
             firmwareVersions: [
                 { name: "Version 1", version: "1.0.0", url: "https://firmware-repo.cumulocity.com/v1.0.0" },
                 { name: "Version 2", version: "2.0.0", url: "https://firmware-repo.cumulocity.com/v2.0.0" }
             ],
             resetOn: 'restart',
-            operations: new Array()
+            alternateConfigs: undefined
         };
 
         //New objects can duplicate the default so it can be restored
         //we will create the config entries if old simulators are edited
         //duplication is to avoid changing old code.
         this.config = _.cloneDeep(c);
-        this.config.operations.push(c);
+        this.checkAlternateConfigs()
+        this.config.alternateConfigs.operations.push(c);
     }
 
 

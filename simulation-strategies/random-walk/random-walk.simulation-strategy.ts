@@ -17,7 +17,6 @@
  */
 
 import {
-    RandomWalkSimulationStrategyConfig,
     RandomWalkSimulationStrategyConfigComponent
 } from "./random-walk.config.component";
 import { SimulationStrategy } from "../../builder/simulator/simulation-strategy.decorator";
@@ -25,7 +24,7 @@ import { DeviceIntervalSimulator } from "../../builder/simulator/device-interval
 import { Injectable, Injector } from "@angular/core";
 import { SimulationStrategyFactory } from "../../builder/simulator/simulation-strategy";
 import { IOperation, MeasurementService, OperationService, OperationStatus } from '@c8y/client';
-import { SimulatorConfig } from "../../builder/simulator/simulator-config";
+import { DtdlSimulationModel, SimulatorConfig } from "../../builder/simulator/simulator-config";
 import * as _ from 'lodash';
 
 @SimulationStrategy({
@@ -37,7 +36,7 @@ import * as _ from 'lodash';
 export class RandomWalkSimulationStrategy extends DeviceIntervalSimulator {
 
     randomWalkConfigParam: randomWalkConfigParam[] = [];
-    constructor(protected injector: Injector, private measurementService: MeasurementService, private opservice: OperationService, private config: RandomWalkSimulationStrategyConfig) {
+    constructor(protected injector: Injector, private measurementService: MeasurementService, private opservice: OperationService, private config: DtdlSimulationModel) {
         super(injector);
     }
 
@@ -54,16 +53,16 @@ export class RandomWalkSimulationStrategy extends DeviceIntervalSimulator {
 
     public async onOperation(param: any): Promise<boolean> {
         //console.log("Series operation = ", param);
-        if (this.config.operations.length > 1) {
-            if (_.has(param, "deviceId") && _.get(param, "deviceId") == this.config.opSource) {
-                for (let cfg of this.config.operations) {
-                    if (_.has(param, this.config.payloadFragment) && _.get(param, this.config.payloadFragment) == cfg.matchingValue) {
+        if (this.config.alternateConfigs.operations.length > 1) {
+            if (_.has(param, "deviceId") && _.get(param, "deviceId") == this.config.alternateConfigs.opSource) {
+                for (let cfg of this.config.alternateConfigs.operations) {
+                    if (_.has(param, this.config.alternateConfigs.payloadFragment) && _.get(param, this.config.alternateConfigs.payloadFragment) == cfg.matchingValue) {
                         console.log(`Rand Matched ${cfg.matchingValue} setting cfg = `, cfg);
                         this.config.minValue = cfg.minValue;
                         this.config.maxValue = cfg.maxValue;
                         this.config.maxDelta = cfg.maxDelta;
 
-                        if (this.config.opReply == true) {
+                        if (this.config.alternateConfigs.opReply == true) {
                             const partialUpdateObject: Partial<IOperation> = {
                                 id: param.id,
                                 status: OperationStatus.SUCCESSFUL
@@ -136,7 +135,7 @@ export class RandomWalkSimulationStrategyFactory extends SimulationStrategyFacto
         super();
     }
 
-    createInstance(config: SimulatorConfig<RandomWalkSimulationStrategyConfig>): RandomWalkSimulationStrategy {
+    createInstance(config: SimulatorConfig): RandomWalkSimulationStrategy {
         return new RandomWalkSimulationStrategy(this.injector, this.measurementService, this.opservice, config.config);
     }
 

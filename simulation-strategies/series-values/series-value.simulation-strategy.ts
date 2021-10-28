@@ -17,7 +17,6 @@
  */
 
 import {
-    SeriesValueSimulationStrategyConfig,
     SeriesValueSimulationStrategyConfigComponent
 } from "./series-value.config.component";
 import { SimulationStrategy } from "../../builder/simulator/simulation-strategy.decorator";
@@ -25,7 +24,7 @@ import { DeviceIntervalSimulator } from "../../builder/simulator/device-interval
 import { Injectable, Injector } from "@angular/core";
 import { SimulationStrategyFactory } from "../../builder/simulator/simulation-strategy";
 import { IOperation, MeasurementService, OperationStatus } from "@c8y/client";
-import { SimulatorConfig } from "../../builder/simulator/simulator-config";
+import { DtdlSimulationModel, SimulatorConfig } from "../../builder/simulator/simulator-config";
 import * as _ from 'lodash';
 import { OperationService } from "@c8y/ngx-components/api";
 
@@ -39,7 +38,7 @@ export class SeriesValueSimulationStrategy extends DeviceIntervalSimulator {
     /*     values: number[] = [];
         measurementCounter = 0; */
     valueSeriesConfigParam: valueSeriesConfigParam[] = [];
-    constructor(protected injector: Injector, private measurementService: MeasurementService, private opservice: OperationService , private config: SeriesValueSimulationStrategyConfig) {
+    constructor(protected injector: Injector, private measurementService: MeasurementService, private opservice: OperationService , private config: DtdlSimulationModel) {
         super(injector);
     }
 
@@ -55,17 +54,17 @@ export class SeriesValueSimulationStrategy extends DeviceIntervalSimulator {
     }
 
     public async onOperation(param: any): Promise<boolean> {
-        //console.log("Series operation = ", param);
-        if (this.config.operations.length > 1) {
-            if (_.has(param, "deviceId") && _.get(param, "deviceId") == this.config.opSource) {
-                for (let cfg of this.config.operations) {
-                    if (_.has(param, this.config.payloadFragment) && _.get(param, this.config.payloadFragment) == cfg.matchingValue) {
+        console.log("Series operation = ", param);
+        if (this.config.alternateConfigs.operations.length > 1) {
+            if (_.has(param, "deviceId") && _.get(param, "deviceId") == this.config.alternateConfigs.opSource) {
+                for (let cfg of this.config.alternateConfigs.operations) {
+                    if (_.has(param, this.config.alternateConfigs.payloadFragment) && _.get(param, this.config.alternateConfigs.payloadFragment) == cfg.matchingValue) {
                         console.log(`Matched ${cfg.matchingValue} setting cfg = `, cfg);
                         this.config.value = cfg.value;
                         let vCfg = this.getValueSeriesConfigParam(this.config.deviceId);
                         vCfg.seriesvalues = this.config.value.split(',').map(value => parseFloat(value.trim()));
                         vCfg.seriesValueMeasurementCounter = 0;
-                        if (this.config.opReply == true) {
+                        if (this.config.alternateConfigs.opReply == true) {
                             const partialUpdateObject: Partial<IOperation> = {
                                 id: param.id,
                                 status: OperationStatus.SUCCESSFUL
@@ -140,7 +139,7 @@ export class SeriesValueSimulationStrategyFactory extends SimulationStrategyFact
         super();
     }
 
-    createInstance(config: SimulatorConfig<SeriesValueSimulationStrategyConfig>): SeriesValueSimulationStrategy {
+    createInstance(config: SimulatorConfig): SeriesValueSimulationStrategy {
         return new SeriesValueSimulationStrategy(this.injector, this.measurementService, this.opservice, config.config);
     }
 

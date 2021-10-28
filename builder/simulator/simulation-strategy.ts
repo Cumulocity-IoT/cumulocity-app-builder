@@ -30,12 +30,23 @@ declare module Reflect {
 export abstract class SimulationStrategyConfigComponent {
     abstract config: any; //typed in extended
     abstract initializeConfig(): void; //extended knows how to init
-    abstract getOperationConfig(i:number) : any;
 
+    public checkAlternateConfigs() {
+        console.log("checkAlternateConfigs",this.config);
+        if (!this.hasOperations()) {
+            this.config.alternateConfigs = {
+                opSource: "",
+                opSourceName: "",
+                payloadFragment: "c8y_Command.text",
+                opReply: false,
+                operations: []
+            };
+        }
+    }
 
     public deleteOperation(index:number) : void {
         if( this.hasOperations() ) {
-            let ops: Array<any> = _.get(this.config,"operations");
+            let ops: Array<any> = _.get(this.config.alternateConfigs,"operations");
             ops.splice(index,1);
         }
     }
@@ -46,20 +57,7 @@ export abstract class SimulationStrategyConfigComponent {
      * @returns true if config supports operations
      */
     public hasOperations() : boolean {
-        return (_.has(this,"config") && _.has(this.config,"operations"));
-    }
-
-
-    /**
-     * clear the operations entires
-     * @returns true if cleared. 
-     */
-    public removeAllOperations() : boolean {
-        if( this.hasOperations() ) {
-            _.set(this.config,"operations",[]);
-            return true;
-        } 
-        return false;
+        return ( _.has(this.config,"alternateConfigs") && _.has(this.config.alternateConfigs,"operations"));
     }
 
     /**
@@ -74,7 +72,7 @@ export abstract class SimulationStrategyConfigComponent {
      */
     public getConfigAsAny(index: number): any | undefined {
         if( this.hasOperations() ) {
-            let ops: Array<any> = _.get(this.config,"operations");
+            let ops: Array<any> = _.get(this.config.alternateConfigs,"operations");
             if(ops.length >= (index+1)) { //zero based
                 return ops[index].config;
             }

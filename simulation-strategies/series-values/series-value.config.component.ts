@@ -18,19 +18,9 @@
 
 import { Component } from "@angular/core";
 import { ControlContainer, NgForm } from '@angular/forms';
-import { OperationDefinitions, OperationSupport } from "builder/simulator/simulator-config";
+import { DtdlSimulationModel } from "builder/simulator/simulator-config";
 import { SimulationStrategyConfigComponent } from "../../builder/simulator/simulation-strategy";
 import * as _ from "lodash";
-
-
-export interface SeriesValueSimulationStrategyConfig extends OperationSupport<SeriesValueSimulationStrategyConfig> {
-    deviceId: string,
-    fragment: string,
-    series: string,
-    value: string,
-    unit: string,
-    interval: number,
-}
 
 @Component({
     template: `
@@ -45,18 +35,18 @@ export interface SeriesValueSimulationStrategyConfig extends OperationSupport<Se
 
         <div class="form-group">
             <label for="value"><span>Default Value</span></label>
-            <input type="text" class="form-control" id="value" name="value" placeholder="e.g. 15,20,30 (required)" required [(ngModel)]="getOperationConfig(0).value">
+            <input type="text" class="form-control" id="value" name="value" placeholder="e.g. 15,20,30 (required)" required [(ngModel)]="config.alternateConfigs.operations[0].value">
         </div>
 
         <div class="form-group">
             <label class="c8y-checkbox">
-                <input name="opEnabled" type="checkbox" [(ngModel)]="getOperationConfig(0).opEnabled"/>
+                <input name="opEnabled" type="checkbox" [(ngModel)]="config.alternateConfigs.opEnabled"/>
                 <span></span>
                 <span>Controlled by operation</span>
             </label>
         </div>
 
-        <ng-container *ngIf="getOperationConfig(0).opEnabled">
+        <ng-container *ngIf="config.alternateConfigs.opEnabled">
             <div class="form-group">
                 <accordion  [isAnimated]="true" [closeOthers]="true">
                     <accordion-group panelClass="op-simulator-panel" #opGroup>
@@ -68,34 +58,34 @@ export interface SeriesValueSimulationStrategyConfig extends OperationSupport<Se
                         <div class="row">
                             <div class="col-lg-6 op-field">
                                 <label for="opSource"><span>Operation Source</span></label>
-                                <device-selector id="opSource" name="opSource" [(value)]="getOperationConfig(0).opSourceName" [placeHolder]="'Type your Device Name'" [required]="true" (selectedDevice)= "getSelectedDevice($event)"></device-selector>
+                                <device-selector id="opSource" name="opSource" [(value)]="config.alternateConfigs.opSourceName" [placeHolder]="'Type your Device Name'" [required]="true" (selectedDevice)= "getOperationsDevice($event)"></device-selector>
                             </div>
                             <div class="col-lg-6 op-field">
                                 <label for="opPayload"><span>Payload Key</span></label>
-                                <input type="text" class="form-control" id="opPayload" name="opPayload" placeholder="e.g. c8y_command.text" required autofocus [(ngModel)]="getOperationConfig(0).payloadFragment">
+                                <input type="text" class="form-control" id="opPayload" name="opPayload" placeholder="e.g. c8y_command.text" required autofocus [(ngModel)]="config.alternateConfigs.payloadFragment">
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-lg-12 op-field">
                                 <label class="c8y-checkbox">
-                                    <input type="checkbox" id="opReply" name="opReply" [(ngModel)]="config.opReply" />
+                                    <input type="checkbox" id="opReply" name="opReply" [(ngModel)]="config.alternateConfigs.opReply" />
                                     <span></span>
                                     <span>Mark operation handled</span>
                                 </label>
                             </div>
                         </div>
                         <hr /> 
-                        <div class="row" *ngFor="let op of config.operations; let i = index">
+                        <div class="row" *ngFor="let op of config.alternateConfigs.operations; let i = index">
                             <ng-container *ngIf="i > 0">
                                 <div class="col-lg-12">
                                     <div class="row">
                                         <div class="col-lg-6 op-field">
-                                            <label for="opMatch_{{i}}"><span>Matching</span></label>
-                                            <input type="text" class="form-control" id="opMatch_{{i}}" name="opMatch_{{i}}" placeholder="e.g. WINDY" required [(ngModel)]="getOperationConfig(i).matchingValue">
+                                            <label for="opMatch_{{i}}"><span>Matching {{i}}</span></label>
+                                            <input type="text" class="form-control" id="opMatch_{{i}}" name="opMatch_{{i}}" placeholder="e.g. WINDY" required [(ngModel)]="op.matchingValue">
                                         </div>
                                         <div class="col-lg-6 op-field">
-                                            <label for="opValue_{{i}}"><span>Values</span></label>
-                                            <input type="text" class="form-control" id="opValue_{{i}}" name="opValue_{{i}}" placeholder="e.g. 15,20,30 (required)" required [(ngModel)]="getOperationConfig(i).value">
+                                            <label for="opValue_{{i}}"><span>Values {{i}}</span></label>
+                                            <input type="text" class="form-control" id="opValue_{{i}}" name="opValue_{{i}}" placeholder="e.g. 15,20,30 (required)" required [(ngModel)]="op.value">
                                         </div>
                                     </div>
                                     <div class="row">
@@ -109,7 +99,7 @@ export interface SeriesValueSimulationStrategyConfig extends OperationSupport<Se
                                 <hr />          
                             </ng-container>
                         </div>
-                        <button class="btn btn-link btn-block" type="button" (click)="newOperation('series_value',config.operations.length)">
+                        <button class="btn btn-link btn-block" type="button" (click)="newOperation('series_value',config.alternateConfigs.operations.length)">
                             <div class="pull-left float-left">Add condition</div>
                         </button>
                     </accordion-group>
@@ -142,64 +132,51 @@ export class SeriesValueSimulationStrategyConfigComponent extends SimulationStra
 
 
 
-    config: SeriesValueSimulationStrategyConfig;
+    config: DtdlSimulationModel;
 
-    getSelectedDevice(device: any) {
-        this.config.opSource = device.id;
-        this.config.opSourceName = device.name;
+    getOperationsDevice(device: any) {
+        this.config.alternateConfigs.opSource = device.id;
+        this.config.alternateConfigs.opSourceName = device.name;
     }
-
-    getOperationConfig(i: number) : SeriesValueSimulationStrategyConfig {
-        let c: SeriesValueSimulationStrategyConfig = this.getConfigAsAny(i);
-        if( c != undefined) {
-            return c;
-        } 
-        return this.config;
-    }
-
 
     newOperation(base: string, index: number ) {
 
-        let c: SeriesValueSimulationStrategyConfig = {
-            deviceId: "",
-            opSource: "",
-            opSourceName: "",
+        this.checkAlternateConfigs();
+
+        let c: DtdlSimulationModel = {
+            deviceId: this.config.deviceId,
             matchingValue: `${base}_match_${index}`,
-            payloadFragment:  "c8y_Command.text",
-            opReply: false,
             fragment: "temperature_measurement",
             series: `${base}_series_${index}`,
             value: "10, 20, 30",
             unit: "C",
-            interval: 5,
-            operations: undefined
+            alternateConfigs: undefined
         };
 
-        this.config.operations.push(c);
-        console.log(this.config.operations);
+        
+        this.config.alternateConfigs.operations.push(c);
+        console.log(this.config.alternateConfigs.operations);
     }
 
     initializeConfig() {
-        let c: SeriesValueSimulationStrategyConfig = {
+
+        let c: DtdlSimulationModel = {
             deviceId: "",
-            opSource: "",
-            opSourceName: "",
-            matchingValue: "default",
-            payloadFragment:  "c8y_Command.text",
-            opReply: false,
             fragment: "temperature_measurement",
             series: "T",
             value: "10, 20, 30",
             unit: "C",
             interval: 5,
-            operations: new Array()
+            alternateConfigs: undefined,
+            matchingValue: "default"
         };
 
         //New objects can duplicate the default so it can be restored
         //we will create the config entries if old simulators are edited
         //duplication is to avoid changing old code.
         this.config = _.cloneDeep(c);
-        this.config.operations.push(c);
+        this.checkAlternateConfigs();
+        this.config.alternateConfigs.operations.push(c);
     }
 
 }

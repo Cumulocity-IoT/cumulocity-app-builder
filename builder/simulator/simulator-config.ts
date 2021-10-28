@@ -19,16 +19,6 @@
 import { SimulationStrategyMetadata } from "./simulation-strategy.decorator";
 
 /**
- *  OperationDefinitions<T> contains instances of config attached to a 
- *  label. Remember the default config lies on the config object as fields
- *  instances of this are additional to the "default"
- */
-export interface OperationDefinitions<T> {
-    config: T;
-}
-
-
-/**
  *  Operation Definition. 
  * 
  *  The derived config interfaces now need to extend OperationSupport.
@@ -42,20 +32,58 @@ export interface OperationSupport<T> {
     opSourceName?: string,
     payloadFragment?: string,
     opReply?: boolean,
-    matchingValue: string,
     operations?: Array<T>;
 }
 
+
+export interface DtdlSimulationModel {
+    matchingValue: string,
+    measurementName?: string,
+    fragment?: string,
+    series?: string,
+    unit?: string,
+    schema?: any,
+    id?: string,
+    minValue?: number, // random value, random walk
+    maxValue?: number, // random value, random walk
+    value?: string, // value series
+    startingValue?: number, // random walk
+    maxDelta?: number, // random walk
+    latitude?: string, // position update
+    longitude?: string, // position update
+    altitude?: string, // position update
+    deviceId?: string;
+    simulationType?: string;
+    isObjectType?: boolean;
+    parentId?: string;
+    isFieldModel?: boolean;
+    eventType?: string; // event creation
+    eventText?: string; // event creation
+    interval?: number;
+    waveType?: 'sine' | 'sqr' | 'sqr-approx',
+    height?: number,
+    wavelength?: number,
+    firmwareVersions?: {
+        name: string,
+        version: string,
+        url: string;
+    }[],
+    resetOn?: 'restart' | 'never';
+    isGroup?: boolean,
+    alternateConfigs?:  OperationSupport<DtdlSimulationModel>;
+}
 
 /**
  *  The interface that for simulator configuration that all simulators will be passed.
  *  N.B. The strategy stores only the config member (See Factory classes)
  */
-export interface SimulatorConfig<T = any> {
+export interface SimulatorConfig {
     id: number,
     name: string,
     type: string,
-    config: T,
+    config: DtdlSimulationModel,
     started?: boolean,
     metadata?: SimulationStrategyMetadata;
 }
+
+

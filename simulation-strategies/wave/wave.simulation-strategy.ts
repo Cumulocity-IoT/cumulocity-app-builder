@@ -17,7 +17,6 @@
  */
 
 import {
-    WaveSimulationStrategyConfig,
     WaveSimulationStrategyConfigComponent
 } from "./wave.config.component";
 import {SimulationStrategy} from "../../builder/simulator/simulation-strategy.decorator";
@@ -25,7 +24,7 @@ import {DeviceIntervalSimulator} from "../../builder/simulator/device-interval-s
 import {Injectable, Injector} from "@angular/core";
 import {SimulationStrategyFactory} from "../../builder/simulator/simulation-strategy";
 import { IOperation, MeasurementService, OperationService, OperationStatus } from '@c8y/client';
-import {SimulatorConfig} from "../../builder/simulator/simulator-config";
+import {DtdlSimulationModel, SimulatorConfig} from "../../builder/simulator/simulator-config";
 import * as _ from 'lodash';
 
 @SimulationStrategy({
@@ -38,7 +37,7 @@ export class WaveSimulationStrategy extends DeviceIntervalSimulator {
 
     startTime: number = 0;
 
-    constructor(protected injector: Injector, private measurementService: MeasurementService, private opservice: OperationService, private config: WaveSimulationStrategyConfig) {
+    constructor(protected injector: Injector, private measurementService: MeasurementService, private opservice: OperationService, private config: DtdlSimulationModel) {
         super(injector);
     }
 
@@ -56,16 +55,16 @@ export class WaveSimulationStrategy extends DeviceIntervalSimulator {
     }
 
     public async onOperation(param: any): Promise<boolean> {
-        //console.log("Wavelength operation = ", param);
-        if (this.config.operations.length > 1) {
-            if (_.has(param, "deviceId") && _.get(param, "deviceId") == this.config.opSource) {
-                for (let cfg of this.config.operations) {
-                    if (_.has(param, this.config.payloadFragment) && _.get(param, this.config.payloadFragment) == cfg.matchingValue) {
+        console.log("Wavelength operation = ", param);
+        if (this.config.alternateConfigs.operations.length > 1) {
+            if (_.has(param, "deviceId") && _.get(param, "deviceId") == this.config.alternateConfigs.opSource) {
+                for (let cfg of this.config.alternateConfigs.operations) {
+                    if (_.has(param, this.config.alternateConfigs.payloadFragment) && _.get(param, this.config.alternateConfigs.payloadFragment) == cfg.matchingValue) {
                         console.log(`Matched ${cfg.matchingValue} setting cfg = `, cfg);
                         this.config.waveType = cfg.waveType;
                         this.config.height = cfg.height;
                         this.config.wavelength = cfg.wavelength;
-                        if (this.config.opReply == true) {
+                        if (this.config.alternateConfigs.opReply == true) {
                             const partialUpdateObject: Partial<IOperation> = {
                                 id: param.id,
                                 status: OperationStatus.SUCCESSFUL
@@ -125,7 +124,7 @@ export class WaveSimulationStrategyFactory extends SimulationStrategyFactory<Wav
         super();
     }
 
-    createInstance(config: SimulatorConfig<WaveSimulationStrategyConfig>): WaveSimulationStrategy {
+    createInstance(config: SimulatorConfig): WaveSimulationStrategy {
         return new WaveSimulationStrategy(this.injector, this.measurementService, this.opservice, config.config);
     }
 

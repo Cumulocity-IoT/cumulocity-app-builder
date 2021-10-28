@@ -17,18 +17,10 @@
  */
 
 import { Component } from "@angular/core";
-import { OperationSupport } from "builder/simulator/simulator-config";
 import { SimulationStrategyConfigComponent } from "../../builder/simulator/simulation-strategy";
 import * as _ from 'lodash';
-import { OperationDefinitions } from '../../builder/simulator/simulator-config';
+import { DtdlSimulationModel } from '../../builder/simulator/simulator-config';
 
-export interface PositionUpdateSimulationStrategyConfig extends OperationSupport<PositionUpdateSimulationStrategyConfig> {
-    deviceId: string,
-    interval: number,
-    latitude: string,
-    longitude: string,
-    altitude: string;
-}
 
 @Component({
     template: `
@@ -52,37 +44,25 @@ export interface PositionUpdateSimulationStrategyConfig extends OperationSupport
 })
 export class PositionUpdateSimulationStrategyConfigComponent extends SimulationStrategyConfigComponent {
 
-    config: PositionUpdateSimulationStrategyConfig;
-
-    getOperationConfig(i: number) : PositionUpdateSimulationStrategyConfig {
-        let c: PositionUpdateSimulationStrategyConfig = this.getConfigAsAny(i);
-        if( c != undefined) {
-            return c;
-        } 
-        return this.config;
-    }
-
+    config: DtdlSimulationModel;
 
     initializeConfig() {
-        let c: PositionUpdateSimulationStrategyConfig = {
+        let c: DtdlSimulationModel = {
             deviceId: "",
-            opSource: "",
-            opSourceName: "",
             matchingValue: "default",
-            payloadFragment:  "c8y_Command.text",
-            opReply: false,
             latitude: "",
             longitude: "",
             altitude: "",
             interval: 5,
-            operations: new Array()
+            alternateConfigs: undefined
         };
 
         //New objects can duplicate the default so it can be restored
         //we will create the config entries if old simulators are edited
         //duplication is to avoid changing old code.
         this.config = _.cloneDeep(c);
-        this.config.operations.push(c);
+        this.checkAlternateConfigs();
+        this.config.alternateConfigs.operations.push(c);
     }
 
 }
