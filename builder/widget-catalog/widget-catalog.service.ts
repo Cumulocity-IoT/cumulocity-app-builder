@@ -11,7 +11,7 @@ import * as semver from "semver";
 @Injectable()
 export class WidgetCatalogService {
 
-    C8Y_VERSION = '1010.0.8';
+    C8Y_VERSION = '1011.0.5';
     private GATEWAY_URL = '';
     private CATALOG_LABCASE_ID = '';
     runtimeLoadingCompleted = false;
