@@ -159,7 +159,7 @@ export class SeriesValueSimulationStrategyConfigComponent extends SimulationStra
     }
 
     initializeConfig() {
-
+        console.log("initializeConfig")
         let c: DtdlSimulationModel = {
             deviceId: "",
             fragment: "temperature_measurement",

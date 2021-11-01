@@ -55,7 +55,7 @@ export class DtdlSimulationStrategy extends DeviceIntervalSimulator {
         console.log("DTDL operation = ", param);
         for (let index = 0; index < this.config.dtdlModelConfig.length; index++) {
             const model = this.config.dtdlModelConfig[index];            
-            if (model.alternateConfigs.operations.length > 1) {
+            if (model.alternateConfigs.opEnabled && model.alternateConfigs.operations.length > 1) {
                 if (_.has(param, "deviceId") && _.get(param, "deviceId") == model.alternateConfigs.opSource) {
                     model.alternateConfigs.operations.forEach( (cfg:DtdlSimulationModel,i:number) => {
                         if (_.has(param, model.alternateConfigs.payloadFragment) && _.get(param, model.alternateConfigs.payloadFragment) == cfg.matchingValue) {
@@ -70,7 +70,6 @@ export class DtdlSimulationStrategy extends DeviceIntervalSimulator {
                             }
                         }
                     });
-                    return true;
                 }
             }
         }
@@ -102,7 +101,7 @@ export class DtdlSimulationStrategy extends DeviceIntervalSimulator {
                                 break;
 
                             default:
-                                console.log("index",cfgIndex, "cfg" , modelConfig.alternateConfigs.operations[cfgIndex]);
+                                //console.log("index",cfgIndex, "cfg" , modelConfig.alternateConfigs.operations[cfgIndex]);
                                 this.createMeasurements(deviceId, modelConfig.alternateConfigs.operations[cfgIndex]);
                                 break;
                         }

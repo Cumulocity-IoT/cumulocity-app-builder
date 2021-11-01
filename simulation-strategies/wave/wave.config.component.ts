@@ -58,7 +58,7 @@ import { DtdlSimulationStrategyModule } from "simulation-strategies/dtdl/dtdl.si
             </label>
         </div>
 
-        <ng-container *ngIf="config.alternateConfigs.operations.length > 1">
+        <ng-container *ngIf="config.alternateConfigs.opEnabled">
             <div class="form-group">
                 <accordion  [isAnimated]="true" [closeOthers]="true">
                     <accordion-group panelClass="op-simulator-panel" #opGroup>

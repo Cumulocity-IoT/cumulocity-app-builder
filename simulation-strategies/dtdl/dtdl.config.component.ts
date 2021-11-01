@@ -212,6 +212,9 @@ import * as _ from 'lodash';
                                         </div>
                                     </div>
                                     <hr /> 
+                                    <!-- <div class="row" *ngFor="let op of model.alternateConfigs.operations; let i = index">
+                                        <div>{{op|json}}</div>
+                                    </div> -->
                                     <div class="row" *ngFor="let op of model.alternateConfigs.operations; let i = index">
                                         <ng-container *ngIf="i > 0">
                                             <div class="col-lg-12">
@@ -229,13 +232,13 @@ import * as _ from 'lodash';
                                                                 <div class="col-xs-12 col-sm-4 col-md-4">
                                                                     <div class="measurement-accordion">
                                                                         <label for="minvalue"><span>Minimum Value</span></label>
-                                                                        <input type="number" class="form-control"  name="minvalue{{model.id}}" placeholder="e.g. 10 (required)" required [(ngModel)]="op.minValue">
+                                                                        <input type="number" class="form-control"  name="minvalue{{model.id}}_{{i}}" placeholder="e.g. 10 (required)" required [(ngModel)]="op.minValue">
                                                                     </div>
                                                                 </div>
                                                                 <div class="col-xs-12 col-sm-4 col-md-4">
                                                                     <div class="measurement-accordion">
                                                                         <label for="maxvalue"><span>Maximum Value</span></label>
-                                                                        <input type="number" class="form-control"  name="maxvalue{{model.id}}" placeholder="e.g. 20 (required)" required [(ngModel)]="op.maxValue">
+                                                                        <input type="number" class="form-control"  name="maxvalue{{model.id}}_{{i}}" placeholder="e.g. 20 (required)" required [(ngModel)]="op.maxValue">
                                                                     </div>
                                                                 </div>
                                                             </ng-container>
@@ -243,19 +246,19 @@ import * as _ from 'lodash';
                                                                 <div class="col-xs-12 col-sm-4 col-md-4">
                                                                     <div class="measurement-accordion">
                                                                         <label for="latitude"><span>Latitude Value</span></label>
-                                                                        <input type="text" class="form-control"  name="latitude{{model.id}}" placeholder="e.g. 40.66,50.40 (required)" required [(ngModel)]="op.latitude">
+                                                                        <input type="text" class="form-control"  name="latitude{{model.id}}_{{i}}" placeholder="e.g. 40.66,50.40 (required)" required [(ngModel)]="op.latitude">
                                                                     </div>
                                                                 </div>
                                                                 <div class="col-xs-12 col-sm-4 col-md-4">
                                                                     <div class="measurement-accordion">
                                                                         <label for="altitude"><span>Altitude Value</span></label>
-                                                                        <input type="text" class="form-control"  name="altitude{{model.id}}" placeholder="e.g. 40.66,50.40 (required)" required [(ngModel)]="op.altitude">
+                                                                        <input type="text" class="form-control"  name="altitude{{model.id}}_{{i}}" placeholder="e.g. 40.66,50.40 (required)" required [(ngModel)]="op.altitude">
                                                                     </div>
                                                                 </div>
                                                                 <div class="col-xs-12 col-sm-4 col-md-4">
                                                                     <div class="measurement-accordion">
                                                                         <label for="longitude"><span>Longitude value</span></label>
-                                                                        <input type="text" class="form-control"  name="longitude{{model.id}}" placeholder="e.g. 40.66,50.40 (required)" required [(ngModel)]="op.longitude">
+                                                                        <input type="text" class="form-control"  name="longitude{{model.id}}_{{i}}" placeholder="e.g. 40.66,50.40 (required)" required [(ngModel)]="op.longitude">
                                                                     </div>
                                                                 </div>
                                                             </ng-container>
@@ -263,13 +266,13 @@ import * as _ from 'lodash';
                                                                 <div class="col-xs-12 col-sm-4 col-md-4">
                                                                     <div class="measurement-accordion">
                                                                         <label for="eventType"><span>Event Type</span></label>
-                                                                        <input type="text" class="form-control"  name="eventType{{model.id}}" placeholder="c8y_locationUpdate,c8y_BeaconUpdate" required [(ngModel)]="op.eventType">
+                                                                        <input type="text" class="form-control"  name="eventType{{model.id}}_{{i}}" placeholder="c8y_locationUpdate,c8y_BeaconUpdate" required [(ngModel)]="op.eventType">
                                                                     </div>
                                                                 </div>
                                                                 <div class="col-xs-12 col-sm-4 col-md-4">
                                                                     <div class="measurement-accordion">
                                                                         <label for="eventText"><span>Event Text</span></label>
-                                                                        <input type="text" class="form-control"  name="eventText{{model.id}}" placeholder="c8y_locationUpdate,c8y_BeaconUpdate (required)" required [(ngModel)]="op.eventText">
+                                                                        <input type="text" class="form-control"  name="eventText{{model.id}}_{{i}}" placeholder="c8y_locationUpdate,c8y_BeaconUpdate (required)" required [(ngModel)]="op.eventText">
                                                                     </div>
                                                                 </div>
                                                             </ng-container>
@@ -277,7 +280,7 @@ import * as _ from 'lodash';
                                                                 <div class="col-xs-12 col-sm-4 col-md-4">
                                                                     <div class="measurement-accordion">
                                                                         <label for="value"><span>Value</span></label>
-                                                                        <input type="text" class="form-control" id="value" name="value{{model.id}}" placeholder="e.g. 15,20,30 (required)" required [(ngModel)]="op.value">
+                                                                        <input type="text" class="form-control" id="value" name="value{{model.id}}_{{i}}" placeholder="e.g. 15,20,30 (required)" required [(ngModel)]="op.value">
                                                                     </div> 
                                                                 </div>
                                                             </ng-container>
@@ -285,25 +288,25 @@ import * as _ from 'lodash';
                                                                 <div class="col-xs-12 col-sm-4 col-md-4">
                                                                     <div class="measurement-accordion">
                                                                     <label for="startingvalue"><span>Starting Value</span></label>
-                                                                    <input type="number" class="form-control" id="startingvalue" name="startingvalue{{model.id}}" placeholder="e.g. 10 (required)" required [(ngModel)]="op.startingValue">
+                                                                    <input type="number" class="form-control" id="startingvalue" name="startingvalue{{model.id}}_{{i}}" placeholder="e.g. 10 (required)" required [(ngModel)]="op.startingValue">
                                                                     </div>
                                                                 </div>
                                                                 <div class="col-xs-12 col-sm-4 col-md-4">
                                                                     <div class="measurement-accordion">
                                                                         <label for="maxdelta"><span>Maximum Change Amount</span></label>
-                                                                        <input type="number" class="form-control" id="maxdelta" name="maxdelta{{model.id}}" min="0" placeholder="e.g. 10 (required)" required [(ngModel)]="op.maxDelta">
+                                                                        <input type="number" class="form-control" id="maxdelta" name="maxdelta{{model.id}}_{{i}}" min="0" placeholder="e.g. 10 (required)" required [(ngModel)]="op.maxDelta">
                                                                     </div>
                                                                 </div>
                                                                 <div class="col-xs-12 col-sm-4 col-md-4">
                                                                     <div class="measurement-accordion">
                                                                         <label for="minvalue"><span>Minimum Value</span></label>
-                                                                        <input type="number" class="form-control"  name="minvalue{{model.id}}" placeholder="e.g. 10 (required)" required [(ngModel)]="op.minValue">
+                                                                        <input type="number" class="form-control"  name="minvalue{{model.id}}_{{i}}" placeholder="e.g. 10 (required)" required [(ngModel)]="op.minValue">
                                                                     </div>
                                                                 </div>
                                                                 <div class="col-xs-12 col-sm-4 col-md-4">
                                                                     <div class="measurement-accordion">
                                                                         <label for="maxvalue"><span>Maximum Value</span></label>
-                                                                        <input type="number" class="form-control"  name="maxvalue{{model.id}}" placeholder="e.g. 20 (required)" required [(ngModel)]="op.maxValue">
+                                                                        <input type="number" class="form-control"  name="maxvalue{{model.id}}_{{i}}" placeholder="e.g. 20 (required)" required [(ngModel)]="op.maxValue">
                                                                     </div>
                                                                 </div>
                                                             </ng-container>

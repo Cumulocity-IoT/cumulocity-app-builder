@@ -57,7 +57,7 @@ import * as _ from 'lodash';
             </label>
         </div>
 
-        <ng-container *ngIf="config.alternateConfigs && config.alternateConfigs.operations.length > 1">
+        <ng-container *ngIf="config.alternateConfigs.opEnabled">
             <div class="form-group">
                 <accordion  [isAnimated]="true" [closeOthers]="true">
                     <accordion-group panelClass="op-simulator-panel" #opGroup>

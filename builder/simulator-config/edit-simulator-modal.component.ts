@@ -31,6 +31,7 @@ import {AppIdService} from "../app-id.service";
 import {SimulatorConfig} from "../simulator/simulator-config";
 import {SimulationStrategiesService} from "../simulator/simulation-strategies.service";
 import {SimulatorCommunicationService} from "../simulator/mainthread/simulator-communication.service";
+import * as _ from 'lodash';
 
 @Component({
     templateUrl: './edit-simulator-modal.component.html'
@@ -52,7 +53,6 @@ export class EditSimulatorModalComponent implements OnInit {
     }
 
     openSimulatorConfig() {
-        console.log("openSimulatorConfig",this.simulatorConfig.config)
         const strategyFactory = this.simulationStrategiesService.strategiesByName.get(this.simulatorConfig.type);
         if (strategyFactory == undefined) {
             console.error("Unknown simulator strategy:", this.simulatorConfig.type);
@@ -72,11 +72,28 @@ export class EditSimulatorModalComponent implements OnInit {
             const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(metadata.configComponent);
             const componentRef = this.configWrapper.createComponent(factory);
             componentRef.instance.config = this.simulatorConfig.config;
+            //existing config - check for new operations - config on simulator config
+            if( !_.has(componentRef.instance.config,"alternateConfigs") ) {
+                console.log("openSimulatorConfig-before",componentRef.instance.config)
+                let defConfig = _.cloneDeep(componentRef.instance.config);
+                _.set(defConfig, "matchingValue","default");
+                //initialize it if it doesn't exist
+                _.set(componentRef.instance.config,"alternateConfigs", {});
+                _.set(componentRef.instance.config,"alternateConfigs.opEnabled", false);
+                _.set(componentRef.instance.config,"alternateConfigs.opSource", "");
+                _.set(componentRef.instance.config,"alternateConfigs.opSourceName", "")
+                _.set(componentRef.instance.config,"alternateConfigs.payloadFragment", "c8y_Command.text")
+                _.set(componentRef.instance.config,"alternateConfigs.opReply", false)
+                _.set(componentRef.instance.config,"alternateConfigs.configIndex", 0)
+                _.set(componentRef.instance.config,"alternateConfigs.operations", [])
+                _.get(componentRef.instance.config,"alternateConfigs.operations").push(defConfig); //default                
+            }
+
             //Accessing EditMode variable in simulator strategy
             componentRef.instance.config.isEditMode = true; 
-            console.log("openSimulatorConfig-meta", metadata);
             this.simulatorConfig.metadata = metadata;
         }
+        console.log("openSimulatorConfig-end",this.simulatorConfig.config)
     }
 
     resetDialogSize() {

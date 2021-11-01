@@ -76,7 +76,6 @@ export class NewSimulatorModalComponent {
             if (componentRef.instance.config.modalSize) {
                 this.bsModalRef.setClass(componentRef.instance.config.modalSize);
             }
-            console.log("createSimulatorConfig-meta", metadata);
             this.newConfig.metadata = metadata;
 
         }
