@@ -72,21 +72,43 @@ export class EditSimulatorModalComponent implements OnInit {
             const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(metadata.configComponent);
             const componentRef = this.configWrapper.createComponent(factory);
             componentRef.instance.config = this.simulatorConfig.config;
+
+            console.log("METADATA",metadata);
             //existing config - check for new operations - config on simulator config
-            if( !_.has(componentRef.instance.config,"alternateConfigs") ) {
-                console.log("openSimulatorConfig-before",componentRef.instance.config)
-                let defConfig = _.cloneDeep(componentRef.instance.config);
-                _.set(defConfig, "matchingValue","default");
-                //initialize it if it doesn't exist
-                _.set(componentRef.instance.config,"alternateConfigs", {});
-                _.set(componentRef.instance.config,"alternateConfigs.opEnabled", false);
-                _.set(componentRef.instance.config,"alternateConfigs.opSource", "");
-                _.set(componentRef.instance.config,"alternateConfigs.opSourceName", "")
-                _.set(componentRef.instance.config,"alternateConfigs.payloadFragment", "c8y_Command.text")
-                _.set(componentRef.instance.config,"alternateConfigs.opReply", false)
-                _.set(componentRef.instance.config,"alternateConfigs.configIndex", 0)
-                _.set(componentRef.instance.config,"alternateConfigs.operations", [])
-                _.get(componentRef.instance.config,"alternateConfigs.operations").push(defConfig); //default                
+            if( metadata.name != "DTDL" ){
+                if( !_.has(componentRef.instance.config,"alternateConfigs")) {
+                    let defConfig = _.cloneDeep(componentRef.instance.config);
+                    _.set(defConfig, "matchingValue","default");
+                    //initialize it if it doesn't exist
+                    _.set(componentRef.instance.config,"alternateConfigs", {});
+                    _.set(componentRef.instance.config,"alternateConfigs.opEnabled", false);
+                    _.set(componentRef.instance.config,"alternateConfigs.opSource", "");
+                    _.set(componentRef.instance.config,"alternateConfigs.opSourceName", "")
+                    _.set(componentRef.instance.config,"alternateConfigs.payloadFragment", "c8y_Command.text")
+                    _.set(componentRef.instance.config,"alternateConfigs.opReply", false)
+                    _.set(componentRef.instance.config,"alternateConfigs.configIndex", 0)
+                    _.set(componentRef.instance.config,"alternateConfigs.operations", [])
+                    _.get(componentRef.instance.config,"alternateConfigs.operations").push(defConfig); //default                
+                }    
+            } else {
+                
+                for (const model of componentRef.instance.config.dtdlModelConfig) {
+                    if( !_.has(model,"alternateConfigs")) {
+                        let defConfig = _.cloneDeep(model);
+                        _.set(defConfig, "matchingValue","default");
+                        //initialize it if it doesn't exist
+                        _.set(model,"alternateConfigs", {});
+                        _.set(model,"alternateConfigs.opEnabled", false);
+                        _.set(model,"alternateConfigs.opSource", "");
+                        _.set(model,"alternateConfigs.opSourceName", "")
+                        _.set(model,"alternateConfigs.payloadFragment", "c8y_Command.text")
+                        _.set(model,"alternateConfigs.opReply", false)
+                        _.set(model,"alternateConfigs.configIndex", 0)
+                        _.set(model,"alternateConfigs.operations", [])
+                        _.get(model,"alternateConfigs.operations").push(defConfig); //default                
+                    }                        
+                }
+                
             }
 
             //Accessing EditMode variable in simulator strategy
