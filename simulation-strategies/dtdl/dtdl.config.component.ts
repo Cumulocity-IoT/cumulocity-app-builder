@@ -223,7 +223,8 @@ import * as _ from 'lodash';
                                                     <input type="text" class="form-control" id="opMatch_{{i}}" name="opMatch_{{i}}" placeholder="e.g. WINDY" required [(ngModel)]="op.matchingValue">
                                                 </div>
                                             </div>
-                                            <ng-container [ngSwitch]="op.simulationType">
+                                            <!-- must be the same as the default --> 
+                                            <ng-container [ngSwitch]="model.simulationType">
                                                 <ng-container *ngSwitchCase="'randomValue'">
                                                     <div class="col-xs-12 col-sm-4 col-md-4">
                                                         <div class="measurement-accordion">
