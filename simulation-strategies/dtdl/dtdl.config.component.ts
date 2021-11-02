@@ -75,10 +75,10 @@ import * as _ from 'lodash';
                         </div>     
                     </div>
                     <div class="col-xs-12 col-sm-4 col-md-4" *ngIf="!model.isFieldModel && model.simulationType !== 'positionUpdate' && model.simulationType !== 'eventCreation'">
-                    <div class="measurement-accordion">
-                        <label for="fragment"><span>Fragment</span></label>
-                        <input type="text" class="form-control"  name="fragment{{model.id}}" placeholder="e.g. temperature_measurement (required)" required autofocus [(ngModel)]="model.alternateConfigs.operations[0].fragment">
-                    </div>
+                        <div class="measurement-accordion">
+                            <label for="fragment"><span>Fragment</span></label>
+                            <input type="text" class="form-control"  name="fragment{{model.id}}" placeholder="e.g. temperature_measurement (required)" required autofocus [(ngModel)]="model.alternateConfigs.operations[0].fragment">
+                        </div>
                     </div>
                     <div class="col-xs-12 col-sm-4 col-md-4" *ngIf="model.simulationType !== 'positionUpdate' && model.simulationType !== 'eventCreation'">
                         <div class="measurement-accordion">
@@ -86,103 +86,106 @@ import * as _ from 'lodash';
                             <input type="text" class="form-control" name="series{{model.id}}" placeholder="e.g. T (required)" required autofocus [(ngModel)]="model.alternateConfigs.operations[0].series">
                         </div>
                     </div>
-                    <div class="form-group">
-                        <ng-container [ngSwitch]="model.simulationType">
-                            <ng-container *ngSwitchCase="'randomValue'">
-                                <div class="col-xs-12 col-sm-4 col-md-4">
-                                    <div class="measurement-accordion">
-                                        <label for="minvalue"><span>Minimum Value</span></label>
-                                        <input type="number" class="form-control"  name="minvalue{{model.id}}" placeholder="e.g. 10 (required)" required [(ngModel)]="model.alternateConfigs.operations[0].minValue">
-                                    </div>
-                                </div>
-                                <div class="col-xs-12 col-sm-4 col-md-4">
-                                    <div class="measurement-accordion">
-                                        <label for="maxvalue"><span>Maximum Value</span></label>
-                                        <input type="number" class="form-control"  name="maxvalue{{model.id}}" placeholder="e.g. 20 (required)" required [(ngModel)]="model.alternateConfigs.operations[0].maxValue">
-                                    </div>
-                                </div>
-                            </ng-container>
-                            <ng-container *ngSwitchCase="'positionUpdate'">
-                                <div class="col-xs-12 col-sm-4 col-md-4">
-                                    <div class="measurement-accordion">
-                                        <label for="latitude"><span>Latitude Value</span></label>
-                                        <input type="text" class="form-control"  name="latitude{{model.id}}" placeholder="e.g. 40.66,50.40 (required)" required [(ngModel)]="model.alternateConfigs.operations[0].latitude">
-                                    </div>
-                                </div>
-                                <div class="col-xs-12 col-sm-4 col-md-4">
-                                    <div class="measurement-accordion">
-                                        <label for="altitude"><span>Altitude Value</span></label>
-                                        <input type="text" class="form-control"  name="altitude{{model.id}}" placeholder="e.g. 40.66,50.40 (required)" required [(ngModel)]="model.alternateConfigs.operations[0].altitude">
-                                    </div>
-                                </div>
-                                <div class="col-xs-12 col-sm-4 col-md-4">
-                                    <div class="measurement-accordion">
-                                        <label for="longitude"><span>Longitude value</span></label>
-                                        <input type="text" class="form-control"  name="longitude{{model.id}}" placeholder="e.g. 40.66,50.40 (required)" required [(ngModel)]="model.alternateConfigs.operations[0].longitude">
-                                    </div>
-                                </div>
-                            </ng-container>
-                            <ng-container *ngSwitchCase="'eventCreation'">
-                                <div class="col-xs-12 col-sm-4 col-md-4">
-                                    <div class="measurement-accordion">
-                                        <label for="eventType"><span>Event Type</span></label>
-                                        <input type="text" class="form-control"  name="eventType{{model.id}}" placeholder="c8y_locationUpdate,c8y_BeaconUpdate" required [(ngModel)]="model.alternateConfigs.operations[0].eventType">
-                                    </div>
-                                </div>
-                                <div class="col-xs-12 col-sm-4 col-md-4">
-                                    <div class="measurement-accordion">
-                                        <label for="eventText"><span>Event Text</span></label>
-                                        <input type="text" class="form-control"  name="eventText{{model.id}}" placeholder="c8y_locationUpdate,c8y_BeaconUpdate (required)" required [(ngModel)]="model.alternateConfigs.operations[0].eventText">
-                                    </div>
-                                </div>
-                            </ng-container>
-                            <ng-container *ngSwitchCase="'valueSeries'">
-                                <div class="col-xs-12 col-sm-4 col-md-4">
-                                    <div class="measurement-accordion">
-                                        <label for="value"><span>Value</span></label>
-                                        <input type="text" class="form-control" id="value" name="value{{model.id}}" placeholder="e.g. 15,20,30 (required)" required [(ngModel)]="model.alternateConfigs.operations[0].value">
-                                    </div> 
-                                </div>
-                            </ng-container>
-                            <ng-container *ngSwitchCase="'randomWalk'">
-                                <div class="col-xs-12 col-sm-4 col-md-4">
-                                    <div class="measurement-accordion">
-                                    <label for="startingvalue"><span>Starting Value</span></label>
-                                    <input type="number" class="form-control" id="startingvalue" name="startingvalue{{model.id}}" placeholder="e.g. 10 (required)" required [(ngModel)]="model.alternateConfigs.operations[0].startingValue">
-                                    </div>
-                                </div>
-                                <div class="col-xs-12 col-sm-4 col-md-4">
-                                    <div class="measurement-accordion">
-                                        <label for="maxdelta"><span>Maximum Change Amount</span></label>
-                                        <input type="number" class="form-control" id="maxdelta" name="maxdelta{{model.id}}" min="0" placeholder="e.g. 10 (required)" required [(ngModel)]="model.alternateConfigs.operations[0].maxDelta">
-                                    </div>
-                                </div>
-                                <div class="col-xs-12 col-sm-4 col-md-4">
-                                    <div class="measurement-accordion">
-                                        <label for="minvalue"><span>Minimum Value</span></label>
-                                        <input type="number" class="form-control"  name="minvalue{{model.id}}" placeholder="e.g. 10 (required)" required [(ngModel)]="model.alternateConfigs.operations[0].minValue">
-                                    </div>
-                                </div>
-                                <div class="col-xs-12 col-sm-4 col-md-4">
-                                    <div class="measurement-accordion">
-                                        <label for="maxvalue"><span>Maximum Value</span></label>
-                                        <input type="number" class="form-control"  name="maxvalue{{model.id}}" placeholder="e.g. 20 (required)" required [(ngModel)]="model.alternateConfigs.operations[0].maxValue">
-                                    </div>
-                                </div>
-                            </ng-container>
-                        </ng-container>
 
-                    <!-- multiple possible configs here -->
-                        <label class="c8y-checkbox">
-                            <input type="checkbox" name="opEnabled1" [(ngModel)]="model.alternateConfigs.opEnabled" (click)="checkDefaultOperation(model)"/>
-                            <span></span>
-                            <span>Controlled by operation</span>
-                        </label>
+                    <ng-container [ngSwitch]="model.simulationType">
+                        <ng-container *ngSwitchCase="'randomValue'">
+                            <div class="col-xs-12 col-sm-4 col-md-4">
+                                <div class="measurement-accordion">
+                                    <label for="minvalue"><span>Minimum Value</span></label>
+                                    <input type="number" class="form-control"  name="minvalue{{model.id}}" placeholder="e.g. 10 (required)" required [(ngModel)]="model.alternateConfigs.operations[0].minValue">
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-sm-4 col-md-4">
+                                <div class="measurement-accordion">
+                                    <label for="maxvalue"><span>Maximum Value</span></label>
+                                    <input type="number" class="form-control"  name="maxvalue{{model.id}}" placeholder="e.g. 20 (required)" required [(ngModel)]="model.alternateConfigs.operations[0].maxValue">
+                                </div>
+                            </div>
+                        </ng-container>
+                        <ng-container *ngSwitchCase="'positionUpdate'">
+                            <div class="col-xs-12 col-sm-4 col-md-4">
+                                <div class="measurement-accordion">
+                                    <label for="latitude"><span>Latitude Value</span></label>
+                                    <input type="text" class="form-control"  name="latitude{{model.id}}" placeholder="e.g. 40.66,50.40 (required)" required [(ngModel)]="model.alternateConfigs.operations[0].latitude">
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-sm-4 col-md-4">
+                                <div class="measurement-accordion">
+                                    <label for="altitude"><span>Altitude Value</span></label>
+                                    <input type="text" class="form-control"  name="altitude{{model.id}}" placeholder="e.g. 40.66,50.40 (required)" required [(ngModel)]="model.alternateConfigs.operations[0].altitude">
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-sm-4 col-md-4">
+                                <div class="measurement-accordion">
+                                    <label for="longitude"><span>Longitude value</span></label>
+                                    <input type="text" class="form-control"  name="longitude{{model.id}}" placeholder="e.g. 40.66,50.40 (required)" required [(ngModel)]="model.alternateConfigs.operations[0].longitude">
+                                </div>
+                            </div>
+                        </ng-container>
+                        <ng-container *ngSwitchCase="'eventCreation'">
+                            <div class="col-xs-12 col-sm-4 col-md-4">
+                                <div class="measurement-accordion">
+                                    <label for="eventType"><span>Event Type</span></label>
+                                    <input type="text" class="form-control"  name="eventType{{model.id}}" placeholder="c8y_locationUpdate,c8y_BeaconUpdate" required [(ngModel)]="model.alternateConfigs.operations[0].eventType">
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-sm-4 col-md-4">
+                                <div class="measurement-accordion">
+                                    <label for="eventText"><span>Event Text</span></label>
+                                    <input type="text" class="form-control"  name="eventText{{model.id}}" placeholder="c8y_locationUpdate,c8y_BeaconUpdate (required)" required [(ngModel)]="model.alternateConfigs.operations[0].eventText">
+                                </div>
+                            </div>
+                        </ng-container>
+                        <ng-container *ngSwitchCase="'valueSeries'">
+                            <div class="col-xs-12 col-sm-4 col-md-4">
+                                <div class="measurement-accordion">
+                                    <label for="value"><span>Value</span></label>
+                                    <input type="text" class="form-control" id="value" name="value{{model.id}}" placeholder="e.g. 15,20,30 (required)" required [(ngModel)]="model.alternateConfigs.operations[0].value">
+                                </div> 
+                            </div>
+                        </ng-container>
+                        <ng-container *ngSwitchCase="'randomWalk'">
+                            <div class="col-xs-12 col-sm-4 col-md-4">
+                                <div class="measurement-accordion">
+                                <label for="startingvalue"><span>Starting Value</span></label>
+                                <input type="number" class="form-control" id="startingvalue" name="startingvalue{{model.id}}" placeholder="e.g. 10 (required)" required [(ngModel)]="model.alternateConfigs.operations[0].startingValue">
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-sm-4 col-md-4">
+                                <div class="measurement-accordion">
+                                    <label for="maxdelta"><span>Maximum Change Amount</span></label>
+                                    <input type="number" class="form-control" id="maxdelta" name="maxdelta{{model.id}}" min="0" placeholder="e.g. 10 (required)" required [(ngModel)]="model.alternateConfigs.operations[0].maxDelta">
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-sm-4 col-md-4">
+                                <div class="measurement-accordion">
+                                    <label for="minvalue"><span>Minimum Value</span></label>
+                                    <input type="number" class="form-control"  name="minvalue{{model.id}}" placeholder="e.g. 10 (required)" required [(ngModel)]="model.alternateConfigs.operations[0].minValue">
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-sm-4 col-md-4">
+                                <div class="measurement-accordion">
+                                    <label for="maxvalue"><span>Maximum Value</span></label>
+                                    <input type="number" class="form-control"  name="maxvalue{{model.id}}" placeholder="e.g. 20 (required)" required [(ngModel)]="model.alternateConfigs.operations[0].maxValue">
+                                </div>
+                            </div>
+                        </ng-container>
+                    </ng-container>
+
+                    
+                    <div class="col-lg-12">
+                        <div class="measurement-accordion">
+                            <label class="c8y-checkbox">
+                                <input type="checkbox" name="opEnabled1" [(ngModel)]="model.alternateConfigs.opEnabled" (click)="checkDefaultOperation(model)"/>
+                                <span></span>
+                                <span>Controlled by operation</span>
+                            </label>
+                        </div>
                     </div>
 
-                    <!-- start fields --> 
-                    <ng-container *ngIf="model.alternateConfigs.opEnabled">
-                        <div class="form-group">
+                    <!-- start operation accordion --> 
+                    <div class="col-lg-12">   
+                        <ng-container *ngIf="model.alternateConfigs.opEnabled">
                             <accordion  [isAnimated]="true" [closeOthers]="true">
                                 <accordion-group panelClass="op-simulator-panel" #opGroup>
                                     <button class="btn btn-link btn-block clearfix" accordion-heading type="button">
@@ -190,20 +193,20 @@ import * as _ from 'lodash';
                                         <span class="float-right pull-right"><i *ngIf="opGroup.isOpen" class="fa fa-caret-up"></i>
                                         <i *ngIf="!opGroup.isOpen" class="fa fa-caret-down"></i></span>
                                     </button>
-                                    <div class="row">
-                                        <div class="col-lg-6 op-field">
+                                    <div class="col-lg-6">
+                                        <div class="measurement-accordion">
                                             <label for="opSource"><span>Operation Source</span></label>
                                             <device-selector id="opSource" name="opSource" [(value)]="model.alternateConfigs.opSourceName" [placeHolder]="'Type your Device Name'" [required]="true" (selectedDevice)= "getOperationDevice($event,model)"></device-selector>
                                         </div>
                                     </div>
-                                    <div class="row">
-                                        <div class="col-lg-6 op-field">
+                                    <div class="col-lg-6">
+                                        <div class="measurement-accordion">
                                             <label for="opPayload"><span>Payload Key</span></label>
                                             <input type="text" class="form-control" id="opPayload" name="opPayload" placeholder="e.g. c8y_command.text" required autofocus [(ngModel)]="model.alternateConfigs.payloadFragment">
                                         </div>
                                     </div>
-                                    <div class="row">
-                                        <div class="col-lg-12 op-field">
+                                    <div class="col-lg-12">
+                                        <div class="measurement-accordion">
                                             <label class="c8y-checkbox">
                                                 <input type="checkbox" id="opReply" name="opReply" [(ngModel)]="model.alternateConfigs.opReply" />
                                                 <span></span>
@@ -212,139 +215,118 @@ import * as _ from 'lodash';
                                         </div>
                                     </div>
                                     <hr /> 
-                                    <!-- <div class="row" *ngFor="let op of model.alternateConfigs.operations; let i = index">
-                                        <div>{{op|json}}</div>
-                                    </div> -->
-                                    <div class="row" *ngFor="let op of model.alternateConfigs.operations; let i = index">
+                                    <ng-container *ngFor="let op of model.alternateConfigs.operations; let i = index">
                                         <ng-container *ngIf="i > 0">
-                                            <div class="col-lg-12">
-                                                <div class="row">
-                                                    <div class="col-lg-6 op-field">
-                                                        <label for="opMatch_{{i}}"><span>Matching</span></label>
-                                                        <input type="text" class="form-control" id="opMatch_{{i}}" name="opMatch_{{i}}" placeholder="e.g. WINDY" required [(ngModel)]="op.matchingValue">
-                                                    </div>
-                                                    <div class="col-lg-6 op-field">
-                                                        <label for="opValue_{{i}}"><span>Values</span></label>
-                                                        <!-- <input type="text" class="form-control" id="opValue_{{i}}" name="opValue_{{i}}" placeholder="e.g. 15,20,30 (required)" required [(ngModel)]="getOperationConfig(i).value"> -->
-                                                        <!-- dtdl field handling --> 
-                                                        <ng-container [ngSwitch]="op.simulationType">
-                                                            <ng-container *ngSwitchCase="'randomValue'">
-                                                                <div class="col-xs-12 col-sm-4 col-md-4">
-                                                                    <div class="measurement-accordion">
-                                                                        <label for="minvalue"><span>Minimum Value</span></label>
-                                                                        <input type="number" class="form-control"  name="minvalue{{model.id}}_{{i}}" placeholder="e.g. 10 (required)" required [(ngModel)]="op.minValue">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-xs-12 col-sm-4 col-md-4">
-                                                                    <div class="measurement-accordion">
-                                                                        <label for="maxvalue"><span>Maximum Value</span></label>
-                                                                        <input type="number" class="form-control"  name="maxvalue{{model.id}}_{{i}}" placeholder="e.g. 20 (required)" required [(ngModel)]="op.maxValue">
-                                                                    </div>
-                                                                </div>
-                                                            </ng-container>
-                                                            <ng-container *ngSwitchCase="'positionUpdate'">
-                                                                <div class="col-xs-12 col-sm-4 col-md-4">
-                                                                    <div class="measurement-accordion">
-                                                                        <label for="latitude"><span>Latitude Value</span></label>
-                                                                        <input type="text" class="form-control"  name="latitude{{model.id}}_{{i}}" placeholder="e.g. 40.66,50.40 (required)" required [(ngModel)]="op.latitude">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-xs-12 col-sm-4 col-md-4">
-                                                                    <div class="measurement-accordion">
-                                                                        <label for="altitude"><span>Altitude Value</span></label>
-                                                                        <input type="text" class="form-control"  name="altitude{{model.id}}_{{i}}" placeholder="e.g. 40.66,50.40 (required)" required [(ngModel)]="op.altitude">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-xs-12 col-sm-4 col-md-4">
-                                                                    <div class="measurement-accordion">
-                                                                        <label for="longitude"><span>Longitude value</span></label>
-                                                                        <input type="text" class="form-control"  name="longitude{{model.id}}_{{i}}" placeholder="e.g. 40.66,50.40 (required)" required [(ngModel)]="op.longitude">
-                                                                    </div>
-                                                                </div>
-                                                            </ng-container>
-                                                            <ng-container *ngSwitchCase="'eventCreation'">
-                                                                <div class="col-xs-12 col-sm-4 col-md-4">
-                                                                    <div class="measurement-accordion">
-                                                                        <label for="eventType"><span>Event Type</span></label>
-                                                                        <input type="text" class="form-control"  name="eventType{{model.id}}_{{i}}" placeholder="c8y_locationUpdate,c8y_BeaconUpdate" required [(ngModel)]="op.eventType">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-xs-12 col-sm-4 col-md-4">
-                                                                    <div class="measurement-accordion">
-                                                                        <label for="eventText"><span>Event Text</span></label>
-                                                                        <input type="text" class="form-control"  name="eventText{{model.id}}_{{i}}" placeholder="c8y_locationUpdate,c8y_BeaconUpdate (required)" required [(ngModel)]="op.eventText">
-                                                                    </div>
-                                                                </div>
-                                                            </ng-container>
-                                                            <ng-container *ngSwitchCase="'valueSeries'">
-                                                                <div class="col-xs-12 col-sm-4 col-md-4">
-                                                                    <div class="measurement-accordion">
-                                                                        <label for="value"><span>Value</span></label>
-                                                                        <input type="text" class="form-control" id="value" name="value{{model.id}}_{{i}}" placeholder="e.g. 15,20,30 (required)" required [(ngModel)]="op.value">
-                                                                    </div> 
-                                                                </div>
-                                                            </ng-container>
-                                                            <ng-container *ngSwitchCase="'randomWalk'">
-                                                                <div class="col-xs-12 col-sm-4 col-md-4">
-                                                                    <div class="measurement-accordion">
-                                                                    <label for="startingvalue"><span>Starting Value</span></label>
-                                                                    <input type="number" class="form-control" id="startingvalue" name="startingvalue{{model.id}}_{{i}}" placeholder="e.g. 10 (required)" required [(ngModel)]="op.startingValue">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-xs-12 col-sm-4 col-md-4">
-                                                                    <div class="measurement-accordion">
-                                                                        <label for="maxdelta"><span>Maximum Change Amount</span></label>
-                                                                        <input type="number" class="form-control" id="maxdelta" name="maxdelta{{model.id}}_{{i}}" min="0" placeholder="e.g. 10 (required)" required [(ngModel)]="op.maxDelta">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-xs-12 col-sm-4 col-md-4">
-                                                                    <div class="measurement-accordion">
-                                                                        <label for="minvalue"><span>Minimum Value</span></label>
-                                                                        <input type="number" class="form-control"  name="minvalue{{model.id}}_{{i}}" placeholder="e.g. 10 (required)" required [(ngModel)]="op.minValue">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-xs-12 col-sm-4 col-md-4">
-                                                                    <div class="measurement-accordion">
-                                                                        <label for="maxvalue"><span>Maximum Value</span></label>
-                                                                        <input type="number" class="form-control"  name="maxvalue{{model.id}}_{{i}}" placeholder="e.g. 20 (required)" required [(ngModel)]="op.maxValue">
-                                                                    </div>
-                                                                </div>
-                                                            </ng-container>
-                                                        </ng-container>
-                                                        <!-- dtdl field handling --> 
-                                                    </div>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-lg-6 op-field">
-                                                        <button class="btn btn-link btn-block" type="button" (click)="deleteDtDLOperation(model,i)">
-                                                            <div class="pull-left float-left">Remove condition</div>
-                                                        </button>
-                                                    </div>
+                                            <div class="col-lg-6">
+                                                <div class="measurement-accordion">
+                                                    <label for="opMatch_{{i}}"><span>Matching</span></label>
+                                                    <input type="text" class="form-control" id="opMatch_{{i}}" name="opMatch_{{i}}" placeholder="e.g. WINDY" required [(ngModel)]="op.matchingValue">
                                                 </div>
                                             </div>
-                                            <hr />          
+                                            <ng-container [ngSwitch]="op.simulationType">
+                                                <ng-container *ngSwitchCase="'randomValue'">
+                                                    <div class="col-xs-12 col-sm-4 col-md-4">
+                                                        <div class="measurement-accordion">
+                                                            <label for="minvalue"><span>Minimum Value</span></label>
+                                                            <input type="number" class="form-control"  name="minvalue{{model.id}}_{{i}}" placeholder="e.g. 10 (required)" required [(ngModel)]="op.minValue">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-xs-12 col-sm-4 col-md-4">
+                                                        <div class="measurement-accordion">
+                                                            <label for="maxvalue"><span>Maximum Value</span></label>
+                                                            <input type="number" class="form-control"  name="maxvalue{{model.id}}_{{i}}" placeholder="e.g. 20 (required)" required [(ngModel)]="op.maxValue">
+                                                        </div>
+                                                    </div>
+                                                </ng-container>
+                                                <ng-container *ngSwitchCase="'positionUpdate'">
+                                                    <div class="col-xs-12 col-sm-4 col-md-4">
+                                                        <div class="measurement-accordion">
+                                                            <label for="latitude"><span>Latitude Value</span></label>
+                                                            <input type="text" class="form-control"  name="latitude{{model.id}}_{{i}}" placeholder="e.g. 40.66,50.40 (required)" required [(ngModel)]="op.latitude">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-xs-12 col-sm-4 col-md-4">
+                                                        <div class="measurement-accordion">
+                                                            <label for="altitude"><span>Altitude Value</span></label>
+                                                            <input type="text" class="form-control"  name="altitude{{model.id}}_{{i}}" placeholder="e.g. 40.66,50.40 (required)" required [(ngModel)]="op.altitude">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-xs-12 col-sm-4 col-md-4">
+                                                        <div class="measurement-accordion">
+                                                            <label for="longitude"><span>Longitude value</span></label>
+                                                            <input type="text" class="form-control"  name="longitude{{model.id}}_{{i}}" placeholder="e.g. 40.66,50.40 (required)" required [(ngModel)]="op.longitude">
+                                                        </div>
+                                                    </div>
+                                                </ng-container>
+                                                <ng-container *ngSwitchCase="'eventCreation'">
+                                                    <div class="col-xs-12 col-sm-4 col-md-4">
+                                                        <div class="measurement-accordion">
+                                                            <label for="eventType"><span>Event Type</span></label>
+                                                            <input type="text" class="form-control"  name="eventType{{model.id}}_{{i}}" placeholder="c8y_locationUpdate,c8y_BeaconUpdate" required [(ngModel)]="op.eventType">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-xs-12 col-sm-4 col-md-4">
+                                                        <div class="measurement-accordion">
+                                                            <label for="eventText"><span>Event Text</span></label>
+                                                            <input type="text" class="form-control"  name="eventText{{model.id}}_{{i}}" placeholder="c8y_locationUpdate,c8y_BeaconUpdate (required)" required [(ngModel)]="op.eventText">
+                                                        </div>
+                                                    </div>
+                                                </ng-container>
+                                                <ng-container *ngSwitchCase="'valueSeries'">
+                                                    <div class="col-xs-12 col-sm-4 col-md-4">
+                                                        <div class="measurement-accordion">
+                                                            <label for="value"><span>Value</span></label>
+                                                            <input type="text" class="form-control" id="value" name="value{{model.id}}_{{i}}" placeholder="e.g. 15,20,30 (required)" required [(ngModel)]="op.value">
+                                                        </div> 
+                                                    </div>
+                                                </ng-container>
+                                                <ng-container *ngSwitchCase="'randomWalk'">
+                                                    <div class="col-xs-12 col-sm-4 col-md-4">
+                                                        <div class="measurement-accordion">
+                                                        <label for="startingvalue"><span>Starting Value</span></label>
+                                                        <input type="number" class="form-control" id="startingvalue" name="startingvalue{{model.id}}_{{i}}" placeholder="e.g. 10 (required)" required [(ngModel)]="op.startingValue">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-xs-12 col-sm-4 col-md-4">
+                                                        <div class="measurement-accordion">
+                                                            <label for="maxdelta"><span>Maximum Change Amount</span></label>
+                                                            <input type="number" class="form-control" id="maxdelta" name="maxdelta{{model.id}}_{{i}}" min="0" placeholder="e.g. 10 (required)" required [(ngModel)]="op.maxDelta">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-xs-12 col-sm-4 col-md-4">
+                                                        <div class="measurement-accordion">
+                                                            <label for="minvalue"><span>Minimum Value</span></label>
+                                                            <input type="number" class="form-control"  name="minvalue{{model.id}}_{{i}}" placeholder="e.g. 10 (required)" required [(ngModel)]="op.minValue">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-xs-12 col-sm-4 col-md-4">
+                                                        <div class="measurement-accordion">
+                                                            <label for="maxvalue"><span>Maximum Value</span></label>
+                                                            <input type="number" class="form-control"  name="maxvalue{{model.id}}_{{i}}" placeholder="e.g. 20 (required)" required [(ngModel)]="op.maxValue">
+                                                        </div>
+                                                    </div>
+                                                </ng-container>
+                                            </ng-container>
+                                            <div class="row">
+                                                <div class="col-lg-12">
+                                                    <button class="btn btn-link btn-block" type="button" (click)="deleteDtDLOperation(model,i)">
+                                                        <div class="pull-left float-left">Remove condition</div>
+                                                    </button>
+                                                </div>
+                                                <div class="col-lg-12">
+                                                    <hr />   
+                                                </div>
+                                            </div>
                                         </ng-container>
-                                    </div>
+                                    </ng-container>
                                     <button class="btn btn-link btn-block" type="button" (click)="newOperation(model,'dtdl_value',model.alternateConfigs.operations.length)">
                                         <div class="pull-left float-left">Add condition</div>
                                     </button>
                                 </accordion-group>
                             </accordion>
-                        </div>
-                    </ng-container>
-                    <!-- end fields --> 
-
-                    <!-- <div class="form-group">
-                        <button class="btn btn-link btn-block" type="button" (click)='newOperation("rand_value",model.alternateConfigs.operations.length)'>
-                                <div class="pull-left float-left">add operation</div>
-                            </button>
-                    </div> -->
-
-                    <!-- finish multiple configs --> 
-
-
-
-
+                        </ng-container>
+                    </div>
+                    <!-- end operation accordion --> 
 
                     <div class="col-xs-12 col-sm-4 col-md-4" *ngIf="model.simulationType !== 'positionUpdate' && model.simulationType !== 'eventCreation'">
                         <div class="measurement-accordion">
@@ -361,21 +343,23 @@ import * as _ from 'lodash';
         </div>
     `,
     styles: [`
-    :host >>> .panel.dtdl-simulator-measurement-panel .panel-title{
-         width: 100%;
-     }
-
-     .measurement-accordion {
-        padding-bottom: 10px;
-     }
-     .measurement-accordion label {
-        font-size: 12px;
-    }
-    .measurement-accordion input, .measurement-accordion select {
-        font-size: 12px;
-        height: 24px;
-    }
-
+        :host >>> .panel.dtdl-simulator-measurement-panel .panel-title{
+            width: 100%;
+        }
+        .measurement-accordion {
+            padding-bottom: 10px;
+        }
+        .measurement-accordion label {
+            font-size: 12px;
+        }
+        .measurement-accordion input, .measurement-accordion select {
+            font-size: 12px;
+            height: 24px;
+        }
+        :host >>> device-selector > div > input {
+            font-size: 12px !important;
+            height: 24px !important;
+        }
     `],
     viewProviders: [ { provide: ControlContainer, useExisting: NgForm } ]
 })
