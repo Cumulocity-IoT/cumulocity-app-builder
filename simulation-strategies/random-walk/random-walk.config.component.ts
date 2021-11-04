@@ -165,8 +165,6 @@ export class RandomWalkSimulationStrategyConfigComponent extends SimulationStrat
 
     newOperation(base: string, index: number ) {
 
-        this.checkAlternateConfigs();
-
         let c: DtdlSimulationModel = {
             deviceId: this.config.deviceId,
             matchingValue: `${base}_match_${index}`,
@@ -177,7 +175,6 @@ export class RandomWalkSimulationStrategyConfigComponent extends SimulationStrat
             alternateConfigs: undefined
         };
 
-        
         this.config.alternateConfigs.operations.push(c);
         console.log(this.config.alternateConfigs.operations);
     }
@@ -194,28 +191,31 @@ export class RandomWalkSimulationStrategyConfigComponent extends SimulationStrat
             maxValue: 20,
             unit: "C",
             interval: 5,
-            alternateConfigs: undefined,
-            matchingValue: "default"
+            matchingValue: "default",
+            alternateConfigs: undefined
         };
 
-        //TODO: copy alternate configs
-        if(existingConfig !== undefined || existingConfig !== null) {
-            this.config.fragment = existingConfig.fragment;
-            this.config.series = existingConfig.series;
-            this.config.startingValue = existingConfig.startingValue;
-            this.config.maxDelta = existingConfig.maxDelta;
-            this.config.minValue = existingConfig.minValue;
-            this.config.maxValue = existingConfig.maxValue;
-            this.config.unit = existingConfig.unit;
-            this.config.interval = existingConfig.interval;
-        }
+        this.checkAlternateConfigs(c);
 
-        //New objects can duplicate the default so it can be restored
-        //we will create the config entries if old simulators are edited
-        //duplication is to avoid changing old code.
-        this.config = _.cloneDeep(c);
-        this.checkAlternateConfigs();
-        this.config.alternateConfigs.operations.push(c);
+        if(existingConfig !== undefined || existingConfig !== null) {
+            c.fragment = existingConfig.fragment;
+            c.series = existingConfig.series;
+            c.startingValue = existingConfig.startingValue;
+            c.maxDelta = existingConfig.maxDelta;
+            c.minValue = existingConfig.minValue;
+            c.maxValue = existingConfig.maxValue;
+            c.unit = existingConfig.unit;
+            c.interval = existingConfig.interval;
+            c.alternateConfigs = _.cloneDeep(existingConfig.alternateConfigs);
+        } else {
+            //New objects can duplicate the default so it can be restored
+            //we will create the config entries if old simulators are edited
+            //duplication is to avoid changing old code.
+            let copy : DtdlSimulationModel = _.cloneDeep(c);
+            copy.alternateConfigs = undefined;
+            this.config.alternateConfigs.operations.push(copy);
+        }
+        this.config = c;
     }
 
 }
