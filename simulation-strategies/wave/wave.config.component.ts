@@ -162,7 +162,6 @@ export class WaveSimulationStrategyConfigComponent extends SimulationStrategyCon
     }
 
     newOperation(base: string, index: number ) {
-        this.checkAlternateConfigs();
 
         let c: DtdlSimulationModel = {
             deviceId: "",
@@ -196,6 +195,8 @@ export class WaveSimulationStrategyConfigComponent extends SimulationStrategyCon
             alternateConfigs: undefined
         };
 
+        this.checkAlternateConfigs(c);
+
         if(existingConfig !== undefined || existingConfig !== null) {
             c.fragment = existingConfig.fragment;
             c.series = existingConfig.series;
@@ -204,13 +205,15 @@ export class WaveSimulationStrategyConfigComponent extends SimulationStrategyCon
             c.wavelength = existingConfig.wavelength;
             c.unit = existingConfig.unit;
             c.interval = existingConfig.interval;
+            c.alternateConfigs = _.cloneDeep(existingConfig.alternateConfigs);
+        } else {
+            //New objects can duplicate the default so it can be restored
+            //we will create the config entries if old simulators are edited
+            //duplication is to avoid changing old code.
+            let copy : DtdlSimulationModel = _.cloneDeep(c);
+            copy.alternateConfigs = undefined;
+            this.config.alternateConfigs.operations.push(copy);
         }
-
-        //New objects can duplicate the default so it can be restored
-        //we will create the config entries if old simulators are edited
-        //duplication is to avoid changing old code.
-        this.config = _.cloneDeep(c);
-        this.checkAlternateConfigs();
-        this.config.alternateConfigs.operations.push(c);
+        this.config = c;
     }
 }

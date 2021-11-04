@@ -19,7 +19,7 @@
 import {DeviceSimulator} from "./device-simulator";
 import {SimulationStrategyMetadata} from "./simulation-strategy.decorator";
 import { Type } from "@angular/core";
-import { SimulatorConfig } from "./simulator-config";
+import { DtdlSimulationModel, SimulatorConfig } from "./simulator-config";
 import * as _ from 'lodash';
 
 // Provided by the polyfills.ts - import '@angular-devkit/build-angular/src/angular-cli-files/models/jit-polyfills.js';
@@ -31,21 +31,22 @@ export abstract class SimulationStrategyConfigComponent {
     abstract config: any; //typed in extended
     abstract initializeConfig(existingConfig?: any): void
 
-    public checkAlternateConfigs() {
-        console.log("checkAlternateConfigs",this.config);
-        if (!this.hasOperations()) {
-            this.config.alternateConfigs = {
+    public checkAlternateConfigs(target: DtdlSimulationModel) {
+        console.log("checkAlternateConfigs",target);
+        if (!this.hasOperations(target)) {
+            target.alternateConfigs = {
                 opSource: "",
                 opSourceName: "",
                 payloadFragment: "c8y_Command.text",
                 opReply: false,
-                operations: []
+                operations: [],
+                configIndex: 0
             };
         }
     }
 
     public deleteOperation(index:number) : void {
-        if( this.hasOperations() ) {
+        if( this.hasOperations(this.config) ) {
             let ops: Array<any> = _.get(this.config.alternateConfigs,"operations");
             ops.splice(index,1);
         }
@@ -56,8 +57,8 @@ export abstract class SimulationStrategyConfigComponent {
      * 
      * @returns true if config supports operations
      */
-    public hasOperations() : boolean {
-        return ( _.has(this.config,"alternateConfigs") && _.has(this.config.alternateConfigs,"operations"));
+    public hasOperations(target: DtdlSimulationModel) : boolean {
+        return ( _.has(target,"alternateConfigs") && _.has(target.alternateConfigs,"operations"));
     }
 
     /**
@@ -71,7 +72,7 @@ export abstract class SimulationStrategyConfigComponent {
      * @returns 
      */
     public getConfigAsAny(index: number): any | undefined {
-        if( this.hasOperations() ) {
+        if( this.hasOperations(this.config) ) {
             let ops: Array<any> = _.get(this.config.alternateConfigs,"operations");
             if(ops.length >= (index+1)) { //zero based
                 return ops[index].config;

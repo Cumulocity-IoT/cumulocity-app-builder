@@ -156,8 +156,6 @@ export class RandomValueSimulationStrategyConfigComponent extends SimulationStra
 
     newOperation(base: string, index: number ) {
 
-        this.checkAlternateConfigs();
-
         let c: DtdlSimulationModel = {
             deviceId: this.config.deviceId,
             matchingValue: `${base}_match_${index}`,
@@ -184,11 +182,13 @@ export class RandomValueSimulationStrategyConfigComponent extends SimulationStra
             maxValue: 20,
             unit: "C",
             interval: 5,
-            alternateConfigs: undefined,
-            matchingValue: "default"
+            matchingValue: "default",
+            alternateConfigs: undefined
         };
 
-        //TODO: copy alternate configs
+        this.checkAlternateConfigs(c);
+
+
         if(existingConfig !== undefined || existingConfig !== null) {
             c.fragment = existingConfig.fragment;
             c.series = existingConfig.series;
@@ -196,14 +196,16 @@ export class RandomValueSimulationStrategyConfigComponent extends SimulationStra
             c.maxValue = existingConfig.maxValue;
             c.unit = existingConfig.unit;
             c.interval = existingConfig.interval;
+            c.alternateConfigs = _.cloneDeep(existingConfig.alternateConfigs);
+        } else {
+            //New objects can duplicate the default so it can be restored
+            //we will create the config entries if old simulators are edited
+            //duplication is to avoid changing old code.
+            let copy : DtdlSimulationModel = _.cloneDeep(c);
+            copy.alternateConfigs = undefined;
+            this.config.alternateConfigs.operations.push(copy);
         }
-
-        //New objects can duplicate the default so it can be restored
-        //we will create the config entries if old simulators are edited
-        //duplication is to avoid changing old code.
-        this.config = _.cloneDeep(c);
-        this.checkAlternateConfigs();
-        this.config.alternateConfigs.operations.push(c);
+        this.config = c;
         
     }
 }

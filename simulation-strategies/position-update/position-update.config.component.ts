@@ -57,20 +57,24 @@ export class PositionUpdateSimulationStrategyConfigComponent extends SimulationS
             alternateConfigs: undefined
         };
 
+        this.checkAlternateConfigs(c);
+
         //TODO: copy alternateconfigs
         if(existingConfig !== undefined || existingConfig !== null) {
             c.interval = existingConfig.interval;
             c.latitude = existingConfig.latitude;
             c.longitude = existingConfig.longitude;
             c.altitude = existingConfig.altitude;
+            c.alternateConfigs = _.cloneDeep(existingConfig.alternateConfigs);
+        } else {
+            //New objects can duplicate the default so it can be restored
+            //we will create the config entries if old simulators are edited
+            //duplication is to avoid changing old code.
+            let copy : DtdlSimulationModel = _.cloneDeep(c);
+            copy.alternateConfigs = undefined;
+            this.config.alternateConfigs.operations.push(copy);
         }
-
-        //New objects can duplicate the default so it can be restored
-        //we will create the config entries if old simulators are edited
-        //duplication is to avoid changing old code.
-        this.config = _.cloneDeep(c);
-        this.checkAlternateConfigs();
-        this.config.alternateConfigs.operations.push(c);
+        this.config = c;
     }
 
 }
