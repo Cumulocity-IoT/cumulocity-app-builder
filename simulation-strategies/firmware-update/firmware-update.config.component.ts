@@ -54,7 +54,8 @@ export class FirmwareUpdateSimulationStrategyConfigComponent extends SimulationS
 
     config: DtdlSimulationModel;
 
-    initializeConfig() {
+    initializeConfig(existingConfig?: DtdlSimulationModel) {
+
         let c: DtdlSimulationModel = {
             deviceId: "",
             matchingValue: "default",
@@ -65,6 +66,20 @@ export class FirmwareUpdateSimulationStrategyConfigComponent extends SimulationS
             resetOn: 'restart',
             alternateConfigs: undefined
         };
+
+        //TODO: copy alternate configs
+        if(existingConfig !== undefined || existingConfig !== null) {
+            c.resetOn = existingConfig.resetOn;
+            c.firmwareVersions = [];
+            existingConfig.firmwareVersions.forEach(fv => {
+                c.firmwareVersions.push({
+                    name: fv.name,
+                    version: fv.version,
+                    url: fv.url
+                });
+            });
+        }
+        
 
         //New objects can duplicate the default so it can be restored
         //we will create the config entries if old simulators are edited

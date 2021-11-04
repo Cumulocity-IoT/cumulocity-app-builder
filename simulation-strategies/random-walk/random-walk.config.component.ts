@@ -182,7 +182,7 @@ export class RandomWalkSimulationStrategyConfigComponent extends SimulationStrat
         console.log(this.config.alternateConfigs.operations);
     }
 
-    initializeConfig() {
+    initializeConfig(existingConfig?: DtdlSimulationModel) {
 
         let c: DtdlSimulationModel = {
             deviceId: "",
@@ -197,6 +197,18 @@ export class RandomWalkSimulationStrategyConfigComponent extends SimulationStrat
             alternateConfigs: undefined,
             matchingValue: "default"
         };
+
+        //TODO: copy alternate configs
+        if(existingConfig !== undefined || existingConfig !== null) {
+            this.config.fragment = existingConfig.fragment;
+            this.config.series = existingConfig.series;
+            this.config.startingValue = existingConfig.startingValue;
+            this.config.maxDelta = existingConfig.maxDelta;
+            this.config.minValue = existingConfig.minValue;
+            this.config.maxValue = existingConfig.maxValue;
+            this.config.unit = existingConfig.unit;
+            this.config.interval = existingConfig.interval;
+        }
 
         //New objects can duplicate the default so it can be restored
         //we will create the config entries if old simulators are edited

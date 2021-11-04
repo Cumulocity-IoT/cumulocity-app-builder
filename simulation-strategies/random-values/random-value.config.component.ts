@@ -174,7 +174,7 @@ export class RandomValueSimulationStrategyConfigComponent extends SimulationStra
         console.log(this.config.alternateConfigs.operations);
     }
 
-    initializeConfig() {
+    initializeConfig(existingConfig?: DtdlSimulationModel) {
 
         let c: DtdlSimulationModel = {
             deviceId: "",
@@ -188,11 +188,22 @@ export class RandomValueSimulationStrategyConfigComponent extends SimulationStra
             matchingValue: "default"
         };
 
+        //TODO: copy alternate configs
+        if(existingConfig !== undefined || existingConfig !== null) {
+            c.fragment = existingConfig.fragment;
+            c.series = existingConfig.series;
+            c.minValue = existingConfig.minValue;
+            c.maxValue = existingConfig.maxValue;
+            c.unit = existingConfig.unit;
+            c.interval = existingConfig.interval;
+        }
+
         //New objects can duplicate the default so it can be restored
         //we will create the config entries if old simulators are edited
         //duplication is to avoid changing old code.
         this.config = _.cloneDeep(c);
         this.checkAlternateConfigs();
         this.config.alternateConfigs.operations.push(c);
+        
     }
 }

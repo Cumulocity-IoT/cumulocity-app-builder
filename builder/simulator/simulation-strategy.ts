@@ -29,7 +29,7 @@ declare module Reflect {
 
 export abstract class SimulationStrategyConfigComponent {
     abstract config: any; //typed in extended
-    abstract initializeConfig(): void; //extended knows how to init
+    abstract initializeConfig(existingConfig?: any): void
 
     public checkAlternateConfigs() {
         console.log("checkAlternateConfigs",this.config);

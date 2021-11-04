@@ -181,7 +181,7 @@ export class WaveSimulationStrategyConfigComponent extends SimulationStrategyCon
         console.log(this.config.alternateConfigs.operations);
     }
 
-    initializeConfig() {
+    initializeConfig(existingConfig?: DtdlSimulationModel) {
 
         let c: DtdlSimulationModel = {
             deviceId: "",
@@ -196,6 +196,15 @@ export class WaveSimulationStrategyConfigComponent extends SimulationStrategyCon
             alternateConfigs: undefined
         };
 
+        if(existingConfig !== undefined || existingConfig !== null) {
+            c.fragment = existingConfig.fragment;
+            c.series = existingConfig.series;
+            c.waveType = existingConfig.waveType;
+            c.height = existingConfig.height;
+            c.wavelength = existingConfig.wavelength;
+            c.unit = existingConfig.unit;
+            c.interval = existingConfig.interval;
+        }
 
         //New objects can duplicate the default so it can be restored
         //we will create the config entries if old simulators are edited

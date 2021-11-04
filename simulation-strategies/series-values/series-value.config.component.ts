@@ -158,7 +158,7 @@ export class SeriesValueSimulationStrategyConfigComponent extends SimulationStra
         console.log(this.config.alternateConfigs.operations);
     }
 
-    initializeConfig() {
+    initializeConfig(existingConfig?: SeriesValueSimulationStrategyConfig) {
         console.log("initializeConfig")
         let c: DtdlSimulationModel = {
             deviceId: "",
@@ -171,7 +171,16 @@ export class SeriesValueSimulationStrategyConfigComponent extends SimulationStra
             matchingValue: "default"
         };
 
-        //New objects can duplicate the default so it can be restored
+        //TODO: copy alternate configs
+        if(existingConfig !== undefined || existingConfig !== null) {
+            c.fragment = existingConfig.fragment;
+            c.series = existingConfig.series;
+            c.value = existingConfig.value;
+            c.unit = existingConfig.unit;
+            c.interval = existingConfig.interval;
+        }
+
+            //New objects can duplicate the default so it can be restored
         //we will create the config entries if old simulators are edited
         //duplication is to avoid changing old code.
         this.config = _.cloneDeep(c);

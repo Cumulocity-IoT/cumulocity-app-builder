@@ -46,7 +46,7 @@ export class PositionUpdateSimulationStrategyConfigComponent extends SimulationS
 
     config: DtdlSimulationModel;
 
-    initializeConfig() {
+    initializeConfig(existingConfig?: DtdlSimulationModel) {
         let c: DtdlSimulationModel = {
             deviceId: "",
             matchingValue: "default",
@@ -56,6 +56,14 @@ export class PositionUpdateSimulationStrategyConfigComponent extends SimulationS
             interval: 5,
             alternateConfigs: undefined
         };
+
+        //TODO: copy alternateconfigs
+        if(existingConfig !== undefined || existingConfig !== null) {
+            c.interval = existingConfig.interval;
+            c.latitude = existingConfig.latitude;
+            c.longitude = existingConfig.longitude;
+            c.altitude = existingConfig.altitude;
+        }
 
         //New objects can duplicate the default so it can be restored
         //we will create the config entries if old simulators are edited

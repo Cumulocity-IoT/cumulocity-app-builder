@@ -26,7 +26,6 @@ import * as _ from 'lodash';
 
 @Component({
     template: `
-    
         <div class="row" *ngIf="!config.isEditMode">
             <div class="col-xs-12 col-sm-6 col-md-6">
                 <div class="form-group">
@@ -375,13 +374,29 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
         super();
     }
 
-    initializeConfig() {
-        this.config.modalSize = "modal-md",
-        this.config.dtdlModelConfig = [];
+    existingConfig: any;
+
+
+    private declareConfig() {
+        this.config.modalSize = "modal-md";
         this.config.dtdlDeviceId = "";
+        this.config.dtdlModelConfig = [];
         this.configModel = [];
         this.config.interval = 5;
         this.checkAlternateConfigs();
+    }
+
+    initializeConfig(existingConfig?: DtdlSimulationModel) {
+        this.existingConfig = existingConfig;
+        this.declareConfig();
+        if(this.existingConfig === undefined || this.existingConfig === null) {
+            this.config.interval = 5;
+        } else {
+            this.config.interval = this.existingConfig.interval;
+            this.existingConfig.dtdlModelConfig.forEach((dmc: DtdlSimulationModel) => {
+                this.config.dtdlModelConfig.push(dmc);
+            });
+        }
     }
 
     public deleteDtDLOperation(model: DtdlSimulationModel, index:number) : void {
@@ -444,14 +459,18 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
             if (validJson) {
                 this.dtdlFile = validJson;
                 this.processDTDL(validJson);
+                this.preselectMeasurements();
             } else {
                 this.isError = true;
                 events.srcElement.value = "";
             }
             this.isUploading = false;
         });
-        if(file) { reader.readAsText(file); } 
-        else {  this.isUploading = false;   }
+        if(file) { 
+            reader.readAsText(file);
+        } else {
+            this.isUploading = false;
+        }
     }
 
     /**
@@ -472,7 +491,7 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
 
 
     private processDTDL(dtdl: any) {
-        this.initializeConfig();
+        this.declareConfig();
         if(dtdl.constructor === Object) {
             this.config.deviceName = (dtdl.displayName && dtdl.displayName.constructor === Object ? dtdl.displayName.en : dtdl.displayName);
             this.processDTDLMeasurement(dtdl.contents);
@@ -555,6 +574,19 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
             this.configModel.push(model);
             model.alternateConfigs.operations.push(cloneDeep(model));
         }
-        
     }
+
+    private preselectMeasurements() {
+        if(this.existingConfig !== undefined && this.existingConfig !== null) {
+            for(let i in this.existingConfig.dtdlModelConfig) {
+                for(let j in this.configModel) {    
+                    if(this.configModel[j].measurementName === this.existingConfig.dtdlModelConfig[i].measurementName) {
+                        this.configModel[j] = this.existingConfig.dtdlModelConfig[i];
+                        this.config.dtdlModelConfig.push(this.existingConfig.dtdlModelConfig[i]);
+                    }
+                }
+            }
+        }
+    }
+    
 }
