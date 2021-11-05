@@ -195,9 +195,10 @@ export class RandomWalkSimulationStrategyConfigComponent extends SimulationStrat
             alternateConfigs: undefined
         };
 
+        this.config = c;
         this.checkAlternateConfigs(c);
 
-        if(existingConfig !== undefined || existingConfig !== null) {
+        if(typeof existingConfig != "undefined" || existingConfig != null) {
             c.fragment = existingConfig.fragment;
             c.series = existingConfig.series;
             c.startingValue = existingConfig.startingValue;
@@ -215,7 +216,6 @@ export class RandomWalkSimulationStrategyConfigComponent extends SimulationStrat
             copy.alternateConfigs = undefined;
             this.config.alternateConfigs.operations.push(copy);
         }
-        this.config = c;
     }
 
 }

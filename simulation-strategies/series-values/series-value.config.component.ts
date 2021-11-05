@@ -169,9 +169,10 @@ export class SeriesValueSimulationStrategyConfigComponent extends SimulationStra
             alternateConfigs: undefined
         };
 
+        this.config = c;
         this.checkAlternateConfigs(c);
 
-        if(existingConfig !== undefined || existingConfig !== null) {
+        if(typeof existingConfig != "undefined" || existingConfig != null) {
             c.fragment = existingConfig.fragment;
             c.series = existingConfig.series;
             c.value = existingConfig.value;
@@ -186,7 +187,6 @@ export class SeriesValueSimulationStrategyConfigComponent extends SimulationStra
             copy.alternateConfigs = undefined;
             this.config.alternateConfigs.operations.push(copy);
         }
-        this.config = c;
     }
 
 }

@@ -195,9 +195,10 @@ export class WaveSimulationStrategyConfigComponent extends SimulationStrategyCon
             alternateConfigs: undefined
         };
 
+        this.config = c;
         this.checkAlternateConfigs(c);
 
-        if(existingConfig !== undefined || existingConfig !== null) {
+        if(typeof existingConfig != "undefined" || existingConfig != null) {
             c.fragment = existingConfig.fragment;
             c.series = existingConfig.series;
             c.waveType = existingConfig.waveType;
@@ -214,6 +215,5 @@ export class WaveSimulationStrategyConfigComponent extends SimulationStrategyCon
             copy.alternateConfigs = undefined;
             this.config.alternateConfigs.operations.push(copy);
         }
-        this.config = c;
     }
 }

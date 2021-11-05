@@ -186,10 +186,11 @@ export class RandomValueSimulationStrategyConfigComponent extends SimulationStra
             alternateConfigs: undefined
         };
 
+        this.config = c;
         this.checkAlternateConfigs(c);
 
 
-        if(existingConfig !== undefined || existingConfig !== null) {
+        if(typeof existingConfig != "undefined" || existingConfig != null) {
             c.fragment = existingConfig.fragment;
             c.series = existingConfig.series;
             c.minValue = existingConfig.minValue;
@@ -205,7 +206,6 @@ export class RandomValueSimulationStrategyConfigComponent extends SimulationStra
             copy.alternateConfigs = undefined;
             this.config.alternateConfigs.operations.push(copy);
         }
-        this.config = c;
         
     }
 }
