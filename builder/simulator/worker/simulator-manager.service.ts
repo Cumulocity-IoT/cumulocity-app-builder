@@ -138,6 +138,9 @@ export class SimulatorManagerService {
             this.simulatorWorkerAPI._lockStatus$.next(lockStatus);
         });
 
+        //
+        // make sure we only ping the simulators when there is new data
+        //
         this.operations$ = this.simulatorWorkerAPI._incomingOperations.pipe(
             //tap( data => console.log("MANAGER", data)),
             distinctUntilChanged((prev, curr) => deepEqual(prev, curr))
@@ -193,6 +196,9 @@ export class SimulatorManagerService {
             deviceId: simulatorConfig.config.deviceId
         });
         instance.start();
+
+        // now connect the simulator to the operations observable
+        // it handles unsub
         instance.subscribeToOperations(this.operations$);
         return instance;
     }

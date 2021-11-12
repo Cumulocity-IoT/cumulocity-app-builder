@@ -21,8 +21,7 @@ import { SimulationStrategyMetadata } from "./simulation-strategy.decorator";
 /**
  *  Operation Definition. 
  * 
- *  The derived config interfaces now need to extend OperationSupport.
- *  if the member exists we can use the configurations, if not use existing mechanism.
+ *  if the members exist we can use the configurations, if not use prior mechanism.
  *  The default config will be the config object and duplicated in this map.
  */
 
@@ -37,6 +36,12 @@ export interface OperationSupport<T> {
 }
 
 
+/**
+ *  DtdlSimulationModel is the base interface for all configs now
+ *  it should be extended to add new simulator config types. It 
+ *  simplifies the structure slightly as we have 1 point of reference
+ *  and means we can handle the configs slightly more consistantly
+ */
 export interface DtdlSimulationModel {
     modalSize?: string,
     deviceName?: string,
@@ -76,7 +81,7 @@ export interface DtdlSimulationModel {
     }[],
     resetOn?: 'restart' | 'never';
     isGroup?: boolean,
-    alternateConfigs?:  OperationSupport<DtdlSimulationModel>;
+    alternateConfigs?: OperationSupport<DtdlSimulationModel>;
 }
 
 /**

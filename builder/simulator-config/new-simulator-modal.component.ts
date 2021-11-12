@@ -25,12 +25,12 @@ import {
     ViewContainerRef
 } from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap/modal';
-import {WizardComponent} from "../../wizard/wizard.component";
-import {InventoryService, ApplicationService, IManagedObject} from '@c8y/client';
-import {AppIdService} from "../app-id.service";
-import {SimulationStrategyConfigComponent, SimulationStrategyFactory} from "../simulator/simulation-strategy";
-import {SimulationStrategiesService} from "../simulator/simulation-strategies.service";
-import {SimulatorCommunicationService} from "../simulator/mainthread/simulator-communication.service";
+import { WizardComponent } from "../../wizard/wizard.component";
+import { InventoryService, ApplicationService, IManagedObject } from '@c8y/client';
+import { AppIdService } from "../app-id.service";
+import { SimulationStrategyConfigComponent, SimulationStrategyFactory } from "../simulator/simulation-strategy";
+import { SimulationStrategiesService } from "../simulator/simulation-strategies.service";
+import { SimulatorCommunicationService } from "../simulator/mainthread/simulator-communication.service";
 import { throwError } from 'rxjs';
 
 @Component({
@@ -74,7 +74,7 @@ export class NewSimulatorModalComponent {
             const componentRef: ComponentRef<SimulationStrategyConfigComponent> = this.configWrapper.createComponent(factory);
             componentRef.instance.config = this.newConfig = {};
 
-            if(this.configFromFile === undefined || this.configFromFile === null) {
+            if (this.configFromFile === undefined || this.configFromFile === null) {
                 componentRef.instance.initializeConfig();
             } else {
                 componentRef.instance.initializeConfig(this.configFromFile);
@@ -95,7 +95,7 @@ export class NewSimulatorModalComponent {
     }
 
     public isConfigFromFileUploaded() {
-        if(this.configFromFile === undefined || this.configFromFile === null) {
+        if (this.configFromFile === undefined || this.configFromFile === null) {
             return false;
         }
         return true;
@@ -184,7 +184,7 @@ export class NewSimulatorModalComponent {
         return group;
     }
 
-    fileUploaded(events){
+    fileUploaded(events) {
         this.isConfigFileError = false;
         this.isConfigFileUploading = true;
         const file = events.target.files[0];
@@ -195,7 +195,7 @@ export class NewSimulatorModalComponent {
             const validJson = this.isValidJson(input);
             if (validJson) {
                 this.selectedStrategyFactory = this.simulationStrategiesService.strategiesByName.get(validJson.type);
-                if(this.selectedStrategyFactory === undefined) {
+                if (this.selectedStrategyFactory === undefined) {
                     this.isConfigFileError = true;
                 } else {
                     this.configFromFile = validJson.config;
@@ -207,11 +207,11 @@ export class NewSimulatorModalComponent {
             }
             this.isConfigFileUploading = false;
         });
-        if(file) { 
-            reader.readAsText(file); 
+        if (file) {
+            reader.readAsText(file);
         } else {
             this.configFromFile = null;
-            this.isConfigFileUploading = false;   
+            this.isConfigFileUploading = false;
         }
     }
 
@@ -219,7 +219,7 @@ export class NewSimulatorModalComponent {
      *
      * @param input Validate JSON Input
      */
-     private isValidJson(input: any) {
+    private isValidJson(input: any) {
         try {
             if (input) {
                 const o = JSON.parse(input);

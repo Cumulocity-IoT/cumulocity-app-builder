@@ -57,6 +57,11 @@ export class SimulatorWorkerAPI {
         this.appStateService.currentUser.next(user);
     }
 
+    /**
+     * This will poll every 5 seconds for operations.
+     * The observable is used to send "new" operations to the
+     * simulators. It filteres this raw list. 
+     */
     async startOperationListener() {
         //handle change here
         if (this._incomingOperationsSub !== undefined) {
@@ -67,7 +72,7 @@ export class SimulatorWorkerAPI {
 
         this._incomingOperationsSub = merge(
             of(-1), // Check the current value immediately
-            interval(5000), // Check every 30 seconds
+            interval(5000), // Check every 5 seconds
         ).pipe(
             debounceTime(100),
             switchMap(() =>

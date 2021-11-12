@@ -73,7 +73,8 @@ export abstract class DeviceSimulator {
     /**
      * This method checks to see what the params are and the 
      * operation name - checks if interested and changes config 
-     * if yes.
+     * if yes. default implementation, override in 
+     * own class - shouldn't be called. 
      * 
      * @param param The parameters passed to the operation
      * @returns true if operation succeeds
