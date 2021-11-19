@@ -52,14 +52,14 @@ export class DtdlSimulationStrategy extends DeviceIntervalSimulator {
     
     
     public async onOperation(param: any): Promise<boolean> {
-        console.log("DTDL operation = ", param);
+        //console.log("DTDL operation = ", param);
         for (let index = 0; index < this.config.dtdlModelConfig.length; index++) {
             const model = this.config.dtdlModelConfig[index];            
             if (model.alternateConfigs.opEnabled && model.alternateConfigs.operations.length > 1) {
                 if (_.has(param, "deviceId") && _.get(param, "deviceId") == model.alternateConfigs.opSource) {
                     model.alternateConfigs.operations.forEach( (cfg:DtdlSimulationModel,i:number) => {
                         if (_.has(param, model.alternateConfigs.payloadFragment) && _.get(param, model.alternateConfigs.payloadFragment) == cfg.matchingValue) {
-                            console.log(`Matched ${cfg.matchingValue} setting cfg = `, cfg);
+                            //console.log(`Matched ${cfg.matchingValue} setting cfg = `, cfg);
                             model.alternateConfigs.configIndex = i; //used in create measurement below.
                             if (model.alternateConfigs.opReply == true) {
                                 const partialUpdateObject: Partial<IOperation> = {

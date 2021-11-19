@@ -55,12 +55,12 @@ export class WaveSimulationStrategy extends DeviceIntervalSimulator {
     }
 
     public async onOperation(param: any): Promise<boolean> {
-        console.log("Wavelength operation = ", param);
+        //console.log("Wavelength operation = ", param);
         if (this.config.alternateConfigs.operations.length > 1) {
             if (_.has(param, "deviceId") && _.get(param, "deviceId") == this.config.alternateConfigs.opSource) {
                 for (let cfg of this.config.alternateConfigs.operations) {
                     if (_.has(param, this.config.alternateConfigs.payloadFragment) && _.get(param, this.config.alternateConfigs.payloadFragment) == cfg.matchingValue) {
-                        console.log(`Matched ${cfg.matchingValue} setting cfg = `, cfg);
+                        //(`Matched ${cfg.matchingValue} setting cfg = `, cfg);
                         this.config.waveType = cfg.waveType;
                         this.config.height = cfg.height;
                         this.config.wavelength = cfg.wavelength;

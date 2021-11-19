@@ -76,13 +76,13 @@ import * as _ from 'lodash';
                     <div class="col-xs-12 col-sm-4 col-md-4" *ngIf="!model.isFieldModel && model.simulationType !== 'positionUpdate' && model.simulationType !== 'eventCreation'">
                         <div class="measurement-accordion">
                             <label for="fragment"><span>Fragment</span></label>
-                            <input type="text" class="form-control"  name="fragment{{model.id}}" placeholder="e.g. temperature_measurement (required)" required autofocus [(ngModel)]="model.alternateConfigs.operations[0].fragment">
+                            <input type="text" class="form-control"  name="fragment{{model.id}}" placeholder="e.g. temperature_measurement (required)" required autofocus [(ngModel)]="model.fragment">
                         </div>
                     </div>
                     <div class="col-xs-12 col-sm-4 col-md-4" *ngIf="model.simulationType !== 'positionUpdate' && model.simulationType !== 'eventCreation'">
                         <div class="measurement-accordion">
                             <label for="series"><span>Series</span></label>
-                            <input type="text" class="form-control" name="series{{model.id}}" placeholder="e.g. T (required)" required autofocus [(ngModel)]="model.alternateConfigs.operations[0].series">
+                            <input type="text" class="form-control" name="series{{model.id}}" placeholder="e.g. T (required)" required autofocus [(ngModel)]="model.series">
                         </div>
                     </div>
 
@@ -91,13 +91,13 @@ import * as _ from 'lodash';
                             <div class="col-xs-12 col-sm-4 col-md-4">
                                 <div class="measurement-accordion">
                                     <label for="minvalue"><span>Minimum Value</span></label>
-                                    <input type="number" class="form-control"  name="minvalue{{model.id}}" placeholder="e.g. 10 (required)" required [(ngModel)]="model.alternateConfigs.operations[0].minValue">
+                                    <input type="number" class="form-control"  name="minvalue{{model.id}}" placeholder="e.g. 10 (required)" required [(ngModel)]="model.minValue">
                                 </div>
                             </div>
                             <div class="col-xs-12 col-sm-4 col-md-4">
                                 <div class="measurement-accordion">
                                     <label for="maxvalue"><span>Maximum Value</span></label>
-                                    <input type="number" class="form-control"  name="maxvalue{{model.id}}" placeholder="e.g. 20 (required)" required [(ngModel)]="model.alternateConfigs.operations[0].maxValue">
+                                    <input type="number" class="form-control"  name="maxvalue{{model.id}}" placeholder="e.g. 20 (required)" required [(ngModel)]="model.maxValue">
                                 </div>
                             </div>
                         </ng-container>
@@ -105,19 +105,19 @@ import * as _ from 'lodash';
                             <div class="col-xs-12 col-sm-4 col-md-4">
                                 <div class="measurement-accordion">
                                     <label for="latitude"><span>Latitude Value</span></label>
-                                    <input type="text" class="form-control"  name="latitude{{model.id}}" placeholder="e.g. 40.66,50.40 (required)" required [(ngModel)]="model.alternateConfigs.operations[0].latitude">
+                                    <input type="text" class="form-control"  name="latitude{{model.id}}" placeholder="e.g. 40.66,50.40 (required)" required [(ngModel)]="model.latitude">
                                 </div>
                             </div>
                             <div class="col-xs-12 col-sm-4 col-md-4">
                                 <div class="measurement-accordion">
                                     <label for="altitude"><span>Altitude Value</span></label>
-                                    <input type="text" class="form-control"  name="altitude{{model.id}}" placeholder="e.g. 40.66,50.40 (required)" required [(ngModel)]="model.alternateConfigs.operations[0].altitude">
+                                    <input type="text" class="form-control"  name="altitude{{model.id}}" placeholder="e.g. 40.66,50.40 (required)" required [(ngModel)]="model.altitude">
                                 </div>
                             </div>
                             <div class="col-xs-12 col-sm-4 col-md-4">
                                 <div class="measurement-accordion">
                                     <label for="longitude"><span>Longitude value</span></label>
-                                    <input type="text" class="form-control"  name="longitude{{model.id}}" placeholder="e.g. 40.66,50.40 (required)" required [(ngModel)]="model.alternateConfigs.operations[0].longitude">
+                                    <input type="text" class="form-control"  name="longitude{{model.id}}" placeholder="e.g. 40.66,50.40 (required)" required [(ngModel)]="model.longitude">
                                 </div>
                             </div>
                         </ng-container>
@@ -125,13 +125,13 @@ import * as _ from 'lodash';
                             <div class="col-xs-12 col-sm-4 col-md-4">
                                 <div class="measurement-accordion">
                                     <label for="eventType"><span>Event Type</span></label>
-                                    <input type="text" class="form-control"  name="eventType{{model.id}}" placeholder="c8y_locationUpdate,c8y_BeaconUpdate" required [(ngModel)]="model.alternateConfigs.operations[0].eventType">
+                                    <input type="text" class="form-control"  name="eventType{{model.id}}" placeholder="c8y_locationUpdate,c8y_BeaconUpdate" required [(ngModel)]="model.eventType">
                                 </div>
                             </div>
                             <div class="col-xs-12 col-sm-4 col-md-4">
                                 <div class="measurement-accordion">
                                     <label for="eventText"><span>Event Text</span></label>
-                                    <input type="text" class="form-control"  name="eventText{{model.id}}" placeholder="c8y_locationUpdate,c8y_BeaconUpdate (required)" required [(ngModel)]="model.alternateConfigs.operations[0].eventText">
+                                    <input type="text" class="form-control"  name="eventText{{model.id}}" placeholder="c8y_locationUpdate,c8y_BeaconUpdate (required)" required [(ngModel)]="model.eventText">
                                 </div>
                             </div>
                         </ng-container>
@@ -139,7 +139,7 @@ import * as _ from 'lodash';
                             <div class="col-xs-12 col-sm-4 col-md-4">
                                 <div class="measurement-accordion">
                                     <label for="value"><span>Value</span></label>
-                                    <input type="text" class="form-control" id="value" name="value{{model.id}}" placeholder="e.g. 15,20,30 (required)" required [(ngModel)]="model.alternateConfigs.operations[0].value">
+                                    <input type="text" class="form-control" id="value" name="value{{model.id}}" placeholder="e.g. 15,20,30 (required)" required [(ngModel)]="model.value">
                                 </div> 
                             </div>
                         </ng-container>
@@ -147,25 +147,25 @@ import * as _ from 'lodash';
                             <div class="col-xs-12 col-sm-4 col-md-4">
                                 <div class="measurement-accordion">
                                 <label for="startingvalue"><span>Starting Value</span></label>
-                                <input type="number" class="form-control" id="startingvalue" name="startingvalue{{model.id}}" placeholder="e.g. 10 (required)" required [(ngModel)]="model.alternateConfigs.operations[0].startingValue">
+                                <input type="number" class="form-control" id="startingvalue" name="startingvalue{{model.id}}" placeholder="e.g. 10 (required)" required [(ngModel)]="model.startingValue">
                                 </div>
                             </div>
                             <div class="col-xs-12 col-sm-4 col-md-4">
                                 <div class="measurement-accordion">
                                     <label for="maxdelta"><span>Maximum Change Amount</span></label>
-                                    <input type="number" class="form-control" id="maxdelta" name="maxdelta{{model.id}}" min="0" placeholder="e.g. 10 (required)" required [(ngModel)]="model.alternateConfigs.operations[0].maxDelta">
+                                    <input type="number" class="form-control" id="maxdelta" name="maxdelta{{model.id}}" min="0" placeholder="e.g. 10 (required)" required [(ngModel)]="model.maxDelta">
                                 </div>
                             </div>
                             <div class="col-xs-12 col-sm-4 col-md-4">
                                 <div class="measurement-accordion">
                                     <label for="minvalue"><span>Minimum Value</span></label>
-                                    <input type="number" class="form-control"  name="minvalue{{model.id}}" placeholder="e.g. 10 (required)" required [(ngModel)]="model.alternateConfigs.operations[0].minValue">
+                                    <input type="number" class="form-control"  name="minvalue{{model.id}}" placeholder="e.g. 10 (required)" required [(ngModel)]="model.minValue">
                                 </div>
                             </div>
                             <div class="col-xs-12 col-sm-4 col-md-4">
                                 <div class="measurement-accordion">
                                     <label for="maxvalue"><span>Maximum Value</span></label>
-                                    <input type="number" class="form-control"  name="maxvalue{{model.id}}" placeholder="e.g. 20 (required)" required [(ngModel)]="model.alternateConfigs.operations[0].maxValue">
+                                    <input type="number" class="form-control"  name="maxvalue{{model.id}}" placeholder="e.g. 20 (required)" required [(ngModel)]="model.maxValue">
                                 </div>
                             </div>
                         </ng-container>
@@ -175,7 +175,7 @@ import * as _ from 'lodash';
                     <div class="col-lg-12">
                         <div class="measurement-accordion">
                             <label class="c8y-checkbox">
-                                <input type="checkbox" name="opEnabled1" [(ngModel)]="model.alternateConfigs.opEnabled" (click)="checkDefaultOperation(model)"/>
+                                <input type="checkbox" name="opEnabled{{model.id}}" [(ngModel)]="model.alternateConfigs.opEnabled" (click)="checkDefaultOperation(model)"/>
                                 <span></span>
                                 <span>Controlled by operation</span>
                             </label>
@@ -383,7 +383,7 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
         this.config.dtdlModelConfig = [];
         this.configModel = [];
         this.config.interval = 5;
-        this.checkAlternateConfigs();
+        this.checkAlternateConfigs(this.config);
     }
 
     initializeConfig(existingConfig?: DtdlSimulationModel) {
@@ -394,6 +394,7 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
         } else {
             this.config.interval = this.existingConfig.interval;
             this.existingConfig.dtdlModelConfig.forEach((dmc: DtdlSimulationModel) => {
+                this.checkAlternateConfigs(dmc);
                 this.config.dtdlModelConfig.push(dmc);
             });
         }
@@ -406,9 +407,18 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
         }
     }
 
-    public checkAlternateConfigs() {
-        for(let cfg = 0; cfg < this.config.dtdlModelConfig.length ; cfg++) {
-            this.checkDefaultOperation(cfg);
+    public checkAlternateConfigs(target: DtdlSimulationModel) {
+        //console.log("checkAlternateConfigs",target);
+        if (!this.hasOperations(target)) {
+            target.alternateConfigs = {
+                opSource: "",
+                opSourceName: "",
+                payloadFragment: "c8y_Command.text",
+                opReply: false,
+                operations: [],
+                configIndex: 0
+            };
+            target.alternateConfigs.operations.push(cloneDeep(target));
         }
     }
 
@@ -444,7 +454,7 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
         //we will create the config entries if old simulators are edited
         //duplication is to avoid changing old code.
         model.alternateConfigs.operations.push(c);
-        console.log(model.alternateConfigs.operations);
+        //console.log(model.alternateConfigs.operations);
     }
 
     fileUploaded(events){
@@ -552,7 +562,16 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
                 fields.forEach(field => {
                     const fieldModel: DtdlSimulationModel = {
                         simulationType: 'randomValue',
-                        matchingValue: "default"
+                        matchingValue: "default",
+                        alternateConfigs: {
+                            opEnabled: false,
+                            opReply: false,
+                            opSource: "",
+                            opSourceName: "",
+                            payloadFragment: "c8y_Command.text",
+                            configIndex: 0,
+                            operations: []
+                        }            
                     };
                     fieldModel.measurementName = model.measurementName + " : " + field.displayName;
                     fieldModel.fragment = model.fragment;
@@ -566,12 +585,13 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
                     fieldModel.parentId = model.id;
                     fieldModel.eventText = fieldModel.measurementName;
                     fieldModel.eventType = field.name;
+                    fieldModel.alternateConfigs.operations.push(cloneDeep(fieldModel));
                     this.configModel.push(fieldModel);
-                    model.alternateConfigs.operations.push(cloneDeep(fieldModel));
                 });
             }
         } else  {
             this.configModel.push(model);
+            this.checkAlternateConfigs(model)
             model.alternateConfigs.operations.push(cloneDeep(model));
         }
     }

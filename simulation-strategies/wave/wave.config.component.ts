@@ -177,7 +177,7 @@ export class WaveSimulationStrategyConfigComponent extends SimulationStrategyCon
         };
 
         this.config.alternateConfigs.operations.push(c);
-        console.log(this.config.alternateConfigs.operations);
+        //console.log(this.config.alternateConfigs.operations);
     }
 
     initializeConfig(existingConfig?: DtdlSimulationModel) {

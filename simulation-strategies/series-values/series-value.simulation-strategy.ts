@@ -54,12 +54,12 @@ export class SeriesValueSimulationStrategy extends DeviceIntervalSimulator {
     }
 
     public async onOperation(param: any): Promise<boolean> {
-        console.log("Series operation = ", param);
+        //console.log("Series operation = ", param);
         if (this.config.alternateConfigs.operations.length > 1) {
             if (_.has(param, "deviceId") && _.get(param, "deviceId") == this.config.alternateConfigs.opSource) {
                 for (let cfg of this.config.alternateConfigs.operations) {
                     if (_.has(param, this.config.alternateConfigs.payloadFragment) && _.get(param, this.config.alternateConfigs.payloadFragment) == cfg.matchingValue) {
-                        console.log(`Matched ${cfg.matchingValue} setting cfg = `, cfg);
+                        //console.log(`Matched ${cfg.matchingValue} setting cfg = `, cfg);
                         this.config.value = cfg.value;
                         let vCfg = this.getValueSeriesConfigParam(this.config.deviceId);
                         vCfg.seriesvalues = this.config.value.split(',').map(value => parseFloat(value.trim()));

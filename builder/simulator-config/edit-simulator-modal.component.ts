@@ -73,7 +73,7 @@ export class EditSimulatorModalComponent implements OnInit {
             const componentRef = this.configWrapper.createComponent(factory);
             componentRef.instance.config = this.simulatorConfig.config;
 
-            console.log("METADATA",metadata);
+            //console.log("METADATA",metadata);
             //existing config - check for new operations - config on simulator config
             if( metadata.name != "DTDL" ){
                 if( !_.has(componentRef.instance.config,"alternateConfigs")) {
@@ -115,14 +115,14 @@ export class EditSimulatorModalComponent implements OnInit {
             componentRef.instance.config.isEditMode = true; 
             this.simulatorConfig.metadata = metadata;
         }
-        console.log("openSimulatorConfig-end",this.simulatorConfig.config)
+        //console.log("openSimulatorConfig-end",this.simulatorConfig.config)
     }
 
     resetDialogSize() {
         this.bsModalRef.setClass('modal-sm');
     }
     async saveAndClose() {
-        console.log("saveAndClose",this.simulatorConfig)
+        //console.log("saveAndClose",this.simulatorConfig)
         this.busy = true;
         let app = (await this.appService.detail(this.appIdService.getCurrentAppId())).data as any;
 
