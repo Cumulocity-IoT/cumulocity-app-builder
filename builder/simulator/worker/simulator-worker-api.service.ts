@@ -75,7 +75,7 @@ export class SimulatorWorkerAPI {
         ).pipe(
             debounceTime(100),
             tap( t => console.log("ops = ", this.hasOperations)),
-            filter( t => this.hasOperations),
+            filter( t => this.hasOperations), //only go through if we need the calls
             switchMap(() => 
                 this.fetchClient.fetch('/devicecontrol/operations', {
                     params: {

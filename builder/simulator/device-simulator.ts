@@ -56,8 +56,6 @@ export abstract class DeviceSimulator {
      */
     public subscribeToOperations(opSource$: Observable<any[]>): void {
         this.subs = []; //belt and braces
-
-        //if we have config for operations - skip otherwise
         this.subs.push(
             opSource$.pipe(
                 mergeAll(),

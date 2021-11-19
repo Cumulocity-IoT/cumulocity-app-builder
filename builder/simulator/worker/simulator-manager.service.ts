@@ -164,9 +164,24 @@ export class SimulatorManagerService {
     async reloadSimulators() {
         this.clearSimulators();
 
+        let turnOn = false;
         for (let simulatorConfig of Array.from(this.simulatorConfigById.values())) {
             this.createInstance(simulatorConfig);
+            if( simulatorConfig.type == "DTDL"){
+                for (let dtdlConfig of Array.from(simulatorConfig.config.dtdlModelConfig)) {
+                    if( dtdlConfig.alternateConfigs.hasOwnProperty("opEnabled") && dtdlConfig.alternateConfigs.opEnabled) {
+                        //console.log(dtdlConfig.alternateConfigs.opEnabled);
+                        turnOn = true;
+                    }        
+                }
+            } else {
+                if( simulatorConfig.config.alternateConfigs.hasOwnProperty("opEnabled") && simulatorConfig.config.alternateConfigs.opEnabled) {
+                    //console.log(simulatorConfig.config.alternateConfigs.opEnabled);
+                    turnOn = true;
+                }    
+            }
         }
+        this.simulatorWorkerAPI.hasOperations = turnOn;
     }
 
     clearSimulators() {
