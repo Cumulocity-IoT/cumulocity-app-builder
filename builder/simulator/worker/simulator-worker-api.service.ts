@@ -24,9 +24,7 @@ import { AppIdService } from "../../app-id.service";
 import { SimulatorConfig } from "../simulator-config";
 import { BehaviorSubject, interval, merge, Subject, Subscription } from "rxjs";
 import { of } from "rxjs";
-import { debounceTime, map, switchMap, tap } from "rxjs/operators";
-import { OperationService } from "@c8y/ngx-components/api";
-import { now } from "lodash";
+import { debounceTime, map, switchMap, tap, filter } from "rxjs/operators";
 /**
  * The public api for talking to the simulators
  * Fields starting with _ are for use only by the worker
@@ -40,6 +38,7 @@ export class SimulatorWorkerAPI {
     _simulatorConfig$ = new BehaviorSubject<Map<number, SimulatorConfig>>(new Map());
     _listeners = new Map<number, Subscription>();
     _checkForSimulatorConfigChanges = new Subject<any>();
+    hasOperations: boolean = false;
 
     constructor(
         private fetchClient: FetchClient,
@@ -75,7 +74,9 @@ export class SimulatorWorkerAPI {
             interval(5000), // Check every 5 seconds
         ).pipe(
             debounceTime(100),
-            switchMap(() =>
+            tap( t => console.log("ops = ", this.hasOperations)),
+            filter( t => this.hasOperations),
+            switchMap(() => 
                 this.fetchClient.fetch('/devicecontrol/operations', {
                     params: {
                         pageSize: 20,
@@ -85,6 +86,7 @@ export class SimulatorWorkerAPI {
                 })
             ),
             switchMap(res => res.json()),
+            tap( d => console.log("data = ", d.operations)),
             map(data => data.operations)
         ).subscribe(ops => this._incomingOperations.next(ops));
     }
@@ -119,6 +121,7 @@ export class SimulatorWorkerAPI {
 
     checkForSimulatorConfigChanges() {
         this._checkForSimulatorConfigChanges.next();
+    
     }
 
     async unlock() {
