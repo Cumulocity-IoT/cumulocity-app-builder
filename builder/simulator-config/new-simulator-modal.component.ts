@@ -78,6 +78,7 @@ export class NewSimulatorModalComponent {
                 componentRef.instance.initializeConfig();
             } else {
                 componentRef.instance.initializeConfig(this.configFromFile);
+                componentRef.instance.config.deviceName = this.simulatorName;
             }
 
             this.newConfig = componentRef.instance.config;//TODO: needed after merge? 
@@ -199,6 +200,7 @@ export class NewSimulatorModalComponent {
                     this.isConfigFileError = true;
                 } else {
                     this.configFromFile = validJson.config;
+                    this.simulatorName = validJson.name;
                     this.wizard.selectStep('device');
                 }
             } else {
