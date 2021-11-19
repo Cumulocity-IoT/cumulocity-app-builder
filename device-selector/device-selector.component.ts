@@ -21,6 +21,7 @@ import { InventoryService, IResultList, IManagedObject } from '@c8y/client';
 import { Observable, Observer} from 'rxjs';
 import { TypeaheadMatch } from 'ngx-bootstrap/typeahead/typeahead-match.class';
 import { ControlContainer, NgForm } from '@angular/forms';
+import {v4 as uuidv4} from 'uuid';
 
 @Component({
     selector: 'device-selector',
@@ -37,9 +38,12 @@ export class DeviceSelectorComponent implements OnInit{
     suggestions$: Observable<any[]>;
     deviceList :any[] = [];
     typeaheadLoading: boolean = false;
-    
+    field_id: string;
+
     constructor(private inventoryService: InventoryService) {}
     ngOnInit(): void {
+        this.field_id = uuidv4();
+
         this.suggestions$ = new Observable((observer: Observer<any>) => {
             const item: any = {
                 id : '',

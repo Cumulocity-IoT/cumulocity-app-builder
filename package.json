@@ -48,6 +48,7 @@
     "rxjs": "~6.4.0",
     "semver": "^7.3.5",
     "url-search-params-polyfill": "6.0.0",
+    "uuid": "^8.3.2",
     "webpack-external-import": "^2.2.4",
     "worker-plugin": "^4.0.3",
     "zone.js": "~0.9.1"
