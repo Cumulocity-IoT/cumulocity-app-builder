@@ -171,8 +171,7 @@ import * as _ from 'lodash';
                         </ng-container>
                     </ng-container>
 
-                    
-                    <div class="col-lg-12">
+                    <div class="col-xs-12 col-lg-12">
                         <div class="measurement-accordion">
                             <label class="c8y-checkbox">
                                 <input type="checkbox" name="opEnabled{{model.id}}" [(ngModel)]="model.alternateConfigs.opEnabled" (click)="checkDefaultOperation(model)"/>
@@ -183,7 +182,7 @@ import * as _ from 'lodash';
                     </div>
 
                     <!-- start operation accordion --> 
-                    <div class="col-lg-12">   
+                    <div class="col-xs-12 col-lg-12">   
                         <ng-container *ngIf="model.alternateConfigs.opEnabled">
                             <accordion  [isAnimated]="true" [closeOthers]="true">
                                 <accordion-group panelClass="op-simulator-panel" #opGroup>
@@ -204,7 +203,7 @@ import * as _ from 'lodash';
                                             <input type="text" class="form-control" id="opPayload" name="opPayload" placeholder="e.g. c8y_command.text" required autofocus [(ngModel)]="model.alternateConfigs.payloadFragment">
                                         </div>
                                     </div>
-                                    <div class="col-lg-12">
+                                    <div class="col-xs-12 col-lg-12">
                                         <div class="measurement-accordion">
                                             <label class="c8y-checkbox">
                                                 <input type="checkbox" id="opReply" name="opReply" [(ngModel)]="model.alternateConfigs.opReply" />
@@ -401,7 +400,8 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
     }
 
     public deleteDtDLOperation(model: DtdlSimulationModel, index:number) : void {
-        if (!_.has(model,"alternateConfigs") && !_.has(model.alternateConfigs,"operations")) {
+        console.log("remove ", model, index);
+        if (_.has(model,"alternateConfigs") && _.has(model.alternateConfigs,"operations")) {
             let ops: Array<any> = _.get(model.alternateConfigs,"operations");
             ops.splice(index,1);
         }
