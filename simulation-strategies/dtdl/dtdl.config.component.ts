@@ -191,13 +191,13 @@ import * as _ from 'lodash';
                                         <span class="float-right pull-right"><i *ngIf="opGroup.isOpen" class="fa fa-caret-up"></i>
                                         <i *ngIf="!opGroup.isOpen" class="fa fa-caret-down"></i></span>
                                     </button>
-                                    <div class="col-lg-6">
+                                    <div class="col-xs-6 col-lg-6">
                                         <div class="measurement-accordion">
                                             <label for="opSource"><span>Operation Source</span></label>
                                             <device-selector id="opSource" name="opSource" [(value)]="model.alternateConfigs.opSourceName" [placeHolder]="'Type your Device Name'" [required]="true" (selectedDevice)= "getOperationDevice($event,model)"></device-selector>
                                         </div>
                                     </div>
-                                    <div class="col-lg-6">
+                                    <div class="col-xs-6 col-lg-6">
                                         <div class="measurement-accordion">
                                             <label for="opPayload"><span>Payload Key</span></label>
                                             <input type="text" class="form-control" id="opPayload" name="opPayload" placeholder="e.g. c8y_command.text" required autofocus [(ngModel)]="model.alternateConfigs.payloadFragment">
@@ -215,7 +215,7 @@ import * as _ from 'lodash';
                                     <hr /> 
                                     <ng-container *ngFor="let op of model.alternateConfigs.operations; let i = index">
                                         <ng-container *ngIf="i > 0">
-                                            <div class="col-lg-6">
+                                            <div class="col-xs-6 col-lg-6">
                                                 <div class="measurement-accordion">
                                                     <label for="opMatch_{{i}}"><span>Matching</span></label>
                                                     <input type="text" class="form-control" id="opMatch_{{i}}" name="opMatch_{{i}}" placeholder="e.g. WINDY" required [(ngModel)]="op.matchingValue">
@@ -280,19 +280,19 @@ import * as _ from 'lodash';
                                                     </div>
                                                 </ng-container>
                                                 <ng-container *ngSwitchCase="'randomWalk'">
-                                                    <div class="col-xs-12 col-sm-4 col-md-4">
+                                                    <div class="col-xs-12 col-sm-4 col-md-6">
                                                         <div class="measurement-accordion">
                                                         <label for="startingvalue"><span>Starting Value</span></label>
                                                         <input type="number" class="form-control" id="startingvalue" name="startingvalue{{model.id}}_{{i}}" placeholder="e.g. 10 (required)" required [(ngModel)]="op.startingValue">
                                                         </div>
                                                     </div>
-                                                    <div class="col-xs-12 col-sm-4 col-md-4">
+                                                    <div class="col-xs-12 col-sm-4 col-md-5">
                                                         <div class="measurement-accordion">
                                                             <label for="maxdelta"><span>Maximum Change Amount</span></label>
                                                             <input type="number" class="form-control" id="maxdelta" name="maxdelta{{model.id}}_{{i}}" min="0" placeholder="e.g. 10 (required)" required [(ngModel)]="op.maxDelta">
                                                         </div>
                                                     </div>
-                                                    <div class="col-xs-12 col-sm-4 col-md-4">
+                                                    <div class="col-xs-12 col-sm-4 col-md-3">
                                                         <div class="measurement-accordion">
                                                             <label for="minvalue"><span>Minimum Value</span></label>
                                                             <input type="number" class="form-control"  name="minvalue{{model.id}}_{{i}}" placeholder="e.g. 10 (required)" required [(ngModel)]="op.minValue">
@@ -307,12 +307,12 @@ import * as _ from 'lodash';
                                                 </ng-container>
                                             </ng-container>
                                             <div class="row">
-                                                <div class="col-lg-12">
+                                                <div class="col-xs-12 col-lg-12">
                                                     <button class="btn btn-link btn-block" type="button" (click)="deleteDtDLOperation(model,i)">
                                                         <div class="pull-left float-left">Remove condition</div>
                                                     </button>
                                                 </div>
-                                                <div class="col-lg-12">
+                                                <div class="col-xs-12 col-lg-12">
                                                     <hr />   
                                                 </div>
                                             </div>
