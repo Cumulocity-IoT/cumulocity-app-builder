@@ -50,6 +50,13 @@ import { DtdlSimulationStrategyModule } from "simulation-strategies/dtdl/dtdl.si
             <label for="wavelength"><span>Wavelength</span></label>
             <input type="text" class="form-control" id="wavelength" name="wavelength" placeholder="e.g. 60 (required)" required [(ngModel)]="config.alternateConfigs.operations[0].wavelength">
         </div>
+        <ng-container *ngIf="config.alternateConfigs.opEnabled">
+            <div class="form-group">
+                <label for="match_default"><span>Matching</span></label>
+                <input type="text" class="form-control" id="match_default" name="match_default" placeholder="e.g. WINDY" required [(ngModel)]="config.alternateConfigs.operations[0].matchingValue">
+            </div>
+        </ng-container>
+
         <div class="form-group">
             <label class="c8y-checkbox">
             <input name="opEnabled" type="checkbox" [(ngModel)]="config.alternateConfigs.opEnabled"/>

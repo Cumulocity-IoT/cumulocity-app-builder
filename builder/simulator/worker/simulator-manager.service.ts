@@ -181,7 +181,7 @@ export class SimulatorManagerService {
                 }    
             }
         }
-        this.simulatorWorkerAPI.hasOperations = turnOn;
+        this.simulatorWorkerAPI.retrieveOperations = turnOn;
     }
 
     clearSimulators() {

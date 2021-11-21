@@ -38,7 +38,7 @@ export class SimulatorWorkerAPI {
     _simulatorConfig$ = new BehaviorSubject<Map<number, SimulatorConfig>>(new Map());
     _listeners = new Map<number, Subscription>();
     _checkForSimulatorConfigChanges = new Subject<any>();
-    hasOperations: boolean = false;
+    retrieveOperations: boolean = false;
 
     constructor(
         private fetchClient: FetchClient,
@@ -74,8 +74,8 @@ export class SimulatorWorkerAPI {
             interval(5000), // Check every 5 seconds
         ).pipe(
             debounceTime(100),
-            tap( t => console.log("ops = ", this.hasOperations)),
-            filter( t => this.hasOperations), //only go through if we need the calls
+            //tap( t => console.log("ops = ", this.retrieveOperations)),
+            filter( t => this.retrieveOperations), //only go through if we need the calls
             switchMap(() => 
                 this.fetchClient.fetch('/devicecontrol/operations', {
                     params: {
@@ -86,7 +86,7 @@ export class SimulatorWorkerAPI {
                 })
             ),
             switchMap(res => res.json()),
-            tap( d => console.log("data = ", d.operations)),
+            //tap( d => console.log("data = ", d.operations)),
             map(data => data.operations)
         ).subscribe(ops => this._incomingOperations.next(ops));
     }
