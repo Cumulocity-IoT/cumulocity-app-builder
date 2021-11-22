@@ -148,10 +148,8 @@ export class BuilderModule {
             if (user != null) {
                 const tfa = localStorage.getItem(loginService.TFATOKEN_KEY) || sessionStorage.getItem(loginService.TFATOKEN_KEY);
                 if (token !== undefined && token) {
-                    const client = isCookieAuth? new Client(cookieAuth) : new Client(new BasicAuth({ token, tfa }));
                     return await simSvc.simulator.setUserAndCredentials(user, { token, tfa }, isCookieAuth, null);
                 } else {
-                    const client = isCookieAuth? new Client(cookieAuth) : new Client(new BasicAuth({ token, tfa }));
                     return await simSvc.simulator.setUserAndCredentials(user, { token, tfa }, isCookieAuth, xsrfToken);
                 }
             }
