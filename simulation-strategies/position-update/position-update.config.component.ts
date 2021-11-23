@@ -60,7 +60,7 @@ export class PositionUpdateSimulationStrategyConfigComponent extends SimulationS
         this.checkAlternateConfigs(c);
 
         //TODO: copy alternateconfigs
-        if(existingConfig != undefined || existingConfig != null) {
+        if( existingConfig ) {
             c.interval = existingConfig.interval;
             c.latitude = existingConfig.latitude;
             c.longitude = existingConfig.longitude;

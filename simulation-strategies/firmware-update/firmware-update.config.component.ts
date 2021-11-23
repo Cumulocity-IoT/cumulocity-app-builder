@@ -68,7 +68,7 @@ export class FirmwareUpdateSimulationStrategyConfigComponent extends SimulationS
         };
         this.checkAlternateConfigs(c);
 
-        if(existingConfig != undefined || existingConfig != null) {
+        if( existingConfig ) {
             c.resetOn = existingConfig.resetOn;
             c.firmwareVersions = [];
             existingConfig.firmwareVersions.forEach(fv => {
