@@ -169,13 +169,13 @@ export class SimulatorManagerService {
             this.createInstance(simulatorConfig);
             if( simulatorConfig.type == "DTDL"){
                 for (let dtdlConfig of Array.from(simulatorConfig.config.dtdlModelConfig)) {
-                    if( dtdlConfig.alternateConfigs.hasOwnProperty("opEnabled") && dtdlConfig.alternateConfigs.opEnabled) {
+                    if( dtdlConfig.alternateConfigs && dtdlConfig.alternateConfigs.hasOwnProperty("opEnabled") && dtdlConfig.alternateConfigs.opEnabled) {
                         //console.log(dtdlConfig.alternateConfigs.opEnabled);
                         turnOn = true;
                     }        
                 }
             } else {
-                if( simulatorConfig.config.alternateConfigs.hasOwnProperty("opEnabled") && simulatorConfig.config.alternateConfigs.opEnabled) {
+                if( simulatorConfig.config.alternateConfigs && simulatorConfig.config.alternateConfigs.hasOwnProperty("opEnabled") && simulatorConfig.config.alternateConfigs.opEnabled) {
                     //console.log(simulatorConfig.config.alternateConfigs.opEnabled);
                     turnOn = true;
                 }    
