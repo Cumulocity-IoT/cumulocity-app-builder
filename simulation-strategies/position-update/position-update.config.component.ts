@@ -60,7 +60,7 @@ export class PositionUpdateSimulationStrategyConfigComponent extends SimulationS
         this.checkAlternateConfigs(c);
 
         //TODO: copy alternateconfigs
-        if(existingConfig !== undefined || existingConfig !== null) {
+        if(existingConfig != undefined || existingConfig != null) {
             c.interval = existingConfig.interval;
             c.latitude = existingConfig.latitude;
             c.longitude = existingConfig.longitude;
@@ -72,7 +72,7 @@ export class PositionUpdateSimulationStrategyConfigComponent extends SimulationS
             //duplication is to avoid changing old code.
             let copy : DtdlSimulationModel = _.cloneDeep(c);
             copy.alternateConfigs = undefined;
-            this.config.alternateConfigs.operations.push(copy);
+            c.alternateConfigs.operations.push(copy);
         }
         this.config = c;
     }

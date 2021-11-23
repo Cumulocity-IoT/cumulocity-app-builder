@@ -66,9 +66,9 @@ export class FirmwareUpdateSimulationStrategyConfigComponent extends SimulationS
             resetOn: 'restart',
             alternateConfigs: undefined
         };
+        this.checkAlternateConfigs(c);
 
-        //TODO: copy alternate configs
-        if(existingConfig !== undefined || existingConfig !== null) {
+        if(existingConfig != undefined || existingConfig != null) {
             c.resetOn = existingConfig.resetOn;
             c.firmwareVersions = [];
             existingConfig.firmwareVersions.forEach(fv => {
@@ -85,7 +85,7 @@ export class FirmwareUpdateSimulationStrategyConfigComponent extends SimulationS
             //duplication is to avoid changing old code.
             let copy : DtdlSimulationModel = _.cloneDeep(c);
             copy.alternateConfigs = undefined;
-            this.config.alternateConfigs.operations.push(copy);
+            c.alternateConfigs.operations.push(copy);
         }
         this.config = c;
     }
