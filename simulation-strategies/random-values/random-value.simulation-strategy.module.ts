@@ -22,12 +22,16 @@ import {RandomValueSimulationStrategyFactory} from "./random-value.simulation-st
 import {CommonModule} from "@angular/common";
 import {FormsModule} from "@angular/forms";
 import { HOOK_SIMULATION_STRATEGY_FACTORY } from '../../builder/simulator/device-simulator';
+import { DeviceSelectorModule } from '../../device-selector/device-selector.module';
+import { AccordionModule } from 'ngx-bootstrap/accordion';
 
 
 @NgModule({
     imports: [
         CommonModule,
-        FormsModule
+        FormsModule,
+        AccordionModule.forRoot(),
+        DeviceSelectorModule
     ],
     declarations: [
         RandomValueSimulationStrategyConfigComponent

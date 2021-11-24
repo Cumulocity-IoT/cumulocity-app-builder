@@ -17,7 +17,6 @@
  */
 
 import {
-    PositionUpdateSimulationStrategyConfig,
     PositionUpdateSimulationStrategyConfigComponent
 } from "./position-update.config.component";
 import {SimulationStrategy} from "../../builder/simulator/simulation-strategy.decorator";
@@ -25,7 +24,7 @@ import {DeviceIntervalSimulator} from "../../builder/simulator/device-interval-s
 import {Injectable, Injector, isDevMode} from "@angular/core";
 import {SimulationStrategyFactory} from "../../builder/simulator/simulation-strategy";
 import {MeasurementService, EventService, InventoryService, IManagedObject} from "@c8y/client";
-import {SimulatorConfig} from "../../builder/simulator/simulator-config";
+import {DtdlSimulationModel, SimulatorConfig} from "../../builder/simulator/simulator-config";
 
 export interface C8yPosition {
     lng: any; // in case the coordinates are defined as string...
@@ -46,7 +45,7 @@ export class PositionUpdateSimulationStrategy extends DeviceIntervalSimulator {
     measurementCounter = 0;
     private invService: InventoryService;
     constructor(protected injector: Injector, private eventService: EventService, 
-         private config: PositionUpdateSimulationStrategyConfig) {
+         private config: DtdlSimulationModel) {
         super(injector);
         this.invService = injector.get(InventoryService);
     }
@@ -108,7 +107,7 @@ export class PositionUpdateSimulationStrategyFactory extends SimulationStrategyF
         super();
     }
 
-    createInstance(config: SimulatorConfig<PositionUpdateSimulationStrategyConfig>): PositionUpdateSimulationStrategy {
+    createInstance(config: SimulatorConfig): PositionUpdateSimulationStrategy {
         return new PositionUpdateSimulationStrategy(this.injector, this.eventService, config.config);
     }
 

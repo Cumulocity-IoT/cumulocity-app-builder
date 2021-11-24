@@ -22,10 +22,45 @@
                     </ng-container>
                     </a>
                 </ng-container>
+                <a class="list-group-item clickable" (click)="wizard.selectStep('import-config')">
+                    <span class="list-group-icon">
+                        <i c8yIcon="upload"></i>
+                    </span>
+                    <span>Import existing simulator</span>
+                </a>
             </div>
         </div>
         <div class="c8y-wizard-footer">
             <button class="btn btn-default" (click)="bsModalRef.hide()">Cancel</button>
+        </div>
+    </wizard-step>
+    <wizard-step stepId="import-config">
+        <div class="modal-header text-center bg-primary">
+            <div style="font-size: 62px;">
+                <span c8yIcon="c8y-simulator"></span>
+            </div>
+            <h4 class="text-uppercase" style="margin:0; letter-spacing: 0.15em;">Add Simulator</h4>
+        </div>
+        <div class="c8y-wizard-nav">
+            <span>Import existing simulator</span>
+        </div>
+        <hr style="margin:0;">
+        <div class="modal-inner-scroll">
+            <div class="col-xs-12">
+                <div class="form-group">
+                    <label for="configFile"><span>Upload a simulator config file</span></label>
+                    <div style="display: inline-flex;">
+                        <input type="file" class="form-control" id="configFile" name="configFile" (change)="fileUploaded($event)" accept=".json">
+                        <div *ngIf="isConfigFileUploading" style="color:blue;margin: 5px;"><i class="fa fa-circle-o-notch fa-spin"></i></div>
+                    </div>
+                    <div *ngIf="isConfigFileError" style="color:red;">Invalid simulator config file!</div>
+                </div>
+            </div>
+        </div>
+        <div class="c8y-wizard-footer">
+            <button class="btn btn-default" (click)="wizard.selectStep('menu')">Back</button>
+            <button class="btn btn-default" (click)="bsModalRef.hide()">Cancel</button>
+            <button class="btn btn-primary" (click)="wizard.selectStep('device')" [disabled]="!isConfigFromFileUploaded()">Next <i c8yIcon="chevron-right"></i> </button>
         </div>
     </wizard-step>
     <wizard-step stepId="device">
@@ -68,7 +103,7 @@
             </div>
         </div>
         <div class="c8y-wizard-footer">
-            <button class="btn btn-default" (click)="wizard.selectStep('menu')">Back</button>
+            <button class="btn btn-default" (click)="configFromFile === undefined ? wizard.selectStep('menu') : wizard.selectStep('import-config')">Back</button>
             <button class="btn btn-default" (click)="bsModalRef.hide()">Cancel</button>
         </div>
     </wizard-step>

@@ -17,14 +17,13 @@
  */
 
 import {
-    FirmwareUpdateSimulationStrategyConfig,
     FirmwareUpdateSimulationStrategyConfigComponent
 } from "./firmware-update.config.component";
 import {SimulationStrategy} from "../../builder/simulator/simulation-strategy.decorator";
 import {Injectable} from "@angular/core";
 import {SimulationStrategyFactory} from "../../builder/simulator/simulation-strategy";
 import {InventoryService, OperationService, OperationStatus, PagingStrategy} from "@c8y/client";
-import {SimulatorConfig} from "../../builder/simulator/simulator-config";
+import {DtdlSimulationModel, SimulatorConfig} from "../../builder/simulator/simulator-config";
 import {DeviceSimulator} from "../../builder/simulator/device-simulator";
 import {from, interval, Subscription} from "rxjs";
 import {filter, flatMap, switchMap} from "rxjs/operators";
@@ -38,7 +37,7 @@ import {filter, flatMap, switchMap} from "rxjs/operators";
 export class FirmwareUpdateSimulationStrategy extends DeviceSimulator {
     subscriptions = new Subscription();
 
-    constructor(private config: FirmwareUpdateSimulationStrategyConfig, private inventoryService: InventoryService, private operationService: OperationService) {
+    constructor(private config: DtdlSimulationModel, private inventoryService: InventoryService, private operationService: OperationService) {
         super();
     }
 
@@ -164,7 +163,7 @@ export class FirmwareUpdateSimulationStrategyFactory extends SimulationStrategyF
         super();
     }
 
-    createInstance(config: SimulatorConfig<FirmwareUpdateSimulationStrategyConfig>): FirmwareUpdateSimulationStrategy {
+    createInstance(config: SimulatorConfig): FirmwareUpdateSimulationStrategy {
         return new FirmwareUpdateSimulationStrategy(config.config, this.inventoryService, this.operationService);
     }
 

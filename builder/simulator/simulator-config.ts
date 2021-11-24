@@ -16,13 +16,85 @@
 * limitations under the License.
  */
 
+import { SimulationStrategyMetadata } from "./simulation-strategy.decorator";
+
 /**
- * The interface that for simulator configuration that all simulators will be passed.
+ *  Operation Definition. 
+ * 
+ *  if the members exist we can use the configurations, if not use prior mechanism.
+ *  The default config will be the config object and duplicated in this map.
  */
-export interface SimulatorConfig<T=any> {
+
+export interface OperationSupport<T> {
+    opEnabled?: boolean, //device id
+    opSource?: string, //device id
+    opSourceName?: string,
+    payloadFragment?: string,
+    opReply?: boolean,
+    configIndex: number;
+    operations?: Array<T>;
+}
+
+
+/**
+ *  DtdlSimulationModel is the base interface for all configs now
+ *  it should be extended to add new simulator config types. It 
+ *  simplifies the structure slightly as we have 1 point of reference
+ *  and means we can handle the configs slightly more consistantly
+ */
+export interface DtdlSimulationModel {
+    modalSize?: string,
+    deviceName?: string,
+    dtdlDeviceId?: string,
+    dtdlModelConfig?: DtdlSimulationModel[],
+    isEditMode?: boolean,
+    matchingValue: string,
+    measurementName?: string,
+    fragment?: string,
+    series?: string,
+    unit?: string,
+    schema?: any,
+    id?: string,
+    minValue?: number, // random value, random walk
+    maxValue?: number, // random value, random walk
+    value?: string, // value series
+    startingValue?: number, // random walk
+    maxDelta?: number, // random walk
+    latitude?: string, // position update
+    longitude?: string, // position update
+    altitude?: string, // position update
+    deviceId?: string;
+    simulationType?: string;
+    isObjectType?: boolean;
+    parentId?: string;
+    isFieldModel?: boolean;
+    eventType?: string; // event creation
+    eventText?: string; // event creation
+    interval?: number;
+    waveType?: 'sine' | 'sqr' | 'sqr-approx',
+    height?: number,
+    wavelength?: number,
+    firmwareVersions?: {
+        name: string,
+        version: string,
+        url: string;
+    }[],
+    resetOn?: 'restart' | 'never';
+    isGroup?: boolean,
+    alternateConfigs?: OperationSupport<DtdlSimulationModel>;
+}
+
+/**
+ *  The interface that for simulator configuration that all simulators will be passed.
+ *  N.B. The strategy stores only the config member (See Factory classes)
+ */
+export interface SimulatorConfig {
     id: number,
     name: string,
     type: string,
-    config: T,
-    started?: boolean
+    config: DtdlSimulationModel,
+    started?: boolean,
+    metadata?: SimulationStrategyMetadata;
 }
+
+

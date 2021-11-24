@@ -17,15 +17,15 @@
  */
 
 import {
-    WaveSimulationStrategyConfig,
     WaveSimulationStrategyConfigComponent
 } from "./wave.config.component";
 import {SimulationStrategy} from "../../builder/simulator/simulation-strategy.decorator";
 import {DeviceIntervalSimulator} from "../../builder/simulator/device-interval-simulator";
 import {Injectable, Injector} from "@angular/core";
 import {SimulationStrategyFactory} from "../../builder/simulator/simulation-strategy";
-import {MeasurementService} from "@c8y/client";
-import {SimulatorConfig} from "../../builder/simulator/simulator-config";
+import { IOperation, MeasurementService, OperationService, OperationStatus } from '@c8y/client';
+import {DtdlSimulationModel, SimulatorConfig} from "../../builder/simulator/simulator-config";
+import * as _ from 'lodash';
 
 @SimulationStrategy({
     name: "Waveform",
@@ -37,7 +37,7 @@ export class WaveSimulationStrategy extends DeviceIntervalSimulator {
 
     startTime: number = 0;
 
-    constructor(protected injector: Injector, private measurementService: MeasurementService, private config: WaveSimulationStrategyConfig) {
+    constructor(protected injector: Injector, private measurementService: MeasurementService, private opservice: OperationService, private config: DtdlSimulationModel) {
         super(injector);
     }
 
@@ -53,6 +53,32 @@ export class WaveSimulationStrategy extends DeviceIntervalSimulator {
         super.onStart();
         this.startTime = Date.now();
     }
+
+    public async onOperation(param: any): Promise<boolean> {
+        //console.log("Wavelength operation = ", param);
+        if (this.config.alternateConfigs.operations.length > 1) {
+            if (_.has(param, "deviceId") && _.get(param, "deviceId") == this.config.alternateConfigs.opSource) {
+                for (let cfg of this.config.alternateConfigs.operations) {
+                    if (_.has(param, this.config.alternateConfigs.payloadFragment) && _.get(param, this.config.alternateConfigs.payloadFragment) == cfg.matchingValue) {
+                        //(`Matched ${cfg.matchingValue} setting cfg = `, cfg);
+                        this.config.waveType = cfg.waveType;
+                        this.config.height = cfg.height;
+                        this.config.wavelength = cfg.wavelength;
+                        if (this.config.alternateConfigs.opReply == true) {
+                            const partialUpdateObject: Partial<IOperation> = {
+                                id: param.id,
+                                status: OperationStatus.SUCCESSFUL
+                            }
+                            await this.opservice.update(partialUpdateObject);
+                        }
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
 
     onTick(groupDeviceId?: any) {
         const t = (Date.now() - this.startTime) / 1000;
@@ -94,12 +120,12 @@ export class WaveSimulationStrategy extends DeviceIntervalSimulator {
 
 @Injectable()
 export class WaveSimulationStrategyFactory extends SimulationStrategyFactory<WaveSimulationStrategy> {
-    constructor(private injector: Injector, private measurementService: MeasurementService) {
+    constructor(private injector: Injector, private measurementService: MeasurementService, private opservice: OperationService) {
         super();
     }
 
-    createInstance(config: SimulatorConfig<WaveSimulationStrategyConfig>): WaveSimulationStrategy {
-        return new WaveSimulationStrategy(this.injector, this.measurementService, config.config);
+    createInstance(config: SimulatorConfig): WaveSimulationStrategy {
+        return new WaveSimulationStrategy(this.injector, this.measurementService, this.opservice, config.config);
     }
 
     getSimulatorClass(): typeof WaveSimulationStrategy {

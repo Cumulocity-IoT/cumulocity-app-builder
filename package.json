@@ -80,7 +80,7 @@
         "cookieBannerText": "Cookies are important to the proper functioning of a site. To improve your experience, we use cookies to remember log-in details and provide secure log-in, collect statistics to optimize site functionality, and deliver content tailored to your interests. Click Agree and Proceed to accept cookies and go directly to the site or click Configure preferences for further details and to manage your options. The consent can be revoked at any time.",
         "policyUrl": "https://www.softwareag.com/en_corporate/privacy.html"
       },
-      "cookiePreferences":{
+      "cookiePreferences": {
         "required": true,
         "functional": "These cookies are used to support you during your first steps in the product, to deliver content tailored to your needs, and to collect usage statistics."
       }

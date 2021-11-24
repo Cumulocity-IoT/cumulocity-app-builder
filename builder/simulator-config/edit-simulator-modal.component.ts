@@ -31,6 +31,7 @@ import {AppIdService} from "../app-id.service";
 import {SimulatorConfig} from "../simulator/simulator-config";
 import {SimulationStrategiesService} from "../simulator/simulation-strategies.service";
 import {SimulatorCommunicationService} from "../simulator/mainthread/simulator-communication.service";
+import * as _ from 'lodash';
 
 @Component({
     templateUrl: './edit-simulator-modal.component.html'
@@ -66,20 +67,62 @@ export class EditSimulatorModalComponent implements OnInit {
         const metadata = strategyFactory.getSimulatorMetadata();
 
         this.configWrapper.clear();
-
+        
         if (metadata.configComponent != null) {
             const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(metadata.configComponent);
             const componentRef = this.configWrapper.createComponent(factory);
             componentRef.instance.config = this.simulatorConfig.config;
+
+            //console.log("METADATA",metadata);
+            //existing config - check for new operations - config on simulator config
+            if( metadata.name != "DTDL" ){
+                if( !_.has(componentRef.instance.config,"alternateConfigs")) {
+                    let defConfig = _.cloneDeep(componentRef.instance.config);
+                    _.set(defConfig, "matchingValue","default");
+                    //initialize it if it doesn't exist
+                    _.set(componentRef.instance.config,"alternateConfigs", {});
+                    _.set(componentRef.instance.config,"alternateConfigs.opEnabled", false);
+                    _.set(componentRef.instance.config,"alternateConfigs.opSource", "");
+                    _.set(componentRef.instance.config,"alternateConfigs.opSourceName", "")
+                    _.set(componentRef.instance.config,"alternateConfigs.payloadFragment", "c8y_Command.text")
+                    _.set(componentRef.instance.config,"alternateConfigs.opReply", false)
+                    _.set(componentRef.instance.config,"alternateConfigs.configIndex", 0)
+                    _.set(componentRef.instance.config,"alternateConfigs.operations", [])
+                    _.get(componentRef.instance.config,"alternateConfigs.operations").push(defConfig); //default                
+                }    
+            } else {
+                
+                for (const model of componentRef.instance.config.dtdlModelConfig) {
+                    if( !_.has(model,"alternateConfigs")) {
+                        let defConfig = _.cloneDeep(model);
+                        _.set(defConfig, "matchingValue","default");
+                        //initialize it if it doesn't exist
+                        _.set(model,"alternateConfigs", {});
+                        _.set(model,"alternateConfigs.opEnabled", false);
+                        _.set(model,"alternateConfigs.opSource", "");
+                        _.set(model,"alternateConfigs.opSourceName", "")
+                        _.set(model,"alternateConfigs.payloadFragment", "c8y_Command.text")
+                        _.set(model,"alternateConfigs.opReply", false)
+                        _.set(model,"alternateConfigs.configIndex", 0)
+                        _.set(model,"alternateConfigs.operations", [])
+                        _.get(model,"alternateConfigs.operations").push(defConfig); //default                
+                    }                        
+                }
+                
+            }
+
             //Accessing EditMode variable in simulator strategy
             componentRef.instance.config.isEditMode = true; 
+            this.simulatorConfig.metadata = metadata;
         }
+        //console.log("openSimulatorConfig-end",this.simulatorConfig.config)
     }
 
     resetDialogSize() {
         this.bsModalRef.setClass('modal-sm');
     }
     async saveAndClose() {
+        //console.log("saveAndClose",this.simulatorConfig)
         this.busy = true;
         let app = (await this.appService.detail(this.appIdService.getCurrentAppId())).data as any;
 
@@ -91,6 +134,7 @@ export class EditSimulatorModalComponent implements OnInit {
         } else {
             app.applicationBuilder.simulators.push(this.simulatorConfig)
         }
+
 
         await this.appService.update({
             id: app.id,

@@ -37,9 +37,12 @@ export class DeviceSelectorComponent implements OnInit{
     suggestions$: Observable<any[]>;
     deviceList :any[] = [];
     typeaheadLoading: boolean = false;
-    
+    field_id: string;
+
     constructor(private inventoryService: InventoryService) {}
     ngOnInit(): void {
+        this.field_id = "id"+Math.floor(Math.random() * 1000000);
+
         this.suggestions$ = new Observable((observer: Observer<any>) => {
             const item: any = {
                 id : '',
