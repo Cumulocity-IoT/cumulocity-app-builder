@@ -1,5 +1,6 @@
 # Application Builder for Cumulocity
 The Application Builder for Cumulocity provides a simple, coding-free way to create new applications inside Cumulocity. 
+Application Builder is an open-source tool for you to create web applications in a no-code environment. It's being managed by the Software AG's open source community but not officially supported by Software AG. You can log any issues at [GitHub](https://github.com/SoftwareAG/cumulocity-app-builder/issues) or  ask any question on the Software AG Tech Community. Support will provided on best endeavors.
 
 ![](https://user-images.githubusercontent.com/38696279/72333172-47cec300-36b3-11ea-9abf-1bb29b490a22.png)
 
