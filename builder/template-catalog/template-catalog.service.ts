@@ -113,7 +113,8 @@ export class TemplateCatalogService {
                         id: templateCatalogEntry.dashboard,
                         name: templateCatalogEntry.title,
                         devices: templateDetails.input.devices ? templateDetails.input.devices : [],
-                        binaries: templateDetails.input.images ? templateDetails.input.images : []
+                        binaries: templateDetails.input.images ? templateDetails.input.images : [],
+                        staticBinaries: templateDetails.input.binaries ? templateDetails.input.binaries : []
                     }
                 }
             ];
@@ -128,13 +129,7 @@ export class TemplateCatalogService {
     }
 
     async updateDashboard(application, dashboardConfig: DashboardConfig, templateDetails: TemplateDetails, index: number) {
-        if (templateDetails.input.devices && templateDetails.input.devices.length > 0) {
-            templateDetails.widgets = this.updateWidgetConfigurationWithDeviceInformation(templateDetails.input.devices, templateDetails.widgets);
-        }
-
-        if (templateDetails.input.images && templateDetails.input.images.length > 0) {
-            templateDetails.widgets = this.updateWidgetConfigurationWithImageInformation(templateDetails.input.images, templateDetails.widgets);
-        }
+        templateDetails = this.updateTemplateWidgetsWithInput(templateDetails);
 
         const dashboardManagedObject = (await this.inventoryService.detail(dashboardConfig.id)).data;
         await this.inventoryService.update({
@@ -155,7 +150,8 @@ export class TemplateCatalogService {
                 id: dashboard.templateDashboard.id,
                 name: dashboard.templateDashboard.title,
                 devices: templateDetails.input.devices ? templateDetails.input.devices : [],
-                binaries: templateDetails.input.images ? templateDetails.input.images : []
+                binaries: templateDetails.input.images ? templateDetails.input.images : [],
+                staticBinaries: templateDetails.input.binaries ? templateDetails.input.binaries : []
             }
         };
 
