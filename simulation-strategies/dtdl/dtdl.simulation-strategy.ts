@@ -247,15 +247,21 @@ export class DtdlSimulationStrategy extends DeviceIntervalSimulator {
 
     // Create measurements series for given dtdl fields details
     private createMeasurementsSeries(deviceId: any, parentId: string, fragment: string) {
-        const dtdlConfigModel = this.config.dtdlModelConfig;
+        let dtdlConfigModel = this.config.dtdlModelConfig;
+       
         const childModelConfigs = dtdlConfigModel.filter(model => model.parentId === parentId && model.simulationType !== 'positionUpdate'
-            && model.simulationType !== 'eventCreation');
+            && model.simulationType !== 'eventCreation') as any;
         if (childModelConfigs && childModelConfigs.length > 0) {
             let fragementmap = new Map();
             childModelConfigs.forEach(field => {
+                let modelConfig = field;
+                if (field.alternateConfigs) {
+                    let cfgIndex = field.alternateConfigs.configIndex ? field.alternateConfigs.configIndex : 0;
+                    modelConfig = field.alternateConfigs.operations[cfgIndex];
+                 } 
                 fragementmap.set(field.series, {
-                    value: this.getMeasurementValue(field, deviceId),
-                    ...field.unit && { unit: field.unit }
+                    value: this.getMeasurementValue(modelConfig, deviceId),
+                    ...modelConfig.unit && { unit: modelConfig.unit }
                 })
             });
             const modelFragmentObject = Array.from(fragementmap.entries()).reduce((main, [key, value]) => ({ ...main, [key]: value }), {});

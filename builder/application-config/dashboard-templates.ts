@@ -34,7 +34,7 @@ export const WELCOME_DASHBOARD_TEMPLATE = {
             "config": {
                 "markdown": `### Demonstration Objectives
                 
-Remote asset condition monitoring is the best demo i have ever seen, it makes all of the other demos look like rubbish. I wish i had been the developer of the RACM demo. If I had been then I would take all of the credit leaving none for anyone else...`
+Please add objective of your application.`
             },
             "_width": 6
         },
@@ -112,11 +112,11 @@ Remote asset condition monitoring is the best demo i have ever seen, it makes al
             "config": {
                 "markdown": `### Differentiating Areas
 
-*  **Independent:** My mum says that I am a strong and independent application and I am not going to take any rubbish from no script.
-*  **Partner:** I am the best of partners.
-*  **Comprehensive:** I am so comprehensive.
-*  **Proven:** I've been great before therefore i must be great now.
-*  **Open System:** I'm open 24/7/52.`
+*  **Independent:**
+*  **Partner:**
+*  **Comprehensive:**
+*  **Proven:**
+*  **Open System:** `
             },
             "_width": 6
         }
