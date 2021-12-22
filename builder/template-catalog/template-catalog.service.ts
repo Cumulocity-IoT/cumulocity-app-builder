@@ -180,10 +180,11 @@ export class TemplateCatalogService {
     }
 
     private async uploadBinariesToC8Y(templateDetails: TemplateDetails): Promise<TemplateDetails> {
-        for (let index = 0; index < templateDetails.input.binaries.length; index++) {
-            templateDetails.input.binaries[index].id = await this.uploadBinaryToC8Y(templateDetails.input.binaries[index]);
+        if(templateDetails.input && templateDetails.input.binaries) {
+            for (let index = 0; index < templateDetails.input.binaries.length; index++) {
+                templateDetails.input.binaries[index].id = await this.uploadBinaryToC8Y(templateDetails.input.binaries[index]);
+            }
         }
-
         return templateDetails;
     }
 

@@ -91,6 +91,9 @@ export class TemplateCatalogModalComponent implements OnInit {
             this.hideLoadingIndicator();
             this.templates = catalog;
             this.filterTemplates =  (this.templates ? this.templates : []);
+        }, error => {
+            this.alertService.danger("Server Communication Error!. Please try after sometimes.");
+            this.hideLoadingIndicator();
         });
     }
 
