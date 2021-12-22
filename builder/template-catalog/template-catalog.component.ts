@@ -92,7 +92,7 @@ export class TemplateCatalogModalComponent implements OnInit {
             this.templates = catalog;
             this.filterTemplates =  (this.templates ? this.templates : []);
         }, error => {
-            this.alertService.danger("Server Communication Error!. Please try after sometimes.");
+            this.alertService.danger("There is some technical error! Please try after sometime.");
             this.hideLoadingIndicator();
         });
     }

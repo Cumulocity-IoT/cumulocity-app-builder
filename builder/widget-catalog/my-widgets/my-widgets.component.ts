@@ -95,7 +95,7 @@ export class MyWidgetsComponent implements OnInit{
             this.filterWidgets = (this.widgetCatalog ? this.widgetCatalog.widgets : []);
             this.isBusy = false;
         }, error => {
-            this.alertService.danger("Server Communication Error! Please try after sometimes.");
+            this.alertService.danger("There is some technical error! Please try after sometime.");
             this.isBusy = false;
         });
     }
