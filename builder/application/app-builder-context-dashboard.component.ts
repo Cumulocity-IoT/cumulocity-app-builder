@@ -45,8 +45,8 @@ import { timeout } from 'rxjs/operators';
                 </c8y-action-bar-item>
                 <ng-container [ngSwitch]="isGroupTemplate">
                     <dashboard-by-id *ngSwitchCase="false" [dashboardId]="dashboardId" [context]="context"
-                                     [disabled]="disabled"></dashboard-by-id>
-                    <group-template-dashboard *ngSwitchCase="true" [dashboardId]="dashboardId" [deviceId]="this.deviceId" [context]="context"
+                                     [disabled]="disabled" style="display:block;"></dashboard-by-id>
+                    <group-template-dashboard *ngSwitchCase="true" style="display:block;" [dashboardId]="dashboardId" [deviceId]="this.deviceId" [context]="context"
                                      [disabled]="disabled"></group-template-dashboard>
                     <ng-container *ngSwitchCase="undefined"><!--Loading--></ng-container>
                 </ng-container>
