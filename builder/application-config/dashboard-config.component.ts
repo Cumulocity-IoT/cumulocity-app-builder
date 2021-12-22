@@ -51,6 +51,7 @@ export interface DashboardConfig {
         name: string;
         devices?: Array<DeviceDescription>,
         binaries?: Array<BinaryDescription>,
+        staticBinaries?: Array<BinaryDescription>
     }
 }
 

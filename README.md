@@ -1,5 +1,6 @@
 # Application Builder for Cumulocity
 The Application Builder for Cumulocity provides a simple, coding-free way to create new applications inside Cumulocity. 
+Application Builder is an open-source tool for you to create web applications in a no-code environment. It's being managed by the Software AG's open source community but not officially supported by Software AG. You can log any issues at [GitHub](https://github.com/SoftwareAG/cumulocity-app-builder/issues) or  ask any question on the Software AG Tech Community. Support will provided on best endeavors.
 
 ![](https://user-images.githubusercontent.com/38696279/72333172-47cec300-36b3-11ea-9abf-1bb29b490a22.png)
 
@@ -140,6 +141,29 @@ Would you like to create your own Custom Runtime widget? Please refer our [Demo 
    8. Goto /cumulocity_app_builder 
    9. Execute "npx patch-package nvd3" command in your terminal
    10. Start the server
+
+------------------------------
+## Contributing to Application Builder
+
+If you like to submit a pull request,  please follow below guidelines:
+
+
+#### Guidelines
+- Please describe the changes that you are making
+- For features, please describe how to use the new feature
+- please include a reference to an existing issue, if applicable
+- Specify type of change
+	- Bug Fix
+	- Feature
+	- Other(Refactoring, Documentation, etc..)
+- Does this change Introduce any breaking change ? Yes/No
+- Follow below checklist:
+	- Commit Messages follow the pattern
+		- A feature commit message is prefixed "feature:"
+		- A bugfix commit message is prefixed "fix:"
+	-   Tests for the changes have been added
+
+
 ------------------------------
 
 These tools are provided as-is and without warranty or support. They do not constitute part of the Software AG product suite. Users are free to use, fork and modify them, subject to the license agreement. While Software AG welcomes contributions, we cannot guarantee to include every contribution in the master project.
