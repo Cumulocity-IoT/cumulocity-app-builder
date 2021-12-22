@@ -33,6 +33,7 @@ export interface TemplateDetails {
         devices?: Array<DeviceDescription>;
         images?: Array<BinaryDescription>;
         dependencies?: Array<DependencyDescription>;
+        binaries?: Array<BinaryDescription>;
     },
     description: string;
     preview: string;
@@ -66,6 +67,7 @@ export interface BinaryDescription {
     type: string;
     placeholder: string;
     id?: string;
+    link?: string;
 }
 
 export interface DependencyDescription {
