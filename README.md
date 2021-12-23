@@ -5,6 +5,9 @@ Application Builder is an open-source tool for you to create web applications 
 ![](https://user-images.githubusercontent.com/38696279/72333172-47cec300-36b3-11ea-9abf-1bb29b490a22.png)
 
 ## What's new?
+* **Simulator Import/Export:** Now User has ability to import/export browser-based simulators.
+* **Controllable Simulators:** Use can now control a simulator's behaviour via operations and ability to change it dynamically the way simulator behaves.
+* **Dashboard Theme:** Use can now edit dashboard and customized cumulocity dashboard theme for any application builder dashboard same like cockpit application.
 * **Widget Catalog:** Now user has ability to install/update runtime widgets directly from Widget Catalog. This is single place where user can also find widget details such as documentation, preview, license and author details.
 * **Dashboard Catalog:** User can select any pre-designed template for dashboard and ability to install dependent runtime widgets.
 * **Dashboard Catalog:** User can search various dashboards.
@@ -46,7 +49,7 @@ Application Builder is an open-source tool for you to create web applications 
 
 **Requirements:**
 * Git
-* NodeJS (release builds are currently built with `v16.9.1`)
+* NodeJS (release builds are currently built with `v14.18.0`)
 * NPM (Included with NodeJS)
 
 **Instructions**
@@ -60,7 +63,7 @@ cd cumulocity-app-builder
 ```
 2. (Optional) Checkout a specific version: 
 ```
-git checkout v1.2.7
+git checkout v1.2.8
 ```
 3. Install the dependencies: 
 ```
