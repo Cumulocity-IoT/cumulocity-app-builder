@@ -7,7 +7,7 @@ Application Builder is an open-source tool for you to create web applications 
 ## What's new?
 * **Simulator Import/Export:** Now User has ability to import/export browser-based simulators.
 * **Controllable Simulators:** Use can now control a simulator's behaviour via operations and ability to change it dynamically the way simulator behaves.
-* **Dashboard Theme:** Use can now edit dashboard and customized cumulocity dashboard theme for any application builder dashboard same as cockpit application.
+* **Dashboard Theme:** Now user has ability to customized dashboard theme.
 * **Widget Catalog:** Now user has ability to install/update runtime widgets directly from Widget Catalog. This is single place where user can also find widget details such as documentation, preview, license and author details.
 * **Dashboard Catalog:** User can select any pre-designed template for dashboard and ability to install dependent runtime widgets.
 * **Dashboard Catalog:** User can search various dashboards.
