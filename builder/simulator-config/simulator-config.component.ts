@@ -91,6 +91,7 @@ export class SimulatorConfigComponent implements OnDestroy {
 
     async changeSimulatorStarted(simulatorConfig: SimulatorConfig, started: boolean) {
         simulatorConfig.started = started;
+        simulatorConfig.lastUpdated = new Date().toISOString();
         const appId = this.appIdService.getCurrentAppId();
         const app = (await this.appService.detail(appId)).data as IApplication & {applicationBuilder: {simulators?: SimulatorConfig[]}};
         if (app.applicationBuilder.simulators != undefined) {

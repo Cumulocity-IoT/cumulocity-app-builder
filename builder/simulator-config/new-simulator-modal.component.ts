@@ -148,7 +148,8 @@ export class NewSimulatorModalComponent {
             id: simulatorId,
             name: this.simulatorName,
             type: metadata.name,
-            config: this.newConfig
+            config: this.newConfig,
+            lastUpdated: new Date().toISOString()
         };
         simulators.push(newSimulatorObject);
         appServiceData.applicationBuilder.simulators = simulators;

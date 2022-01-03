@@ -43,7 +43,7 @@ import { AppListService } from './app-list.service';
             
             <div class="form-group">
                 <label for="icon"><span>Icon</span></label>
-                <icon-selector id="icon" name="icon" [(value)]="appIcon"></icon-selector>
+                <icon-selector id="icon" name="icon" [(value)]="appIcon" appendTo=".modal-content"></icon-selector>
             </div>
 
             <div class="form-group">

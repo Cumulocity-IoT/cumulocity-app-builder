@@ -128,6 +128,8 @@ export class EditSimulatorModalComponent implements OnInit {
 
         let matchingIndex = app.applicationBuilder.simulators
             .findIndex(x => x.id == this.simulatorConfig.id);
+        
+        this.simulatorConfig.lastUpdated = new Date().toISOString();
 
         if (matchingIndex > -1) {
             app.applicationBuilder.simulators[matchingIndex] = this.simulatorConfig;

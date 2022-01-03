@@ -26,6 +26,7 @@ import * as icons from "./ignore-font-icons";
 })
 export class IconSelectorComponent {
     @Input() value: string;
+    @Input() appendTo: string;
     @Output() valueChange = new EventEmitter<string>();
 
     // Create a list of all icons

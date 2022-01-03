@@ -179,7 +179,7 @@ export class WaveSimulationStrategyConfigComponent extends SimulationStrategyCon
             height: 10,
             wavelength: 60,
             unit: "C",
-            interval: 5,
+            interval: 30,
             alternateConfigs: undefined
         };
 
@@ -198,7 +198,7 @@ export class WaveSimulationStrategyConfigComponent extends SimulationStrategyCon
             height: 10,
             wavelength: 60,
             unit: "C",
-            interval: 5,
+            interval: 30,
             alternateConfigs: undefined
         };
 

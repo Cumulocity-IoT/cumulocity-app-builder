@@ -107,7 +107,8 @@ export class RandomWalkSimulationStrategy extends DeviceIntervalSimulator {
                     value: Math.round(measurementValue * 100) / 100,
                     ...this.config.unit && { unit: this.config.unit }
                 }
-            }
+            },
+            type: this.config.fragment
         });
     }
 

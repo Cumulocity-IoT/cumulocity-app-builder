@@ -389,7 +389,7 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
         this.config.dtdlDeviceId = "";
         this.config.dtdlModelConfig = [];
         this.configModel = [];
-        this.config.interval = 5;
+        this.config.interval = 30;
         this.checkAlternateConfigs(this.config);
     }
 
@@ -397,7 +397,7 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
         this.existingConfig = existingConfig;
         this.declareConfig();
         if(this.existingConfig === undefined || this.existingConfig === null) {
-            this.config.interval = 5;
+            this.config.interval = 30;
         } else {
             this.config.interval = this.existingConfig.interval;
             this.existingConfig.dtdlModelConfig.forEach((dmc: DtdlSimulationModel) => {

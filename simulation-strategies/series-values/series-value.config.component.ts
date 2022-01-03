@@ -170,7 +170,7 @@ export class SeriesValueSimulationStrategyConfigComponent extends SimulationStra
             series: "T",
             value: "10, 20, 30",
             unit: "C",
-            interval: 5,
+            interval: 30,
             matchingValue: "default",
             alternateConfigs: undefined
         };

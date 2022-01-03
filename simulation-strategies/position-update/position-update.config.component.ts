@@ -53,7 +53,7 @@ export class PositionUpdateSimulationStrategyConfigComponent extends SimulationS
             latitude: "",
             longitude: "",
             altitude: "",
-            interval: 5,
+            interval: 30,
             alternateConfigs: undefined
         };
 

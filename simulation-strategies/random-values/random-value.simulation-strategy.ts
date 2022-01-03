@@ -82,7 +82,8 @@ export class RandomValueSimulationStrategy extends DeviceIntervalSimulator {
                     value: measurementValue,
                     ...this.config.unit && { unit: this.config.unit }
                 }
-            }
+            },
+            type: this.config.fragment
         });
     }
 }

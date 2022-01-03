@@ -197,7 +197,7 @@ export class RandomWalkSimulationStrategyConfigComponent extends SimulationStrat
             minValue: 10,
             maxValue: 20,
             unit: "C",
-            interval: 5,
+            interval: 30,
             matchingValue: "default",
             alternateConfigs: undefined
         };
