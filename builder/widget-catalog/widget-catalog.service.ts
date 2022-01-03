@@ -12,7 +12,8 @@ import * as semver from "semver";
 export class WidgetCatalogService {
 
     C8Y_VERSION = '1011.0.5';
-    private GATEWAY_URL = '';
+    private GATEWAY_URL_GitHubAsset = '';
+    private GATEWAY_URL_GitHubAPI = '';
     private CATALOG_LABCASE_ID = '';
     runtimeLoadingCompleted = false;
     private readonly HTTP_HEADERS = {
@@ -27,13 +28,15 @@ export class WidgetCatalogService {
         private binaryService: InventoryBinaryService, private alertService: AlertService,
         private runtimeWidgetInstallerService: RuntimeWidgetInstallerService,
         private externalService: AppBuilderExternalAssetsService) {
-        this.GATEWAY_URL = this.externalService.getURL('WIDGETCATALOG', 'gatewayURL');
-        this.CATALOG_LABCASE_ID = this.externalService.getURL('WIDGETCATALOG', 'labcaseId');
+    //    this.GATEWAY_URL = this.externalService.getURL('WIDGETCATALOG', 'gatewayURL');
+    //    this.CATALOG_LABCASE_ID = this.externalService.getURL('WIDGETCATALOG', 'labcaseId');
+        this.GATEWAY_URL_GitHubAPI = this.externalService.getURL('WIDGETCATALOG','gatewayURL_Github');
+        this.GATEWAY_URL_GitHubAsset =  this.externalService.getURL('WIDGETCATALOG','gatewayURL_GitHubAsset');
     }
 
 
     fetchWidgetCatalog(): Observable<WidgetCatalog> {
-        return this.http.get<WidgetCatalog>(`${this.GATEWAY_URL}${this.CATALOG_LABCASE_ID}`, this.HTTP_HEADERS);
+        return this.http.get<WidgetCatalog>(`${this.GATEWAY_URL_GitHubAPI}`, this.HTTP_HEADERS);
     }
 
     async installWidget(binary: Blob, widget: WidgetModel) {
@@ -41,7 +44,7 @@ export class WidgetCatalogService {
     }
 
     downloadBinary(binaryId: string): Observable<ArrayBuffer> {
-      return this.http.get(`${this.GATEWAY_URL}${binaryId}`, {
+      return this.http.get(`${this.GATEWAY_URL_GitHubAsset}${binaryId}`, {
           responseType: 'arraybuffer'
       });
     }

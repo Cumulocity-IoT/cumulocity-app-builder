@@ -26,11 +26,12 @@ import {
 import {AlertService, AppStateService, DynamicComponentService} from "@c8y/ngx-components";
 import { ProgressIndicatorModalComponent } from '../../utils/progress-indicator-modal/progress-indicator-modal.component';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
-import { previewModalComponent } from '../preview-modal/preview.-modal.component';
+import { previewModalComponent } from '../preview-modal/preview-modal.component';
 import { WidgetCatalog, WidgetModel } from '../widget-catalog.model';
 import { WidgetCatalogService } from '../widget-catalog.service';
 import { interval } from 'rxjs';
 import { RuntimeWidgetLoaderService } from 'cumulocity-runtime-widget-loader';
+import { AlertMessageModalComponent } from "../../utils/alert-message-modal/alert-message-modal.component";
 @Component({
     templateUrl: './my-widgets.component.html',
     styleUrls: ['./my-widgets.component.less']
@@ -133,9 +134,32 @@ export class MyWidgetsComponent implements OnInit{
             return;
         }
 
+        if(widget.actionCode === '002') {
+            const alertMessage = {
+                title: 'Update Confirmation',
+                description: `${widget.title} is not supported by current version of application builder and may not work properly.
+                Click on confirm if you would like to proceed further.`,
+                type: 'warning',
+                alertType: 'confirm' //info|confirm
+              }
+              const installDemoDialogRef = this.alertModalDialog(alertMessage);
+              await installDemoDialogRef.content.event.subscribe(async data => {
+                if(data && data.isConfirm) {
+                    await this.initiateUpdateWidgetProcess(widget);
+                }
+              });
+
+        } else { await this.initiateUpdateWidgetProcess(widget);}
+        
+    }
+
+    private alertModalDialog(message: any): BsModalRef {
+        return this.modalService.show(AlertMessageModalComponent, { class: 'c8y-wizard', initialState: { message } });
+    }
+    private async initiateUpdateWidgetProcess(widget: WidgetModel) {
         this.showProgressModalDialog(`Updating ${widget.title}`)
         const blob = await new Promise<any>((resolve) => {
-            this.widgetCatalogService.downloadBinary(widget.link).subscribe(data => {
+            this.widgetCatalogService.downloadBinary(widget.binaryLink).subscribe(data => {
                 const blob = new Blob([data], {
                     type: 'application/zip'
                 });
@@ -147,6 +171,7 @@ export class MyWidgetsComponent implements OnInit{
             this.widgetCatalogService.installWidget(fileOfBlob, widget).then(() => {
                 widget.isReloadRequired = true;
                 widget.installedVersion = widget.version;
+                this.actionFlag(widget);
                 this.hideProgressModalDialog();
                 resolve(true);
             });
@@ -172,6 +197,7 @@ export class MyWidgetsComponent implements OnInit{
             if(widget.installed && !widget.isReloadRequired && this.isUpdateAvailable(widget) ) {
                this.isUpdateRequired = true;
             }
+            this.actionFlag(widget);
         });
         this.widgetCatalog.widgets = this.widgetCatalog.widgets.filter(widget => widget.installed);
     }
@@ -182,5 +208,25 @@ export class MyWidgetsComponent implements OnInit{
         }
         return this.widgetCatalogService.isLatestVersionAvailable(widget);
     }
+
+    
+    /**
+     * compatible and update available: 001
+     * non compatible and update available: 002
+     * refresh: 003
+     * force upgrade 004 (my widget) -TODO
+     * invisible 000
+     */ 
+     private actionFlag(widget: WidgetModel) {
+    
+        if(this.userHasAdminRights) {
+         if(widget.isCompatible && this.isUpdateAvailable(widget) && !widget.isReloadRequired) { widget.actionCode = '001'; }
+         else if(!widget.isCompatible && this.isUpdateAvailable(widget) && !widget.isReloadRequired) { widget.actionCode = '002'; }
+         else if(widget.isReloadRequired && !this.isUpdateAvailable(widget)) { widget.actionCode = '003'; }
+         else { widget.actionCode = '000'; }
+        } else {
+         widget.actionCode = '000'; 
+        }
+     }
 
 }

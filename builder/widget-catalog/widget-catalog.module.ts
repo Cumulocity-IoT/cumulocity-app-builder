@@ -26,7 +26,7 @@ import { WidgetCatalogService } from './widget-catalog.service';
 import {WidgetCatalogTabFactory} from './widget-catalog.tabfactory';
 import { RouterModule, Routes } from '@angular/router';
 import { SortableModule } from 'ngx-bootstrap/sortable';
-import { previewModalComponent } from './preview-modal/preview.-modal.component';
+import { previewModalComponent } from './preview-modal/preview-modal.component';
 import { ProgressIndicatorModalModule } from '../utils/progress-indicator-modal/progress-indicator-modal.module';
 import { MyWidgetsComponent } from './my-widgets/my-widgets.component';
 

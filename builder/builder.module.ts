@@ -58,6 +58,7 @@ import { CustomPropertiesComponent } from './settings/custom-properties.componen
 import { SettingsService } from './settings/settings.service';
 import { HomeComponent } from './home/home.component';
 import { WidgetCatalogModule } from './widget-catalog/widget-catalog.module';
+import { AlertMessageModalModule } from "./utils/alert-message-modal/alert-message-modal.module";
 @NgModule({
     imports: [
         ApplicationModule,
@@ -106,7 +107,8 @@ import { WidgetCatalogModule } from './widget-catalog/widget-catalog.module';
         DeviceSelectorModule,
         MarkdownModule.forRoot(),
         SettingsModule,
-        WidgetCatalogModule
+        WidgetCatalogModule,
+        AlertMessageModalModule
     ],
     declarations: [
         DashboardConfigComponent,

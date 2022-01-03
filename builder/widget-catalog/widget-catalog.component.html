@@ -5,24 +5,25 @@
     </div>
     <div class="card-group interact-grid" *ngIf="!isBusy">
         <ng-template #itemTemplate let-item="item" let-index="index">
-            <div class="text-warning" >
-                <button class="btn btn-clean btn-icon btn-md" [disabled]="!item.value.isCompatible" title="{{item.value.isCompatible ? 'Install' : 'Platform not supported!'}}"
-                 *ngIf="userHasAdminRights && !item.value.installed && !selectMultipe" (click)="installWidget(item.value)">
+            <div class="text-warning" [ngSwitch]="item.value.actionCode">
+
+                <button class="btn btn-clean btn-icon btn-md"  title="Install"
+                *ngSwitchCase="'001'" (click)="installWidget(item.value)">
                     <i c8yIcon="upload" class="action-icon" ></i>
                 </button>
-                <!-- <label title="Select for Install"  class="btn btn-clean btn-icon btn-md c8y-checkbox checkbox-padding" *ngIf="!item.value.installed && selectMultipe">
-                    <input type="checkbox" id="selectMultipe-{{item.value.id}}" [disabled]="!item.value.isCompatible"  [(ngModel)]="item.value.selected"/>
-                    <span></span>
-                  </label> -->
-                <button class="btn btn-clean btn-icon btn-md" title="Refresh" *ngIf="item.value.installed && item.value.isReloadRequired">
+                <button class="btn btn-clean btn-icon btn-md"  title="Install (Not Compatible)"
+                *ngSwitchCase="'002'" (click)="installWidget(item.value)">
+                    <i c8yIcon="level-up" class="action-icon" ></i>
+                </button>
+                <button class="btn btn-clean btn-icon btn-md" *ngSwitchCase="'003'" title="Refresh">
                     <i c8yIcon="refresh" class="action-icon text-info" (click)="refresh()"></i>
                 </button>
-                <button class="invisible btn btn-clean btn-icon btn-md" title="Refresh" *ngIf="item.value.installed && !item.value.isReloadRequired">
+                <button class="invisible btn btn-clean btn-icon btn-md" title="Refresh" *ngSwitchDefault>
                     <i c8yIcon="refresh" class="action-icon text-info" (click)="refresh()"></i>
                 </button>
             </div>
             <div class="widget-icon" ><i [c8yIcon]="item.value.icon"></i></div>
-            <div class="col col-overflow" title="{{item.value.title}}">{{item.value.title}}</div>
+            <div class="col col-overflow" title="{{item.value.title}}">{{item.value.title}} <i *ngIf="item.value.isDeprecated" title="This widget is deprecated!" c8yIcon="warning" class="warning-icon text-warning" ></i></div>
             <div class="col col-overflow" title="{{item.value.version}}" >{{item.value.version}}</div>
             <div class="col col-overflow" title="{{item.value.requiredPlatformVersion}}" >{{item.value.requiredPlatformVersion}}</div>
             <div class="col col-overflow" title="{{item.value.license}}">{{item.value.license}}</div>
@@ -58,9 +59,18 @@
                             </span>
                         </div>
                         <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6" >
-                                <button class="btn btn-link pull-right" id="refresh-widget" (click)="reload()">
-                                    <i c8yIcon="refresh"></i> Reload
-                                </button>
+                            <button class="btn btn-link pull-right" id="refresh-widget" (click)="reload()">
+                                <i c8yIcon="refresh"></i> Reload
+                            </button>
+                            <div class="btn-group pull-right">
+                                <label class="c8y-switch danger">
+                                    <input type="checkbox" 
+                                    [(ngModel)]="showAllWidgets"
+                                    (change)="toggleCompatible()">
+                                    <span></span> Show All
+                                  </label>
+                               </div>
+                                
                                <!--  <button *ngIf="!selectMultipe" class="btn btn-clean pull-right" style="padding: 6px 8px;" id="update-widget" [disabled]="true" >
                                     <i c8yIcon="upload" style="font-size: 16px;" ></i> Install
                                 </button>
