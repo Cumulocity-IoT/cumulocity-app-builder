@@ -16,13 +16,15 @@
 * limitations under the License.
  */
 
-import {Injectable} from "@angular/core";
-import {BasicAuth, FetchClient, IUser, ICurrentTenant, ICredentials} from "@c8y/client";
-import {LockStatus, SimulationLockService} from "./simulation-lock.service";
-import {AppStateService} from "@c8y/ngx-components";
-import {AppIdService} from "../../app-id.service";
+import { Injectable } from "@angular/core";
+import { BasicAuth, FetchClient, IUser, ICurrentTenant, ICredentials, IFetchOptions } from "@c8y/client";
+import { LockStatus, SimulationLockService } from "./simulation-lock.service";
+import { AppStateService } from "@c8y/ngx-components";
+import { AppIdService } from "../../app-id.service";
 import { SimulatorConfig } from "../simulator-config";
-import {BehaviorSubject, Subject, Subscription} from "rxjs";
+import { BehaviorSubject, interval, merge, Subject, Subscription } from "rxjs";
+import { of } from "rxjs";
+import { debounceTime, map, switchMap, tap, filter } from "rxjs/operators";
 /**
  * The public api for talking to the simulators
  * Fields starting with _ are for use only by the worker
@@ -30,25 +32,65 @@ import {BehaviorSubject, Subject, Subscription} from "rxjs";
 @Injectable()
 export class SimulatorWorkerAPI {
     private _listenerId;
-    _lockStatus$ = new BehaviorSubject<{isLocked: boolean, isLockOwned: boolean, lockStatus?: LockStatus}>({isLocked: false, isLockOwned: false});
+    _incomingOperations = new BehaviorSubject<any[]>([]);
+    _incomingOperationsSub: Subscription = undefined;
+    _lockStatus$ = new BehaviorSubject<{ isLocked: boolean, isLockOwned: boolean, lockStatus?: LockStatus; }>({ isLocked: false, isLockOwned: false });
     _simulatorConfig$ = new BehaviorSubject<Map<number, SimulatorConfig>>(new Map());
     _listeners = new Map<number, Subscription>();
     _checkForSimulatorConfigChanges = new Subject<any>();
+    retrieveOperations: boolean = false;
 
     constructor(
         private fetchClient: FetchClient,
         private lockService: SimulationLockService,
         private appStateService: AppStateService,
         private appIdService: AppIdService
-    ) {}
+    ) { }
 
     setUserAndCredentials(user: IUser | null, credentials: ICredentials, isCookieAuth: boolean, cookieAuth: any) {
-        if(isCookieAuth) {
-            this.fetchClient.defaultHeaders = {'X-XSRF-TOKEN': cookieAuth};
+        if (isCookieAuth) {
+            this.fetchClient.defaultHeaders = { 'X-XSRF-TOKEN': cookieAuth };
         }
         this.fetchClient.setAuth(new BasicAuth(credentials));
+        this.startOperationListener();
         this.appStateService.currentUser.next(user);
     }
+
+    /**
+     * This will poll every 5 seconds for operations.
+     * The observable is used to send "new" operations to the
+     * simulators. It filteres this raw list. 
+     */
+    async startOperationListener() {
+        //handle change here
+        if (this._incomingOperationsSub !== undefined) {
+            this._incomingOperationsSub.unsubscribe();
+        }
+
+        let from = new Date().toISOString();
+
+        this._incomingOperationsSub = merge(
+            of(-1), // Check the current value immediately
+            interval(5000), // Check every 5 seconds
+        ).pipe(
+            debounceTime(100),
+            //tap( t => console.log("ops = ", this.retrieveOperations)),
+            filter( t => this.retrieveOperations), //only go through if we need the calls
+            switchMap(() => 
+                this.fetchClient.fetch('/devicecontrol/operations', {
+                    params: {
+                        pageSize: 20,
+                        revert: true,
+                        dateFrom: from
+                    }
+                })
+            ),
+            switchMap(res => res.json()),
+            //tap( d => console.log("data = ", d.operations)),
+            map(data => data.operations)
+        ).subscribe(ops => this._incomingOperations.next(ops));
+    }
+
     setTenant(tenant: ICurrentTenant | null) {
         this.appStateService.currentTenant.next(tenant);
     }
@@ -61,7 +103,7 @@ export class SimulatorWorkerAPI {
         await this.lockService.forceTakeLock(this.appIdService.getCurrentAppId());
     }
 
-    addLockStatusListener(listener: (lockStatus: {isLocked: boolean, isLockOwned: boolean, lockStatus?: LockStatus}) => void): number {
+    addLockStatusListener(listener: (lockStatus: { isLocked: boolean, isLockOwned: boolean, lockStatus?: LockStatus; }) => void): number {
         const id = this._listenerId++;
         this._listeners.set(id, this._lockStatus$.subscribe(lockStatus => listener(lockStatus)));
         return id;
@@ -79,6 +121,7 @@ export class SimulatorWorkerAPI {
 
     checkForSimulatorConfigChanges() {
         this._checkForSimulatorConfigChanges.next();
+    
     }
 
     async unlock() {

@@ -16,7 +16,7 @@
 * limitations under the License.
  */
 
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpResponse } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
@@ -93,13 +93,8 @@ export class TemplateCatalogService {
     }
 
     async createDashboard(application, dashboardConfiguration, templateCatalogEntry: TemplateCatalogEntry, templateDetails: TemplateDetails) {
-        if (templateDetails.input.devices && templateDetails.input.devices.length > 0) {
-            templateDetails.widgets = this.updateWidgetConfigurationWithDeviceInformation(templateDetails.input.devices, templateDetails.widgets);
-        }
-
-        if (templateDetails.input.images && templateDetails.input.images.length > 0) {
-            templateDetails.widgets = this.updateWidgetConfigurationWithImageInformation(templateDetails.input.images, templateDetails.widgets);
-        }
+        templateDetails = await this.uploadBinariesToC8Y(templateDetails);
+        templateDetails = this.updateTemplateWidgetsWithInput(templateDetails);
 
         await this.inventoryService.create({
             "c8y_Dashboard": this.getCumulocityDashboardRepresentation(dashboardConfiguration, templateDetails.widgets)
@@ -113,12 +108,13 @@ export class TemplateCatalogService {
                     visibility: dashboardConfiguration.dashboardVisibility,
                     tabGroup: dashboardConfiguration.tabGroup,
                     ...(templateDetails.input.devices && templateDetails.input.devices.length > 0 && templateDetails.input.devices[0].reprensentation &&
-                        templateDetails.input.devices[0].reprensentation.id  ? { deviceId: templateDetails.input.devices[0].reprensentation.id } : {}),
+                        templateDetails.input.devices[0].reprensentation.id ? { deviceId: templateDetails.input.devices[0].reprensentation.id } : {}),
                     templateDashboard: {
                         id: templateCatalogEntry.dashboard,
                         name: templateCatalogEntry.title,
                         devices: templateDetails.input.devices ? templateDetails.input.devices : [],
-                        binaries: templateDetails.input.images ? templateDetails.input.images : []
+                        binaries: templateDetails.input.images ? templateDetails.input.images : [],
+                        staticBinaries: templateDetails.input.binaries ? templateDetails.input.binaries : []
                     }
                 }
             ];
@@ -133,13 +129,7 @@ export class TemplateCatalogService {
     }
 
     async updateDashboard(application, dashboardConfig: DashboardConfig, templateDetails: TemplateDetails, index: number) {
-        if (templateDetails.input.devices && templateDetails.input.devices.length > 0) {
-            templateDetails.widgets = this.updateWidgetConfigurationWithDeviceInformation(templateDetails.input.devices, templateDetails.widgets);
-        }
-
-        if (templateDetails.input.images && templateDetails.input.images.length > 0) {
-            templateDetails.widgets = this.updateWidgetConfigurationWithImageInformation(templateDetails.input.images, templateDetails.widgets);
-        }
+        templateDetails = this.updateTemplateWidgetsWithInput(templateDetails);
 
         const dashboardManagedObject = (await this.inventoryService.detail(dashboardConfig.id)).data;
         await this.inventoryService.update({
@@ -155,12 +145,13 @@ export class TemplateCatalogService {
             visibility: dashboardConfig.visibility,
             tabGroup: dashboardConfig.tabGroup,
             ...(templateDetails.input.devices && templateDetails.input.devices.length > 0 && templateDetails.input.devices[0].reprensentation &&
-                templateDetails.input.devices[0].reprensentation.id  ? { deviceId: templateDetails.input.devices[0].reprensentation.id } : {}),
+                templateDetails.input.devices[0].reprensentation.id ? { deviceId: templateDetails.input.devices[0].reprensentation.id } : {}),
             templateDashboard: {
                 id: dashboard.templateDashboard.id,
                 name: dashboard.templateDashboard.title,
                 devices: templateDetails.input.devices ? templateDetails.input.devices : [],
-                binaries: templateDetails.input.images ? templateDetails.input.images : []
+                binaries: templateDetails.input.images ? templateDetails.input.images : [],
+                staticBinaries: templateDetails.input.binaries ? templateDetails.input.binaries : []
             }
         };
 
@@ -170,6 +161,53 @@ export class TemplateCatalogService {
         } as any);
 
         this.navigation.refresh();
+    }
+
+    private updateTemplateWidgetsWithInput(templateDetails: TemplateDetails): TemplateDetails {
+        if (templateDetails.input.devices && templateDetails.input.devices.length > 0) {
+            templateDetails.widgets = this.updateWidgetConfigurationWithDeviceInformation(templateDetails.input.devices, templateDetails.widgets);
+        }
+
+        if (templateDetails.input.images && templateDetails.input.images.length > 0) {
+            templateDetails.widgets = this.updateWidgetConfigurationWithImageInformation(templateDetails.input.images, templateDetails.widgets);
+        }
+
+        if (templateDetails.input.binaries && templateDetails.input.binaries.length > 0) {
+            templateDetails.widgets = this.updateWidgetConfigurationWithBinaryInformation(templateDetails.input.binaries, templateDetails.widgets);
+        }
+
+        return templateDetails;
+    }
+
+    private async uploadBinariesToC8Y(templateDetails: TemplateDetails): Promise<TemplateDetails> {
+        if(templateDetails.input && templateDetails.input.binaries) {
+            for (let index = 0; index < templateDetails.input.binaries.length; index++) {
+                templateDetails.input.binaries[index].id = await this.uploadBinaryToC8Y(templateDetails.input.binaries[index]);
+            }
+        }
+        return templateDetails;
+    }
+
+    private async uploadBinaryToC8Y(binaryDescription: BinaryDescription): Promise<string> {
+        const response: HttpResponse<Blob> = await this.downloadBinaryFromRepository(binaryDescription.link).toPromise();
+        const fileName = this.getFileNameFromContentDispositionHeader(response.headers.get('content-disposition'));
+        const binaryFile = new File([response.body], fileName, { type: response.body.type });
+
+        return await this.createBinaryInC8Y(binaryFile);
+    }
+
+    private downloadBinaryFromRepository(binaryId: string): Observable<HttpResponse<Blob>> {
+        return this.http.get(`${this.GATEWAY_URL}${binaryId}`, {
+            responseType: 'blob',
+            observe: 'response'
+        });
+    }
+
+    private async createBinaryInC8Y(binary: File): Promise<string> {
+        return this.binaryService.create(binary).then((response) => {
+            let imageBinary = response.data as IManagedObjectBinary
+            return imageBinary.id;
+        });
     }
 
     private getCumulocityDashboardRepresentation(dashboardConfiguration, widgets: Array<TemplateDashboardWidget>): CumulocityDashboard {
@@ -224,6 +262,21 @@ export class TemplateCatalogService {
         return updatedWidgets;
     }
 
+    private updateWidgetConfigurationWithBinaryInformation(binaries: Array<BinaryDescription>, widgets: Array<TemplateDashboardWidget>): Array<TemplateDashboardWidget> {
+        let updatedWidgets = widgets.map(widget => {
+            let widgetStringDescription: any = JSON.stringify(widget);
+
+            binaries.forEach(binary => {
+                widgetStringDescription = widgetStringDescription.replaceAll(`"{{${binary.placeholder}.id}}"`, `"${binary.id}"`);
+            });
+
+            widget = JSON.parse(widgetStringDescription);
+            return widget;
+        })
+
+        return updatedWidgets;
+    }
+
     private generateId(): string {
         let id = this.generateRandomInteger(10000, 100000000);
         return id.toString();
@@ -231,5 +284,15 @@ export class TemplateCatalogService {
 
     private generateRandomInteger(min, max): number {
         return Math.floor(Math.random() * Math.floor(max) + min);
+    }
+
+    private getFileNameFromContentDispositionHeader(header: string): string {
+        if (!header) {
+            return 'untitled';
+        }
+
+        const matches = /filename="([^;]+)"/ig.exec(header);
+        const fileName = (matches[1] || 'untitled').trim();
+        return fileName;
     }
 }

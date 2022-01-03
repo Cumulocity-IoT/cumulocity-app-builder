@@ -22,7 +22,7 @@
             <div class="widget-icon" ><i [c8yIcon]="item.value.icon"></i></div>
             <div class="col col-overflow" title="{{item.value.title}}">{{item.value.title}}<i *ngIf="item.value.isDeprecated" title="This widget is deprecated!" c8yIcon="warning" class="warning-icon text-warning" ></i></div>
             <div class="col col-overflow" title="{{item.value.version}}" >{{item.value.version}}</div>
-            <div class="col col-overflow" title="{{item.value.installedVersion}}" >{{item.value.installedVersion}}</div>
+            <div class="col col-overflow" title="{{item.value.installedVersion}}" >{{item.value.installedVersion ? item.value.installedVersion : 'Not Available'}}</div>
             <div class="col col-overflow" title="{{item.value.license}}">{{item.value.license}}</div>
             <div class="col col-overflow" title="{{item.value.author}}">{{item.value.author}}</div>
             <div class="action-icon text-info" title="Preview"><i c8yIcon="eye" (click)="preview(item.value.preview)"></i></div>

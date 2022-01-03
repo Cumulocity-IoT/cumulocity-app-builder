@@ -91,6 +91,9 @@ export class TemplateCatalogModalComponent implements OnInit {
             this.hideLoadingIndicator();
             this.templates = catalog;
             this.filterTemplates =  (this.templates ? this.templates : []);
+        }, error => {
+            this.alertService.danger("There is some technical error! Please try after sometime.");
+            this.hideLoadingIndicator();
         });
     }
 

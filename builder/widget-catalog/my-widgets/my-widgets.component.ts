@@ -95,7 +95,10 @@ export class MyWidgetsComponent implements OnInit{
             await this.filterInstalledWidgets();
             this.filterWidgets = (this.widgetCatalog ? this.widgetCatalog.widgets : []);
             this.isBusy = false;
-        })
+        }, error => {
+            this.alertService.danger("There is some technical error! Please try after sometime.");
+            this.isBusy = false;
+        });
     }
    
     openDocumentation(url: string) {

@@ -17,15 +17,16 @@
  */
 
 import {
-    RandomValueSimulationStrategyConfig,
     RandomValueSimulationStrategyConfigComponent
 } from "./random-value.config.component";
-import {SimulationStrategy} from "../../builder/simulator/simulation-strategy.decorator";
-import {DeviceIntervalSimulator} from "../../builder/simulator/device-interval-simulator";
-import {Injectable, Injector} from "@angular/core";
-import {SimulationStrategyFactory} from "../../builder/simulator/simulation-strategy";
-import {MeasurementService} from "@c8y/client";
-import {SimulatorConfig} from "../../builder/simulator/simulator-config";
+import { SimulationStrategy } from "../../builder/simulator/simulation-strategy.decorator";
+import { DeviceIntervalSimulator } from "../../builder/simulator/device-interval-simulator";
+import { Injectable, Injector } from "@angular/core";
+import { SimulationStrategyFactory } from "../../builder/simulator/simulation-strategy";
+import { IOperation, MeasurementService, OperationStatus } from "@c8y/client";
+import { DtdlSimulationModel, SimulatorConfig } from "../../builder/simulator/simulator-config";
+import { OperationService } from '@c8y/ngx-components/api';
+import * as _ from 'lodash';
 
 @SimulationStrategy({
     name: "Random Value",
@@ -34,9 +35,9 @@ import {SimulatorConfig} from "../../builder/simulator/simulator-config";
     configComponent: RandomValueSimulationStrategyConfigComponent
 })
 export class RandomValueSimulationStrategy extends DeviceIntervalSimulator {
-    constructor(protected injector: Injector, private measurementService: MeasurementService, 
-        private config: RandomValueSimulationStrategyConfig) {
-        super(injector)
+    constructor(protected injector: Injector, private measurementService: MeasurementService, private opservice: OperationService,
+        private config: DtdlSimulationModel) {
+        super(injector);
     }
 
     get interval() {
@@ -44,18 +45,42 @@ export class RandomValueSimulationStrategy extends DeviceIntervalSimulator {
     }
     get strategyConfig() {
         return this.config;
-    } 
+    }
+
+    public async onOperation(param: any): Promise<boolean> {
+        //console.log("Series operation = ", param);
+        if (this.config.alternateConfigs.operations.length > 1) {
+            if (_.has(param, "deviceId") && _.get(param, "deviceId") == this.config.alternateConfigs.opSource) {
+                for (let cfg of this.config.alternateConfigs.operations) {
+                    if (_.has(param, this.config.alternateConfigs.payloadFragment) && _.get(param, this.config.alternateConfigs.payloadFragment) == cfg.matchingValue) {
+                        //console.log(`Matched ${cfg.matchingValue} setting cfg = `, cfg);
+                        this.config.minValue = cfg.minValue;
+                        this.config.maxValue = cfg.maxValue;
+                        if (this.config.alternateConfigs.opReply == true) {
+                            const partialUpdateObject: Partial<IOperation> = {
+                                id: param.id,
+                                status: OperationStatus.SUCCESSFUL
+                            };
+                            await this.opservice.update(partialUpdateObject);
+                        }
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
 
     onTick(groupDeviceId?: any) {
         const measurementValue = Math.floor(Math.random() * (this.config.maxValue - this.config.minValue + 1)) + this.config.minValue;
 
         this.measurementService.create({
-            sourceId: (groupDeviceId? groupDeviceId : this.config.deviceId),
+            sourceId: (groupDeviceId ? groupDeviceId : this.config.deviceId),
             time: new Date(),
             [this.config.fragment]: {
                 [this.config.series]: {
                     value: measurementValue,
-                    ...this.config.unit && {unit: this.config.unit}
+                    ...this.config.unit && { unit: this.config.unit }
                 }
             }
         });
@@ -64,12 +89,12 @@ export class RandomValueSimulationStrategy extends DeviceIntervalSimulator {
 
 @Injectable()
 export class RandomValueSimulationStrategyFactory extends SimulationStrategyFactory<RandomValueSimulationStrategy> {
-    constructor(private injector: Injector, private measurementService: MeasurementService) {
+    constructor(private injector: Injector, private measurementService: MeasurementService, private opservice: OperationService) {
         super();
     }
 
-    createInstance(config: SimulatorConfig<RandomValueSimulationStrategyConfig>): RandomValueSimulationStrategy {
-        return new RandomValueSimulationStrategy(this.injector, this.measurementService, config.config);
+    createInstance(config: SimulatorConfig): RandomValueSimulationStrategy {
+        return new RandomValueSimulationStrategy(this.injector, this.measurementService, this.opservice, config.config);
     }
 
     getSimulatorClass(): typeof RandomValueSimulationStrategy {

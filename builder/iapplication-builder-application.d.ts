@@ -29,6 +29,6 @@ export type IApplicationBuilderApplication = IApplication & {
             deviceId?: string,
             groupTemplate?: boolean
         }[],
-        simulators?: SimulatorConfig<unknown>[]
+        simulators?: SimulatorConfig[]
     }
 }

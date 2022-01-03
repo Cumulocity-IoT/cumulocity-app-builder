@@ -32,6 +32,8 @@ import {SimulationStrategiesService} from "../simulation-strategies.service";
 
 const client = new Client(new CookieAuth());
 
+
+
 /**
  * Main simulator worker module
  */
@@ -72,6 +74,7 @@ const client = new Client(new CookieAuth());
         SimulationLockService,
         SimulationStrategiesService,
         SimulatorManagerService
+
     ]
 })
 export class SimulatorWorkerModule implements DoBootstrap {

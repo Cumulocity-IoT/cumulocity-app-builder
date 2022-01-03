@@ -16,18 +16,11 @@
 * limitations under the License.
  */
 
-import {Component} from "@angular/core";
+import { Component } from "@angular/core";
 import { ControlContainer, NgForm } from '@angular/forms';
-import {SimulationStrategyConfigComponent} from "../../builder/simulator/simulation-strategy";
-
-export interface SeriesValueSimulationStrategyConfig {
-    deviceId: string,
-    fragment: string,
-    series: string,
-    value: string
-    unit: string,
-    interval: number
-}
+import { DtdlSimulationModel } from "builder/simulator/simulator-config";
+import { SimulationStrategyConfigComponent } from "../../builder/simulator/simulation-strategy";
+import * as _ from "lodash";
 
 @Component({
     template: `
@@ -39,10 +32,88 @@ export interface SeriesValueSimulationStrategyConfig {
             <label for="series"><span>Series</span></label>
             <input type="text" class="form-control" id="series" name="series" placeholder="e.g. T (required)" required autofocus [(ngModel)]="config.series">
         </div>
+
         <div class="form-group">
-            <label for="value"><span>Value</span></label>
-            <input type="text" class="form-control" id="value" name="value" placeholder="e.g. 15,20,30 (required)" required [(ngModel)]="config.value">
-        </div> 
+            <label for="value"><span>Default Value</span></label>
+            <input type="text" class="form-control" id="value" name="value" placeholder="e.g. 15,20,30 (required)" required [(ngModel)]="config.alternateConfigs.operations[0].value">
+        </div>
+        <ng-container *ngIf="config.alternateConfigs.opEnabled">
+            <div class="form-group">
+                <label for="match_default"><span>Matching</span></label>
+                <input type="text" class="form-control" id="match_default" name="match_default" placeholder="e.g. WINDY" required [(ngModel)]="config.alternateConfigs.operations[0].matchingValue">
+            </div>
+        </ng-container>
+
+        <div class="form-group">
+            <label class="c8y-checkbox">
+                <input name="opEnabled" type="checkbox" [(ngModel)]="config.alternateConfigs.opEnabled"/>
+                <span></span>
+                <span>Controlled by operation</span>
+            </label>
+        </div>
+
+        <ng-container *ngIf="config.alternateConfigs.opEnabled">
+            <div class="form-group">
+                <accordion  [isAnimated]="true" [closeOthers]="true">
+                    <accordion-group panelClass="op-simulator-panel" #opGroup>
+                        <button class="btn btn-link btn-block clearfix" accordion-heading type="button">
+                            <div class="pull-left float-left">Operation details</div>
+                            <span class="float-right pull-right"><i *ngIf="opGroup.isOpen" class="fa fa-caret-up"></i>
+                            <i *ngIf="!opGroup.isOpen" class="fa fa-caret-down"></i></span>
+                        </button>
+                        <div class="row">
+                            <div class="col-lg-6 op-field">
+                                <label for="opSource"><span>Operation Source</span></label>
+                                <device-selector id="opSource" name="opSource" [(value)]="config.alternateConfigs.opSourceName" [placeHolder]="'Type your Device Name'" [required]="true" (selectedDevice)= "getOperationsDevice($event)"></device-selector>
+                            </div>
+                            <div class="col-lg-6 op-field">
+                                <label for="opPayload"><span>Payload Key</span></label>
+                                <input type="text" class="form-control" id="opPayload" name="opPayload" placeholder="e.g. c8y_command.text" required autofocus [(ngModel)]="config.alternateConfigs.payloadFragment">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-12 op-field">
+                                <label class="c8y-checkbox">
+                                    <input type="checkbox" id="opReply" name="opReply" [(ngModel)]="config.alternateConfigs.opReply" />
+                                    <span></span>
+                                    <span>Mark operation handled</span>
+                                </label>
+                            </div>
+                        </div>
+                        <hr /> 
+                        <div class="row" *ngFor="let op of config.alternateConfigs.operations; let i = index">
+                            <ng-container *ngIf="i > 0">
+                                <div class="col-lg-12">
+                                    <div class="row">
+                                        <div class="col-lg-6 op-field">
+                                            <label for="opMatch_{{i}}"><span>Matching {{i}}</span></label>
+                                            <input type="text" class="form-control" id="opMatch_{{i}}" name="opMatch_{{i}}" placeholder="e.g. WINDY" required [(ngModel)]="op.matchingValue">
+                                        </div>
+                                        <div class="col-lg-6 op-field">
+                                            <label for="opValue_{{i}}"><span>Values {{i}}</span></label>
+                                            <input type="text" class="form-control" id="opValue_{{i}}" name="opValue_{{i}}" placeholder="e.g. 15,20,30 (required)" required [(ngModel)]="op.value">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-6 op-field">
+                                            <button class="btn btn-link btn-block" type="button" (click)="deleteOperation(i)">
+                                                <div class="pull-left float-left">Remove condition</div>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />          
+                            </ng-container>
+                        </div>
+                        <button class="btn btn-link btn-block" type="button" (click)="newOperation('series_value',config.alternateConfigs.operations.length)">
+                            <div class="pull-left float-left">Add condition</div>
+                        </button>
+                    </accordion-group>
+                </accordion>
+            </div>
+        </ng-container>
+        
+
         <div class="form-group">
             <label for="unit"><span>Unit</span></label>
             <input type="text" class="form-control" id="unit" name="unit" placeholder="e.g. C (optional)" [(ngModel)]="config.unit">
@@ -52,16 +123,76 @@ export interface SeriesValueSimulationStrategyConfig {
             <input type="number" class="form-control" id="interval" name="interval" placeholder="e.g. 5 (required)" required [(ngModel)]="config.interval">
         </div>  
     `,
-    viewProviders: [ { provide: ControlContainer, useExisting: NgForm } ]
+    styles: [`
+    :host >>> .panel.op-simulator-panel .panel-title {
+         width: 100%;
+    }
+    .op-field {
+        margin-bottom: 10px;
+    }
+    `],
+    viewProviders: [{ provide: ControlContainer, useExisting: NgForm }]
 })
 export class SeriesValueSimulationStrategyConfigComponent extends SimulationStrategyConfigComponent {
-    config: SeriesValueSimulationStrategyConfig;
 
-    initializeConfig() {
-        this.config.fragment = "temperature_measurement";
-        this.config.series = "T";
-        this.config.value = "10, 20, 30";
-        this.config.unit = "C";
-        this.config.interval = 5;
+
+
+
+    config: DtdlSimulationModel;
+
+    getOperationsDevice(device: any) {
+        this.config.alternateConfigs.opSource = device.id;
+        this.config.alternateConfigs.opSourceName = device.name;
     }
+
+    newOperation(base: string, index: number ) {
+
+        let c: DtdlSimulationModel = {
+            deviceId: this.config.deviceId,
+            matchingValue: `${base}_match_${index}`,
+            fragment: "temperature_measurement",
+            series: `${base}_series_${index}`,
+            value: "10, 20, 30",
+            unit: "C",
+            alternateConfigs: undefined
+        };
+
+        
+        this.config.alternateConfigs.operations.push(c);
+        //console.log(this.config.alternateConfigs.operations);
+    }
+
+    initializeConfig(existingConfig?: DtdlSimulationModel) {
+        //console.log("initializeConfig")
+        let c: DtdlSimulationModel = {
+            deviceId: "",
+            fragment: "temperature_measurement",
+            series: "T",
+            value: "10, 20, 30",
+            unit: "C",
+            interval: 5,
+            matchingValue: "default",
+            alternateConfigs: undefined
+        };
+
+        this.config = c;
+        this.checkAlternateConfigs(c);
+
+        if(typeof existingConfig != "undefined" || existingConfig != null) {
+            c.fragment = existingConfig.fragment;
+            c.series = existingConfig.series;
+            c.value = existingConfig.value;
+            c.unit = existingConfig.unit;
+            c.interval = existingConfig.interval;
+            c.alternateConfigs = _.cloneDeep(existingConfig.alternateConfigs);
+        } else {
+            //New objects can duplicate the default so it can be restored
+            //we will create the config entries if old simulators are edited
+            //duplication is to avoid changing old code.
+            let copy : DtdlSimulationModel = _.cloneDeep(c);
+            copy.alternateConfigs = undefined;
+            this.config.alternateConfigs.operations.push(copy);
+        }
+    }
+
 }

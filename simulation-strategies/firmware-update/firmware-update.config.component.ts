@@ -16,19 +16,11 @@
 * limitations under the License.
  */
 
-import {Component} from "@angular/core";
-import {SimulationStrategyConfigComponent} from "../../builder/simulator/simulation-strategy";
+import { Component } from "@angular/core";
+import { DtdlSimulationModel } from "builder/simulator/simulator-config";
+import { SimulationStrategyConfigComponent } from "../../builder/simulator/simulation-strategy";
+import * as _ from 'lodash';
 
-export interface FirmwareUpdateSimulationStrategyConfig {
-    deviceId: string,
-    isGroup?: boolean,
-    firmwareVersions: {
-        name: string,
-        version: string,
-        url: string
-    }[],
-    resetOn: 'restart' | 'never'
-}
 
 @Component({
     template: `
@@ -58,15 +50,46 @@ export interface FirmwareUpdateSimulationStrategyConfig {
     `
 })
 export class FirmwareUpdateSimulationStrategyConfigComponent extends SimulationStrategyConfigComponent {
-    config: FirmwareUpdateSimulationStrategyConfig;
 
-    initializeConfig() {
-        this.config.firmwareVersions = [
-            {name: "Version 1", version: "1.0.0", url: "https://firmware-repo.cumulocity.com/v1.0.0"},
-            {name: "Version 2", version: "2.0.0", url: "https://firmware-repo.cumulocity.com/v2.0.0"}
-        ];
-        this.config.resetOn = 'restart';
+
+    config: DtdlSimulationModel;
+
+    initializeConfig(existingConfig?: DtdlSimulationModel) {
+
+        let c: DtdlSimulationModel = {
+            deviceId: "",
+            matchingValue: "default",
+            firmwareVersions: [
+                { name: "Version 1", version: "1.0.0", url: "https://firmware-repo.cumulocity.com/v1.0.0" },
+                { name: "Version 2", version: "2.0.0", url: "https://firmware-repo.cumulocity.com/v2.0.0" }
+            ],
+            resetOn: 'restart',
+            alternateConfigs: undefined
+        };
+        this.checkAlternateConfigs(c);
+
+        if( existingConfig ) {
+            c.resetOn = existingConfig.resetOn;
+            c.firmwareVersions = [];
+            existingConfig.firmwareVersions.forEach(fv => {
+                c.firmwareVersions.push({
+                    name: fv.name,
+                    version: fv.version,
+                    url: fv.url
+                });
+            });
+            c.alternateConfigs = _.cloneDeep(existingConfig.alternateConfigs);
+        } else {
+            //New objects can duplicate the default so it can be restored
+            //we will create the config entries if old simulators are edited
+            //duplication is to avoid changing old code.
+            let copy : DtdlSimulationModel = _.cloneDeep(c);
+            copy.alternateConfigs = undefined;
+            c.alternateConfigs.operations.push(copy);
+        }
+        this.config = c;
     }
+
 
     removeFirmware(firmware) {
         this.config.firmwareVersions = this.config.firmwareVersions.filter(fw => fw !== firmware);
@@ -74,6 +97,6 @@ export class FirmwareUpdateSimulationStrategyConfigComponent extends SimulationS
 
     addFirmware() {
         const versionNumber = this.config.firmwareVersions.length + 1;
-        this.config.firmwareVersions.push({name: `Version ${versionNumber}`, version: `${versionNumber}.0.0`, url: `https://firmware-repo.cumulocity.com/v${versionNumber}.0.0`})
+        this.config.firmwareVersions.push({ name: `Version ${versionNumber}`, version: `${versionNumber}.0.0`, url: `https://firmware-repo.cumulocity.com/v${versionNumber}.0.0` });
     }
 }

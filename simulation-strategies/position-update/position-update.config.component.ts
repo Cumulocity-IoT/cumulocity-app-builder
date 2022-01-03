@@ -16,16 +16,11 @@
 * limitations under the License.
  */
 
-import {Component} from "@angular/core";
-import {SimulationStrategyConfigComponent} from "../../builder/simulator/simulation-strategy";
+import { Component } from "@angular/core";
+import { SimulationStrategyConfigComponent } from "../../builder/simulator/simulation-strategy";
+import * as _ from 'lodash';
+import { DtdlSimulationModel } from '../../builder/simulator/simulator-config';
 
-export interface PositionUpdateSimulationStrategyConfig {
-    deviceId: string,
-    interval: number,
-    latitude: string,
-    longitude: string,
-    altitude: string
-}
 
 @Component({
     template: `
@@ -48,9 +43,38 @@ export interface PositionUpdateSimulationStrategyConfig {
     `
 })
 export class PositionUpdateSimulationStrategyConfigComponent extends SimulationStrategyConfigComponent {
-    config: PositionUpdateSimulationStrategyConfig;
 
-    initializeConfig() {
-        this.config.interval = 5;
+    config: DtdlSimulationModel;
+
+    initializeConfig(existingConfig?: DtdlSimulationModel) {
+        let c: DtdlSimulationModel = {
+            deviceId: "",
+            matchingValue: "default",
+            latitude: "",
+            longitude: "",
+            altitude: "",
+            interval: 5,
+            alternateConfigs: undefined
+        };
+
+        this.checkAlternateConfigs(c);
+
+        //TODO: copy alternateconfigs
+        if( existingConfig ) {
+            c.interval = existingConfig.interval;
+            c.latitude = existingConfig.latitude;
+            c.longitude = existingConfig.longitude;
+            c.altitude = existingConfig.altitude;
+            c.alternateConfigs = _.cloneDeep(existingConfig.alternateConfigs);
+        } else {
+            //New objects can duplicate the default so it can be restored
+            //we will create the config entries if old simulators are edited
+            //duplication is to avoid changing old code.
+            let copy : DtdlSimulationModel = _.cloneDeep(c);
+            copy.alternateConfigs = undefined;
+            c.alternateConfigs.operations.push(copy);
+        }
+        this.config = c;
     }
+
 }

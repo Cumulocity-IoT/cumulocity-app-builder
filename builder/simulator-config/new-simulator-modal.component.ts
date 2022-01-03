@@ -25,20 +25,23 @@ import {
     ViewContainerRef
 } from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap/modal';
-import {WizardComponent} from "../../wizard/wizard.component";
-import {InventoryService, ApplicationService, IManagedObject} from '@c8y/client';
-import {AppIdService} from "../app-id.service";
-import {SimulationStrategyConfigComponent, SimulationStrategyFactory} from "../simulator/simulation-strategy";
-import {SimulationStrategiesService} from "../simulator/simulation-strategies.service";
-import {SimulatorCommunicationService} from "../simulator/mainthread/simulator-communication.service";
+import { WizardComponent } from "../../wizard/wizard.component";
+import { InventoryService, ApplicationService, IManagedObject } from '@c8y/client';
+import { AppIdService } from "../app-id.service";
+import { SimulationStrategyConfigComponent, SimulationStrategyFactory } from "../simulator/simulation-strategy";
+import { SimulationStrategiesService } from "../simulator/simulation-strategies.service";
+import { SimulatorCommunicationService } from "../simulator/mainthread/simulator-communication.service";
+import { throwError } from 'rxjs';
 
 @Component({
     templateUrl: './new-simulator-modal.component.html'
 })
 export class NewSimulatorModalComponent {
     busy: boolean = false;
+    isConfigFileUploading: boolean = false;
+    isConfigFileError: boolean = false;
 
-    @ViewChild(WizardComponent, {static: true}) wizard: WizardComponent;
+    @ViewChild(WizardComponent, { static: true }) wizard: WizardComponent;
 
     @ViewChild("configWrapper", { read: ViewContainerRef, static: true }) configWrapper: ViewContainerRef;
 
@@ -50,13 +53,14 @@ export class NewSimulatorModalComponent {
     groupName: string | undefined;
     numberOfDevice: number | 0;
     isGroup: boolean = false;
+    configFromFile: any;
 
     constructor(
         private simSvc: SimulatorCommunicationService,
         public bsModalRef: BsModalRef, public simulationStrategiesService: SimulationStrategiesService,
         private resolver: ComponentFactoryResolver, private injector: Injector, private inventoryService: InventoryService,
         private appService: ApplicationService, private appIdService: AppIdService
-    ) {}
+    ) { }
 
     openSimulatorConfig() {
         this.wizard.selectStep('config');
@@ -69,29 +73,48 @@ export class NewSimulatorModalComponent {
             const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(metadata.configComponent);
             const componentRef: ComponentRef<SimulationStrategyConfigComponent> = this.configWrapper.createComponent(factory);
             componentRef.instance.config = this.newConfig = {};
-            componentRef.instance.initializeConfig();
-            if(componentRef.instance.config.modalSize) {
+
+            if (this.configFromFile === undefined || this.configFromFile === null) {
+                componentRef.instance.initializeConfig();
+            } else {
+                componentRef.instance.initializeConfig(this.configFromFile);
+                componentRef.instance.config.deviceName = this.simulatorName;
+            }
+
+            this.newConfig = componentRef.instance.config;//TODO: needed after merge? 
+
+            if (componentRef.instance.config.modalSize) {
                 this.bsModalRef.setClass(componentRef.instance.config.modalSize);
             }
+            this.newConfig.metadata = metadata;
+
         }
     }
 
     resetDialogSize() {
         this.bsModalRef.setClass('modal-sm');
     }
+
+    public isConfigFromFileUploaded() {
+        if (this.configFromFile === undefined || this.configFromFile === null) {
+            return false;
+        }
+        return true;
+    }
+
     async saveAndClose() {
         this.busy = true;
 
         const metadata = this.selectedStrategyFactory.getSimulatorMetadata();
         // get simulator Name from strategy's deviceName field
-        if(metadata.hideSimulatorName) {
+        if (metadata.hideSimulatorName) {
             this.simulatorName = this.newConfig.deviceName;
         }
         let device;
         if (!this.deviceId) {
-            if(this.isGroup) {
+            if (this.isGroup) {
                 // Create Group and Devices
-                device = await this.AddGroupAndDevices();    
+                device = await this.AddGroupAndDevices();
                 this.deviceName = this.groupName;
                 this.deviceId = device.id;
             } else {
@@ -103,16 +126,16 @@ export class NewSimulatorModalComponent {
                 this.deviceName = this.simulatorName;
                 this.deviceId = device.id;
             }
-            
+
         } else {
             // getExistingDevice
             // device = (await this.inventoryService.detail(this.deviceId)).data;
         }
-      //  this.deviceId = device.id;
-        
+        //  this.deviceId = device.id;
+
         const appId = this.appIdService.getCurrentAppId();
         let appServiceData;
-        if(appId){
+        if (appId) {
             appServiceData = (await this.appService.detail(appId)).data;
         }
         // updateDevice
@@ -160,5 +183,53 @@ export class NewSimulatorModalComponent {
             await this.inventoryService.childAssetsCreate(childManageObject, group.id);
         }
         return group;
+    }
+
+    fileUploaded(events) {
+        this.isConfigFileError = false;
+        this.isConfigFileUploading = true;
+        const file = events.target.files[0];
+        const reader = new FileReader();
+        let input = null;
+        reader.addEventListener('load', (event: any) => {
+            input = event.target.result;
+            const validJson = this.isValidJson(input);
+            if (validJson) {
+                this.selectedStrategyFactory = this.simulationStrategiesService.strategiesByName.get(validJson.type);
+                if (this.selectedStrategyFactory === undefined) {
+                    this.isConfigFileError = true;
+                } else {
+                    this.configFromFile = validJson.config;
+                    this.simulatorName = validJson.name;
+                    this.wizard.selectStep('device');
+                }
+            } else {
+                this.isConfigFileError = true;
+                events.srcElement.value = "";
+            }
+            this.isConfigFileUploading = false;
+        });
+        if (file) {
+            reader.readAsText(file);
+        } else {
+            this.configFromFile = null;
+            this.isConfigFileUploading = false;
+        }
+    }
+
+    /**
+     *
+     * @param input Validate JSON Input
+     */
+    private isValidJson(input: any) {
+        try {
+            if (input) {
+                const o = JSON.parse(input);
+                if (o && (o.constructor === Object || o.constructor === Array)) {
+                    return o;
+                }
+            }
+        } catch (e) { }
+        return false;
     }
 }

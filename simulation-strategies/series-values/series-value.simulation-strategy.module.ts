@@ -16,18 +16,22 @@
 * limitations under the License.
  */
 
-import {NgModule} from "@angular/core";
-import {SeriesValueSimulationStrategyConfigComponent} from "./series-value.config.component";
-import {SeriesValueSimulationStrategyFactory} from "./series-value.simulation-strategy";
-import {CommonModule} from "@angular/common";
-import {FormsModule} from "@angular/forms";
+import { NgModule } from "@angular/core";
+import { SeriesValueSimulationStrategyConfigComponent } from "./series-value.config.component";
+import { SeriesValueSimulationStrategyFactory } from "./series-value.simulation-strategy";
+import { CommonModule } from "@angular/common";
+import { FormsModule } from "@angular/forms";
 import { HOOK_SIMULATION_STRATEGY_FACTORY } from '../../builder/simulator/device-simulator';
+import { AccordionModule } from 'ngx-bootstrap/accordion';
+import { DeviceSelectorModule } from '../../device-selector/device-selector.module';
 
 
 @NgModule({
     imports: [
         CommonModule,
-        FormsModule
+        FormsModule,
+        AccordionModule.forRoot(),
+        DeviceSelectorModule
     ],
     declarations: [
         SeriesValueSimulationStrategyConfigComponent
@@ -39,7 +43,7 @@ import { HOOK_SIMULATION_STRATEGY_FACTORY } from '../../builder/simulator/device
         SeriesValueSimulationStrategyConfigComponent
     ],
     providers: [
-        { provide: HOOK_SIMULATION_STRATEGY_FACTORY, useClass: SeriesValueSimulationStrategyFactory, multi: true },
+        { provide: HOOK_SIMULATION_STRATEGY_FACTORY, useClass: SeriesValueSimulationStrategyFactory, multi: true }
     ]
 })
-export class SeriesValueSimulationStrategyModule {}
+export class SeriesValueSimulationStrategyModule { }

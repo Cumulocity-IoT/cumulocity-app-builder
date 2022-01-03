@@ -19,7 +19,8 @@
 import {DeviceSimulator} from "./device-simulator";
 import {SimulationStrategyMetadata} from "./simulation-strategy.decorator";
 import { Type } from "@angular/core";
-import { SimulatorConfig } from "./simulator-config";
+import { DtdlSimulationModel, SimulatorConfig } from "./simulator-config";
+import * as _ from 'lodash';
 
 // Provided by the polyfills.ts - import '@angular-devkit/build-angular/src/angular-cli-files/models/jit-polyfills.js';
 declare module Reflect {
@@ -27,8 +28,58 @@ declare module Reflect {
 }
 
 export abstract class SimulationStrategyConfigComponent {
-    abstract config: any;
-    abstract initializeConfig(): void
+    abstract config: any; //typed in extended
+    abstract initializeConfig(existingConfig?: any): void
+
+    public checkAlternateConfigs(target: DtdlSimulationModel) {
+        //console.log("checkAlternateConfigs",target);
+        if (!this.hasOperations(target)) {
+            target.alternateConfigs = {
+                opSource: "",
+                opSourceName: "",
+                payloadFragment: "c8y_Command.text",
+                opReply: false,
+                operations: [],
+                configIndex: 0
+            };
+        }
+    }
+
+    public deleteOperation(index:number) : void {
+        if( this.hasOperations(this.config) ) {
+            let ops: Array<any> = _.get(this.config.alternateConfigs,"operations");
+            ops.splice(index,1);
+        }
+    }
+
+    /**
+     * hasOperations
+     * 
+     * @returns true if config supports operations
+     */
+    public hasOperations(target: DtdlSimulationModel) : boolean {
+        return ( _.has(target,"alternateConfigs") && _.has(target.alternateConfigs,"operations"));
+    }
+
+    /**
+     * return an any or undefined when a label is queried.
+     * 
+     * This is a helper function for the extended class 
+     * to use in getNamedConfig so it can cast the return 
+     * to a specified interface for use. 
+     * 
+     * @param label is the entry required
+     * @returns 
+     */
+    public getConfigAsAny(index: number): any | undefined {
+        if( this.hasOperations(this.config) ) {
+            let ops: Array<any> = _.get(this.config.alternateConfigs,"operations");
+            if(ops.length >= (index+1)) { //zero based
+                return ops[index].config;
+            }
+        } 
+        return undefined;
+    }
 }
 
 export abstract class SimulationStrategyFactory<T extends DeviceSimulator = DeviceSimulator> {

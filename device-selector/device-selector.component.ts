@@ -37,9 +37,12 @@ export class DeviceSelectorComponent implements OnInit{
     suggestions$: Observable<any[]>;
     deviceList :any[] = [];
     typeaheadLoading: boolean = false;
-    
+    field_id: string;
+
     constructor(private inventoryService: InventoryService) {}
     ngOnInit(): void {
+        this.field_id = "id"+Math.floor(Math.random() * 1000000);
+
         this.suggestions$ = new Observable((observer: Observer<any>) => {
             const item: any = {
                 id : '',
@@ -61,12 +64,12 @@ export class DeviceSelectorComponent implements OnInit{
         };
         if (searchName) {
             if(this.isGroup) {
-                inventoryFilter['query'] = `$filter=(has(c8y_IsDeviceGroup) and (name eq '${this.generateRegEx(searchName)}'))`;
+                inventoryFilter['query'] = `$filter=(hasany(c8y_IsDeviceGroup,c8y_IsAsset) and (name eq '${this.generateRegEx(searchName)}'))`;
             } else {
-                inventoryFilter['query'] = `$filter=(has(c8y_IsDevice) and (name eq '${this.generateRegEx(searchName)}'))`;
+                inventoryFilter['query'] = `$filter=(hasany(c8y_IsDevice,c8y_IsAsset) and (name eq '${this.generateRegEx(searchName)}'))`;
             }
         } else {
-            inventoryFilter['query'] = `$filter=(has(c8y_IsDevice))`;
+            inventoryFilter['query'] = `$filter=(hasany(c8y_IsDevice,c8y_IsAsset))`;
         }
         return this.inventoryService.list(inventoryFilter);
     

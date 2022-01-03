@@ -58,6 +58,7 @@ export class TemplateUpdateModalComponent implements OnInit {
                 // TODO add some checks
                 templateDetails.input.devices = this.dashboardConfig.templateDashboard.devices ? this.dashboardConfig.templateDashboard.devices : [];
                 templateDetails.input.images = this.dashboardConfig.templateDashboard.binaries ? this.dashboardConfig.templateDashboard.binaries : [];
+                templateDetails.input.binaries = this.dashboardConfig.templateDashboard.staticBinaries ? this.dashboardConfig.templateDashboard.staticBinaries : [];
 
                 this.templateDetails = templateDetails;
             });
