@@ -42,6 +42,12 @@ import { SettingsService } from './settings.service';
                         (ngModelChange)="changeDashboardCatalogStatus()" [disabled]="!userHasAdminRights" 
                         [class.disabled]="!userHasAdminRights " btnCheckbox tabindex="1">{{dashboardCataglogEnabled? 'Enabled' : 'Disabled' }}</button>
             </div>
+            <div class="form-group" >
+                <label translate="" for="dashboardCataglogEnabled" >Dashboard: Smart rules, Alarms and Data explorer visibility</label>
+                <button class="btn btn-default" id="dashboardVisibility" name="dashboardVisibility" [(ngModel)]="dashboardVisibility" 
+                        (ngModelChange)="changeDashboardVisibility()" [disabled]="!userHasAdminRights" 
+                        [class.disabled]="!userHasAdminRights " btnCheckbox tabindex="1">{{dashboardVisibility? 'Visible' : 'Hidden' }}</button>
+            </div>
         </div>
         <div *ngIf="isBusy" class="col-xs-12 col-sm-12 col-md-12" style="padding-bottom:50px;padding-top:20px">
             <rectangle-spinner  style="position: relative; left: 47%;">
@@ -63,9 +69,12 @@ export class CustomPropertiesComponent implements OnInit, OnDestroy{
     isGainsightParent: boolean = false;
     gainsightEnabled = false;
     dashboardCataglogEnabled = true;
+    dashboardVisibility = true;
     customProperties = {
         gainsightEnabled: "false",
-        dashboardCataglogEnabled: "true"
+        dashboardCataglogEnabled: "true",
+        dashboardVisibility: "true"
+        
     }
     delayedTenantSubscription: Subscription;
     constructor( private appStateService: AppStateService,
@@ -90,6 +99,7 @@ export class CustomPropertiesComponent implements OnInit, OnDestroy{
         }
         if(this.customProperties.gainsightEnabled === 'true') { this.gainsightEnabled = true;}
         if(this.customProperties.dashboardCataglogEnabled === 'true') { this.dashboardCataglogEnabled = true;}
+        if(this.customProperties.dashboardVisibility === 'false') { this.dashboardVisibility = false;}
         this.isBusy = false;
     }
 
@@ -102,6 +112,11 @@ export class CustomPropertiesComponent implements OnInit, OnDestroy{
     changeDashboardCatalogStatus() {
         if(this.dashboardCataglogEnabled) { this.customProperties.dashboardCataglogEnabled = 'true';}
         else { this.customProperties.dashboardCataglogEnabled = 'false'; }
+    }
+
+    changeDashboardVisibility() {
+        if(this.dashboardVisibility) { this.customProperties.dashboardVisibility = 'true';}
+        else { this.customProperties.dashboardVisibility = 'false'; }
     }
     isFormValid() {
         return ((this.customProperties.gainsightEnabled === 'true' || this.customProperties.gainsightEnabled === 'false') && 

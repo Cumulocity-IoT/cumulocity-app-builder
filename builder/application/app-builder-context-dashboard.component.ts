@@ -25,7 +25,7 @@ import {SMART_RULES_AVAILABILITY_TOKEN} from "./smartrules/smart-rules-availabil
 import {IApplicationBuilderApplication} from "../iapplication-builder-application";
 import {AppStateService} from "@c8y/ngx-components";
 import {RuntimeWidgetInstallerModalService} from "cumulocity-runtime-widget-loader";
-import { timeout } from 'rxjs/operators';
+import { SettingsService } from "../../builder/settings/settings.service";
 
 @Component({
     selector: 'app-builder-context-dashboard',
@@ -34,9 +34,10 @@ import { timeout } from 'rxjs/operators';
                  [priority]="tab.priority"></c8y-tab>
 
         <ng-container [ngSwitch]="deviceDetail">
-            <legacy-smart-rules *ngSwitchCase="'smartrules'"></legacy-smart-rules>
+             <legacy-smart-rules *ngSwitchCase="'smartrules'"></legacy-smart-rules>
             <legacy-alarms *ngSwitchCase="'alarms'"></legacy-alarms>
             <legacy-data-explorer *ngSwitchCase="'data_explorer'"></legacy-data-explorer>
+            
             <ng-container *ngSwitchDefault>
                 <c8y-action-bar-item priority="0" placement="more" *ngIf="hasAdminRights()">
                     <li>
@@ -60,6 +61,7 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
     tabGroup?: string
     deviceId?: string
     deviceDetail?: string
+    dashboardSmartRulesAlarmsExplorerVisibility = true;
 
     isGroupTemplate?: boolean;
 
@@ -87,7 +89,8 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
         @Inject(SMART_RULES_AVAILABILITY_TOKEN) private c8ySmartRulesAvailability: any,
         private userService: UserService,
         private appStateService: AppStateService,
-        private runtimeWidgetInstallerModalService: RuntimeWidgetInstallerModalService
+        private runtimeWidgetInstallerModalService: RuntimeWidgetInstallerModalService,
+        private settingsService: SettingsService
     ) {
         this.subscriptions.add(this.activatedRoute.paramMap.subscribe(async paramMap => {
             // Always defined
@@ -103,6 +106,7 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
             }
 
             this.isGroupTemplate = undefined;
+            this.dashboardSmartRulesAlarmsExplorerVisibility = await this.settingsService.isDashboardVisibilitySmartRulesAlarmsExplorer();
 
             // The user may have simulator access (INVENTORY_ADMIN)
             // but we don't necessarily want them messing with the dashboards unless they have app edit permissions
@@ -113,7 +117,7 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
 
             const tabs = [];
             this.tabs = tabs;
-            if (this.deviceId) {
+            if (this.deviceId && this.dashboardSmartRulesAlarmsExplorerVisibility) {
                 if (this.c8ySmartRulesAvailability.shouldShowLocalSmartRules()) {
                     tabs.push({
                         label: 'Smart rules',
@@ -207,6 +211,7 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
                 }
                 tabOutletSub.unsubscribe();
             });
+
         }));
     }
 

@@ -40,6 +40,7 @@ import { AppListService } from "./app-list.service";
 export class AppListComponent {
  //   applications: Observable<IApplication[]>;
     applications: IApplication[];
+    allApplications: IApplication[];
 
     userHasAdminRights: boolean;
 
@@ -70,15 +71,15 @@ export class AppListComponent {
 
         // Get a list of the applications on the tenant (This includes live updates)
         if(this.userHasAdminRights){
-            this.applications =  ( await this.appService.list({ pageSize: 2000, withTotalPages: true }) as any).data ;
-            if(!this.applications || this.applications.length  === 0) {
-                this.applications = ( await this.appService.listByUser(this.appStateService.currentUser.value, { pageSize: 2000 })).data;
+            this.allApplications =  ( await this.appService.list({ pageSize: 2000, withTotalPages: true }) as any).data ;
+            if(!this.allApplications || this.allApplications.length  === 0) {
+                this.allApplications = ( await this.appService.listByUser(this.appStateService.currentUser.value, { pageSize: 2000 })).data;
             }
-            this.applications = this.applications.filter(app => app.hasOwnProperty('applicationBuilder'));
+            this.applications = this.allApplications.filter(app => app.hasOwnProperty('applicationBuilder'));
             this.applications = this.applications.sort((a, b) => a.id > b.id ? 1 : -1);   
         } else {
-            this.applications = ( await this.appService.listByUser(this.appStateService.currentUser.value, { pageSize: 2000 })).data;
-            this.applications = this.applications.filter(app => app.hasOwnProperty('applicationBuilder'));
+            this.allApplications = ( await this.appService.listByUser(this.appStateService.currentUser.value, { pageSize: 2000 })).data;
+            this.applications = this.allApplications.filter(app => app.hasOwnProperty('applicationBuilder'));
             this.applications = this.applications.sort((a, b) => a.id > b.id ? 1 : -1);   
         }
         /* if(this.userHasAdminRights){
@@ -101,7 +102,7 @@ export class AppListComponent {
 
     createAppWizard() {
         this.bsModalRef = this.modalService.show(NewApplicationModalComponent, { class: 'c8y-wizard' ,initialState : 
-        { applications: this.applications}});
+        { applications: this.applications, allApplications: this.allApplications}});
     }
 
     async deleteApplication(id: number) {

@@ -161,4 +161,9 @@ export class SettingsService {
         }
         return email;
     }
+
+    async isDashboardVisibilitySmartRulesAlarmsExplorer() {
+        const customProp = await this.getCustomProperties();
+        return (!customProp || (customProp  && ( !customProp.dashboardVisibility || customProp.dashboardVisibility === "true")));
+    }
 }

@@ -57,9 +57,9 @@ import { AppListService } from './app-list.service';
             <div class="form-group">
                     <label for="appCloneName"><span>Clone Existing Application</span></label>
                     <input type="text" class="form-control" id="appCloneName" name="appCloneName"
-                      placeholder="e.g. Type Application Name/Id (optional)" 
+                      placeholder="e.g. Type and select Application Name/Id (optional)" 
                       [(ngModel)]="existingAppName" [typeahead]="appNameList" autocomplete="off">
-                      
+                      <span id="helpBlockCloneApp" class="help-block">Only application builder's applications can be cloned here.</span>
                 </div>
         </form>
     </div>
@@ -77,6 +77,7 @@ export class NewApplicationModalComponent implements OnInit {
     appIcon: string = 'bathtub';
    // applications: Observable<IApplication[]>;
     applications: IApplication[];
+    allApplications: IApplication[];
     appList: any = [];
     appNameList: any = [];
 
@@ -89,10 +90,18 @@ export class NewApplicationModalComponent implements OnInit {
     }
    
     async createApplication() {
-        this.bsModalRef.hide();
-        
         let isCloneApp = false;
         let appBuilderObj;
+
+        // app validation check 
+        const appFound = this.allApplications.find( app => app.name.toLowerCase() === this.appName.toLowerCase() || 
+        ( this.appPath && this.appPath.length > 0 && ( app.contextPath && app.contextPath?.toLowerCase() === this.appPath.toLowerCase())))
+        if(appFound) {
+            this.alertService.danger(" Application name or context path already exists!");
+            return;
+        }
+
+        this.bsModalRef.hide();
         if(this.existingAppName) {
             const existingApp = this.existingAppName.split(' (');
             if(existingApp.length > 1) {
