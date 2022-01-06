@@ -65,11 +65,11 @@
                 </div>
                 <hr/>
                 <div class="card-block">
-                    <button class="btn btn-primary" style="--brand-primary: #1776BF; color: white" (click)="setTheme(app, '#1776BF', '#14629F', '#333333', 'white', 'white')">Software AG Blue</button>
-                    <button class="btn btn-primary" style="--brand-primary: #FFCC00; color: black;" (click)="setTheme(app, '#FFCC00', 'firebrick', 'firebrick', 'firebrick', 'white')">Yellow</button>
-                    <button class="btn btn-primary" style="--brand-primary: #D40511; color: white;" (click)="setTheme(app, '#D40511', '#8b0000', 'firebrick', 'white', 'white')">Red</button>
-                    <button class="btn btn-primary" style="--brand-primary: #009000; color: white;" (click)="setTheme(app, '#009000', '#205115', '#333333', 'white', 'white')">Green</button>
-                    <button class="btn btn-primary" style="--brand-primary: salmon; color: black;" (click)="setTheme(app, 'salmon', 'firebrick', 'firebrick', 'firebrick', 'white')">Salmon</button>
+                    <button class="btn btn-primary" style="--brand-primary: #1776BF; color: white" (click)="setTheme(app, '#1776BF', '#14629F', '#333333', '#ffffff', '#ffffff','#ffffff', '#ffffff', '#ffffff')">Software AG Blue</button>
+                    <button class="btn btn-primary" style="--brand-primary: #FFCC00; color: black;" (click)="setTheme(app, '#FFCC00', 'firebrick', 'firebrick', 'firebrick', '#ffffff','#ffffff', '#ffffff', '#ffffff')">Yellow</button>
+                    <button class="btn btn-primary" style="--brand-primary: #D40511; color: #ffffff;" (click)="setTheme(app, '#D40511', '#8b0000', 'firebrick', '#ffffff', '#ffffff','#ffffff', '#ffffff', '#ffffff')">Red</button>
+                    <button class="btn btn-primary" style="--brand-primary: #009000; color: #ffffff;" (click)="setTheme(app, '#009000', '#205115', '#333333', '#ffffff', '#ffffff','#ffffff', '#ffffff', '#ffffff')">Green</button>
+                    <button class="btn btn-primary" style="--brand-primary: salmon; color: black;" (click)="setTheme(app, 'salmon', 'firebrick', 'firebrick', 'firebrick', '#ffffff','#ffffff', '#ffffff','#ffffff')">Salmon</button>
                 </div>
             </div>
         </div>
@@ -82,28 +82,66 @@
                 <div class="card-block">
                     Colors can be entered as any valid CSS color (salmon, #fff, #ffffff, rgb(255, 255, 255))<br>
                     <div class="row">
-                        <div class="col-xs-12 col-md-6">
+                        <div class="col-xs-12 col-md-4">
                             <div class="form-group">
                                 <label for="primary"><span>Primary</span></label>
-                                <input type="text" class="form-control" id="primary" name="primary" placeholder="e.g. salmon (required)" required [(ngModel)]="app.applicationBuilder.branding.colors.primary" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
+                                <div style="display: inline-flex;width: 100%;">
+                                    <input type="text" class="form-control" id="primary" name="primary" placeholder="e.g. salmon (required)" required [(ngModel)]="app.applicationBuilder.branding.colors.primary" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
+                                    <input type="color" style="height: 32px; border:0; background: transparent;" id="primaryPicker" class="m-l-4" name="primaryPicker" [(ngModel)]="app.applicationBuilder.branding.colors.primary" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label for="active"><span>Active</span></label>
-                                <input type="text" class="form-control" id="active" name="active" placeholder="e.g. salmon (required)" required [(ngModel)]="app.applicationBuilder.branding.colors.active" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
+                                <div style="display: inline-flex;width: 100%;">
+                                    <input type="text" class="form-control" id="active" name="active" placeholder="e.g. salmon (required)" required [(ngModel)]="app.applicationBuilder.branding.colors.active" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
+                                    <input type="color" style="height: 32px; border:0; background: transparent;" id="activePicker" class="m-l-4" name="activePicker" [(ngModel)]="app.applicationBuilder.branding.colors.active" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label for="text"><span>Text</span></label>
-                                <input type="text" class="form-control" id="text" name="text" placeholder="e.g. salmon (required)" required [(ngModel)]="app.applicationBuilder.branding.colors.text" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
+                                <div style="display: inline-flex;width: 100%;">
+                                    <input type="text" class="form-control" id="text" name="text" placeholder="e.g. salmon (required)" required [(ngModel)]="app.applicationBuilder.branding.colors.text" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
+                                    <input type="color" style="height: 32px; border:0; background: transparent;" id="textPicker" class="m-l-4" name="textPicker" [(ngModel)]="app.applicationBuilder.branding.colors.text" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
+                                </div>
                             </div>
                         </div>
-                        <div class="col-xs-12 col-md-6">
+                        <div class="col-xs-12 col-md-4">
                             <div class="form-group">
                                 <label for="text-primary"><span>Text on Primary</span></label>
-                                <input type="text" class="form-control" id="text-primary" name="text-primary" placeholder="e.g. salmon (required)" required [(ngModel)]="app.applicationBuilder.branding.colors.textOnPrimary" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
+                                <div style="display: inline-flex;width: 100%;">
+                                    <input type="text" class="form-control" id="text-primary" name="text-primary" placeholder="e.g. salmon (required)" required [(ngModel)]="app.applicationBuilder.branding.colors.textOnPrimary" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
+                                    <input type="color" style="height: 32px; border:0; background: transparent;" id="text-primaryPicker" class="m-l-4" name="text-primaryPicker" [(ngModel)]="app.applicationBuilder.branding.colors.textOnPrimary" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label for="text-active"><span>Text on Active</span></label>
-                                <input type="text" class="form-control" id="text-active" name="text-active" placeholder="e.g. salmon (required)" required [(ngModel)]="app.applicationBuilder.branding.colors.textOnActive" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
+                                <div style="display: inline-flex;width: 100%;">
+                                    <input type="text" class="form-control" id="text-active" name="text-active" placeholder="e.g. salmon (required)" required [(ngModel)]="app.applicationBuilder.branding.colors.textOnActive" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
+                                    <input type="color" style="height: 32px; border:0; background: transparent;" id="text-activePicker" class="m-l-4" name="text-activePicker" [(ngModel)]="app.applicationBuilder.branding.colors.textOnActive" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-md-4">
+                            <div class="form-group">
+                                <label for="primary"><span>Header bar</span></label>
+                                <div style="display: inline-flex;width: 100%;">
+                                    <input type="text" class="form-control" id="headerBar" name="headerBar" placeholder="e.g. white (required)" required [(ngModel)]="app.applicationBuilder.branding.colors.headerBar" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
+                                    <input type="color" style="height: 32px; border:0; background: transparent;" id="headerBarPicker" class="m-l-4" name="headerBarPicker" [(ngModel)]="app.applicationBuilder.branding.colors.headerBar" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="text"><span>Tool Bar</span></label>
+                                <div style="display: inline-flex;width: 100%;">
+                                    <input type="text" class="form-control" id="toolBar" name="toolBar" placeholder="e.g. white (required)" required [(ngModel)]="app.applicationBuilder.branding.colors.toolBar" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
+                                    <input type="color" style="height: 32px; border:0; background: transparent;" id="toolBarPicker" class="m-l-4" name="toolBarPicker" [(ngModel)]="app.applicationBuilder.branding.colors.toolBar" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="active"><span>Tab Bar</span></label>
+                                <div style="display: inline-flex;width: 100%;">
+                                    <input type="text" class="form-control" id="tabBar" name="tabBar" placeholder="e.g. white (required)" required [(ngModel)]="app.applicationBuilder.branding.colors.tabBar" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
+                                    <input type="color" style="height: 32px; border:0; background: transparent;" id="tabBarPicker" class="m-l-4" name="toolBarPicker" [(ngModel)]="app.applicationBuilder.branding.colors.tabBar" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
+                                </div>
                             </div>
                         </div>
                     </div>

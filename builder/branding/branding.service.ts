@@ -109,6 +109,8 @@ export class BrandingService {
 .navigatorContent .link.active {
     border-left-color: var(--navigator-active-color);
 }
+
+
 `;
 
             if (app.applicationBuilder.branding && app.applicationBuilder.branding.enabled && app.applicationBuilder.branding.colors) {
@@ -130,8 +132,14 @@ body {
     --brand-dark: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     --input-focus-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
 
+    --header-color: ${app.applicationBuilder.branding.colors.headerBar ? this.colorToHex(app.applicationBuilder.branding.colors.headerBar) : '#ffffff' };
+    --dropdown-background: ${app.applicationBuilder.branding.colors.headerBar ? this.colorToHex(app.applicationBuilder.branding.colors.headerBar) : '#ffffff' };
+    --toolbar-background:${app.applicationBuilder.branding.colors.toolBar ? this.colorToHex(app.applicationBuilder.branding.colors.toolBar) : '#ffffff' };
+    --page-tabs-background:${app.applicationBuilder.branding.colors.tabBar ? this.colorToHex(app.applicationBuilder.branding.colors.tabBar) : '#ffffff' };
+    
     ${app.applicationBuilder.branding.logoHeight != undefined ? '--navigator-platform-logo-height: ' + app.applicationBuilder.branding.logoHeight + 'px;' : ''}
 }
+
 
 .navigator .title .tenant-brand {
     background-image: url(${CSS.escape(app.applicationBuilder.branding.logo || '')});
