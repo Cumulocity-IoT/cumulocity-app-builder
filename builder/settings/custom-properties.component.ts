@@ -43,7 +43,7 @@ import { SettingsService } from './settings.service';
                         [class.disabled]="!userHasAdminRights " btnCheckbox tabindex="1">{{dashboardCataglogEnabled? 'Enabled' : 'Disabled' }}</button>
             </div>
             <div class="form-group" >
-                <label translate="" for="dashboardCataglogEnabled" >Dashboard: Smart rules, Alarms and Data explorer visibility</label>
+                <label translate="" for="dashboardVisibility" >Dashboard: Smart rules, Alarms and Data explorer visibility</label>
                 <button class="btn btn-default" id="dashboardVisibility" name="dashboardVisibility" [(ngModel)]="dashboardVisibility" 
                         (ngModelChange)="changeDashboardVisibility()" [disabled]="!userHasAdminRights" 
                         [class.disabled]="!userHasAdminRights " btnCheckbox tabindex="1">{{dashboardVisibility? 'Visible' : 'Hidden' }}</button>
@@ -61,6 +61,13 @@ import { SettingsService } from './settings.service';
     `
 })
 
+// TODO for next release
+/*  <div class="form-group" >
+            <label translate="" for="simulatorEnabled" >Simulators</label>
+            <button class="btn btn-default" id="simulatorEnabled" name="simulatorEnabled" [(ngModel)]="simulatorEnabled" 
+                    (ngModelChange)="changeSimulatorStatus()" [disabled]="!userHasAdminRights" 
+                    [class.disabled]="!userHasAdminRights " btnCheckbox tabindex="1">{{simulatorEnabled? 'Enabled' : 'Disabled' }}</button>
+            </div> */
 // Custom property settings for Application Builder
 export class CustomPropertiesComponent implements OnInit, OnDestroy{
 
@@ -69,11 +76,13 @@ export class CustomPropertiesComponent implements OnInit, OnDestroy{
     isGainsightParent: boolean = false;
     gainsightEnabled = false;
     dashboardCataglogEnabled = true;
+    simulatorEnabled = true;
     dashboardVisibility = true;
     customProperties = {
         gainsightEnabled: "false",
         dashboardCataglogEnabled: "true",
-        dashboardVisibility: "true"
+        dashboardVisibility: "true",
+        simulatorEnabled: "true"
         
     }
     delayedTenantSubscription: Subscription;
@@ -97,8 +106,13 @@ export class CustomPropertiesComponent implements OnInit, OnDestroy{
             this.customProperties.dashboardCataglogEnabled = 'false';
             this.dashboardCataglogEnabled = false;
         }
+        if(this.customProperties && this.customProperties.simulatorEnabled === 'false') {
+            this.customProperties.simulatorEnabled = 'false';
+            this.simulatorEnabled = false;
+        }
         if(this.customProperties.gainsightEnabled === 'true') { this.gainsightEnabled = true;}
         if(this.customProperties.dashboardCataglogEnabled === 'true') { this.dashboardCataglogEnabled = true;}
+        if(this.customProperties.simulatorEnabled === 'true') { this.simulatorEnabled = true;}
         if(this.customProperties.dashboardVisibility === 'false') { this.dashboardVisibility = false;}
         this.isBusy = false;
     }
@@ -107,6 +121,11 @@ export class CustomPropertiesComponent implements OnInit, OnDestroy{
         if(this.gainsightEnabled) { this.customProperties.gainsightEnabled = 'true';}
         else { this.customProperties.gainsightEnabled = 'false'; }
 
+    }
+
+    changeSimulatorStatus() {
+        if(this.simulatorEnabled) { this.customProperties.simulatorEnabled = 'true';}
+        else { this.customProperties.simulatorEnabled = 'false'; }
     }
 
     changeDashboardCatalogStatus() {
@@ -120,7 +139,9 @@ export class CustomPropertiesComponent implements OnInit, OnDestroy{
     }
     isFormValid() {
         return ((this.customProperties.gainsightEnabled === 'true' || this.customProperties.gainsightEnabled === 'false') && 
-        (this.customProperties.dashboardCataglogEnabled === 'true' || this.customProperties.dashboardCataglogEnabled === 'false'));
+        (this.customProperties.dashboardCataglogEnabled === 'true' || this.customProperties.dashboardCataglogEnabled === 'false'))
+     //   && 
+     //   (this.customProperties.simulatorEnabled === 'true' || this.customProperties.simulatorEnabled === 'false'));
     }
 
     save(customProperties) {

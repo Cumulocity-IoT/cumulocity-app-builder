@@ -34,6 +34,7 @@ import { TemplateCatalogModalComponent } from "../template-catalog/template-cata
 import { TemplateUpdateModalComponent } from "../template-catalog/template-update.component";
 import { BinaryDescription, DeviceDescription } from "../template-catalog/template-catalog.model";
 import { SettingsService } from './../../builder/settings/settings.service';
+import { AlertMessageModalComponent } from "./../../builder/utils/alert-message-modal/alert-message-modal.component";
 
 
 export interface DashboardConfig {
@@ -101,17 +102,32 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     async ngOnInit() {
         this.isDashboardCatalogEnabled = await this.settngService.isDashboardCatalogEnabled();
     }
-    async deleteDashboard(application, dashboards: DashboardConfig[], index: number) {
-        dashboards.splice(index, 1);
-        application.applicationBuilder.dashboards = [...dashboards];
-        await this.appService.update({
-            id: application.id,
-            applicationBuilder: application.applicationBuilder
-        } as any);
 
-        this.navigation.refresh();
-        // TODO?
-        // this.tabs.refresh();
+    private alertModalDialog(message: any): BsModalRef {
+        return this.modalService.show(AlertMessageModalComponent, { class: 'c8y-wizard', initialState: { message } });
+    }
+    async deleteDashboard(application, dashboards: DashboardConfig[], index: number) {
+        const alertMessage = {
+            title: 'Delete Dashboard',
+            description: `You are about to delete this dashboard. This operation is irreversible. Do you want to proceed?`,
+            type: 'danger',
+            alertType: 'confirm' //info|confirm
+          }
+          const installDemoDialogRef = this.alertModalDialog(alertMessage);
+          await installDemoDialogRef.content.event.subscribe(async data => {
+            if(data && data.isConfirm) {
+                dashboards.splice(index, 1);
+                application.applicationBuilder.dashboards = [...dashboards];
+                await this.appService.update({
+                    id: application.id,
+                    applicationBuilder: application.applicationBuilder
+                } as any);
+
+                this.navigation.refresh();
+                // TODO?
+                // this.tabs.refresh();
+            }
+          });
     }
 
     async reorderDashboards(app, newDashboardsOrder) {

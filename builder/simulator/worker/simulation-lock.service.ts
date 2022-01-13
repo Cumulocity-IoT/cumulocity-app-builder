@@ -27,7 +27,7 @@ import {
 } from "rxjs/operators";
 import {Injectable} from "@angular/core";
 
-export const LOCK_TIMEOUT = 10000; // Milliseconds
+export const LOCK_TIMEOUT = 20000; // Milliseconds
 
 export interface LockStatus {
     sessionId: number,

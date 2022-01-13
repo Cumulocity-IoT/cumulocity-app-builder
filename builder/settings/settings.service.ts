@@ -84,6 +84,10 @@ export class SettingsService {
         return (!customProp || (customProp  && ( !customProp.dashboardCataglogEnabled || customProp.dashboardCataglogEnabled === "true")));
     }
     
+    async isSimulatorEnabled() {
+        const customProp = await this.getCustomProperties();
+        return (!customProp || (customProp  && ( !customProp.simulatorEnabled || customProp.simulatorEnabled === "true")));
+    }
     async saveCustomProperties(customProperties) {
         const creationAlert = new UpdateableAlert(this.alertService);
         creationAlert.update('Updating Custom Properties...');

@@ -71,7 +71,7 @@ export class SimulatorWorkerAPI {
 
         this._incomingOperationsSub = merge(
             of(-1), // Check the current value immediately
-            interval(5000), // Check every 5 seconds
+            interval(10000), // Check every 5 seconds
         ).pipe(
             debounceTime(100),
             //tap( t => console.log("ops = ", this.retrieveOperations)),

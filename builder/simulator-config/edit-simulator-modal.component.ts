@@ -131,12 +131,17 @@ export class EditSimulatorModalComponent implements OnInit {
         
         this.simulatorConfig.lastUpdated = new Date().toISOString();
 
+        // Patch Fix for alternate config
+        if(this.simulatorConfig.config.alternateConfigs && this.simulatorConfig.config.alternateConfigs.operations && 
+            this.simulatorConfig.config.alternateConfigs.operations.length > 0) {
+            this.simulatorConfig.config.alternateConfigs.operations[0].deviceId = this.simulatorConfig.config.deviceId;
+        }
+
         if (matchingIndex > -1) {
             app.applicationBuilder.simulators[matchingIndex] = this.simulatorConfig;
         } else {
             app.applicationBuilder.simulators.push(this.simulatorConfig)
         }
-
 
         await this.appService.update({
             id: app.id,
