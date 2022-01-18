@@ -194,7 +194,7 @@ export class SimulatorManagerService {
     }
 
     createInstance(simulatorConfig: SimulatorConfig): DeviceSimulator | undefined {
-        if (!simulatorConfig.started) {
+        if (!simulatorConfig.started || simulatorConfig.serverSide) {
             return undefined;
         }
 

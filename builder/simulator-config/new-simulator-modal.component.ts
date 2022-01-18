@@ -26,7 +26,7 @@ import {
 } from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap/modal';
 import { WizardComponent } from "../../wizard/wizard.component";
-import { InventoryService, ApplicationService, IManagedObject } from '@c8y/client';
+import { InventoryService, ApplicationService, IManagedObject, FetchClient } from '@c8y/client';
 import { AppIdService } from "../app-id.service";
 import { SimulationStrategyConfigComponent, SimulationStrategyFactory } from "../simulator/simulation-strategy";
 import { SimulationStrategiesService } from "../simulator/simulation-strategies.service";
@@ -54,17 +54,21 @@ export class NewSimulatorModalComponent {
     numberOfDevice: number | 0;
     isGroup: boolean = false;
     configFromFile: any;
+    runOnServer: boolean = false;
+    isMSExist: boolean = false;
+    isMSCheckSpin: boolean = false;
 
     constructor(
         private simSvc: SimulatorCommunicationService,
         public bsModalRef: BsModalRef, public simulationStrategiesService: SimulationStrategiesService,
         private resolver: ComponentFactoryResolver, private injector: Injector, private inventoryService: InventoryService,
-        private appService: ApplicationService, private appIdService: AppIdService
-    ) { }
+        private appService: ApplicationService, private appIdService: AppIdService, private fetchClient: FetchClient
+    ) {}
 
     openSimulatorConfig() {
         this.wizard.selectStep('config');
 
+        this.verifySimulatorMicroServiceStatus();
         const metadata = this.selectedStrategyFactory.getSimulatorMetadata();
 
         this.configWrapper.clear();
@@ -154,7 +158,8 @@ export class NewSimulatorModalComponent {
             name: this.simulatorName,
             type: metadata.name,
             config: this.newConfig,
-            lastUpdated: new Date().toISOString()
+            lastUpdated: new Date().toISOString(),
+            serverSide: (this.runOnServer ? true: false)
         };
         simulators.push(newSimulatorObject);
         appServiceData.applicationBuilder.simulators = simulators;
@@ -237,5 +242,14 @@ export class NewSimulatorModalComponent {
             }
         } catch (e) { }
         return false;
+    }
+
+    private async verifySimulatorMicroServiceStatus() {
+        this.isMSCheckSpin = true;
+        const response = await this.fetchClient.fetch('service/simulator-microservice/health'); 
+        const data = await response.json()
+        if(data && data.status && data.status === "UP") { this.isMSExist = true;}
+        else { this.isMSExist = false;}
+        this.isMSCheckSpin = false;
     }
 }

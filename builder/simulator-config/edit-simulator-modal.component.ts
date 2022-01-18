@@ -26,7 +26,7 @@ import {
     ComponentFactory
 } from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap/modal';
-import {ApplicationService} from '@c8y/client';
+import {ApplicationService, FetchClient} from '@c8y/client';
 import {AppIdService} from "../app-id.service";
 import {SimulatorConfig} from "../simulator/simulator-config";
 import {SimulationStrategiesService} from "../simulator/simulation-strategies.service";
@@ -41,11 +41,14 @@ export class EditSimulatorModalComponent implements OnInit {
     @ViewChild("configWrapper", { read: ViewContainerRef, static: true }) configWrapper: ViewContainerRef;
     simulatorConfig: SimulatorConfig;
 
+    isMSExist: boolean = false;
+    isMSCheckSpin: boolean = false;
+
     constructor(
         private simSvc: SimulatorCommunicationService,
         public bsModalRef: BsModalRef, private simulationStrategiesService: SimulationStrategiesService,
         private resolver: ComponentFactoryResolver, private injector: Injector,
-        private appService: ApplicationService, private appIdService: AppIdService
+        private appService: ApplicationService, private appIdService: AppIdService, private fetchClient: FetchClient
     ) {}
 
     ngOnInit() {
@@ -59,6 +62,8 @@ export class EditSimulatorModalComponent implements OnInit {
             this.bsModalRef.hide();
             return;
         }
+
+        this.verifySimulatorMicroServiceStatus();
         // For exisitng simulators
         if(this.simulatorConfig.config && !this.simulatorConfig.config.deviceName) {
             this.simulatorConfig.config.deviceName = this.simulatorConfig.config.deviceId;
@@ -160,5 +165,14 @@ export class EditSimulatorModalComponent implements OnInit {
     }
     cancelEdit() {
         this.bsModalRef.hide();
+    }
+
+    private async verifySimulatorMicroServiceStatus() {
+        this.isMSCheckSpin = true;
+        const response = await this.fetchClient.fetch('service/simulator-microservice/health'); 
+        const data = await response.json()
+        if(data && data.status && data.status === "UP") { this.isMSExist = true;}
+        else { this.isMSExist = false;}
+        this.isMSCheckSpin = false;
     }
 }
