@@ -32,6 +32,7 @@ import {SimulatorConfig} from "../simulator/simulator-config";
 import {SimulationStrategiesService} from "../simulator/simulation-strategies.service";
 import {SimulatorCommunicationService} from "../simulator/mainthread/simulator-communication.service";
 import * as _ from 'lodash';
+import { SimulatorNotificationService } from './simulatorNotification.service';
 
 @Component({
     templateUrl: './edit-simulator-modal.component.html'
@@ -48,7 +49,8 @@ export class EditSimulatorModalComponent implements OnInit {
         private simSvc: SimulatorCommunicationService,
         public bsModalRef: BsModalRef, private simulationStrategiesService: SimulationStrategiesService,
         private resolver: ComponentFactoryResolver, private injector: Injector,
-        private appService: ApplicationService, private appIdService: AppIdService, private fetchClient: FetchClient
+        private appService: ApplicationService, private appIdService: AppIdService, private fetchClient: FetchClient,
+        private simulatorNotificationService: SimulatorNotificationService
     ) {}
 
     ngOnInit() {
@@ -153,6 +155,13 @@ export class EditSimulatorModalComponent implements OnInit {
             applicationBuilder: app.applicationBuilder
         } as any);
 
+        this.simulatorNotificationService.post({
+            id: app.id,
+            name: app.name,
+            tenant: (app.owner && app.owner.tenant && app.owner.tenant.id ? app.owner.tenant.id : ''),
+            type: app.type,
+            simulator: this.simulatorConfig
+        });
         // We could just wait for them to refresh, but it's nicer to instantly refresh
         await this.simSvc.simulator.checkForSimulatorConfigChanges();
 

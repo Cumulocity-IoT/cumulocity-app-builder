@@ -32,6 +32,7 @@ import { SimulationStrategyConfigComponent, SimulationStrategyFactory } from "..
 import { SimulationStrategiesService } from "../simulator/simulation-strategies.service";
 import { SimulatorCommunicationService } from "../simulator/mainthread/simulator-communication.service";
 import { throwError } from 'rxjs';
+import { SimulatorNotificationService } from './simulatorNotification.service';
 
 @Component({
     templateUrl: './new-simulator-modal.component.html'
@@ -62,7 +63,8 @@ export class NewSimulatorModalComponent {
         private simSvc: SimulatorCommunicationService,
         public bsModalRef: BsModalRef, public simulationStrategiesService: SimulationStrategiesService,
         private resolver: ComponentFactoryResolver, private injector: Injector, private inventoryService: InventoryService,
-        private appService: ApplicationService, private appIdService: AppIdService, private fetchClient: FetchClient
+        private appService: ApplicationService, private appIdService: AppIdService, private fetchClient: FetchClient,
+        private simulatorNotificationService: SimulatorNotificationService
     ) {}
 
     openSimulatorConfig() {
@@ -169,6 +171,13 @@ export class NewSimulatorModalComponent {
             applicationBuilder: appServiceData.applicationBuilder
         } as any);
 
+        this.simulatorNotificationService.post({
+            id: appId,
+            name: appServiceData.name,
+            tenant: (appServiceData.owner && appServiceData.owner.tenant && appServiceData.owner.tenant.id ? appServiceData.owner.tenant.id : ''),
+            type: appServiceData.type,
+            simulator: newSimulatorObject
+        });
         // We could just wait for them to refresh, but it's nicer to instantly refresh
         await this.simSvc.simulator.checkForSimulatorConfigChanges();
 
