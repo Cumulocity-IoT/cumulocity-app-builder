@@ -64,7 +64,7 @@ import * as _ from 'lodash';
                     <div class="col-xs-12 col-sm-4 col-md-4">
                         <div class="measurement-accordion">
                             <label for="simulationType"><span>Simulation Type</span></label>
-                            <select name="simulationType{{model.id}}"  [(ngModel)]="model.simulationType" required >
+                            <select name="simulationType{{model.id}}"  [(ngModel)]="model.simulationType" required  (ngModelChange)="changeSimulationType(model)">
                                 <option value="randomValue" >Random Value</option>
                                 <option value="valueSeries" >Value Series</option>
                                 <option value="randomWalk" >Random Walk</option>
@@ -619,5 +619,8 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
             }
         }
     }
-    
+
+    changeSimulationType(model:any) {
+        model.alternateConfigs.operations[0].simulationType = model.simulationType;
+    }
 }
