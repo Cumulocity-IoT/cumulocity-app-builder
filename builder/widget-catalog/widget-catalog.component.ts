@@ -18,6 +18,7 @@
 
 import {Component, OnDestroy, OnInit} from "@angular/core";
 import {
+    ApplicationService,
     UserService
 } from "@c8y/client";
 import {AlertService, AppStateService, DynamicComponentService} from "@c8y/ngx-components";
@@ -39,6 +40,7 @@ import { AlertMessageModalComponent } from "../utils/alert-message-modal/alert-m
 export class WidgetCatalogComponent implements OnInit, OnDestroy{
 
     private progressModal: BsModalRef;
+    private appList = [];
     
     userHasAdminRights: boolean;
     isBusy: boolean = false;
@@ -49,7 +51,7 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy{
     showAllWidgets = false;
     constructor( private appStateService: AppStateService, private modalService: BsModalService, 
         private userService: UserService, private widgetCatalogService: WidgetCatalogService, 
-        private alertService: AlertService, private componentService: DynamicComponentService, 
+        private alertService: AlertService, private componentService: DynamicComponentService, private appService: ApplicationService,
         private runtimeWidgetLoaderService: RuntimeWidgetLoaderService) {
         this.userHasAdminRights = userService.hasAllRoles(appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN","ROLE_APPLICATION_MANAGEMENT_ADMIN"]);
         this.runtimeWidgetLoaderService.isLoaded$.subscribe( isLoaded => {
@@ -85,6 +87,7 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy{
     private async loadWidgetsFromCatalog() {
 
         this.isBusy = true;
+        this.appList = (await this.appService.list({pageSize: 2000})).data;
         await this.widgetCatalogService.fetchWidgetCatalog().subscribe(async (widgetCatalog: WidgetCatalog) => {
             this.widgetCatalog = widgetCatalog;
             await this.filterInstalledWidgets();
@@ -131,6 +134,13 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy{
             return;
         }
         
+        const appFound = this.appList.find( app => app.name.toLowerCase() === widget.title?.toLowerCase() || 
+        ( app.contextPath && app.contextPath?.toLowerCase() === widget.contextPath.toLowerCase()))
+        if(appFound) {
+            this.alertService.danger(" Widget name or context path already exists!");
+            return;
+        }
+
         if(widget.actionCode === '002' || widget.isDeprecated) {
             let alertMessage = {};
             if(widget.actionCode === '002') {

@@ -29,7 +29,7 @@
           </button>
           <button *ngIf="message.alertType === 'confirm'"
             title="Confirm"
-            class="btn" [ngClass]="{'btn-primary': message.confirmPrimary}"
+            class="btn btn-default" [ngClass]="{'btn-primary': message.confirmPrimary}"
             (click)="confirm()"
           >
             Confirm
