@@ -29,24 +29,28 @@ import { Alert, AlertService } from "@c8y/ngx-components";
 // import { RuntimeWidgetInstallerService } from "cumulocity-runtime-widget-loader";
 import { AppBuilderExternalAssetsService } from 'app-builder-external-assets';
 import { DashboardConfig } from "builder/application-config/dashboard-config.component";
+import { RuntimeWidgetInstallerService } from "cumulocity-runtime-widget-loader";
 
 @Injectable()
 export class TemplateCatalogService {
 
     private GATEWAY_URL = '';
     private CATALOG_LABCASE_ID = '';
+    private GATEWAY_URL_GitHubAsset = '';
+    private GATEWAY_URL_GitHubAPI = '';
+    private dashboardCatalogPath = '/dashboardCatalog/catalog.json';
 
     constructor(private http: HttpClient, private inventoryService: InventoryService,
         private appService: ApplicationService, private navigation: AppBuilderNavigationService,
         private binaryService: InventoryBinaryService, private alertService: AlertService,
-   //     private runtimeWidgetInstallerService: RuntimeWidgetInstallerService,
+        private runtimeWidgetInstallerService: RuntimeWidgetInstallerService,
         private externalService: AppBuilderExternalAssetsService) {
-        this.GATEWAY_URL = this.externalService.getURL('DBCATALOG', 'gatewayURL');
-        this.CATALOG_LABCASE_ID = this.externalService.getURL('DBCATALOG', 'labcaseId');
+        this.GATEWAY_URL_GitHubAPI = this.externalService.getURL('GITHUB','gatewayURL_Github');
+        this.GATEWAY_URL_GitHubAsset =  this.externalService.getURL('GITHUB','gatewayURL_GitHubAsset');
     }
 
     getTemplateCatalog(): Observable<TemplateCatalogEntry[]> {
-        return this.http.get(`${this.GATEWAY_URL}${this.CATALOG_LABCASE_ID}`).pipe(map(response => {
+        return this.http.get(`${this.GATEWAY_URL_GitHubAPI}${this.dashboardCatalogPath}`).pipe(map(response => {
             if (!has(response, 'catalog')) {
                 console.error('Failed to load catalog');
                 return undefined;
@@ -69,20 +73,24 @@ export class TemplateCatalogService {
     }
 
     getTemplateDetails(dashboardId: string): Observable<TemplateDetails> {
-        return this.http.get(`${this.GATEWAY_URL}${dashboardId}`).pipe(map((dashboard: TemplateDetails) => {
+        return this.http.get(`${this.GATEWAY_URL_GitHubAPI}${dashboardId}`).pipe(map((dashboard: TemplateDetails) => {
             return dashboard;
         }));
     }
 
     async installWidget(binary: Blob) {
-     //   await this.runtimeWidgetInstallerService.installWidget(binary, (msg, type) => { });
+        await this.runtimeWidgetInstallerService.installWidget(binary, (msg, type) => { });
         this.alertService.success("Widget Added! Page will be refreshed once dashbaord is saved...");
     }
 
     downloadBinary(binaryId: string): Observable<ArrayBuffer> {
-        return this.http.get(`${this.GATEWAY_URL}${binaryId}`, {
+        return this.http.get(`${this.GATEWAY_URL_GitHubAsset}${binaryId}`, {
             responseType: 'arraybuffer'
         });
+    }
+
+    getGithubURL(relativePath: string){
+       return `${this.GATEWAY_URL_GitHubAPI}${relativePath}`;
     }
 
     uploadImage(image: File): Promise<string> {

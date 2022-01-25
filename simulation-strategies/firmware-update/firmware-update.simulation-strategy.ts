@@ -26,8 +26,7 @@ import {InventoryService, OperationService, OperationStatus, Realtime} from "@c8
 import {SimulatorConfig, DtdlSimulationModel} from "../../builder/simulator/simulator-config";
 
 import {DeviceSimulator} from "../../builder/simulator/device-simulator";
-import {from, interval, Subscription} from "rxjs";
-import {filter, flatMap, switchMap} from "rxjs/operators";
+
 
 @SimulationStrategy({
     name: "Firmware Update",

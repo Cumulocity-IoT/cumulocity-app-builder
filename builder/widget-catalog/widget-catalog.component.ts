@@ -137,17 +137,19 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy{
                 alertMessage = {
                     title: 'Installation Confirmation',
                     description: `${widget.title} is not supported by current version of application builder and may not work properly.
-                    Click on confirm if you would like to proceed further.`,
+                    Do you want to proceed?`,
                     type: 'warning',
-                    alertType: 'confirm' //info|confirm
+                    alertType: 'confirm', //info|confirm
+                    confirmPrimary: false //confirm Button is primary
                   }
             } else {
                 alertMessage = {
                     title: 'Installation Confirmation',
                     description: `${widget.title} is deprecated. Please refer documentation for more detail.
-                    Click on confirm if you would like to proceed with installation.`,
+                    Do you want to proceed?`,
                     type: 'warning',
-                    alertType: 'confirm' //info|confirm
+                    alertType: 'confirm', //info|confirm
+                    confirmPrimary: false //confirm Button is primary
                   }
             }
             

@@ -15,7 +15,7 @@
         <div class="alert-footer" >
           <button *ngIf="message.alertType === 'confirm'"
             title="Cancel"
-            class="btn btn-default"
+            class="btn btn-default" [ngClass]="{'btn-primary': !message.confirmPrimary}"
             (click)="dismiss()"
           >
             Cancel
@@ -29,7 +29,7 @@
           </button>
           <button *ngIf="message.alertType === 'confirm'"
             title="Confirm"
-            class="btn btn-primary"
+            class="btn" [ngClass]="{'btn-primary': message.confirmPrimary}"
             (click)="confirm()"
           >
             Confirm

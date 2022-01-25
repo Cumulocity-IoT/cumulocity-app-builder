@@ -111,7 +111,8 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
             title: 'Delete Dashboard',
             description: `You are about to delete this dashboard. This operation is irreversible. Do you want to proceed?`,
             type: 'danger',
-            alertType: 'confirm' //info|confirm
+            alertType: 'confirm', //info|confirm,
+            confirmPrimary: true //confirm Button is primary
           }
           const installDemoDialogRef = this.alertModalDialog(alertMessage);
           await installDemoDialogRef.content.event.subscribe(async data => {

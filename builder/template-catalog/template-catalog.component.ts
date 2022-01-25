@@ -91,6 +91,11 @@ export class TemplateCatalogModalComponent implements OnInit {
             this.hideLoadingIndicator();
             this.templates = catalog;
             this.filterTemplates =  (this.templates ? this.templates : []);
+            this.filterTemplates.forEach( template => {
+                if(template.thumbnail && template?.thumbnail != '') {
+                    template.thumbnail = this.catalogService.getGithubURL(template.thumbnail);
+                }
+            })
         }, error => {
             this.alertService.danger("There is some technical error! Please try after sometime.");
             this.hideLoadingIndicator();
@@ -108,6 +113,9 @@ export class TemplateCatalogModalComponent implements OnInit {
         this.catalogService.getTemplateDetails(template.dashboard).subscribe(templateDetails => {
             this.hideLoadingIndicator();
             this.templateDetails = templateDetails;
+            if(this.templateDetails.preview) {
+                this.templateDetails.preview = this.catalogService.getGithubURL(this.templateDetails.preview);
+            }
             this.updateDepedencies();
         });
     }
@@ -219,7 +227,8 @@ export class TemplateCatalogModalComponent implements OnInit {
             const blob = new Blob([data], {
                 type: 'application/zip'
             });
-            const fileOfBlob = new File([blob], dependency.fileName);
+            const fileName = dependency.link.replace(/^.*[\\\/]/, '');
+            const fileOfBlob = new File([blob], fileName);
             this.catalogService.installWidget(fileOfBlob).then(() => {
                 dependency.isInstalled = true;
                 this.isReloadRequired = true;
@@ -262,7 +271,7 @@ export class TemplateCatalogModalComponent implements OnInit {
 
     downloadDTDL(uri: string) {
         const dtdlLink = document.createElement("a");
-        dtdlLink.href = uri;
+        dtdlLink.href = this.catalogService.getGithubURL(uri);;
         document.body.appendChild(dtdlLink);
         dtdlLink.click();
         document.body.removeChild(dtdlLink);
@@ -275,5 +284,4 @@ export class TemplateCatalogModalComponent implements OnInit {
         } 
 
     }
-
 }

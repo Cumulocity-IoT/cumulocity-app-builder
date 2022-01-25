@@ -141,9 +141,10 @@ export class MyWidgetsComponent implements OnInit{
             const alertMessage = {
                 title: 'Update Confirmation',
                 description: `${widget.title} is not supported by current version of application builder and may not work properly.
-                Click on confirm if you would like to proceed further.`,
+                Do you want to proceed?`,
                 type: 'warning',
-                alertType: 'confirm' //info|confirm
+                alertType: 'confirm', //info|confirm
+                confirmPrimary: false //confirm Button is primary
               }
               const installDemoDialogRef = this.alertModalDialog(alertMessage);
               await installDemoDialogRef.content.event.subscribe(async data => {

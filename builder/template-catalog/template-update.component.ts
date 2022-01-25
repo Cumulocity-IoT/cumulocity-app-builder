@@ -59,7 +59,9 @@ export class TemplateUpdateModalComponent implements OnInit {
                 templateDetails.input.devices = this.dashboardConfig.templateDashboard.devices ? this.dashboardConfig.templateDashboard.devices : [];
                 templateDetails.input.images = this.dashboardConfig.templateDashboard.binaries ? this.dashboardConfig.templateDashboard.binaries : [];
                 templateDetails.input.binaries = this.dashboardConfig.templateDashboard.staticBinaries ? this.dashboardConfig.templateDashboard.staticBinaries : [];
-
+                if(templateDetails.preview) {
+                    templateDetails.preview = this.catalogService.getGithubURL(templateDetails.preview);
+                }
                 this.templateDetails = templateDetails;
             });
     }
