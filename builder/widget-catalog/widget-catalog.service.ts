@@ -48,7 +48,8 @@ export class WidgetCatalogService {
       });
     }
 
-    isCompatiblieVersion(widget: WidgetModel) {
+    isCompatiblieVersion(widget: any) {
+      if(!widget || !widget.requiredPlatformVersion ) return false;
       return semver.satisfies(this.C8Y_VERSION, widget.requiredPlatformVersion);
     }
 

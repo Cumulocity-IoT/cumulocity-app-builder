@@ -76,13 +76,13 @@ import * as _ from 'lodash';
                     <div class="col-xs-12 col-sm-4 col-md-4" *ngIf="!model.isFieldModel && model.simulationType !== 'positionUpdate' && model.simulationType !== 'eventCreation'">
                         <div class="measurement-accordion">
                             <label for="fragment"><span>Fragment</span></label>
-                            <input type="text" class="form-control"  name="fragment{{model.id}}" placeholder="e.g. temperature_measurement (required)" required autofocus [(ngModel)]="model.fragment">
+                            <input type="text" class="form-control"  name="fragment{{model.id}}" placeholder="e.g. temperature_measurement (required)" required autofocus [(ngModel)]="model.fragment" (ngModelChange)="changeFragment(model)">
                         </div>
                     </div>
                     <div class="col-xs-12 col-sm-4 col-md-4" *ngIf="model.simulationType !== 'positionUpdate' && model.simulationType !== 'eventCreation'">
                         <div class="measurement-accordion">
                             <label for="series"><span>Series</span></label>
-                            <input type="text" class="form-control" name="series{{model.id}}" placeholder="e.g. T (required)" required autofocus [(ngModel)]="model.series">
+                            <input type="text" class="form-control" name="series{{model.id}}" placeholder="e.g. T (required)" required autofocus [(ngModel)]="model.series" (ngModelChange)="changeSeries(model)">
                         </div>
                     </div>
 
@@ -338,7 +338,7 @@ import * as _ from 'lodash';
                     <div class="col-xs-12 col-sm-4 col-md-4" *ngIf="model.simulationType !== 'positionUpdate' && model.simulationType !== 'eventCreation'">
                         <div class="measurement-accordion">
                             <label for="unit"><span>Unit</span></label>
-                            <input type="text" class="form-control"  name="unit{{model.id}}" placeholder="e.g. C (optional)" [(ngModel)]="model.unit">
+                            <input type="text" class="form-control"  name="unit{{model.id}}" placeholder="e.g. C (optional)" [(ngModel)]="model.unit"  (ngModelChange)="changeUnit(model)">
                         </div>        
                     </div>
                 </accordion-group>
@@ -559,7 +559,7 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
         };
         model.measurementName = (content.displayName && content.displayName.constructor === Object ? content.displayName.en : content.displayName);
         model.fragment = ( typeLength > 0 ? content['@type'][typeLength - 1] : content['@type']);
-        model.id = (content['@id'] ?  content['@id']: Math.floor(Math.random() * 1000000));
+        model.id = (content['@id'] ?  content['@id']: Math.floor(Math.random() * 1000000).toString());
         model.schema = content.schema;
         model.series = content.name;
         model.unit = content.unit;
@@ -586,7 +586,7 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
                     };
                     fieldModel.measurementName = model.measurementName + " : " + field.displayName;
                     fieldModel.fragment = model.fragment;
-                    fieldModel.id = (field['@id'] ?  field['@id']: Math.floor(Math.random() * 1000000));
+                    fieldModel.id = (field['@id'] ?  field['@id']: Math.floor(Math.random() * 1000000).toString());
                     fieldModel.schema = field.schema;
                     fieldModel.series = content.name +":" + field.name;
                     fieldModel.unit = field.unit;
@@ -620,7 +620,17 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
         }
     }
 
+    // Patch fix for server side simulators
     changeSimulationType(model:any) {
         model.alternateConfigs.operations[0].simulationType = model.simulationType;
+    }
+    changeFragment(model:any) {
+        model.alternateConfigs.operations[0].fragment = model.fragment;
+    }
+    changeSeries(model:any) {
+        model.alternateConfigs.operations[0].series = model.series;
+    }
+    changeUnit(model:any) {
+        model.alternateConfigs.operations[0].unit = model.unit;
     }
 }

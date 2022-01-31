@@ -137,16 +137,21 @@
             <div *ngIf="templateDetails.input?.dependencies?.length > 0">
                 <label for="Depedencies"><span>Dependencies:</span></label>
                 <ul class="list-group">
-                    <li *ngFor="let dependency of templateDetails.input.dependencies; let i = index"
-                        class="list-group-item">
-                        <span *ngIf="dependency.isInstalled" class="badge badge-success">INSTALLED</span>
-                        <span *ngIf="!dependency.isInstalled" class="badge badge-danger">NOT INSTALLED</span>
-                        <a href="{{dependency.repository}}" target="_blank">{{dependency.title}}</a>
-                        <button *ngIf="!dependency.isInstalled" type="button" style="margin-left: 10px"
-                            class="btn btn-primary btn-xs btn-icon" (click)="installDependency(dependency)">
-                            <i class="fa fa-cloud-download"></i>
-                            Install</button>
+                    <ng-container *ngFor="let dependency of templateDetails.input.dependencies; let i = index" >
+                    <li *ngIf="dependency.visible" class="list-group-item">
+                            <span *ngIf="dependency.isInstalled" class="badge badge-success">INSTALLED</span>
+                            <span *ngIf="!dependency.isInstalled" class="badge badge-danger">NOT INSTALLED</span>
+                            <a href="{{dependency.repository}}" target="_blank">{{dependency.title}}</a>
+                            <button *ngIf="!dependency.isInstalled && dependency.isSupported" type="button" style="margin-left: 10px"
+                                class="btn btn-primary btn-xs btn-icon" (click)="installDependency(dependency)">
+                                <i class="fa fa-cloud-download"></i>
+                                Install</button>
+                            <button *ngIf="!dependency.isInstalled && !dependency.isSupported" disabled type="button" style="margin-left: 10px"
+                                class="btn btn-xs btn-icon">
+                                <i class="fa fa-warning"></i>
+                                Not supported!</button>
                     </li>
+                    </ng-container>
                 </ul>
             </div>
         </div>

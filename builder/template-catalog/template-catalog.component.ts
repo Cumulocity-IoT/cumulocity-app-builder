@@ -27,6 +27,7 @@ import { Observable, Subject } from "rxjs";
 import { ProgressIndicatorModalComponent } from "../utils/progress-indicator-modal/progress-indicator-modal.component";
 
 import './cumulocity.json';
+import { WidgetCatalogService } from "../../builder/widget-catalog/widget-catalog.service";
 
 enum TemplateCatalogStep {
     CATALOG,
@@ -77,7 +78,7 @@ export class TemplateCatalogModalComponent implements OnInit {
 
     constructor(private modalService: BsModalService, private modalRef: BsModalRef,
         private catalogService: TemplateCatalogService, private componentService: DynamicComponentService,
-        private alertService: AlertService) {
+        private alertService: AlertService, private widgetCatalogService: WidgetCatalogService) {
         this.onSave = new Subject();
     }
 
@@ -127,6 +128,7 @@ export class TemplateCatalogModalComponent implements OnInit {
         }
 
         this.templateDetails.input.dependencies.forEach(dependency => {
+            this.verifyWidgetCompatibility(dependency);
             this.componentService.getById$(dependency.id).subscribe(widget => {
                 dependency.isInstalled = (widget != undefined);
             });
@@ -267,6 +269,19 @@ export class TemplateCatalogModalComponent implements OnInit {
 
     private isNameAvailable(): boolean {
         return this.dashboardConfiguration.dashboardName && this.dashboardConfiguration.dashboardName.length >= 0;
+    }
+
+    private verifyWidgetCompatibility(dependency: DependencyDescription) {
+        if(this.widgetCatalogService.isCompatiblieVersion(dependency)) {
+            dependency.isSupported = true;
+            dependency.visible = true;
+        } else {
+            const differentDependencyVersion = this.templateDetails.input.dependencies.find( widget => widget.id === dependency.id && widget.link !== dependency.link);
+            dependency.isSupported = false;
+            if(differentDependencyVersion) {
+                dependency.visible = false;
+            } else { dependency.visible = true;}
+        }
     }
 
     downloadDTDL(uri: string) {

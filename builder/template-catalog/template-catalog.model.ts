@@ -77,6 +77,9 @@ export interface DependencyDescription {
     link: string;
     isInstalled?: boolean;
     fileName?: string;
+    requiredPlatformVersion?: string;
+    isSupported?: boolean;
+    visible?: boolean;
 }
 
 export interface CumulocityDashboard {
