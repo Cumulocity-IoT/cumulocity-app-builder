@@ -27,6 +27,7 @@
             <div class="col col-overflow" title="{{item.value.author}}">{{item.value.author}}</div>
             <div class="action-icon text-info" title="Preview"><i c8yIcon="eye" (click)="preview(item.value.preview)"></i></div>
             <div class="action-icon text-info" title="Documentation"><i c8yIcon="document-with-code" (click)="openDocumentation(item.value.repository)"></i></div>
+            <div *ngIf="userHasAdminRights" class="action-icon text-danger" title="Uninstall Widget"><i c8yIcon="minus-circle" (click)="uninstallWidget(item.value)"></i></div>
         </ng-template>
 
         <div class="card-group col-xs-12 col-sm-12 col-md-12 col-lg-12">
@@ -93,6 +94,7 @@
                                 <div class="col">Author</div>
                                 <div class="invisible widget-icon text-info"  style="width: 20px;"><i [c8yIcon]="eye"></i></div>
                                 <div class="invisible widget-icon text-success" style="width: 20px;"><i [c8yIcon]="external-link"></i></div>
+                                <div class="invisible widget-icon text-success" style="width: 20px;"><i [c8yIcon]="minus-circle"></i></div>
                             </div>
                             <bs-sortable [ngModel]="filterWidgets" [itemTemplate]="itemTemplate"
                                 itemClass="sortable-item" itemActiveClass="sortable-item-active"

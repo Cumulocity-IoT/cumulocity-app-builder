@@ -189,21 +189,33 @@ export class MyWidgetsComponent implements OnInit{
         }
 
         await this.widgetCatalog.widgets.forEach(async widget => {
-            const widgetObj = await new Promise<any>((resolve) => {
+           /*  const widgetObj = await new Promise<any>((resolve) => {
                 this.componentService.getById$(widget.id).subscribe(widgetObj => {
                     resolve(widgetObj);
                 });
-            });
-            widget.installed = (widgetObj != undefined);
+            }); */
             widget.isCompatible = this.widgetCatalogService.isCompatiblieVersion(widget);
             const appObj = this.appList.find( app => app.contextPath === widget.contextPath);
             widget.installedVersion = (appObj && appObj.manifest  && appObj.manifest.version ? appObj.manifest.version : '');
+            widget.installed =  appObj && this.findInstalledWidget(widget); //(widgetObj != undefined);
             if(widget.installed && !widget.isReloadRequired && this.isUpdateAvailable(widget) ) {
                this.isUpdateRequired = true;
             }
             this.actionFlag(widget);
         });
         this.widgetCatalog.widgets = this.widgetCatalog.widgets.filter(widget => widget.installed);
+    }
+
+    // if same widget exists in widget catalog json more than one time with different version
+    private findInstalledWidget(widget: WidgetModel) {
+        const checkWidgetInCatalog = this.widgetCatalog.widgets.filter( widgetCatalogWidget => widgetCatalogWidget.contextPath === widget.contextPath);
+        if(checkWidgetInCatalog && checkWidgetInCatalog.length > 1){
+            const isWidgetInstalled = checkWidgetInCatalog.find( installObj => installObj.installed);
+            if(isWidgetInstalled) return false;
+
+           return this.widgetCatalogService.checkInstalledVersion(widget);       
+        }
+        return true;
     }
 
     isUpdateAvailable(widget: WidgetModel) {
@@ -233,4 +245,24 @@ export class MyWidgetsComponent implements OnInit{
         }
      }
 
+     async uninstallWidget(widget: WidgetModel) {
+        const alertMessage = {
+            title: 'Uninstall widget',
+            description: `You are about to uninstall ${widget.title}.
+            Do you want to proceed?`,
+            type: 'danger',
+            alertType: 'confirm', //info|confirm
+            confirmPrimary: true //confirm Button is primary
+          }
+          const installDemoDialogRef = this.alertModalDialog(alertMessage);
+          await installDemoDialogRef.content.event.subscribe(async data => {
+            if(data && data.isConfirm) {
+                const widgetAppObj = this.appList.find( app => app.contextPath === widget.contextPath)
+                if(widgetAppObj) {
+                    await this.appService.delete(widgetAppObj.id);
+                    this.reload();
+                }
+            }
+          });         
+     }
 }

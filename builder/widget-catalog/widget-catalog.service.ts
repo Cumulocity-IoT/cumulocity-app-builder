@@ -56,4 +56,10 @@ export class WidgetCatalogService {
     isLatestVersionAvailable(widget: WidgetModel) {
       return semver.lt(widget.installedVersion, widget.version);
     }
+
+    checkInstalledVersion(widget: WidgetModel) {
+      if(!widget.installedVersion) return true;
+      const major = '>=' + semver.major(widget.installedVersion) + '.0.0';
+      return semver.satisfies(widget.version, major);
+    }
 }
