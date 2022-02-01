@@ -25,6 +25,7 @@ import { HOOK_SIMULATION_STRATEGY_FACTORY } from '../../builder/simulator/device
 import { AccordionModule } from 'ngx-bootstrap/accordion';
 import {NgSelectModule} from "@ng-select/ng-select";
 import { DeviceSelectorModule } from '../../device-selector/device-selector.module';
+import { ButtonsModule } from "ngx-bootstrap/buttons";
 
 @NgModule({
     imports: [
@@ -32,7 +33,8 @@ import { DeviceSelectorModule } from '../../device-selector/device-selector.modu
         FormsModule,
         NgSelectModule,
         AccordionModule.forRoot(),
-        DeviceSelectorModule
+        DeviceSelectorModule,
+        ButtonsModule.forRoot()
     ],
     declarations: [
         DtdlSimulationStrategyConfigComponent

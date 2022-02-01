@@ -27,7 +27,7 @@ import * as _ from 'lodash';
 @Component({
     template: `
         <div class="row" *ngIf="!config.isEditMode">
-            <div class="col-xs-12 col-sm-6 col-md-6">
+            <div class="col-xs-12 col-sm-5 col-md-5">
                 <div class="form-group">
                     <label for="dtdlFile"><span>Upload a DTDL File</span></label>
                     <div style="display: inline-flex;">
@@ -38,16 +38,24 @@ import * as _ from 'lodash';
                 </div>
                 
             </div>
-             <div class="col-xs-12 col-sm-6 col-md-6">
+             <div class="col-xs-12 col-sm-4 col-md-4">
              <div class="form-group">
                 <label for="name"><span>Name</span></label>
                 <input type="text" class="form-control" id="name" name="name" placeholder="e.g. My First Simulator (required)" required autofocus [(ngModel)]="config.deviceName">
              </div>
             </div>
+            <div class="col-xs-12 col-sm-3 col-md-3">
+             <div class="form-group">
+                <label for="name"><span>Filter</span></label>
+                <button class="btn btn-xs" id="measurementFilterEnabled" name="measurementFilterEnabled" [(ngModel)]="measurementFilterEnabled" 
+                (ngModelChange)="measurementFilterEnabledChange()" 
+                btnCheckbox>{{measurementFilterEnabled? 'Telemetry' : 'All fields' }}</button>
+            </div>
+            </div>
             
         </div>
         <div class="form-group"  *ngIf="!config.isEditMode">
-             <label for="dtdlDevice"><span>Select Measurements</span></label>
+             <label for="dtdlDevice"><span>Select Measurements</span>  </label>
              <ng-select [items]="configModel" bindLabel="measurementName" name="measurementSelect" required [multiple]="true" [closeOnSelect]="false" [searchable]="true"
              placeholder="Select Measurements" [(ngModel)]="config.dtdlModelConfig" >
              </ng-select>
@@ -376,6 +384,7 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
     dtdlFile: FileList;
     isUploading = false;
     isError = false;
+    measurementFilterEnabled = true;
 
     constructor() {
         super();
@@ -510,6 +519,10 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
         return false;
     }
 
+    measurementFilterEnabledChange() {
+        this.processDTDL(this.dtdlFile);
+        this.preselectMeasurements();
+    }
 
     private processDTDL(dtdl: any) {
         this.declareConfig();
@@ -527,6 +540,7 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
     }
     private processDTDLMeasurement(dtdlM: any, deviceId?: string) {
         if(dtdlM && dtdlM.length > 0) {
+            const dtdlJSON: any = this.dtdlFile;
             dtdlM.forEach((content: any) => {
                 if(content['@type'].includes("Telemetry")) {
                     this.processTelemetry(content, deviceId);
@@ -537,12 +551,25 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
                             this.processTelemetry(content,deviceId);
                         } 
                     });
+                    if(content.schema && content.schema.length > 0){
+                        const locateContent = dtdlJSON.find( dtdlMsrmnt => dtdlMsrmnt['@id'] === content.schema);
+                        if(locateContent && locateContent.contents && locateContent.contents.length > 0) {
+                            const contents1stLevelObj = locateContent.contents;
+                            contents1stLevelObj.forEach((content1stLevel: any) => {
+                                if(content1stLevel['@type'].includes("Telemetry") || (!this.measurementFilterEnabled  && content1stLevel['@type'].includes("Property"))) {
+                                    const level2DisplayName =  (content1stLevel.displayName && content1stLevel.displayName.constructor === Object ? content1stLevel.displayName.en : content1stLevel.displayName);
+                                    const level1DisplayName = (content.displayName && content.displayName.constructor === Object ? content.displayName.en : content.displayName);
+                                    this.processTelemetry(content1stLevel,deviceId, (level1DisplayName ? level1DisplayName + ':' + level2DisplayName : level2DisplayName));
+                                } 
+                            });
+                        }
+                    }
                 }
             });
         }
     }
 
-    private processTelemetry(content: any, deviceId?: string) {
+    private processTelemetry(content: any, deviceId?: string, displayName?: string) {
         const typeLength = (Array.isArray(content['@type']) ? content['@type'].length : 0);
         const model: DtdlSimulationModel = {
             simulationType: 'randomValue',
@@ -557,7 +584,7 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
                 operations: []
             }
         };
-        model.measurementName = (content.displayName && content.displayName.constructor === Object ? content.displayName.en : content.displayName);
+        model.measurementName = (displayName  && displayName.length > 0 ? displayName : (content.displayName && content.displayName.constructor === Object ? content.displayName.en : content.displayName));
         model.fragment = ( typeLength > 0 ? content['@type'][typeLength - 1] : content['@type']);
         model.id = (content['@id'] ?  content['@id']: Math.floor(Math.random() * 1000000).toString());
         model.schema = content.schema;
