@@ -93,6 +93,7 @@ export class NewSimulatorModalComponent {
                 this.bsModalRef.setClass(componentRef.instance.config.modalSize);
             }
             this.newConfig.metadata = metadata;
+            componentRef.instance.config.isGroup = this.isGroup;
 
         }
     }

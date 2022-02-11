@@ -142,7 +142,6 @@ export class SimulatorManagerService {
         // make sure we only ping the simulators when there is new data
         //
         this.operations$ = this.simulatorWorkerAPI._incomingOperations.pipe(
-            //tap( data => console.log("MANAGER", data)),
             distinctUntilChanged((prev, curr) => deepEqual(prev, curr))
         );
 
@@ -170,13 +169,11 @@ export class SimulatorManagerService {
             if( simulatorConfig.type == "DTDL"){
                 for (let dtdlConfig of Array.from(simulatorConfig.config.dtdlModelConfig)) {
                     if( dtdlConfig.alternateConfigs && dtdlConfig.alternateConfigs.hasOwnProperty("opEnabled") && dtdlConfig.alternateConfigs.opEnabled) {
-                        //console.log(dtdlConfig.alternateConfigs.opEnabled);
                         turnOn = true;
                     }        
                 }
             } else {
                 if( simulatorConfig.config.alternateConfigs && simulatorConfig.config.alternateConfigs.hasOwnProperty("opEnabled") && simulatorConfig.config.alternateConfigs.opEnabled) {
-                    //console.log(simulatorConfig.config.alternateConfigs.opEnabled);
                     turnOn = true;
                 }    
             }

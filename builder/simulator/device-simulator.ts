@@ -78,7 +78,6 @@ export abstract class DeviceSimulator {
      * @returns true if operation succeeds
      */
     public async onOperation(param: any): Promise<boolean> {
-        console.log("SIM operation = ", param);
         return false;
     }
 

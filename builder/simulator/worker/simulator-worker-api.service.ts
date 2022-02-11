@@ -74,7 +74,6 @@ export class SimulatorWorkerAPI {
             interval(10000), // Check every 5 seconds
         ).pipe(
             debounceTime(100),
-            //tap( t => console.log("ops = ", this.retrieveOperations)),
             filter( t => this.retrieveOperations), //only go through if we need the calls
             switchMap(() => 
                 this.fetchClient.fetch('/devicecontrol/operations', {
@@ -86,7 +85,6 @@ export class SimulatorWorkerAPI {
                 })
             ),
             switchMap(res => res.json()),
-            //tap( d => console.log("data = ", d.operations)),
             map(data => data.operations)
         ).subscribe(ops => this._incomingOperations.next(ops));
     }

@@ -52,7 +52,6 @@ export class AppListComponent {
         
         this.userHasAdminRights = userService.hasRole(appStateService.currentUser.value, "ROLE_APPLICATION_MANAGEMENT_ADMIN")
         this.appListService.refreshAppList$.subscribe( () => {
-            console.log('subscribe refresh app list');
             this.getListOfApplications();
 
         });

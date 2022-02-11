@@ -27,27 +27,27 @@ import * as _ from 'lodash';
     template: `
         <div class="form-group">
             <label for="fragment"><span>Fragment</span></label>
-            <input type="text" class="form-control" id="fragment" name="fragment" placeholder="e.g. temperature_measurement (required)" required autofocus [(ngModel)]="config.fragment">
+            <input type="text" class="form-control" id="fragment" name="fragment" placeholder="e.g. temperature_measurement (required)" required autofocus [(ngModel)]="config.fragment" (ngModelChange)="changeFragment(config)">
         </div>
         <div class="form-group">
             <label for="series"><span>Series</span></label>
-            <input type="text" class="form-control" id="series" name="series" placeholder="e.g. T (required)" required autofocus [(ngModel)]="config.series">
+            <input type="text" class="form-control" id="series" name="series" placeholder="e.g. T (required)" required autofocus [(ngModel)]="config.series" (ngModelChange)="changeSeries(config)">
         </div>
         <div class="form-group">
             <label for="startingvalue"><span>Starting Value</span></label>
-            <input type="number" class="form-control" id="startingvalue" name="startingvalue" placeholder="e.g. 10 (required)" required [(ngModel)]="config.startingValue">
+            <input type="number" class="form-control" id="startingvalue" name="startingvalue" placeholder="e.g. 10 (required)" required [(ngModel)]="config.alternateConfigs.operations[0].startingValue">
         </div>
         <div class="form-group">
             <label for="maxdelta"><span>Maximum Change Amount</span></label>
-            <input type="number" class="form-control" id="maxdelta" name="maxdelta" min="0" placeholder="e.g. 10 (required)" required [(ngModel)]="config.maxDelta">
+            <input type="number" class="form-control" id="maxdelta" name="maxdelta" min="0" placeholder="e.g. 10 (required)" required [(ngModel)]="config.alternateConfigs.operations[0].maxDelta">
         </div>
         <div class="form-group">
             <label for="minvalue"><span>Minimum Value</span></label>
-            <input type="number" class="form-control" id="minvalue" name="minvalue" placeholder="e.g. 10 (required)" required [(ngModel)]="config.minValue">
+            <input type="number" class="form-control" id="minvalue" name="minvalue" placeholder="e.g. 10 (required)" required [(ngModel)]="config.alternateConfigs.operations[0].minValue">
         </div>
         <div class="form-group">
             <label for="maxvalue"><span>Maximum Value</span></label>
-            <input type="number" class="form-control" id="maxvalue" name="maxvalue" placeholder="e.g. 20 (required)" required [(ngModel)]="config.maxValue">
+            <input type="number" class="form-control" id="maxvalue" name="maxvalue" placeholder="e.g. 20 (required)" required [(ngModel)]="config.alternateConfigs.operations[0].maxValue">
         </div>
         <ng-container *ngIf="config.alternateConfigs.opEnabled">
             <div class="form-group">
@@ -56,7 +56,7 @@ import * as _ from 'lodash';
             </div>
         </ng-container>
 
-        <div class="form-group">
+        <div class="form-group" *ngIf="!config.isGroup">
             <label class="c8y-checkbox">
             <input name="opEnabled" type="checkbox" [(ngModel)]="config.alternateConfigs.opEnabled"/>
                 <span></span>
@@ -144,11 +144,11 @@ import * as _ from 'lodash';
 
         <div class="form-group">
             <label for="unit"><span>Unit</span></label>
-            <input type="text" class="form-control" id="unit" name="unit" placeholder="e.g. C (optional)" [(ngModel)]="config.unit">
+            <input type="text" class="form-control" id="unit" name="unit" placeholder="e.g. C (optional)" [(ngModel)]="config.unit" (ngModelChange)="changeUnit(config)">
         </div> 
          <div class="form-group">
             <label for="interval"><span>Interval (seconds)</span></label>
-            <input type="number" class="form-control" id="interval" name="interval" placeholder="e.g. 5 (required)" required [(ngModel)]="config.interval">
+            <input type="number" class="form-control" id="interval" name="interval" placeholder="e.g. 5 (required)" required [(ngModel)]="config.interval" (ngModelChange)="changeInterval(config)">
         </div>
     `,
     styles: [`
@@ -178,12 +178,11 @@ export class RandomWalkSimulationStrategyConfigComponent extends SimulationStrat
             fragment: "temperature_measurement",
             series: `${base}_series_${index}`,
             value: "10, 20, 30",
-            unit: "C",
+            unit: this.config.unit,
             alternateConfigs: undefined
         };
 
         this.config.alternateConfigs.operations.push(c);
-        //console.log(this.config.alternateConfigs.operations);
     }
 
     initializeConfig(existingConfig?: DtdlSimulationModel) {
@@ -225,4 +224,17 @@ export class RandomWalkSimulationStrategyConfigComponent extends SimulationStrat
         }
     }
 
+    // Patch fix for server side simulators
+    changeFragment(model:any) {
+        model.alternateConfigs.operations[0].fragment = model.fragment;
+    }
+    changeSeries(model:any) {
+        model.alternateConfigs.operations[0].series = model.series;
+    }
+    changeUnit(model:any) {
+        model.alternateConfigs.operations[0].unit = model.unit;
+    }
+    changeInterval(model:any) {
+        model.alternateConfigs.operations[0].interval = model.interval;
+    }
 }

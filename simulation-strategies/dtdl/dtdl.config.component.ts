@@ -187,7 +187,7 @@ import * as _ from 'lodash';
                         </ng-container>
                     </ng-container>
 
-                    <div class="col-xs-12 col-lg-12">
+                    <div class="col-xs-12 col-lg-12" *ngIf="!config.isGroup && model.simulationType !== 'positionUpdate' && model.simulationType !== 'eventCreation' ">
                         <div class="measurement-accordion">
                             <label class="c8y-checkbox">
                                 <input type="checkbox" name="opEnabled{{model.id}}" [(ngModel)]="model.alternateConfigs.opEnabled" (click)="checkDefaultOperation(model)"/>
@@ -354,7 +354,7 @@ import * as _ from 'lodash';
         </div>
         <div class="form-group">
             <label for="interval"><span>Interval (seconds)</span></label>
-            <input type="number" class="form-control" id="interval" name="interval" placeholder="e.g. 5 (required)" required [(ngModel)]="config.interval">
+            <input type="number" class="form-control" id="interval" name="interval" placeholder="e.g. 5 (required)" required [(ngModel)]="config.interval" (ngModelChange)="changeInterval(config)">
         </div>
     `,
     styles: [`
@@ -417,7 +417,6 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
     }
 
     public deleteDtDLOperation(model: DtdlSimulationModel, index:number) : void {
-        //console.log("remove ", model, index);
         if (_.has(model,"alternateConfigs") && _.has(model.alternateConfigs,"operations")) {
             let ops: Array<any> = _.get(model.alternateConfigs,"operations");
             ops.splice(index,1);
@@ -425,7 +424,6 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
     }
 
     public checkAlternateConfigs(target: DtdlSimulationModel) {
-        //console.log("checkAlternateConfigs",target);
         if (!this.hasOperations(target)) {
             target.alternateConfigs = {
                 opSource: "",
@@ -474,7 +472,6 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
         //we will create the config entries if old simulators are edited
         //duplication is to avoid changing old code.
         model.alternateConfigs.operations.push(c);
-        //console.log(model.alternateConfigs.operations);
     }
 
     fileUploaded(events){
@@ -659,5 +656,8 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
     }
     changeUnit(model:any) {
         model.alternateConfigs.operations[0].unit = model.unit;
+    }
+    changeInterval(model:any) {
+        model.alternateConfigs.operations[0].interval = model.interval;
     }
 }

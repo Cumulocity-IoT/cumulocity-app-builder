@@ -28,11 +28,11 @@ import { DtdlSimulationStrategyModule } from "simulation-strategies/dtdl/dtdl.si
     template: `
         <div class="form-group">
             <label for="fragment"><span>Fragment</span></label>
-            <input type="text" class="form-control" id="fragment" name="fragment" placeholder="e.g. temperature_measurement (required)" required autofocus [(ngModel)]="config.fragment">
+            <input type="text" class="form-control" id="fragment" name="fragment" placeholder="e.g. temperature_measurement (required)" required autofocus [(ngModel)]="config.fragment" (ngModelChange)="changeFragment(config)">
         </div>
         <div class="form-group">
             <label for="series"><span>Series</span></label>
-            <input type="text" class="form-control" id="series" name="series" placeholder="e.g. T (required)" required autofocus [(ngModel)]="config.series">
+            <input type="text" class="form-control" id="series" name="series" placeholder="e.g. T (required)" required autofocus [(ngModel)]="config.series" (ngModelChange)="changeSeries(config)">
         </div>
         <div class="form-group">
             <label for="value"><span>Wave Type</span></label>
@@ -57,7 +57,7 @@ import { DtdlSimulationStrategyModule } from "simulation-strategies/dtdl/dtdl.si
             </div>
         </ng-container>
 
-        <div class="form-group">
+        <div class="form-group" *ngIf="!config.isGroup">
             <label class="c8y-checkbox">
             <input name="opEnabled" type="checkbox" [(ngModel)]="config.alternateConfigs.opEnabled"/>
                 <span></span>
@@ -142,11 +142,11 @@ import { DtdlSimulationStrategyModule } from "simulation-strategies/dtdl/dtdl.si
 
         <div class="form-group">
             <label for="unit"><span>Unit</span></label>
-            <input type="text" class="form-control" id="unit" name="unit" placeholder="e.g. C (optional)" [(ngModel)]="config.unit">
+            <input type="text" class="form-control" id="unit" name="unit" placeholder="e.g. C (optional)" [(ngModel)]="config.unit" (ngModelChange)="changeUnit(config)">
         </div> 
          <div class="form-group">
             <label for="interval"><span>Interval (seconds)</span></label>
-            <input type="number" class="form-control" id="interval" name="interval" placeholder="e.g. 5 (required)" required [(ngModel)]="config.interval">
+            <input type="number" class="form-control" id="interval" name="interval" placeholder="e.g. 5 (required)" required [(ngModel)]="config.interval" (ngModelChange)="changeInterval(config)">
         </div>  
     `,
     styles: [`
@@ -178,13 +178,12 @@ export class WaveSimulationStrategyConfigComponent extends SimulationStrategyCon
             waveType: 'sine',
             height: 10,
             wavelength: 60,
-            unit: "C",
+            unit: this.config.unit,
             interval: 30,
             alternateConfigs: undefined
         };
 
         this.config.alternateConfigs.operations.push(c);
-        //console.log(this.config.alternateConfigs.operations);
     }
 
     initializeConfig(existingConfig?: DtdlSimulationModel) {
@@ -222,5 +221,19 @@ export class WaveSimulationStrategyConfigComponent extends SimulationStrategyCon
             copy.alternateConfigs = undefined;
             this.config.alternateConfigs.operations.push(copy);
         }
+    }
+
+    // Patch fix for server side simulators
+    changeFragment(model:any) {
+        model.alternateConfigs.operations[0].fragment = model.fragment;
+    }
+    changeSeries(model:any) {
+        model.alternateConfigs.operations[0].series = model.series;
+    }
+    changeUnit(model:any) {
+        model.alternateConfigs.operations[0].unit = model.unit;
+    }
+    changeInterval(model:any) {
+        model.alternateConfigs.operations[0].interval = model.interval;
     }
 }
