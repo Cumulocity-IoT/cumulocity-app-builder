@@ -152,7 +152,9 @@ export class NewSimulatorModalComponent {
         // Added by darpan to sync device id in alternateConfigs
         if(this.newConfig.alternateConfigs && this.newConfig.alternateConfigs.operations && 
             this.newConfig.alternateConfigs.operations.length > 0) {
-            this.newConfig.alternateConfigs.operations[0].deviceId = this.deviceId;
+                this.newConfig.alternateConfigs.operations.forEach( ops => {
+                    ops.deviceId = this.deviceId;
+                });
         }
         this.newConfig.deviceName = this.deviceName;
         this.newConfig.isGroup = this.isGroup;

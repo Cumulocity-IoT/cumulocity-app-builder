@@ -138,7 +138,9 @@ export class EditSimulatorModalComponent implements OnInit {
         // Patch Fix for alternate config
         if(this.simulatorConfig.config.alternateConfigs && this.simulatorConfig.config.alternateConfigs.operations && 
             this.simulatorConfig.config.alternateConfigs.operations.length > 0) {
-            this.simulatorConfig.config.alternateConfigs.operations[0].deviceId = this.simulatorConfig.config.deviceId;
+            this.simulatorConfig.config.alternateConfigs.operations.forEach( ops => {
+                ops.deviceId = this.simulatorConfig.config.deviceId;
+            });
         }
 
         if (matchingIndex > -1) {

@@ -20,6 +20,7 @@ import {Injectable} from "@angular/core";
 import * as fa from "fontawesome";
 import * as d3 from "d3-color";
 import * as delay from "delay";
+import { SettingsService } from "../settings/settings.service";
 declare const FontFace: any;
 
 /**
@@ -30,16 +31,24 @@ declare const FontFace: any;
 export class BrandingService {
     appGeneral: HTMLStyleElement;
     appBranding: HTMLStyleElement;
+    powerByBlock: HTMLStyleElement;
     favicon: HTMLLinkElement;
 
     fontAwesomeLoaded: Promise<void>;
     isFontAwesomeLoaded: boolean = false;
-
-    constructor() {
+    
+    private isNavlogoVisible = true;
+    constructor( private settingService: SettingsService) {
         this.appGeneral = document.createElement('style');
         this.appBranding = document.createElement('style');
+        this.powerByBlock = document.createElement('style');
         document.head.appendChild(this.appGeneral);
         document.head.appendChild(this.appBranding);
+        document.head.appendChild(this.powerByBlock);
+        this.settingService.isNavlogoVisible().then ( isVisible => {
+            this.isNavlogoVisible = isVisible;
+            this.updatePowerbyLogo(this.isNavlogoVisible);
+        });
 
         this.favicon = document.head.querySelector('[rel=icon]');
 
@@ -62,7 +71,7 @@ export class BrandingService {
                 this.updateStyleForApp(app);
             });
         }
-
+        this.updatePowerbyLogo(this.isNavlogoVisible);
         if (app && app.applicationBuilder) {
             this.appGeneral.innerText = `
 .title .c8y-app-icon i {
@@ -234,5 +243,21 @@ body {
         context.fillStyle = color;
         context.fillText(fa(icon), 0, 0, 16);
         return canvas.toDataURL();
+    }
+
+    private updatePowerbyLogo(isLogoVisible: boolean) {
+        if(isLogoVisible){
+            this.powerByBlock.innerText = `
+            .powered-by {
+                display: block;
+            }
+            `
+        } else {
+            this.powerByBlock.innerText = `
+            .powered-by {
+                display: none;
+            }
+            `
+        }
     }
 }

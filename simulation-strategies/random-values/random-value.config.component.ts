@@ -166,8 +166,8 @@ export class RandomValueSimulationStrategyConfigComponent extends SimulationStra
         let c: DtdlSimulationModel = {
             deviceId: this.config.deviceId,
             matchingValue: `${base}_match_${index}`,
-            fragment: "temperature_measurement",
-            series: `${base}_series_${index}`,
+            fragment: this.config.fragment,
+            series: this.config.series,
             minValue: 10,
             maxValue: 20,
             unit: this.config.unit,
@@ -217,15 +217,31 @@ export class RandomValueSimulationStrategyConfigComponent extends SimulationStra
 
     // Patch fix for server side simulators
     changeFragment(model:any) {
-        model.alternateConfigs.operations[0].fragment = model.fragment;
+        if( model.alternateConfigs &&  model.alternateConfigs.operations &&  model.alternateConfigs.operations.length > 0){
+            model.alternateConfigs.operations.forEach(ops => {
+                ops.fragment = model.fragment;
+            });
+        }
     }
     changeSeries(model:any) {
-        model.alternateConfigs.operations[0].series = model.series;
+        if( model.alternateConfigs &&  model.alternateConfigs.operations &&  model.alternateConfigs.operations.length > 0){
+            model.alternateConfigs.operations.forEach(ops => {
+                ops.series = model.series;
+            });
+        }
     }
     changeUnit(model:any) {
-        model.alternateConfigs.operations[0].unit = model.unit;
+        if( model.alternateConfigs &&  model.alternateConfigs.operations &&  model.alternateConfigs.operations.length > 0){
+            model.alternateConfigs.operations.forEach(ops => {
+                ops.unit = model.unit;
+            });
+        }
     }
     changeInterval(model:any) {
-        model.alternateConfigs.operations[0].interval = model.interval;
+        if( model.alternateConfigs &&  model.alternateConfigs.operations &&  model.alternateConfigs.operations.length > 0){
+            model.alternateConfigs.operations.forEach(ops => {
+                ops.interval = model.interval;
+            });
+        }
     }
 }

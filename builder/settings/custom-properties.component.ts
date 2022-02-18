@@ -43,10 +43,16 @@ import { SettingsService } from './settings.service';
                         [class.disabled]="!userHasAdminRights " btnCheckbox tabindex="1">{{dashboardCataglogEnabled? 'Enabled' : 'Disabled' }}</button>
             </div>
             <div class="form-group" >
-                <label translate="" for="dashboardVisibility" >Dashboard: Smart rules, Alarms and Data explorer visibility</label>
+                <label translate="" for="dashboardVisibility" >Dashboard: Smart rules, Alarms and Data explorer</label>
                 <button class="btn btn-default" id="dashboardVisibility" name="dashboardVisibility" [(ngModel)]="dashboardVisibility" 
                         (ngModelChange)="changeDashboardVisibility()" [disabled]="!userHasAdminRights" 
                         [class.disabled]="!userHasAdminRights " btnCheckbox tabindex="1">{{dashboardVisibility? 'Visible' : 'Hidden' }}</button>
+            </div>
+            <div class="form-group" >
+                <label translate="" for="navLogoVisibility" >Navigator Logo</label>
+                <button class="btn btn-default" id="navLogoVisibility" name="navLogoVisibility" [(ngModel)]="navLogoVisibility" 
+                        (ngModelChange)="changeNavLogoVisibility()" [disabled]="!userHasAdminRights" 
+                        [class.disabled]="!userHasAdminRights " btnCheckbox tabindex="1">{{navLogoVisibility? 'Visible' : 'Hidden' }}</button>
             </div>
         </div>
         <div *ngIf="isBusy" class="col-xs-12 col-sm-12 col-md-12" style="padding-bottom:50px;padding-top:20px">
@@ -78,11 +84,13 @@ export class CustomPropertiesComponent implements OnInit, OnDestroy{
     dashboardCataglogEnabled = true;
     simulatorEnabled = true;
     dashboardVisibility = true;
+    navLogoVisibility = true;
     customProperties = {
         gainsightEnabled: "false",
         dashboardCataglogEnabled: "true",
         dashboardVisibility: "true",
-        simulatorEnabled: "true"
+        simulatorEnabled: "true",
+        navLogoVisibility: "true"
         
     }
     delayedTenantSubscription: Subscription;
@@ -114,6 +122,7 @@ export class CustomPropertiesComponent implements OnInit, OnDestroy{
         if(this.customProperties.dashboardCataglogEnabled === 'true') { this.dashboardCataglogEnabled = true;}
         if(this.customProperties.simulatorEnabled === 'true') { this.simulatorEnabled = true;}
         if(this.customProperties.dashboardVisibility === 'false') { this.dashboardVisibility = false;}
+        if(this.customProperties.navLogoVisibility === 'false') { this.navLogoVisibility = false;}
         this.isBusy = false;
     }
 
@@ -137,8 +146,12 @@ export class CustomPropertiesComponent implements OnInit, OnDestroy{
         if(this.dashboardVisibility) { this.customProperties.dashboardVisibility = 'true';}
         else { this.customProperties.dashboardVisibility = 'false'; }
     }
+    changeNavLogoVisibility() {
+        if(this.navLogoVisibility) { this.customProperties.navLogoVisibility = 'true';}
+        else { this.customProperties.navLogoVisibility = 'false'; }
+    }
     isFormValid() {
-        return ((this.customProperties.gainsightEnabled === 'true' || this.customProperties.gainsightEnabled === 'false') && 
+        return ( this.customProperties && (this.customProperties.gainsightEnabled === 'true' || this.customProperties.gainsightEnabled === 'false') && 
         (this.customProperties.dashboardCataglogEnabled === 'true' || this.customProperties.dashboardCataglogEnabled === 'false'))
      //   && 
      //   (this.customProperties.simulatorEnabled === 'true' || this.customProperties.simulatorEnabled === 'false'));

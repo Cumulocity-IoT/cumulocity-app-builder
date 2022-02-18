@@ -20,9 +20,12 @@ import { Injectable } from '@angular/core';
 import { ApplicationService, InventoryService, ICurrentTenant, IApplication } from '@c8y/client';
 import { AlertService, AppStateService } from '@c8y/ngx-components';
 import { AppBuilderExternalAssetsService } from 'app-builder-external-assets';
-import { Subject } from 'rxjs';
+import { AppIdService } from '../app-id.service';
+import { from, of, Subject } from 'rxjs';
 import { contextPathFromURL } from '../utils/contextPathFromURL';
 import {UpdateableAlert} from "../utils/UpdateableAlert";
+import { switchMap } from 'rxjs/operators';
+import * as delay from "delay";
 
 @Injectable({providedIn: 'root'})
 export class SettingsService {
@@ -31,18 +34,32 @@ export class SettingsService {
     private appBuilderConfig: any;
     private appbuilderId: any = '';
     private defaultCustomProperties = {
-        gainsightEnabled: ""
+        gainsightEnabled: "",
+        dashboardCataglogEnabled: "",
+        dashboardVisibility: "",
+        simulatorEnabled: "",
+        navLogoVisibility: ""
     };
     private currentTenant: ICurrentTenant;
     private analyticsProvider: any = {};
     delayedTenantUpdateSubject = new Subject<any>();
     
-    constructor(private appService: ApplicationService, private inventoryService: InventoryService,
+    constructor(appIdService: AppIdService, private appService: ApplicationService, private inventoryService: InventoryService,
         private alertService: AlertService, private externalAssetService: AppBuilderExternalAssetsService,
         private appStateService: AppStateService ){
             const providerList = this.externalAssetService.getAssetsList('ANALYTICS')
             this.analyticsProvider = providerList.find( provider => provider.key === 'gainsight');
             this.analyticsProvider.providerURL = this.externalAssetService.getURL('ANALYTICS','gainsight');
+            appIdService.appIdDelayedUntilAfterLogin$.pipe(switchMap(appId => {
+                if (appId != undefined) {
+                    return from(this.getAppBuilderConfig());
+                } else {
+                    return of(undefined);
+                }
+            }))
+                .subscribe(async app => {
+                   // TODO
+                });
         }
 
     /**
@@ -71,11 +88,12 @@ export class SettingsService {
     }
 
     async getCustomProperties() {
-        if(this.appBuilderConfig) 
+        if(this.appBuilderConfig) {
             return (this.appBuilderConfig.customProperties ? this.appBuilderConfig.customProperties : this.defaultCustomProperties);
+        }
         else {
-            await this.getAppBuilderConfig();
-            return (this.appBuilderConfig && this.appBuilderConfig.customProperties ? this.appBuilderConfig.customProperties : this.defaultCustomProperties);
+            await delay(500);
+            return await this.getCustomProperties();
         }
     }
 
@@ -169,5 +187,10 @@ export class SettingsService {
     async isDashboardVisibilitySmartRulesAlarmsExplorer() {
         const customProp = await this.getCustomProperties();
         return (!customProp || (customProp  && ( !customProp.dashboardVisibility || customProp.dashboardVisibility === "true")));
+    }
+
+    async isNavlogoVisible() {
+        const customProp = await this.getCustomProperties();
+        return (!customProp || (customProp  && ( !customProp.navLogoVisibility || customProp.navLogoVisibility === "true")));
     }
 }
