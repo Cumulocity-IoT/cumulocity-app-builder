@@ -19,7 +19,7 @@ import {Injector, NgModule} from '@angular/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {NavigationError, Router, RouterModule as NgRouterModule} from '@angular/router';
 import { UpgradeModule as NgUpgradeModule } from '@angular/upgrade/static';
-import {AppStateService, CoreModule, RouterModule} from '@c8y/ngx-components';
+import {AppStateService, CoreModule, RouterModule, PluginsModule} from '@c8y/ngx-components';
 import {DashboardUpgradeModule, UpgradeModule, HybridAppModule} from '@c8y/ngx-components/upgrade';
 import {BuilderModule} from "./builder/builder.module";
 import {filter, first, map, startWith, tap, withLatestFrom} from "rxjs/operators";
@@ -29,6 +29,8 @@ import {CustomWidgetsModule} from "./custom-widgets/custom-widgets.module";
 import {RuntimeWidgetInstallerModule, RuntimeWidgetLoaderService} from "cumulocity-runtime-widget-loader";
 import { interval } from 'rxjs';
 import { SettingsService } from './builder/settings/settings.service';
+
+import { BinaryFileDownloadModule } from '@c8y/ngx-components/binary-file-download';
 @NgModule({
   imports: [
     // Upgrade module must be the first
@@ -37,8 +39,10 @@ import { SettingsService } from './builder/settings/settings.service';
     RouterModule.forRoot(),
     NgRouterModule.forRoot([], { enableTracing: false, useHash: true }),
     CoreModule.forRoot(),
+   // PluginsModule,
     NgUpgradeModule,
     DashboardUpgradeModule,
+    BinaryFileDownloadModule,
     BuilderModule,
     SimulationStrategiesModule,
     CustomWidgetsModule,
@@ -47,7 +51,8 @@ import { SettingsService } from './builder/settings/settings.service';
 })
 export class AppModule extends HybridAppModule {
     constructor(protected upgrade: NgUpgradeModule, appStateService: AppStateService, private router: Router, 
-        private runtimeWidgetLoaderService: RuntimeWidgetLoaderService, private injector: Injector,
+        private runtimeWidgetLoaderService: RuntimeWidgetLoaderService, 
+        private injector: Injector,
         private settingsService: SettingsService) {
         super();
 

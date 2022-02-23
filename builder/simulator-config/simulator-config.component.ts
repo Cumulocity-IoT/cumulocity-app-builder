@@ -31,6 +31,7 @@ import {SimulatorCommunicationService} from "../simulator/mainthread/simulator-c
 import {SimulationStrategiesService} from "../simulator/simulation-strategies.service";
 import { AppStateService } from '@c8y/ngx-components';
 import * as cloneDeep from "clone-deep";
+import { SimulatorNotificationService } from './simulatorNotification.service';
 @Component({
     templateUrl: './simulator-config.component.html'
 })
@@ -48,7 +49,8 @@ export class SimulatorConfigComponent implements OnDestroy {
         private simSvc: SimulatorCommunicationService, private modalService: BsModalService,
         private appIdService: AppIdService, private appService: ApplicationService,
         public simulationStrategiesService: SimulationStrategiesService,
-        private appStateService: AppStateService, private userService: UserService
+        private appStateService: AppStateService, private userService: UserService,
+        private simulatorNotificationService: SimulatorNotificationService
     ) {
         this._lockStatusListener = simSvc.simulator.addLockStatusListener(Comlink.proxy(lockStatus => this.lockStatus$.next(lockStatus)));
         this._simulatorConfigListener = simSvc.simulator.addSimulatorConfigListener(Comlink.proxy(simulatorConfigById =>
@@ -91,6 +93,7 @@ export class SimulatorConfigComponent implements OnDestroy {
 
     async changeSimulatorStarted(simulatorConfig: SimulatorConfig, started: boolean) {
         simulatorConfig.started = started;
+        simulatorConfig.lastUpdated = new Date().toISOString();
         const appId = this.appIdService.getCurrentAppId();
         const app = (await this.appService.detail(appId)).data as IApplication & {applicationBuilder: {simulators?: SimulatorConfig[]}};
         if (app.applicationBuilder.simulators != undefined) {
@@ -104,6 +107,13 @@ export class SimulatorConfigComponent implements OnDestroy {
             applicationBuilder: app.applicationBuilder
         } as IApplication);
 
+        this.simulatorNotificationService.post({
+            id: appId,
+            name: app.name,
+            tenant: (app.owner && app.owner.tenant && app.owner.tenant.id ? app.owner.tenant.id : ''),
+            type: app.type,
+            simulator: simulatorConfig
+        });
         // We could just wait for them to refresh, but it's nicer to instantly refresh
         await this.simSvc.simulator.checkForSimulatorConfigChanges();
     }
@@ -119,6 +129,13 @@ export class SimulatorConfigComponent implements OnDestroy {
             applicationBuilder: app.applicationBuilder
         } as IApplication);
 
+        this.simulatorNotificationService.remove({
+            id: appId,
+            name: app.name,
+            tenant: (app.owner && app.owner.tenant && app.owner.tenant.id ? app.owner.tenant.id : ''),
+            type: app.type,
+            simulator: simulatorConfig
+        });
         // We could just wait for them to refresh, but it's nicer to instantly refresh
         await this.simSvc.simulator.checkForSimulatorConfigChanges();
     }

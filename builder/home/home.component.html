@@ -9,7 +9,7 @@
                         <h2 class="text-light home-margin-top-20" translate="">Welcome to Application Builder</h2>
                     </div>
                     <div class="card-block">
-                        <p>Application Builder is an open-source tool for you to <b>create web applications</b> in a <b>no-code environment</b>. It's being managed by the Software AG Global Presales team but not officially supported by Software AG. You can find the source code on <a href="#" (click)="openLink('source')">Software AG Open Source</a>.</p>
+                        <p>Application Builder is an open-source tool for you to <b>create web applications</b> in a <b>no-code environment</b>. It's being managed by the Software AG Global Presales team but not officially supported by Software AG. You can find the source code on <a [href]="getURL('source')" target="_blank">Software AG Open Source</a>.</p>
                         <br>
                         <p>Application Builder also allows you to,</p>
                         <p class="home-margin-top-5">
@@ -35,7 +35,7 @@
                                 <img  (click)="openLink('widget')"  src="./images/c8y-app-installing-updates.png">
                             </div>
                             <div class="col-xs-8 col-sm-10 col-md-10">
-                                Find runtime widgets that can be directly installed inside Application Builder at <a href="#"  (click)="openLink('widget')">Software AG Open Source</a>.
+                                Find runtime widgets that can be directly installed inside Application Builder at <a [href]="getURL('widget')" target="_blank">Software AG Open Source</a>.
                             </div>
                         </div>
                     </div>
@@ -52,7 +52,7 @@
                                 <img  (click)="openLink('source')"  src="./images/c8y-app-upgrade.png">
                             </div>
                             <div class="col-xs-8 col-sm-10 col-md-10">
-                                Find the latest release of Application Builder on <a href="#" (click)="openLink('source')" >Software AG Open Source</a>.
+                                Find the latest release of Application Builder on <a [href]="getURL('source')" target="_blank" >Software AG Open Source</a>.
                             </div>
                         </div>
                     </div>
@@ -89,7 +89,7 @@
                 <div class="row home-widget-body home-video-content">
                     <div class="col-xs-12 col-sm-12 col-md-12">
                         <img  style="margin-right: 35px" (click)="openLink('forum')"  src="./images/c8y-app-query.png">
-                        Get your questions answered and stay upto date with the latest news on <a href="#" (click)="openLink('forum')">Software AG Tech Community</a>.
+                        Get your questions answered and stay upto date with the latest news on <a [href]="getURL('forum')" target="_blank">Software AG Tech Community</a>.
                     </div>
                 </div>
             </div>

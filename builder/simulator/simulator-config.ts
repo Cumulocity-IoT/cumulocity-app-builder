@@ -94,7 +94,9 @@ export interface SimulatorConfig {
     type: string,
     config: DtdlSimulationModel,
     started?: boolean,
-    metadata?: SimulationStrategyMetadata;
+    metadata?: SimulationStrategyMetadata,
+    lastUpdated?: string,
+    serverSide?: boolean
 }
 
 

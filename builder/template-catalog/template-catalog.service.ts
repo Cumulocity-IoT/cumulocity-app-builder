@@ -17,7 +17,7 @@
  */
 
 import { HttpClient, HttpResponse } from "@angular/common/http";
-import { Injectable } from "@angular/core";
+import { Injectable, isDevMode } from "@angular/core";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
 import { has, get } from "lodash-es";
@@ -26,27 +26,37 @@ import { BinaryDescription, CumulocityDashboard, DependencyDescription, DeviceDe
 import { ApplicationService, InventoryBinaryService, InventoryService } from "@c8y/ngx-components/api";
 import { AppBuilderNavigationService } from "../navigation/app-builder-navigation.service";
 import { Alert, AlertService } from "@c8y/ngx-components";
-import { RuntimeWidgetInstallerService } from "cumulocity-runtime-widget-loader";
+// import { RuntimeWidgetInstallerService } from "cumulocity-runtime-widget-loader";
 import { AppBuilderExternalAssetsService } from 'app-builder-external-assets';
 import { DashboardConfig } from "builder/application-config/dashboard-config.component";
+import { RuntimeWidgetInstallerService } from "cumulocity-runtime-widget-loader";
 
 @Injectable()
 export class TemplateCatalogService {
 
     private GATEWAY_URL = '';
     private CATALOG_LABCASE_ID = '';
+    private GATEWAY_URL_GitHubAsset = '';
+    private GATEWAY_URL_GitHubAPI = '';
+    private dashboardCatalogPath = '/dashboardCatalog/catalog.json';
+    private devBranchPath = "?ref=development";
+
 
     constructor(private http: HttpClient, private inventoryService: InventoryService,
         private appService: ApplicationService, private navigation: AppBuilderNavigationService,
         private binaryService: InventoryBinaryService, private alertService: AlertService,
         private runtimeWidgetInstallerService: RuntimeWidgetInstallerService,
         private externalService: AppBuilderExternalAssetsService) {
-        this.GATEWAY_URL = this.externalService.getURL('DBCATALOG', 'gatewayURL');
-        this.CATALOG_LABCASE_ID = this.externalService.getURL('DBCATALOG', 'labcaseId');
+        this.GATEWAY_URL_GitHubAPI = this.externalService.getURL('GITHUB','gatewayURL_Github');
+        this.GATEWAY_URL_GitHubAsset =  this.externalService.getURL('GITHUB','gatewayURL_GitHubAsset');
     }
 
     getTemplateCatalog(): Observable<TemplateCatalogEntry[]> {
-        return this.http.get(`${this.GATEWAY_URL}${this.CATALOG_LABCASE_ID}`).pipe(map(response => {
+        let url = `${this.GATEWAY_URL_GitHubAPI}${this.dashboardCatalogPath}`;
+        if(isDevMode()) {
+            url = url + this.devBranchPath;
+        }
+        return this.http.get(`${url}`).pipe(map(response => {
             if (!has(response, 'catalog')) {
                 console.error('Failed to load catalog');
                 return undefined;
@@ -69,7 +79,11 @@ export class TemplateCatalogService {
     }
 
     getTemplateDetails(dashboardId: string): Observable<TemplateDetails> {
-        return this.http.get(`${this.GATEWAY_URL}${dashboardId}`).pipe(map((dashboard: TemplateDetails) => {
+        let url = `${this.GATEWAY_URL_GitHubAPI}${dashboardId}`;
+        if(isDevMode()) {
+            url = url + this.devBranchPath;
+        }
+        return this.http.get(`${url}`).pipe(map((dashboard: TemplateDetails) => {
             return dashboard;
         }));
     }
@@ -80,9 +94,16 @@ export class TemplateCatalogService {
     }
 
     downloadBinary(binaryId: string): Observable<ArrayBuffer> {
-        return this.http.get(`${this.GATEWAY_URL}${binaryId}`, {
+        return this.http.get(`${this.GATEWAY_URL_GitHubAsset}${binaryId}`, {
             responseType: 'arraybuffer'
         });
+    }
+
+    getGithubURL(relativePath: string){
+        if(isDevMode()){
+            return `${this.GATEWAY_URL_GitHubAPI}${relativePath}${this.devBranchPath}`;
+        }
+       return `${this.GATEWAY_URL_GitHubAPI}${relativePath}`;
     }
 
     uploadImage(image: File): Promise<string> {

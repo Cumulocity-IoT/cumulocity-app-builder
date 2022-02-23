@@ -52,10 +52,14 @@ export class WaveSimulationStrategy extends DeviceIntervalSimulator {
     onStart() {
         super.onStart();
         this.startTime = Date.now();
+        if (this.config.alternateConfigs && this.config.alternateConfigs.operations && this.config.alternateConfigs.operations.length > 0) {
+            this.config.waveType = this.config.alternateConfigs.operations[0].waveType;
+            this.config.height = this.config.alternateConfigs.operations[0].height;
+            this.config.wavelength = this.config.alternateConfigs.operations[0].wavelength;
+        }
     }
 
     public async onOperation(param: any): Promise<boolean> {
-        //console.log("Wavelength operation = ", param);
         if (this.config.alternateConfigs.operations.length > 1) {
             if (_.has(param, "deviceId") && _.get(param, "deviceId") == this.config.alternateConfigs.opSource) {
                 for (let cfg of this.config.alternateConfigs.operations) {
@@ -113,7 +117,8 @@ export class WaveSimulationStrategy extends DeviceIntervalSimulator {
                     value: measurementValue,
                     ...this.config.unit && { unit: this.config.unit }
                 }
-            }
+            },
+            type: this.config.fragment
         });
     }
 }

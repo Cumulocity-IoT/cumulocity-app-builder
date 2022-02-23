@@ -24,6 +24,7 @@ import {UpdateableAlert} from "../utils/UpdateableAlert";
 import {contextPathFromURL} from "../utils/contextPathFromURL";
 import { Observable } from 'rxjs';
 import { SettingsService } from './../settings/settings.service';
+import { AppListService } from './app-list.service';
 
 @Component({
     template: `
@@ -42,7 +43,7 @@ import { SettingsService } from './../settings/settings.service';
             
             <div class="form-group">
                 <label for="icon"><span>Icon</span></label>
-                <icon-selector id="icon" name="icon" [(value)]="appIcon"></icon-selector>
+                <icon-selector id="icon" name="icon" [(value)]="appIcon" appendTo=".modal-content"></icon-selector>
             </div>
 
             <div class="form-group">
@@ -56,9 +57,9 @@ import { SettingsService } from './../settings/settings.service';
             <div class="form-group">
                     <label for="appCloneName"><span>Clone Existing Application</span></label>
                     <input type="text" class="form-control" id="appCloneName" name="appCloneName"
-                      placeholder="e.g. Type Application Name/Id (optional)" 
+                      placeholder="e.g. Type and select Application Name/Id (optional)" 
                       [(ngModel)]="existingAppName" [typeahead]="appNameList" autocomplete="off">
-                      
+                      <span id="helpBlockCloneApp" class="help-block">Only application builder's applications can be cloned here.</span>
                 </div>
         </form>
     </div>
@@ -74,23 +75,33 @@ export class NewApplicationModalComponent implements OnInit {
     appPath: string = '';
     existingAppName: string = '';
     appIcon: string = 'bathtub';
-    applications: Observable<IApplication[]>;
+   // applications: Observable<IApplication[]>;
+    applications: IApplication[];
+    allApplications: IApplication[];
     appList: any = [];
     appNameList: any = [];
 
     constructor(public bsModalRef: BsModalRef, private appService: ApplicationService, private appStateService: AppStateService, 
         private fetchClient: FetchClient, private inventoryService: InventoryService, private alertService: AlertService,
-        private settingsService: SettingsService) {}
+        private settingsService: SettingsService, private appListService: AppListService) {}
    
     ngOnInit() {
         this.loadApplicationsForClone();
     }
    
     async createApplication() {
-        this.bsModalRef.hide();
-        
         let isCloneApp = false;
         let appBuilderObj;
+
+        // app validation check 
+        const appFound = this.allApplications.find( app => app.name.toLowerCase() === this.appName.toLowerCase() || 
+        ( this.appPath && this.appPath.length > 0 && ( app.contextPath && app.contextPath?.toLowerCase() === this.appPath.toLowerCase())))
+        if(appFound) {
+            this.alertService.danger(" Application name or context path already exists!");
+            return;
+        }
+
+        this.bsModalRef.hide();
         if(this.existingAppName) {
             const existingApp = this.existingAppName.split(' (');
             if(existingApp.length > 1) {
@@ -286,6 +297,7 @@ export class NewApplicationModalComponent implements OnInit {
         }
         // Refresh the applications list
         this.appStateService.currentUser.next(this.appStateService.currentUser.value);
+        this.appListService.RefreshAppList();
     }
 
     private async updateAppBuilderConfiguration(appBuilderId: any, newAppId: any) {
@@ -304,12 +316,16 @@ export class NewApplicationModalComponent implements OnInit {
     }
 
     loadApplicationsForClone() {
-        this.applications.subscribe(apps => {
+        this.appList = this.applications;
+            if (this.appList && this.appList.length > 0) {
+                this.appNameList = Array.from(new Set(this.appList.map(app => `${app.name} (${app.id})`)));
+            }
+       /*  this.applications.subscribe(apps => {
             this.appList = apps;
             if (this.appList && this.appList.length > 0) {
                 this.appNameList = Array.from(new Set(this.appList.map(app => `${app.name} (${app.id})`)));
             }
-        });
+        }); */
       
     }
 

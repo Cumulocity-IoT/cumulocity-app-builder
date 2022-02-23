@@ -5,25 +5,29 @@
     </div>
     <div class="card-group interact-grid" *ngIf="!isBusy">
         <ng-template #itemTemplate let-item="item" let-index="index">
-            <div class="text-warning">
-                <button class="btn btn-clean btn-icon btn-md" title="Update" *ngIf="userHasAdminRights && isUpdateAvailable(item.value) && !item.value.isReloadRequired">
+            <div class="text-warning" [ngSwitch]="item.value.actionCode" >
+                <button class="btn btn-clean btn-icon btn-md" title="Update" *ngSwitchCase="'001'">
                     <i c8yIcon="cloud-upload" class="action-icon" (click)="updateWidget(item.value)"></i>
                 </button>
-                <button class="btn btn-clean btn-icon btn-md" title="Refresh" *ngIf="!isUpdateAvailable(item.value) && item.value.isReloadRequired">
+                <button class="btn btn-clean btn-icon btn-md" title="Update (Not Compatible)" *ngSwitchCase="'002'">
+                    <i c8yIcon="level-up" class="action-icon" (click)="updateWidget(item.value)"></i>
+                </button>
+                <button class="btn btn-clean btn-icon btn-md" title="Refresh" *ngSwitchCase="'003'">
                     <i c8yIcon="refresh" class="action-icon text-info" (click)="refresh()"></i>
                 </button>
-                <button class="invisible btn btn-clean btn-icon btn-md" title="Refresh" *ngIf="!isUpdateAvailable(item.value) && !item.value.isReloadRequired">
+                <button class="invisible btn btn-clean btn-icon btn-md" title="Refresh" *ngSwitchDefault>
                     <i c8yIcon="refresh" class="action-icon text-info" (click)="refresh()"></i>
                 </button>
             </div>
             <div class="widget-icon" ><i [c8yIcon]="item.value.icon"></i></div>
-            <div class="col col-overflow" title="{{item.value.title}}">{{item.value.title}}</div>
+            <div class="col col-overflow" title="{{item.value.title}}">{{item.value.title}}<i *ngIf="item.value.isDeprecated" title="This widget is deprecated!" c8yIcon="warning" class="warning-icon text-warning" ></i></div>
             <div class="col col-overflow" title="{{item.value.version}}" >{{item.value.version}}</div>
             <div class="col col-overflow" title="{{item.value.installedVersion}}" >{{item.value.installedVersion ? item.value.installedVersion : 'Not Available'}}</div>
             <div class="col col-overflow" title="{{item.value.license}}">{{item.value.license}}</div>
             <div class="col col-overflow" title="{{item.value.author}}">{{item.value.author}}</div>
             <div class="action-icon text-info" title="Preview"><i c8yIcon="eye" (click)="preview(item.value.preview)"></i></div>
             <div class="action-icon text-info" title="Documentation"><i c8yIcon="document-with-code" (click)="openDocumentation(item.value.repository)"></i></div>
+            <div *ngIf="userHasAdminRights" class="action-icon text-danger" title="Uninstall Widget"><i c8yIcon="minus-circle" (click)="uninstallWidget(item.value)"></i></div>
         </ng-template>
 
         <div class="card-group col-xs-12 col-sm-12 col-md-12 col-lg-12">
@@ -90,6 +94,7 @@
                                 <div class="col">Author</div>
                                 <div class="invisible widget-icon text-info"  style="width: 20px;"><i [c8yIcon]="eye"></i></div>
                                 <div class="invisible widget-icon text-success" style="width: 20px;"><i [c8yIcon]="external-link"></i></div>
+                                <div class="invisible widget-icon text-success" style="width: 20px;"><i [c8yIcon]="minus-circle"></i></div>
                             </div>
                             <bs-sortable [ngModel]="filterWidgets" [itemTemplate]="itemTemplate"
                                 itemClass="sortable-item" itemActiveClass="sortable-item-active"

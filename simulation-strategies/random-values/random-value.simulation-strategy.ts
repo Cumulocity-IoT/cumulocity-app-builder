@@ -47,13 +47,19 @@ export class RandomValueSimulationStrategy extends DeviceIntervalSimulator {
         return this.config;
     }
 
+    onStart() {
+        super.onStart();
+        if (this.config.alternateConfigs && this.config.alternateConfigs.operations && this.config.alternateConfigs.operations.length > 0) {
+            this.config.minValue = this.config.alternateConfigs.operations[0].minValue;
+            this.config.maxValue = this.config.alternateConfigs.operations[0].maxValue;
+        }
+    }
+
     public async onOperation(param: any): Promise<boolean> {
-        //console.log("Series operation = ", param);
         if (this.config.alternateConfigs.operations.length > 1) {
             if (_.has(param, "deviceId") && _.get(param, "deviceId") == this.config.alternateConfigs.opSource) {
                 for (let cfg of this.config.alternateConfigs.operations) {
                     if (_.has(param, this.config.alternateConfigs.payloadFragment) && _.get(param, this.config.alternateConfigs.payloadFragment) == cfg.matchingValue) {
-                        //console.log(`Matched ${cfg.matchingValue} setting cfg = `, cfg);
                         this.config.minValue = cfg.minValue;
                         this.config.maxValue = cfg.maxValue;
                         if (this.config.alternateConfigs.opReply == true) {
@@ -82,7 +88,8 @@ export class RandomValueSimulationStrategy extends DeviceIntervalSimulator {
                     value: measurementValue,
                     ...this.config.unit && { unit: this.config.unit }
                 }
-            }
+            },
+            type: this.config.fragment
         });
     }
 }

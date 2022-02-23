@@ -270,7 +270,8 @@ export class DtdlSimulationStrategy extends DeviceIntervalSimulator {
                 time: new Date(),
                 [fragment]: {
                     ...modelFragmentObject
-                }
+                },
+                type: fragment
             });
         }
     }
@@ -291,7 +292,8 @@ export class DtdlSimulationStrategy extends DeviceIntervalSimulator {
                     time: new Date(),
                     [modelConfig.fragment]: {
                         ...modelFragmentObject
-                    }
+                    },
+                    type: modelConfig.fragment
                 });
             }
 
@@ -304,7 +306,8 @@ export class DtdlSimulationStrategy extends DeviceIntervalSimulator {
                         value: this.getMeasurementValue(modelConfig, deviceId),
                         ...modelConfig.unit && { unit: modelConfig.unit }
                     }
-                }
+                },
+                type: modelConfig.fragment
             });
         }
 

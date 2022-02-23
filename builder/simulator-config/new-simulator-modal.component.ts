@@ -26,12 +26,13 @@ import {
 } from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap/modal';
 import { WizardComponent } from "../../wizard/wizard.component";
-import { InventoryService, ApplicationService, IManagedObject } from '@c8y/client';
+import { InventoryService, ApplicationService, IManagedObject, FetchClient } from '@c8y/client';
 import { AppIdService } from "../app-id.service";
 import { SimulationStrategyConfigComponent, SimulationStrategyFactory } from "../simulator/simulation-strategy";
 import { SimulationStrategiesService } from "../simulator/simulation-strategies.service";
 import { SimulatorCommunicationService } from "../simulator/mainthread/simulator-communication.service";
 import { throwError } from 'rxjs';
+import { SimulatorNotificationService } from './simulatorNotification.service';
 
 @Component({
     templateUrl: './new-simulator-modal.component.html'
@@ -54,17 +55,22 @@ export class NewSimulatorModalComponent {
     numberOfDevice: number | 0;
     isGroup: boolean = false;
     configFromFile: any;
+    runOnServer: boolean = false;
+    isMSExist: boolean = false;
+    isMSCheckSpin: boolean = false;
 
     constructor(
         private simSvc: SimulatorCommunicationService,
         public bsModalRef: BsModalRef, public simulationStrategiesService: SimulationStrategiesService,
         private resolver: ComponentFactoryResolver, private injector: Injector, private inventoryService: InventoryService,
-        private appService: ApplicationService, private appIdService: AppIdService
-    ) { }
+        private appService: ApplicationService, private appIdService: AppIdService, private fetchClient: FetchClient,
+        private simulatorNotificationService: SimulatorNotificationService
+    ) {}
 
     openSimulatorConfig() {
         this.wizard.selectStep('config');
 
+        this.verifySimulatorMicroServiceStatus();
         const metadata = this.selectedStrategyFactory.getSimulatorMetadata();
 
         this.configWrapper.clear();
@@ -87,6 +93,7 @@ export class NewSimulatorModalComponent {
                 this.bsModalRef.setClass(componentRef.instance.config.modalSize);
             }
             this.newConfig.metadata = metadata;
+            componentRef.instance.config.isGroup = this.isGroup;
 
         }
     }
@@ -142,13 +149,22 @@ export class NewSimulatorModalComponent {
         const simulators = appServiceData.applicationBuilder.simulators || [];
         const simulatorId = Math.floor(Math.random() * 1000000);
         this.newConfig.deviceId = this.deviceId;
+        // Added by darpan to sync device id in alternateConfigs
+        if(this.newConfig.alternateConfigs && this.newConfig.alternateConfigs.operations && 
+            this.newConfig.alternateConfigs.operations.length > 0) {
+                this.newConfig.alternateConfigs.operations.forEach( ops => {
+                    ops.deviceId = this.deviceId;
+                });
+        }
         this.newConfig.deviceName = this.deviceName;
         this.newConfig.isGroup = this.isGroup;
         const newSimulatorObject = {
             id: simulatorId,
             name: this.simulatorName,
             type: metadata.name,
-            config: this.newConfig
+            config: this.newConfig,
+            lastUpdated: new Date().toISOString(),
+            serverSide: (this.runOnServer ? true: false)
         };
         simulators.push(newSimulatorObject);
         appServiceData.applicationBuilder.simulators = simulators;
@@ -158,6 +174,13 @@ export class NewSimulatorModalComponent {
             applicationBuilder: appServiceData.applicationBuilder
         } as any);
 
+        this.simulatorNotificationService.post({
+            id: appId,
+            name: appServiceData.name,
+            tenant: (appServiceData.owner && appServiceData.owner.tenant && appServiceData.owner.tenant.id ? appServiceData.owner.tenant.id : ''),
+            type: appServiceData.type,
+            simulator: newSimulatorObject
+        });
         // We could just wait for them to refresh, but it's nicer to instantly refresh
         await this.simSvc.simulator.checkForSimulatorConfigChanges();
 
@@ -231,5 +254,14 @@ export class NewSimulatorModalComponent {
             }
         } catch (e) { }
         return false;
+    }
+
+    private async verifySimulatorMicroServiceStatus() {
+        this.isMSCheckSpin = true;
+        const response = await this.fetchClient.fetch('service/simulator-microservice/health'); 
+        const data = await response.json()
+        if(data && data.status && data.status === "UP") { this.isMSExist = true;}
+        else { this.isMSExist = false;}
+        this.isMSCheckSpin = false;
     }
 }

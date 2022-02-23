@@ -10,7 +10,7 @@ export interface WidgetModel {
     id?: string;
     title?: string;
     repository?: string;
-    link?: string;
+    binaryLink?: string;
     fileName?: string;
     contextPath?: string;
     icon?: string;
@@ -24,4 +24,6 @@ export interface WidgetModel {
     isReloadRequired?: boolean;
     isCompatible?: boolean;
     installedVersion?: string;
+    actionCode?: string;
+    isDeprecated?: boolean;
 }

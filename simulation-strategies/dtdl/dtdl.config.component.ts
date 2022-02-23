@@ -46,10 +46,10 @@ import * as _ from 'lodash';
             </div>
             <div class="col-xs-12 col-sm-3 col-md-3">
              <div class="form-group">
-                <label for="name"><span>Feeds</span></label>
+                <label for="name"><span>Filter</span></label>
                 <button class="btn btn-xs" id="measurementFilterEnabled" name="measurementFilterEnabled" [(ngModel)]="measurementFilterEnabled" 
                 (ngModelChange)="measurementFilterEnabledChange()" 
-                btnCheckbox>{{measurementFilterEnabled? 'Telemetry' : 'All feeds' }}</button>
+                btnCheckbox>{{measurementFilterEnabled? 'Telemetry' : 'All fields' }}</button>
             </div>
             </div>
             
@@ -72,7 +72,7 @@ import * as _ from 'lodash';
                     <div class="col-xs-12 col-sm-4 col-md-4">
                         <div class="measurement-accordion">
                             <label for="simulationType"><span>Simulation Type</span></label>
-                            <select name="simulationType{{model.id}}"  [(ngModel)]="model.simulationType" required >
+                            <select name="simulationType{{model.id}}"  [(ngModel)]="model.simulationType" required  (ngModelChange)="changeSimulationType(model)">
                                 <option value="randomValue" >Random Value</option>
                                 <option value="valueSeries" >Value Series</option>
                                 <option value="randomWalk" >Random Walk</option>
@@ -84,13 +84,13 @@ import * as _ from 'lodash';
                     <div class="col-xs-12 col-sm-4 col-md-4" *ngIf="!model.isFieldModel && model.simulationType !== 'positionUpdate' && model.simulationType !== 'eventCreation'">
                         <div class="measurement-accordion">
                             <label for="fragment"><span>Fragment</span></label>
-                            <input type="text" class="form-control"  name="fragment{{model.id}}" placeholder="e.g. temperature_measurement (required)" required autofocus [(ngModel)]="model.fragment">
+                            <input type="text" class="form-control"  name="fragment{{model.id}}" placeholder="e.g. temperature_measurement (required)" required autofocus [(ngModel)]="model.fragment" (ngModelChange)="changeFragment(model)">
                         </div>
                     </div>
                     <div class="col-xs-12 col-sm-4 col-md-4" *ngIf="model.simulationType !== 'positionUpdate' && model.simulationType !== 'eventCreation'">
                         <div class="measurement-accordion">
                             <label for="series"><span>Series</span></label>
-                            <input type="text" class="form-control" name="series{{model.id}}" placeholder="e.g. T (required)" required autofocus [(ngModel)]="model.series">
+                            <input type="text" class="form-control" name="series{{model.id}}" placeholder="e.g. T (required)" required autofocus [(ngModel)]="model.series" (ngModelChange)="changeSeries(model)">
                         </div>
                     </div>
 
@@ -187,7 +187,7 @@ import * as _ from 'lodash';
                         </ng-container>
                     </ng-container>
 
-                    <div class="col-xs-12 col-lg-12">
+                    <div class="col-xs-12 col-lg-12" *ngIf="!config.isGroup && model.simulationType !== 'positionUpdate' && model.simulationType !== 'eventCreation' ">
                         <div class="measurement-accordion">
                             <label class="c8y-checkbox">
                                 <input type="checkbox" name="opEnabled{{model.id}}" [(ngModel)]="model.alternateConfigs.opEnabled" (click)="checkDefaultOperation(model)"/>
@@ -346,7 +346,7 @@ import * as _ from 'lodash';
                     <div class="col-xs-12 col-sm-4 col-md-4" *ngIf="model.simulationType !== 'positionUpdate' && model.simulationType !== 'eventCreation'">
                         <div class="measurement-accordion">
                             <label for="unit"><span>Unit</span></label>
-                            <input type="text" class="form-control"  name="unit{{model.id}}" placeholder="e.g. C (optional)" [(ngModel)]="model.unit">
+                            <input type="text" class="form-control"  name="unit{{model.id}}" placeholder="e.g. C (optional)" [(ngModel)]="model.unit"  (ngModelChange)="changeUnit(model)">
                         </div>        
                     </div>
                 </accordion-group>
@@ -354,7 +354,7 @@ import * as _ from 'lodash';
         </div>
         <div class="form-group">
             <label for="interval"><span>Interval (seconds)</span></label>
-            <input type="number" class="form-control" id="interval" name="interval" placeholder="e.g. 5 (required)" required [(ngModel)]="config.interval">
+            <input type="number" class="form-control" id="interval" name="interval" placeholder="e.g. 5 (required)" required [(ngModel)]="config.interval" (ngModelChange)="changeInterval(config)">
         </div>
     `,
     styles: [`
@@ -398,7 +398,7 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
         this.config.dtdlDeviceId = "";
         this.config.dtdlModelConfig = [];
         this.configModel = [];
-        this.config.interval = 5;
+        this.config.interval = 30;
         this.checkAlternateConfigs(this.config);
     }
 
@@ -406,7 +406,7 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
         this.existingConfig = existingConfig;
         this.declareConfig();
         if(this.existingConfig === undefined || this.existingConfig === null) {
-            this.config.interval = 5;
+            this.config.interval = 30;
         } else {
             this.config.interval = this.existingConfig.interval;
             this.existingConfig.dtdlModelConfig.forEach((dmc: DtdlSimulationModel) => {
@@ -417,7 +417,6 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
     }
 
     public deleteDtDLOperation(model: DtdlSimulationModel, index:number) : void {
-        //console.log("remove ", model, index);
         if (_.has(model,"alternateConfigs") && _.has(model.alternateConfigs,"operations")) {
             let ops: Array<any> = _.get(model.alternateConfigs,"operations");
             ops.splice(index,1);
@@ -425,7 +424,6 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
     }
 
     public checkAlternateConfigs(target: DtdlSimulationModel) {
-        //console.log("checkAlternateConfigs",target);
         if (!this.hasOperations(target)) {
             target.alternateConfigs = {
                 opSource: "",
@@ -474,7 +472,6 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
         //we will create the config entries if old simulators are edited
         //duplication is to avoid changing old code.
         model.alternateConfigs.operations.push(c);
-        //console.log(model.alternateConfigs.operations);
     }
 
     fileUploaded(events){
@@ -586,7 +583,7 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
         };
         model.measurementName = (displayName  && displayName.length > 0 ? displayName : (content.displayName && content.displayName.constructor === Object ? content.displayName.en : content.displayName));
         model.fragment = ( typeLength > 0 ? content['@type'][typeLength - 1] : content['@type']);
-        model.id = (content['@id'] ?  content['@id']: Math.floor(Math.random() * 1000000));
+        model.id = (content['@id'] ?  content['@id']: Math.floor(Math.random() * 1000000).toString());
         model.schema = content.schema;
         model.series = content.name;
         model.unit = content.unit;
@@ -613,7 +610,7 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
                     };
                     fieldModel.measurementName = model.measurementName + " : " + field.displayName;
                     fieldModel.fragment = model.fragment;
-                    fieldModel.id = (field['@id'] ?  field['@id']: Math.floor(Math.random() * 1000000));
+                    fieldModel.id = (field['@id'] ?  field['@id']: Math.floor(Math.random() * 1000000).toString());
                     fieldModel.schema = field.schema;
                     fieldModel.series = content.name +":" + field.name;
                     fieldModel.unit = field.unit;
@@ -646,5 +643,41 @@ export class DtdlSimulationStrategyConfigComponent extends SimulationStrategyCon
             }
         }
     }
-    
+
+    // Patch fix for server side simulators
+    changeSimulationType(model:any) {
+        if( model.alternateConfigs &&  model.alternateConfigs.operations &&  model.alternateConfigs.operations.length > 0){
+            model.alternateConfigs.operations.forEach(ops => {
+                ops.simulationType = model.simulationType;
+            });
+        }
+    }
+    changeFragment(model:any) {
+        if( model.alternateConfigs &&  model.alternateConfigs.operations &&  model.alternateConfigs.operations.length > 0){
+            model.alternateConfigs.operations.forEach(ops => {
+                ops.fragment = model.fragment;
+            });
+        }
+    }
+    changeSeries(model:any) {
+        if( model.alternateConfigs &&  model.alternateConfigs.operations &&  model.alternateConfigs.operations.length > 0){
+            model.alternateConfigs.operations.forEach(ops => {
+                ops.series = model.series;
+            });
+        }
+    }
+    changeUnit(model:any) {
+        if( model.alternateConfigs &&  model.alternateConfigs.operations &&  model.alternateConfigs.operations.length > 0){
+            model.alternateConfigs.operations.forEach(ops => {
+                ops.unit = model.unit;
+            });
+        }
+    }
+    changeInterval(model:any) {
+        if( model.alternateConfigs &&  model.alternateConfigs.operations &&  model.alternateConfigs.operations.length > 0){
+            model.alternateConfigs.operations.forEach(ops => {
+                ops.interval = model.interval;
+            });
+        }
+    }
 }

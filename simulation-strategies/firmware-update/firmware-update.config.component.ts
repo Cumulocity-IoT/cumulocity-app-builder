@@ -16,7 +16,7 @@
 * limitations under the License.
  */
 
-import { Component } from "@angular/core";
+import { Component, DoCheck, OnChanges, SimpleChanges } from "@angular/core";
 import { DtdlSimulationModel } from "builder/simulator/simulator-config";
 import { SimulationStrategyConfigComponent } from "../../builder/simulator/simulation-strategy";
 import * as _ from 'lodash';
@@ -29,9 +29,9 @@ import * as _ from 'lodash';
             <table>
                 <tr><th>Name</th><th>Version</th><th>URL</th></tr>
                 <tr *ngFor="let firmware of config.firmwareVersions">
-                    <td><input type="string" class="form-control" placeholder="e.g. Version 1 (required)" required [(ngModel)]="firmware.name"></td>
-                    <td><input type="string" class="form-control" placeholder="e.g. 1.0.0 (required)" required [(ngModel)]="firmware.version"></td>
-                    <td><input type="string" class="form-control" placeholder="e.g. https://firmware-repo.cumulocity.com" [(ngModel)]="firmware.url"></td>
+                    <td><input type="string" class="form-control" placeholder="e.g. Version 1 (required)" required [(ngModel)]="firmware.name" (ngModelChange)="changeFirmware()"></td>
+                    <td><input type="string" class="form-control" placeholder="e.g. 1.0.0 (required)" required [(ngModel)]="firmware.version" (ngModelChange)="changeFirmware()"></td>
+                    <td><input type="string" class="form-control" placeholder="e.g. https://firmware-repo.cumulocity.com" [(ngModel)]="firmware.url" (ngModelChange)="changeFirmware()"></td>
                     <td><button *ngIf="config.firmwareVersions.length > 1" (click)="removeFirmware(firmware)">-</button></td>
                 </tr>
                 <tr>
@@ -42,7 +42,7 @@ import * as _ from 'lodash';
         </div>
         <div class="form-group">
             <label for="reset-on"><span>Reset Version</span></label>
-            <select class="form-control" id="reset-on" name="reset-on" [(ngModel)]="config.resetOn">
+            <select class="form-control" id="reset-on" name="reset-on" [(ngModel)]="config.resetOn" (ngModelChange)="changeResetVersion()">
                 <option value="restart">On Simulator Restart</option>
                 <option value="never">Never</option>
             </select>
@@ -93,10 +93,21 @@ export class FirmwareUpdateSimulationStrategyConfigComponent extends SimulationS
 
     removeFirmware(firmware) {
         this.config.firmwareVersions = this.config.firmwareVersions.filter(fw => fw !== firmware);
+        this.changeFirmware();
     }
 
     addFirmware() {
         const versionNumber = this.config.firmwareVersions.length + 1;
         this.config.firmwareVersions.push({ name: `Version ${versionNumber}`, version: `${versionNumber}.0.0`, url: `https://firmware-repo.cumulocity.com/v${versionNumber}.0.0` });
+        this.changeFirmware();
     }
+
+    changeFirmware() {
+        this.config.alternateConfigs.operations[0].firmwareVersions = this.config.firmwareVersions;
+    }
+
+    changeResetVersion() {
+        this.config.alternateConfigs.operations[0].resetOn = this.config.resetOn;
+    }
+   
 }

@@ -38,6 +38,9 @@ export class HomeComponent implements OnInit{
         this.mediaList = this.externalService.getAssetsList('MEDIA');
     }
 
+    getURL(type) {
+        return this.externalService.getURL('HOME', type);
+    }
     // Open External Link based or play media
     openLink(type) {
         switch (type) {

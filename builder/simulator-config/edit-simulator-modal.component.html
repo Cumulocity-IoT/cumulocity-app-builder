@@ -16,6 +16,13 @@
                 placeholder="e.g. My First Simulator (required)" required
                 [(ngModel)]="simulatorConfig.name">
         </div>
+        <div *ngIf="isMSCheckSpin" style="text-align: center;"><c8y-loading></c8y-loading></div>
+        <div class="form-group" *ngIf="isMSExist">
+                    <label class="c8y-switch">
+                        <input type="checkbox"  [(ngModel)]="simulatorConfig.serverSide"  id="serverSideFlag" name="serverSideFlag" />
+                        <span></span>Run on Server
+                      </label>
+        </div>
           <div class="form-group" *ngIf="simulatorConfig.config.isGroup" style="padding-bottom: 30px;">
               <label for="deviceName"><span>Group Name</span></label>
                <device-selector id="deviceName" name="deviceName" [(value)]="simulatorConfig.config.deviceName" [isGroup]='true' [placeHolder]="'Type your Group Name'" [required]="true"

@@ -27,6 +27,7 @@ import { Observable, Subject } from "rxjs";
 import { ProgressIndicatorModalComponent } from "../utils/progress-indicator-modal/progress-indicator-modal.component";
 
 import './cumulocity.json';
+import { WidgetCatalogService } from "../../builder/widget-catalog/widget-catalog.service";
 
 enum TemplateCatalogStep {
     CATALOG,
@@ -77,7 +78,7 @@ export class TemplateCatalogModalComponent implements OnInit {
 
     constructor(private modalService: BsModalService, private modalRef: BsModalRef,
         private catalogService: TemplateCatalogService, private componentService: DynamicComponentService,
-        private alertService: AlertService) {
+        private alertService: AlertService, private widgetCatalogService: WidgetCatalogService) {
         this.onSave = new Subject();
     }
 
@@ -91,6 +92,11 @@ export class TemplateCatalogModalComponent implements OnInit {
             this.hideLoadingIndicator();
             this.templates = catalog;
             this.filterTemplates =  (this.templates ? this.templates : []);
+            this.filterTemplates.forEach( template => {
+                if(template.thumbnail && template?.thumbnail != '') {
+                    template.thumbnail = this.catalogService.getGithubURL(template.thumbnail);
+                }
+            })
         }, error => {
             this.alertService.danger("There is some technical error! Please try after sometime.");
             this.hideLoadingIndicator();
@@ -108,6 +114,9 @@ export class TemplateCatalogModalComponent implements OnInit {
         this.catalogService.getTemplateDetails(template.dashboard).subscribe(templateDetails => {
             this.hideLoadingIndicator();
             this.templateDetails = templateDetails;
+            if(this.templateDetails.preview) {
+                this.templateDetails.preview = this.catalogService.getGithubURL(this.templateDetails.preview);
+            }
             this.updateDepedencies();
         });
     }
@@ -119,6 +128,7 @@ export class TemplateCatalogModalComponent implements OnInit {
         }
 
         this.templateDetails.input.dependencies.forEach(dependency => {
+            this.verifyWidgetCompatibility(dependency);
             this.componentService.getById$(dependency.id).subscribe(widget => {
                 dependency.isInstalled = (widget != undefined);
             });
@@ -219,7 +229,8 @@ export class TemplateCatalogModalComponent implements OnInit {
             const blob = new Blob([data], {
                 type: 'application/zip'
             });
-            const fileOfBlob = new File([blob], dependency.fileName);
+            const fileName = dependency.link.replace(/^.*[\\\/]/, '');
+            const fileOfBlob = new File([blob], fileName);
             this.catalogService.installWidget(fileOfBlob).then(() => {
                 dependency.isInstalled = true;
                 this.isReloadRequired = true;
@@ -260,9 +271,22 @@ export class TemplateCatalogModalComponent implements OnInit {
         return this.dashboardConfiguration.dashboardName && this.dashboardConfiguration.dashboardName.length >= 0;
     }
 
+    private verifyWidgetCompatibility(dependency: DependencyDescription) {
+        if(this.widgetCatalogService.isCompatiblieVersion(dependency)) {
+            dependency.isSupported = true;
+            dependency.visible = true;
+        } else {
+            const differentDependencyVersion = this.templateDetails.input.dependencies.find( widget => widget.id === dependency.id && widget.link !== dependency.link);
+            dependency.isSupported = false;
+            if(differentDependencyVersion) {
+                dependency.visible = false;
+            } else { dependency.visible = true;}
+        }
+    }
+
     downloadDTDL(uri: string) {
         const dtdlLink = document.createElement("a");
-        dtdlLink.href = uri;
+        dtdlLink.href = this.catalogService.getGithubURL(uri);;
         document.body.appendChild(dtdlLink);
         dtdlLink.click();
         document.body.removeChild(dtdlLink);
@@ -275,5 +299,4 @@ export class TemplateCatalogModalComponent implements OnInit {
         } 
 
     }
-
 }

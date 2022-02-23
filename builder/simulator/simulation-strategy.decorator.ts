@@ -17,7 +17,7 @@
  */
 
 // Provided by the polyfills.ts - import '@angular-devkit/build-angular/src/angular-cli-files/models/jit-polyfills.js';
-// import "reflect-metadata";
+import "reflect-metadata";
 declare module Reflect {
     function defineMetadata(name: string, metadata: any[], target: any);
 }

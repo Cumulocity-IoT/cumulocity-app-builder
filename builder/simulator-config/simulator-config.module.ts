@@ -72,7 +72,7 @@ class DeviceSimulatorConfigNavigation implements NavigatorNodeFactory {
     ]
 })
 export class SimulatorConfigModule {
-    static withNavigation(): ModuleWithProviders {
+    static withNavigation(): ModuleWithProviders<SimulatorConfigModule> {
         return {
             ngModule: SimulatorConfigModule,
             providers: [

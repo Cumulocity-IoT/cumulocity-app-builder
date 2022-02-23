@@ -1,4 +1,4 @@
-<ng-select #select [items]="items" [ngModel]="value" (ngModelChange)="valueChange.emit($event)" appendTo="body" [clearable]="false" [virtualScroll]="true" (open)="opened(select)" bindLabel="name" bindValue="className">
+<ng-select #select [items]="items" [ngModel]="value" (ngModelChange)="valueChange.emit($event)" [appendTo]="(appendTo ?  appendTo : 'body')" [clearable]="false" [virtualScroll]="true" (open)="opened(select)" bindLabel="name" bindValue="className">
     <ng-template ng-label-tmp let-item="item">
         <i [c8yIcon]="item.className" style="margin-right: 5px"></i>
         <span>{{item.name}}</span>

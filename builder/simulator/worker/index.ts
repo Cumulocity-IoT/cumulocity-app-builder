@@ -19,13 +19,13 @@
 /** This file is the main entrypoint for the simulator worker */
 
 /** IE9, IE10, IE11, Evergreen browsers require the following polyfills. */
-import '@angular-devkit/build-angular/src/angular-cli-files/models/es5-jit-polyfills.js';
-import '@angular-devkit/build-angular/src/angular-cli-files/models/es5-polyfills.js';
-import '@angular-devkit/build-angular/src/angular-cli-files/models/jit-polyfills.js';
+// import '@angular-devkit/build-angular/src/angular-cli-files/models/es5-jit-polyfills.js';
+// import '@angular-devkit/build-angular/src/angular-cli-files/models/es5-polyfills.js';
+// import '@angular-devkit/build-angular/src/angular-cli-files/models/jit-polyfills.js';
 
 import {enableProdMode} from "@angular/core";
-import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
-//import {platformBrowserDynamic} from "@angular/platform-webworker-dynamic";
+import { platformBrowserDynamic } from "@angular/platform-browser-dynamic";
+// import {platformWorkerAppDynamic} from "@angular/platform-webworker-dynamic";
 import {SimulatorWorkerModule} from "./simulator-worker.module";
 
 declare const __MODE__: string;
@@ -34,4 +34,5 @@ if (__MODE__ === 'production') {
 }
 
 // TODO: deprecated, can probably just switch to platformBrowserDynamic because not creating ui on the worker
+// platformWorkerAppDynamic().bootstrapModule(SimulatorWorkerModule, { ngZone: 'noop' });
 platformBrowserDynamic().bootstrapModule(SimulatorWorkerModule, { ngZone: 'noop' });

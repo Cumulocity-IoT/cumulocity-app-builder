@@ -21,6 +21,7 @@ import { BsModalRef } from 'ngx-bootstrap/modal';
 import {ApplicationService, InventoryService} from '@c8y/client';
 import {WizardComponent} from "../../wizard/wizard.component";
 import {WELCOME_DASHBOARD_TEMPLATE} from "./dashboard-templates";
+import {HELP_SUPPORT_DASHBOARD_TEMPLATE} from "./help-support-templates";
 import {AppBuilderNavigationService} from "../navigation/app-builder-navigation.service";
 
 @Component({
@@ -134,9 +135,9 @@ export class NewDashboardModalComponent {
 
     async addTemplateDashboardByTemplateName(application, name: string, visibility: '' | 'hidden' | 'no-nav', icon: string, templateName: 'welcome', tabGroup: string) {
         const template = {
-            welcome: WELCOME_DASHBOARD_TEMPLATE
+            welcome: WELCOME_DASHBOARD_TEMPLATE,
+            helpsupport: HELP_SUPPORT_DASHBOARD_TEMPLATE
         }[templateName];
-
         await this.addTemplateDashboard(application, name, visibility, icon, template, tabGroup);
     }
 

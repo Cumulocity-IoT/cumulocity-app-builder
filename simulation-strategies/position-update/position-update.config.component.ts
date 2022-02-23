@@ -26,19 +26,19 @@ import { DtdlSimulationModel } from '../../builder/simulator/simulator-config';
     template: `
         <div class="form-group">
             <label for="value"><span>Latitude value</span></label>
-            <input type="text" class="form-control" id="latitude" name="latitude" placeholder="e.g. 40.66, 50.40 (required)" required [(ngModel)]="config.latitude">
+            <input type="text" class="form-control" id="latitude" name="latitude" placeholder="e.g. 40.66, 50.40 (required)" required [(ngModel)]="config.latitude" (ngModelChange)="applyValuetoOperations(config)">
         </div> 
         <div class="form-group">
         <label for="value"><span>Altitude value</span></label>
-        <input type="text" class="form-control" id="altitude" name="altitude" placeholder="e.g. 0, 1 (required)" required [(ngModel)]="config.altitude">
+        <input type="text" class="form-control" id="altitude" name="altitude" placeholder="e.g. 0, 1 (required)" required [(ngModel)]="config.altitude" (ngModelChange)="applyValuetoOperations(config)">
     </div> 
         <div class="form-group">
             <label for="value"><span>Longitude Value</span></label>
-            <input type="text" class="form-control" id="longitude" name="longitude" placeholder="e.g. -74.20, -75.20 (required)" required [(ngModel)]="config.longitude">
+            <input type="text" class="form-control" id="longitude" name="longitude" placeholder="e.g. -74.20, -75.20 (required)" required [(ngModel)]="config.longitude" (ngModelChange)="applyValuetoOperations(config)">
         </div> 
          <div class="form-group">
             <label for="interval"><span>Interval (seconds)</span></label>
-            <input type="number" class="form-control" id="interval" name="interval" placeholder="e.g. 10 (required)" required [(ngModel)]="config.interval">
+            <input type="number" class="form-control" id="interval" name="interval" placeholder="e.g. 10 (required)" required [(ngModel)]="config.interval" (ngModelChange)="changeInterval(config)">
         </div>  
     `
 })
@@ -53,7 +53,7 @@ export class PositionUpdateSimulationStrategyConfigComponent extends SimulationS
             latitude: "",
             longitude: "",
             altitude: "",
-            interval: 5,
+            interval: 30,
             alternateConfigs: undefined
         };
 
@@ -77,4 +77,13 @@ export class PositionUpdateSimulationStrategyConfigComponent extends SimulationS
         this.config = c;
     }
 
+     // Patch fix for server side simulators
+     applyValuetoOperations(model:any) {
+        model.alternateConfigs.operations[0].latitude = model.latitude;
+        model.alternateConfigs.operations[0].altitude = model.altitude;
+        model.alternateConfigs.operations[0].longitude = model.longitude;
+    }
+    changeInterval(model:any) {
+        model.alternateConfigs.operations[0].interval = model.interval;
+    }
 }

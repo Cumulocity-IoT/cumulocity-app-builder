@@ -20,6 +20,7 @@ import {Injectable} from "@angular/core";
 import * as fa from "fontawesome";
 import * as d3 from "d3-color";
 import * as delay from "delay";
+import { SettingsService } from "../settings/settings.service";
 declare const FontFace: any;
 
 /**
@@ -30,22 +31,30 @@ declare const FontFace: any;
 export class BrandingService {
     appGeneral: HTMLStyleElement;
     appBranding: HTMLStyleElement;
+    powerByBlock: HTMLStyleElement;
     favicon: HTMLLinkElement;
 
     fontAwesomeLoaded: Promise<void>;
     isFontAwesomeLoaded: boolean = false;
-
-    constructor() {
+    
+    private isNavlogoVisible = true;
+    constructor( private settingService: SettingsService) {
         this.appGeneral = document.createElement('style');
         this.appBranding = document.createElement('style');
+        this.powerByBlock = document.createElement('style');
         document.head.appendChild(this.appGeneral);
         document.head.appendChild(this.appBranding);
+        document.head.appendChild(this.powerByBlock);
+        this.settingService.isNavlogoVisible().then ( isVisible => {
+            this.isNavlogoVisible = isVisible;
+            this.updatePowerbyLogo(this.isNavlogoVisible);
+        });
 
         this.favicon = document.head.querySelector('[rel=icon]');
 
         if (typeof FontFace != 'undefined') {
-          //  this.fontAwesomeLoaded = new FontFace('FontAwesome', 'url(./fontawesome-webfont-20fd1704ea223900efa9fd4e869efb08.woff2)').load();
-            this.fontAwesomeLoaded = new FontFace('FontAwesome', 'url(./fontawesome-webfont.woff2)').load();
+            // this.fontAwesomeLoaded = new FontFace('FontAwesome', 'url(./fontawesome-webfont-20fd1704ea223900efa9fd4e869efb08.woff2)').load();
+            this.fontAwesomeLoaded = new FontFace('FontAwesome', 'url(./fonts/fontawesome-webfont.woff2)').load();
         } else {
             this.fontAwesomeLoaded = Promise.resolve();
         }
@@ -62,7 +71,7 @@ export class BrandingService {
                 this.updateStyleForApp(app);
             });
         }
-
+        this.updatePowerbyLogo(this.isNavlogoVisible);
         if (app && app.applicationBuilder) {
             this.appGeneral.innerText = `
 .title .c8y-app-icon i {
@@ -109,6 +118,8 @@ export class BrandingService {
 .navigatorContent .link.active {
     border-left-color: var(--navigator-active-color);
 }
+
+
 `;
 
             if (app.applicationBuilder.branding && app.applicationBuilder.branding.enabled && app.applicationBuilder.branding.colors) {
@@ -130,8 +141,14 @@ body {
     --brand-dark: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     --input-focus-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
 
+    --header-color: ${app.applicationBuilder.branding.colors.headerBar ? this.colorToHex(app.applicationBuilder.branding.colors.headerBar) : '#ffffff' };
+    --dropdown-background: ${app.applicationBuilder.branding.colors.headerBar ? this.colorToHex(app.applicationBuilder.branding.colors.headerBar) : '#ffffff' };
+    --toolbar-background:${app.applicationBuilder.branding.colors.toolBar ? this.colorToHex(app.applicationBuilder.branding.colors.toolBar) : '#ffffff' };
+    --page-tabs-background:${app.applicationBuilder.branding.colors.tabBar ? this.colorToHex(app.applicationBuilder.branding.colors.tabBar) : '#ffffff' };
+    
     ${app.applicationBuilder.branding.logoHeight != undefined ? '--navigator-platform-logo-height: ' + app.applicationBuilder.branding.logoHeight + 'px;' : ''}
 }
+
 
 .navigator .title .tenant-brand {
     background-image: url(${CSS.escape(app.applicationBuilder.branding.logo || '')});
@@ -226,5 +243,21 @@ body {
         context.fillStyle = color;
         context.fillText(fa(icon), 0, 0, 16);
         return canvas.toDataURL();
+    }
+
+    private updatePowerbyLogo(isLogoVisible: boolean) {
+        if(isLogoVisible){
+            this.powerByBlock.innerText = `
+            .powered-by {
+                display: block;
+            }
+            `
+        } else {
+            this.powerByBlock.innerText = `
+            .powered-by {
+                display: none;
+            }
+            `
+        }
     }
 }

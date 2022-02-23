@@ -26,12 +26,13 @@ import {
     ComponentFactory
 } from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap/modal';
-import {ApplicationService} from '@c8y/client';
+import {ApplicationService, FetchClient} from '@c8y/client';
 import {AppIdService} from "../app-id.service";
 import {SimulatorConfig} from "../simulator/simulator-config";
 import {SimulationStrategiesService} from "../simulator/simulation-strategies.service";
 import {SimulatorCommunicationService} from "../simulator/mainthread/simulator-communication.service";
 import * as _ from 'lodash';
+import { SimulatorNotificationService } from './simulatorNotification.service';
 
 @Component({
     templateUrl: './edit-simulator-modal.component.html'
@@ -41,11 +42,15 @@ export class EditSimulatorModalComponent implements OnInit {
     @ViewChild("configWrapper", { read: ViewContainerRef, static: true }) configWrapper: ViewContainerRef;
     simulatorConfig: SimulatorConfig;
 
+    isMSExist: boolean = false;
+    isMSCheckSpin: boolean = false;
+
     constructor(
         private simSvc: SimulatorCommunicationService,
         public bsModalRef: BsModalRef, private simulationStrategiesService: SimulationStrategiesService,
         private resolver: ComponentFactoryResolver, private injector: Injector,
-        private appService: ApplicationService, private appIdService: AppIdService
+        private appService: ApplicationService, private appIdService: AppIdService, private fetchClient: FetchClient,
+        private simulatorNotificationService: SimulatorNotificationService
     ) {}
 
     ngOnInit() {
@@ -59,6 +64,8 @@ export class EditSimulatorModalComponent implements OnInit {
             this.bsModalRef.hide();
             return;
         }
+
+        this.verifySimulatorMicroServiceStatus();
         // For exisitng simulators
         if(this.simulatorConfig.config && !this.simulatorConfig.config.deviceName) {
             this.simulatorConfig.config.deviceName = this.simulatorConfig.config.deviceId;
@@ -73,7 +80,6 @@ export class EditSimulatorModalComponent implements OnInit {
             const componentRef = this.configWrapper.createComponent(factory);
             componentRef.instance.config = this.simulatorConfig.config;
 
-            //console.log("METADATA",metadata);
             //existing config - check for new operations - config on simulator config
             if( metadata.name != "DTDL" ){
                 if( !_.has(componentRef.instance.config,"alternateConfigs")) {
@@ -115,19 +121,27 @@ export class EditSimulatorModalComponent implements OnInit {
             componentRef.instance.config.isEditMode = true; 
             this.simulatorConfig.metadata = metadata;
         }
-        //console.log("openSimulatorConfig-end",this.simulatorConfig.config)
     }
 
     resetDialogSize() {
         this.bsModalRef.setClass('modal-sm');
     }
     async saveAndClose() {
-        //console.log("saveAndClose",this.simulatorConfig)
         this.busy = true;
         let app = (await this.appService.detail(this.appIdService.getCurrentAppId())).data as any;
 
         let matchingIndex = app.applicationBuilder.simulators
             .findIndex(x => x.id == this.simulatorConfig.id);
+        
+        this.simulatorConfig.lastUpdated = new Date().toISOString();
+
+        // Patch Fix for alternate config
+        if(this.simulatorConfig.config.alternateConfigs && this.simulatorConfig.config.alternateConfigs.operations && 
+            this.simulatorConfig.config.alternateConfigs.operations.length > 0) {
+            this.simulatorConfig.config.alternateConfigs.operations.forEach( ops => {
+                ops.deviceId = this.simulatorConfig.config.deviceId;
+            });
+        }
 
         if (matchingIndex > -1) {
             app.applicationBuilder.simulators[matchingIndex] = this.simulatorConfig;
@@ -135,12 +149,18 @@ export class EditSimulatorModalComponent implements OnInit {
             app.applicationBuilder.simulators.push(this.simulatorConfig)
         }
 
-
         await this.appService.update({
             id: app.id,
             applicationBuilder: app.applicationBuilder
         } as any);
 
+        this.simulatorNotificationService.post({
+            id: app.id,
+            name: app.name,
+            tenant: (app.owner && app.owner.tenant && app.owner.tenant.id ? app.owner.tenant.id : ''),
+            type: app.type,
+            simulator: this.simulatorConfig
+        });
         // We could just wait for them to refresh, but it's nicer to instantly refresh
         await this.simSvc.simulator.checkForSimulatorConfigChanges();
 
@@ -153,5 +173,14 @@ export class EditSimulatorModalComponent implements OnInit {
     }
     cancelEdit() {
         this.bsModalRef.hide();
+    }
+
+    private async verifySimulatorMicroServiceStatus() {
+        this.isMSCheckSpin = true;
+        const response = await this.fetchClient.fetch('service/simulator-microservice/health'); 
+        const data = await response.json()
+        if(data && data.status && data.status === "UP") { this.isMSExist = true;}
+        else { this.isMSExist = false;}
+        this.isMSCheckSpin = false;
     }
 }

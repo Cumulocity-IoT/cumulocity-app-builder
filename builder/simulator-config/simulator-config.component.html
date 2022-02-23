@@ -29,6 +29,9 @@
         <ng-container *ngIf="simulationStrategiesService.strategiesByName.get(simulatorConfig.type) as simulationStrategyFactory">
         <ng-container *ngIf="simulationStrategyFactory.getSimulatorMetadata() as simulationStrategyMetadata">
         <div class="card">
+            <div *ngIf="simulatorConfig.serverSide" style="position: absolute; right: 30px; top: 17px;" title="Run on Server">
+                <i c8yIcon="server"></i>
+            </div>
             <div class="dropdown card-actions" dropdown (click)="$event.stopPropagation()" *ngIf="userHasAdminRights && lockStatus.isLockOwned">
                 <button title="Settings" id="appSettings-{{simulatorConfig.name}}" class="dropdown-toggle c8y-dropdown" dropdownToggle type="button">
                     <i c8yIcon="ellipsis-v"></i>

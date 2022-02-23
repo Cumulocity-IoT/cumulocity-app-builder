@@ -32,7 +32,6 @@ export abstract class SimulationStrategyConfigComponent {
     abstract initializeConfig(existingConfig?: any): void
 
     public checkAlternateConfigs(target: DtdlSimulationModel) {
-        //console.log("checkAlternateConfigs",target);
         if (!this.hasOperations(target)) {
             target.alternateConfigs = {
                 opSource: "",
