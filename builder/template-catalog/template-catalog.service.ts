@@ -17,7 +17,7 @@
  */
 
 import { HttpClient, HttpResponse } from "@angular/common/http";
-import { Injectable } from "@angular/core";
+import { Injectable, isDevMode } from "@angular/core";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
 import { has, get } from "lodash-es";
@@ -39,6 +39,8 @@ export class TemplateCatalogService {
     private GATEWAY_URL_GitHubAsset = '';
     private GATEWAY_URL_GitHubAPI = '';
     private dashboardCatalogPath = '/dashboardCatalog/catalog.json';
+    private devBranchPath = "?ref=development";
+
 
     constructor(private http: HttpClient, private inventoryService: InventoryService,
         private appService: ApplicationService, private navigation: AppBuilderNavigationService,
@@ -50,7 +52,11 @@ export class TemplateCatalogService {
     }
 
     getTemplateCatalog(): Observable<TemplateCatalogEntry[]> {
-        return this.http.get(`${this.GATEWAY_URL_GitHubAPI}${this.dashboardCatalogPath}`).pipe(map(response => {
+        let url = `${this.GATEWAY_URL_GitHubAPI}${this.dashboardCatalogPath}`;
+        if(isDevMode()) {
+            url = url + this.devBranchPath;
+        }
+        return this.http.get(`${url}`).pipe(map(response => {
             if (!has(response, 'catalog')) {
                 console.error('Failed to load catalog');
                 return undefined;
@@ -73,7 +79,11 @@ export class TemplateCatalogService {
     }
 
     getTemplateDetails(dashboardId: string): Observable<TemplateDetails> {
-        return this.http.get(`${this.GATEWAY_URL_GitHubAPI}${dashboardId}`).pipe(map((dashboard: TemplateDetails) => {
+        let url = `${this.GATEWAY_URL_GitHubAPI}${dashboardId}`;
+        if(isDevMode()) {
+            url = url + this.devBranchPath;
+        }
+        return this.http.get(`${url}`).pipe(map((dashboard: TemplateDetails) => {
             return dashboard;
         }));
     }
@@ -90,6 +100,9 @@ export class TemplateCatalogService {
     }
 
     getGithubURL(relativePath: string){
+        if(isDevMode()){
+            return `${this.GATEWAY_URL_GitHubAPI}${relativePath}${this.devBranchPath}`;
+        }
        return `${this.GATEWAY_URL_GitHubAPI}${relativePath}`;
     }
 

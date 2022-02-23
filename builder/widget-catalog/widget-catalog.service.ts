@@ -1,5 +1,5 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, isDevMode } from '@angular/core';
 import { ApplicationService, InventoryBinaryService, InventoryService } from '@c8y/client';
 import { AlertService } from '@c8y/ngx-components';
 import { AppBuilderExternalAssetsService } from 'app-builder-external-assets';
@@ -7,12 +7,14 @@ import { RuntimeWidgetInstallerService } from 'cumulocity-runtime-widget-loader'
 import { Observable } from 'rxjs';
 import { WidgetCatalog, WidgetModel } from './widget-catalog.model';
 import * as semver from "semver";
+import * as packageJson from "./../../package.json";
 
 @Injectable()
 export class WidgetCatalogService {
 
-    C8Y_VERSION = '1011.0.5';
+    C8Y_VERSION = '1011.0.01';
     private WidgetCatalogPath = '/widgetCatalog/widget-catalog.json';
+    private devBranchPath = "?ref=development";
     private GATEWAY_URL_GitHubAsset = '';
     private GATEWAY_URL_GitHubAPI = '';
     private CATALOG_LABCASE_ID = '';
@@ -31,10 +33,14 @@ export class WidgetCatalogService {
         private externalService: AppBuilderExternalAssetsService) {
         this.GATEWAY_URL_GitHubAPI = this.externalService.getURL('GITHUB','gatewayURL_Github');
         this.GATEWAY_URL_GitHubAsset =  this.externalService.getURL('GITHUB','gatewayURL_GitHubAsset');
+        this.C8Y_VERSION = packageJson.dependencies['@c8y/ngx-components']
     }
 
 
     fetchWidgetCatalog(): Observable<WidgetCatalog> {
+        if(isDevMode()){
+          return this.http.get<WidgetCatalog>(`${this.GATEWAY_URL_GitHubAPI}${this.WidgetCatalogPath}${this.devBranchPath}`, this.HTTP_HEADERS);
+        }
         return this.http.get<WidgetCatalog>(`${this.GATEWAY_URL_GitHubAPI}${this.WidgetCatalogPath}`, this.HTTP_HEADERS);
     }
 

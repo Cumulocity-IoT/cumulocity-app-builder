@@ -16,7 +16,7 @@
 * limitations under the License.
  */
 
-import {Component, OnDestroy, OnInit} from "@angular/core";
+import {Component, isDevMode, OnDestroy, OnInit} from "@angular/core";
 import {
     ApplicationService,
     UserService
@@ -129,8 +129,8 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy{
     }
     async installWidget(widget: WidgetModel): Promise<void> {
         const currentHost = window.location.host.split(':')[0];
-        if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
-            this.alertService.warning("Runtime widget installation isn't supported when running Application Builder on localhost.");
+        if (currentHost === 'localhost' || currentHost === '127.0.0.1' || isDevMode()) {
+            this.alertService.warning("Runtime widget installation isn't supported when running Application Builder on localhost or in development mode.");
             return;
         }
         
