@@ -17,7 +17,6 @@ import { ProgressIndicatorService } from './progress-indicator.service';
     entryComponents: [
         ProgressIndicatorModalComponent
     ],
-    providers: [ProgressIndicatorService]
 })
 export class ProgressIndicatorModalModule {
 
