@@ -34,14 +34,16 @@ export class SettingsService {
     private appBuilderConfig: any;
     private appbuilderId: any = '';
     private defaultCustomProperties = {
-        gainsightEnabled: "",
-        dashboardCataglogEnabled: "",
-        dashboardVisibility: "",
-        simulatorEnabled: "",
-        navLogoVisibility: ""
+        gainsightEnabled: "false",
+        dashboardCataglogEnabled: "true",
+        dashboardVisibility: "true",
+        simulatorEnabled: "true",
+        navLogoVisibility: "true",
+        appUpgradeNotification: "true"
     };
     private currentTenant: ICurrentTenant;
     private analyticsProvider: any = {};
+    private isAppConfigNotFound = false;
     delayedTenantUpdateSubject = new Subject<any>();
     
     constructor(appIdService: AppIdService, private appService: ApplicationService, private inventoryService: InventoryService,
@@ -85,11 +87,14 @@ export class SettingsService {
         const appBuilderId = await this.getAPPBuilderId();
         const AppBuilderConfigList = (await this.inventoryService.list( {pageSize: 100, query: `type eq AppBuilder-Configuration and appBuilderId eq '${appBuilderId}'`})).data;
         this.appBuilderConfig = (AppBuilderConfigList.length > 0 ? AppBuilderConfigList[0] : null);
+        if(!this.appBuilderConfig) { this.isAppConfigNotFound = true; }
     }
 
     async getCustomProperties() {
         if(this.appBuilderConfig) {
             return (this.appBuilderConfig.customProperties ? this.appBuilderConfig.customProperties : this.defaultCustomProperties);
+        } else if(this.isAppConfigNotFound) {
+            return this.defaultCustomProperties;
         }
         else {
             await delay(500);
@@ -192,5 +197,10 @@ export class SettingsService {
     async isNavlogoVisible() {
         const customProp = await this.getCustomProperties();
         return (!customProp || (customProp  && ( !customProp.navLogoVisibility || customProp.navLogoVisibility === "true")));
+    }
+
+    async isAppUpgradeNotification() {
+        const customProp = await this.getCustomProperties();
+        return (!customProp || (customProp  && ( !customProp.appUpgradeNotification || customProp.appUpgradeNotification === "true")));
     }
 }

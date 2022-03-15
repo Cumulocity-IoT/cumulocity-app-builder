@@ -1,3 +1,21 @@
+/*
+* Copyright (c) 2019 Software AG, Darmstadt, Germany and/or its licensors
+*
+* SPDX-License-Identifier: Apache-2.0
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+ */
+
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, isDevMode } from '@angular/core';
 import { ApplicationService, InventoryBinaryService, InventoryService } from '@c8y/client';
@@ -12,11 +30,13 @@ import * as packageJson from "./../../package.json";
 @Injectable()
 export class WidgetCatalogService {
 
-    C8Y_VERSION = '1011.0.01';
+    C8Y_VERSION = '1011.0.0';
     private WidgetCatalogPath = '/widgetCatalog/widget-catalog.json';
+    private DemoCatalogWidgetsPath = '/demoCatalogWidgets/demo-catalog-widgets.json';
     private devBranchPath = "?ref=development";
     private GATEWAY_URL_GitHubAsset = '';
     private GATEWAY_URL_GitHubAPI = '';
+    private GATEWAY_URL_Labcase = '';
     private CATALOG_LABCASE_ID = '';
     runtimeLoadingCompleted = false;
     private readonly HTTP_HEADERS = {
@@ -34,6 +54,7 @@ export class WidgetCatalogService {
         this.GATEWAY_URL_GitHubAPI = this.externalService.getURL('GITHUB','gatewayURL_Github');
         this.GATEWAY_URL_GitHubAsset =  this.externalService.getURL('GITHUB','gatewayURL_GitHubAsset');
         this.C8Y_VERSION = packageJson.dependencies['@c8y/ngx-components']
+        this.GATEWAY_URL_Labcase = this.externalService.getURL('DBCATALOG', 'gatewayURL');
     }
 
 
@@ -44,6 +65,12 @@ export class WidgetCatalogService {
         return this.http.get<WidgetCatalog>(`${this.GATEWAY_URL_GitHubAPI}${this.WidgetCatalogPath}`, this.HTTP_HEADERS);
     }
 
+    fetchWidgetForDemoCatalog(): Observable<WidgetCatalog> {
+      if(isDevMode()){
+        return this.http.get<WidgetCatalog>(`${this.GATEWAY_URL_GitHubAPI}${this.DemoCatalogWidgetsPath}${this.devBranchPath}`, this.HTTP_HEADERS);
+      }
+      return this.http.get<WidgetCatalog>(`${this.GATEWAY_URL_GitHubAPI}${this.DemoCatalogWidgetsPath}`, this.HTTP_HEADERS);
+  }
     async installWidget(binary: Blob, widget: WidgetModel) {
       await this.runtimeWidgetInstallerService.installWidget(binary, (msg, type) => { }, widget);
     }
@@ -67,5 +94,11 @@ export class WidgetCatalogService {
       if(!widget.installedVersion) return true;
       const major = '>=' + semver.major(widget.installedVersion) + '.0.0';
       return semver.satisfies(widget.version, major);
+    }
+
+    downloadBinaryFromLabcase(binaryId: string): Observable<ArrayBuffer> {
+      return this.http.get(`${this.GATEWAY_URL_Labcase}${binaryId}`, {
+          responseType: 'arraybuffer'
+      });
     }
 }

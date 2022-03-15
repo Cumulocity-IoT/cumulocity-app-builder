@@ -16,7 +16,7 @@
 * limitations under the License.
  */
 
-import {Component, OnDestroy, OnInit} from "@angular/core";
+import {Component, isDevMode, OnDestroy, OnInit} from "@angular/core";
 import {
     ApplicationService,
     UserService,
@@ -29,9 +29,11 @@ import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { previewModalComponent } from '../preview-modal/preview-modal.component';
 import { WidgetCatalog, WidgetModel } from '../widget-catalog.model';
 import { WidgetCatalogService } from '../widget-catalog.service';
-import { interval } from 'rxjs';
+import { concat, forkJoin, from, fromEvent, interval, Observable, of } from 'rxjs';
 import { RuntimeWidgetLoaderService } from 'cumulocity-runtime-widget-loader';
 import { AlertMessageModalComponent } from "../../utils/alert-message-modal/alert-message-modal.component";
+import { mergeWith } from "lodash-es";
+import { map } from "rxjs/operators";
 @Component({
     templateUrl: './my-widgets.component.html',
     styleUrls: ['./my-widgets.component.less']
@@ -90,8 +92,16 @@ export class MyWidgetsComponent implements OnInit{
 
         this.isBusy = true;
         this.appList = (await this.appService.list({pageSize: 2000})).data;
-        await this.widgetCatalogService.fetchWidgetCatalog().subscribe(async (widgetCatalog: WidgetCatalog) => {
-            this.widgetCatalog = widgetCatalog;
+        
+        forkJoin([this.widgetCatalogService.fetchWidgetCatalog(), this.widgetCatalogService.fetchWidgetForDemoCatalog()])
+        .subscribe(async ([widgetList1, widgetList2]) =>{
+            this.widgetCatalog = widgetList1;
+            widgetList2.widgets.forEach((widget: WidgetModel) => {
+                const widgetObj = this.widgetCatalog.widgets.find( widgetObj => widgetObj.contextPath === widget.contextPath);
+                if(!widgetObj) {
+                    this.widgetCatalog.widgets.push(widget);
+                }
+            });
             await this.filterInstalledWidgets();
             this.filterWidgets = (this.widgetCatalog ? this.widgetCatalog.widgets : []);
             this.isBusy = false;
@@ -132,8 +142,8 @@ export class MyWidgetsComponent implements OnInit{
     }
     async updateWidget(widget: WidgetModel): Promise<void> {
         const currentHost = window.location.host.split(':')[0];
-        if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
-            this.alertService.warning("Runtime widget installation isn't supported when running Application Builder on localhost.");
+        if (currentHost === 'localhost' || currentHost === '127.0.0.1' || isDevMode()) {
+            this.alertService.warning("Runtime widget installation isn't supported when running Application Builder on localhost or in development mode.");
             return;
         }
 
@@ -162,15 +172,31 @@ export class MyWidgetsComponent implements OnInit{
     }
     private async initiateUpdateWidgetProcess(widget: WidgetModel) {
         this.showProgressModalDialog(`Updating ${widget.title}`)
-        const blob = await new Promise<any>((resolve) => {
-            this.widgetCatalogService.downloadBinary(widget.binaryLink).subscribe(data => {
-                const blob = new Blob([data], {
-                    type: 'application/zip'
+        let blob: any;
+        let fileName = "";
+        if(widget.binaryLink && widget.binaryLink !== '') {
+            blob = await new Promise<any>((resolve) => {
+                this.widgetCatalogService.downloadBinary(widget.binaryLink).subscribe(data => {
+                    const blob = new Blob([data], {
+                        type: 'application/zip'
+                    });
+                    resolve(blob);
                 });
-                resolve(blob);
             });
-        });
-        const fileOfBlob = new File([blob], widget.fileName);
+            fileName = widget.binaryLink.replace(/^.*[\\\/]/, '');
+        } else {
+            blob = await new Promise<any>((resolve) => {
+                this.widgetCatalogService.downloadBinaryFromLabcase(widget.link).subscribe(data => {
+                    const blob = new Blob([data], {
+                        type: 'application/zip'
+                    });
+                    resolve(blob);
+                });
+            });
+            fileName = widget.fileName;
+        }
+        
+        const fileOfBlob = new File([blob], fileName);
         await new Promise<any>((resolve) => {
             this.widgetCatalogService.installWidget(fileOfBlob, widget).then(() => {
                 widget.isReloadRequired = true;

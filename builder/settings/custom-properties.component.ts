@@ -54,12 +54,18 @@ import { SettingsService } from './settings.service';
                         (ngModelChange)="changeNavLogoVisibility()" [disabled]="!userHasAdminRights" 
                         [class.disabled]="!userHasAdminRights " btnCheckbox tabindex="1">{{navLogoVisibility? 'Visible' : 'Hidden' }}</button>
             </div>
+            <div class="form-group" >
+                <label translate="" for="appUpgradeNotification" >Application Builder Upgrade Notification</label>
+                <button class="btn btn-default" id="appUpgradeNotification" name="appUpgradeNotification" [(ngModel)]="appUpgradeNotification" 
+                        (ngModelChange)="changeAppUpgradeNotification()" [disabled]="!userHasAdminRights" 
+                        [class.disabled]="!userHasAdminRights " btnCheckbox tabindex="1">{{appUpgradeNotification? 'Enabled' : 'Disabled' }}</button>
+            </div>
         </div>
         <div *ngIf="isBusy" class="col-xs-12 col-sm-12 col-md-12" style="padding-bottom:50px;padding-top:20px">
             <rectangle-spinner  style="position: relative; left: 47%;">
             </rectangle-spinner>
         </div>
-        <div class="card-footer" style="text-align:center" *ngIf="userHasAdminRights">
+        <div class="card-footer" style="text-align:center" *ngIf="userHasAdminRights && !isBusy">
             <button class="btn btn-primary" id="saveCustomProperties" (click)="save(customProperties)" [disabled]="!customPropertiesForm.form.valid || !isFormValid()">Save</button>
         </div>
         </form>
@@ -85,12 +91,14 @@ export class CustomPropertiesComponent implements OnInit, OnDestroy{
     simulatorEnabled = true;
     dashboardVisibility = true;
     navLogoVisibility = true;
+    appUpgradeNotification = true;
     customProperties = {
         gainsightEnabled: "false",
         dashboardCataglogEnabled: "true",
         dashboardVisibility: "true",
         simulatorEnabled: "true",
-        navLogoVisibility: "true"
+        navLogoVisibility: "true",
+        appUpgradeNotification: "true"
         
     }
     delayedTenantSubscription: Subscription;
@@ -123,6 +131,7 @@ export class CustomPropertiesComponent implements OnInit, OnDestroy{
         if(this.customProperties.simulatorEnabled === 'true') { this.simulatorEnabled = true;}
         if(this.customProperties.dashboardVisibility === 'false') { this.dashboardVisibility = false;}
         if(this.customProperties.navLogoVisibility === 'false') { this.navLogoVisibility = false;}
+        if(this.customProperties.appUpgradeNotification === 'false') { this.appUpgradeNotification = false;}
         this.isBusy = false;
     }
 
@@ -146,9 +155,15 @@ export class CustomPropertiesComponent implements OnInit, OnDestroy{
         if(this.dashboardVisibility) { this.customProperties.dashboardVisibility = 'true';}
         else { this.customProperties.dashboardVisibility = 'false'; }
     }
+
     changeNavLogoVisibility() {
         if(this.navLogoVisibility) { this.customProperties.navLogoVisibility = 'true';}
         else { this.customProperties.navLogoVisibility = 'false'; }
+    }
+
+    changeAppUpgradeNotification() {
+        if(this.appUpgradeNotification) { this.customProperties.appUpgradeNotification = 'true';}
+        else { this.customProperties.appUpgradeNotification = 'false'; }
     }
     isFormValid() {
         return ( this.customProperties && (this.customProperties.gainsightEnabled === 'true' || this.customProperties.gainsightEnabled === 'false') && 

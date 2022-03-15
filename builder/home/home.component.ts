@@ -16,12 +16,17 @@
 * limitations under the License.
  */
 
-import {Component, OnInit} from "@angular/core";
+import {Component, isDevMode, OnInit} from "@angular/core";
 import { AppBuilderExternalAssetsService } from 'app-builder-external-assets';
+import { AppBuilderUpgradeService } from "../app-builder-upgrade/app-builder-upgrade.service";
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 
 import './cumulocity';
 import { VideoModalComponent } from './video-modal.component';
+import { UserService } from "@c8y/ngx-components/api";
+import { AlertService, AppStateService } from "@c8y/ngx-components";
+import { ExternalApp } from "../app-builder-upgrade/app-builder-upgrade.model";
+import { Router } from "@angular/router";
 
 @Component({
     templateUrl: './home.component.html',
@@ -31,8 +36,13 @@ export class HomeComponent implements OnInit{
 
     bsModalRef: BsModalRef;
     mediaList = [];
+    userHasAdminRights: boolean;
 
-    constructor(private modalService: BsModalService, private externalService: AppBuilderExternalAssetsService) {}
+    constructor(private modalService: BsModalService, private externalService: AppBuilderExternalAssetsService,
+        private appBuilderUpgradeService: AppBuilderUpgradeService, private alertService: AlertService,
+        private userService: UserService, private appStateService: AppStateService, private router: Router) {
+            this.userHasAdminRights = userService.hasRole(appStateService.currentUser.value, "ROLE_APPLICATION_MANAGEMENT_ADMIN")
+        }
 
     ngOnInit() {
         this.mediaList = this.externalService.getAssetsList('MEDIA');
@@ -72,5 +82,64 @@ export class HomeComponent implements OnInit{
 
     private getMediaDetails(key) {
         return this.mediaList.find(mkey => mkey.key === key);
+    }
+
+    async installDemoCatalog() {
+        if(this.userHasAdminRights) {
+           await this.appBuilderUpgradeService.fetchAppBuilderConfig().subscribe( async appBuilderConfig => {
+                if(appBuilderConfig && appBuilderConfig.externalApps && appBuilderConfig.externalApps.length > 0){
+                    const demoCatalogApp: ExternalApp = appBuilderConfig.externalApps.find( app => app.appName === 'demoCatalog');
+                    if(demoCatalogApp && demoCatalogApp.binaryLink){
+                        const currentHost = window.location.host.split(':')[0];
+                        if (currentHost === 'localhost' || currentHost === '127.0.0.1' || isDevMode()) {
+                                this.alertService.warning("Installation isn't supported when running Application Builder on localhost or in development mode.");
+                                return;
+                        }
+                        const appList = await this.appBuilderUpgradeService.getApplicationList();
+                        const existingDemoCatalogApp = appList.find( app => demoCatalogApp.contextPath && app.contextPath === demoCatalogApp.contextPath);
+                        if(existingDemoCatalogApp) {
+                           window.location.href = `/apps/${existingDemoCatalogApp.contextPath}`;
+                        } else {this.initiateInstallation(demoCatalogApp); }
+                        
+                    } else {
+                        this.alertService.danger("There is some technical error! Please try after sometime.");
+                    }
+                }
+            
+            });
+        } else {
+             this.alertService.danger("User does not have the required permissions to install Demo Catalog", "Missing Application Admin Permission");
+        }
+        
+    }
+    private initiateInstallation(dempCatalogApp: ExternalApp) {
+        const alertMessage = {
+            title: 'Installation Confirmation',
+            description: `You are about to Install Demo Catalog.
+            Do you want to proceed?`,
+            type: 'info',
+            alertType: 'confirm', //info|confirm
+            confirmPrimary: true //confirm Button is primary
+          }
+        const installDemoCatalogDialogRef = this.appBuilderUpgradeService.alertModalDialog(alertMessage);
+        installDemoCatalogDialogRef.content.event.subscribe(async data => {
+            if (data && data.isConfirm) {
+              this.appBuilderUpgradeService.showProgressModalDialog('Installing Demo Catalog...');
+              await this.appBuilderUpgradeService.downloadAndInstall(dempCatalogApp.binaryLink, dempCatalogApp.fileName, false, 'INSTALL');
+              this.appBuilderUpgradeService.hideProgressModalDialog();
+              if(!this.appBuilderUpgradeService.errorReported) {
+                const postInstallMsg = {
+                    title: 'Installation Completed',
+                    description: 'Demo Catalog is successfully installed.',
+                    type: 'info',
+                    alertType: 'info' //info|confirm
+                  };
+                  const postInstalaltionDialogRef = this.appBuilderUpgradeService.alertModalDialog(postInstallMsg);
+                  await postInstalaltionDialogRef.content.event.subscribe(data => {
+                    window.location.reload();
+                  });
+              }
+            }
+          });
     }
 }

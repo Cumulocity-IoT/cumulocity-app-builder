@@ -59,6 +59,7 @@ import { SettingsService } from './settings/settings.service';
 import { HomeComponent } from './home/home.component';
 import { WidgetCatalogModule } from './widget-catalog/widget-catalog.module';
 import { AlertMessageModalModule } from "./utils/alert-message-modal/alert-message-modal.module";
+import { AppBuilderUpgradeService } from "./app-builder-upgrade/app-builder-upgrade.service";
 @NgModule({
     imports: [
         ApplicationModule,
@@ -133,7 +134,7 @@ import { AlertMessageModalModule } from "./utils/alert-message-modal/alert-messa
 export class BuilderModule {
     private renderer: Renderer2;
     constructor(appStateService: AppStateService, loginService: LoginService, simSvc: SimulatorCommunicationService, 
-        appIdService: AppIdService, private settingService: SettingsService,
+        appIdService: AppIdService, private settingService: SettingsService, private appBuilderUpgradeService: AppBuilderUpgradeService,
         rendererFactory: RendererFactory2, @Inject(DOCUMENT) private _document: Document, private tenantService: TenantService) {
         // Pass the app state to the worker from the main thread (Initially and every time it changes)
         appStateService.currentUser.subscribe(async (user) => {
@@ -181,6 +182,7 @@ export class BuilderModule {
                     this.renderer = rendererFactory.createRenderer(null, null);
                     this.registerAndTrackAnalyticsProvider(true);
                 }
+                this.appBuilderUpgradeService.loadUpgradeBanner();
             }
         });
        

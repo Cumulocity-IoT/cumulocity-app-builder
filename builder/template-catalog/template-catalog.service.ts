@@ -218,7 +218,7 @@ export class TemplateCatalogService {
     }
 
     private downloadBinaryFromRepository(binaryId: string): Observable<HttpResponse<Blob>> {
-        return this.http.get(`${this.GATEWAY_URL}${binaryId}`, {
+        return this.http.get(`${this.GATEWAY_URL_GitHubAsset}${binaryId}`, {
             responseType: 'blob',
             observe: 'response'
         });

@@ -154,6 +154,7 @@ export class SeriesValueSimulationStrategyConfigComponent extends SimulationStra
             series: this.config.series,
             value: "10, 20, 30",
             unit: this.config.unit,
+            interval: this.config.interval,
             alternateConfigs: undefined
         };
 

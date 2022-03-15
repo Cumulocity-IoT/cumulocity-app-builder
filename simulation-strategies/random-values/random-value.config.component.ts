@@ -171,6 +171,7 @@ export class RandomValueSimulationStrategyConfigComponent extends SimulationStra
             minValue: 10,
             maxValue: 20,
             unit: this.config.unit,
+            interval: this.config.interval,
             alternateConfigs: undefined
         };
 

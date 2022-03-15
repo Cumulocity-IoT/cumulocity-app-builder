@@ -179,7 +179,7 @@ export class WaveSimulationStrategyConfigComponent extends SimulationStrategyCon
             height: 10,
             wavelength: 60,
             unit: this.config.unit,
-            interval: 30,
+            interval: this.config.interval,
             alternateConfigs: undefined
         };
 
