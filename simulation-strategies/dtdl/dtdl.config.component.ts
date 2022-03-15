@@ -108,6 +108,14 @@ import * as _ from 'lodash';
                                     <input type="number" class="form-control"  name="maxvalue{{model.id}}" placeholder="e.g. 20 (required)" required [(ngModel)]="model.alternateConfigs.operations[0].maxValue">
                                 </div>
                             </div>
+                            <ng-container *ngIf="model.alternateConfigs.opEnabled">
+                                <div class="col-xs-12 col-sm-4 col-md-4">
+                                    <div class="measurement-accordion">
+                                        <label for="match_{{model.id}}"><span>Matching</span></label>
+                                        <input type="text" class="form-control" id="match_{{model.id}}" name="match_{{model.id}}" placeholder="e.g. WINDY" required [(ngModel)]="model.alternateConfigs.operations[0].matchingValue">
+                                    </div>
+                                </div>
+                            </ng-container>
                         </ng-container>
                         <ng-container *ngSwitchCase="'positionUpdate'">
                             <div class="col-xs-12 col-sm-4 col-md-4">
@@ -150,6 +158,14 @@ import * as _ from 'lodash';
                                     <input type="text" class="form-control" id="value" name="value{{model.id}}" placeholder="e.g. 15,20,30 (required)" required [(ngModel)]="model.alternateConfigs.operations[0].value">
                                 </div> 
                             </div>
+                            <ng-container *ngIf="model.alternateConfigs.opEnabled">
+                                <div class="col-xs-12 col-sm-4 col-md-4">
+                                    <div class="measurement-accordion">
+                                        <label for="match_{{model.id}}"><span>Matching</span></label>
+                                        <input type="text" class="form-control" id="match_{{model.id}}" name="match_{{model.id}}" placeholder="e.g. WINDY" required [(ngModel)]="model.alternateConfigs.operations[0].matchingValue">
+                                    </div>
+                                </div>
+                            </ng-container>
                         </ng-container>
                         <ng-container *ngSwitchCase="'randomWalk'">
                             <div class="col-xs-12 col-sm-4 col-md-4">
@@ -234,7 +250,7 @@ import * as _ from 'lodash';
                                             <div class="col-xs-6 col-lg-6">
                                                 <div class="measurement-accordion">
                                                     <label for="opMatch_{{i}}"><span>Matching</span></label>
-                                                    <input type="text" class="form-control" id="opMatch_{{i}}" name="opMatch_{{i}}" placeholder="e.g. WINDY" required [(ngModel)]="op.matchingValue">
+                                                    <input type="text" class="form-control" id="opMatch{{model.id}}_{{i}}" name="opMatch{{model.id}}_{{i}}" placeholder="e.g. WINDY" required [(ngModel)]="op.matchingValue">
                                                 </div>
                                             </div>
                                             <!-- must be the same as the default --> 

@@ -104,9 +104,15 @@ export class AppBuilderUpgradeService {
                 }
                 const appList = await this.getApplicationList();
                 const currentTenantId = this.settingService.getTenantName();
-                const appBuilderApp = appList.find( 
+                let appBuilderApp = appList.find( 
                     app => this.appBuilderConfigModel.versionInfo.contextPath && 
-                    app.contextPath === this.appBuilderConfigModel.versionInfo.contextPath);
+                    app.contextPath === this.appBuilderConfigModel.versionInfo.contextPath &&  (String(app.availability) === 'PRIVATE'));
+                if(!appBuilderApp) {
+                    // Checking app builder subscribed one..
+                    appList.find( 
+                        app => this.appBuilderConfigModel.versionInfo.contextPath && 
+                        app.contextPath === this.appBuilderConfigModel.versionInfo.contextPath );
+                }
                 const appBuilderTenantId = (appBuilderApp && appBuilderApp.owner && appBuilderApp.owner.tenant ? appBuilderApp.owner.tenant.id : undefined);
                 if(appBuilderApp && currentTenantId === appBuilderTenantId) { isValidContextPath = true;} 
                 /* else {
