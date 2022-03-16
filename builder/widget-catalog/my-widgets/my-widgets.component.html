@@ -25,8 +25,10 @@
             <div class="col col-overflow" title="{{item.value.installedVersion}}" >{{item.value.installedVersion ? item.value.installedVersion : 'Not Available'}}</div>
             <div class="col col-overflow" title="{{item.value.license}}">{{item.value.license}}</div>
             <div class="col col-overflow" title="{{item.value.author}}">{{item.value.author}}</div>
-            <div class="action-icon text-info" title="Preview"><i c8yIcon="eye" (click)="preview(item.value.preview)"></i></div>
-            <div class="action-icon text-info" title="Documentation"><i c8yIcon="document-with-code" (click)="openDocumentation(item.value.repository)"></i></div>
+            <div class="text-info">
+                <button class="btn btn-clean btn-icon btn-md" title="Preview" [disabled] = "!item.value.preview" ><i c8yIcon="eye" class="action-icon-button" (click)="preview(item.value.preview)"></i></button></div>
+            <div class=" text-info" >
+                <button class="btn btn-clean btn-icon btn-md"  title="Documentation" [disabled] = "!item.value.repository" ><i c8yIcon="document-with-code" class="action-icon-button" (click)="openDocumentation(item.value.repository)"></i></button></div>
             <div *ngIf="userHasAdminRights" class="action-icon text-danger" title="Uninstall Widget"><i c8yIcon="minus-circle" (click)="uninstallWidget(item.value)"></i></div>
         </ng-template>
 
