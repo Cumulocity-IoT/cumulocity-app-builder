@@ -109,7 +109,7 @@ export class AppBuilderUpgradeService {
                     app.contextPath === this.appBuilderConfigModel.versionInfo.contextPath &&  (String(app.availability) === 'PRIVATE'));
                 if(!appBuilderApp) {
                     // Checking app builder subscribed one..
-                    appList.find( 
+                    appBuilderApp = appList.find( 
                         app => this.appBuilderConfigModel.versionInfo.contextPath && 
                         app.contextPath === this.appBuilderConfigModel.versionInfo.contextPath );
                 }
