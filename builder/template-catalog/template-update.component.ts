@@ -24,6 +24,7 @@ import { IManagedObject } from '@c8y/client';
 import { TemplateDetails } from "./template-catalog.model";
 import { TemplateCatalogService } from "./template-catalog.service";
 import { ProgressIndicatorModalComponent } from "../utils/progress-indicator-modal/progress-indicator-modal.component";
+import { catchError } from "rxjs/operators";
 
 @Component({
     selector: 'template-update-component',
@@ -53,6 +54,10 @@ export class TemplateUpdateModalComponent implements OnInit {
     ngOnInit(): void {
         this.showLoadingIndicator();
         this.catalogService.getTemplateDetails(this.dashboardConfig.templateDashboard.id)
+        .pipe(catchError(err => {
+            console.log('Dashboard Details: Error in primary endpoint using fallback');
+            return this.catalogService.getTemplateDetailsFallBack(this.dashboardConfig.templateDashboard.id)
+            }))
             .subscribe(templateDetails => {
                 this.hideLoadingIndicator();
                 // TODO add some checks

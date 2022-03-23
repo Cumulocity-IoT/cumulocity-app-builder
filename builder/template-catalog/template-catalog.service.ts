@@ -34,12 +34,15 @@ import { RuntimeWidgetInstallerService } from "cumulocity-runtime-widget-loader"
 @Injectable()
 export class TemplateCatalogService {
 
-    private GATEWAY_URL = '';
-    private CATALOG_LABCASE_ID = '';
+ //   private GATEWAY_URL = '';
+ //   private CATALOG_LABCASE_ID = '';
     private GATEWAY_URL_GitHubAsset = '';
     private GATEWAY_URL_GitHubAPI = '';
+    private GATEWAY_URL_GitHubAsset_FallBack = '';
+    private GATEWAY_URL_GitHubAPI_FallBack = '';
     private dashboardCatalogPath = '/dashboardCatalog/catalog.json';
     private devBranchPath = "?ref=development";
+    private isFallBackActive = false;
 
 
     constructor(private http: HttpClient, private inventoryService: InventoryService,
@@ -49,6 +52,9 @@ export class TemplateCatalogService {
         private externalService: AppBuilderExternalAssetsService) {
         this.GATEWAY_URL_GitHubAPI = this.externalService.getURL('GITHUB','gatewayURL_Github');
         this.GATEWAY_URL_GitHubAsset =  this.externalService.getURL('GITHUB','gatewayURL_GitHubAsset');
+        this.GATEWAY_URL_GitHubAPI_FallBack = this.externalService.getURL('GITHUB','gatewayURL_Github_Fallback');
+        this.GATEWAY_URL_GitHubAsset_FallBack =  this.externalService.getURL('GITHUB','gatewayURL_GitHubAsset_Fallback');
+        
     }
 
     getTemplateCatalog(): Observable<TemplateCatalogEntry[]> {
@@ -56,6 +62,19 @@ export class TemplateCatalogService {
         if(isDevMode()) {
             url = url + this.devBranchPath;
         }
+        return this.getDataForTemplateCatalog(url);
+    }
+
+    getTemplateCatalogFallBack(): Observable<TemplateCatalogEntry[]> {
+        let url = `${this.GATEWAY_URL_GitHubAPI_FallBack}${this.dashboardCatalogPath}`;
+        this.isFallBackActive = true;
+        if(isDevMode()) {
+            url = url + this.devBranchPath;
+        }
+        return this.getDataForTemplateCatalog(url);
+    }
+
+    private getDataForTemplateCatalog(url: string): Observable<TemplateCatalogEntry[]> {
         return this.http.get(`${url}`).pipe(map(response => {
             if (!has(response, 'catalog')) {
                 console.error('Failed to load catalog');
@@ -88,6 +107,17 @@ export class TemplateCatalogService {
         }));
     }
 
+    getTemplateDetailsFallBack(dashboardId: string): Observable<TemplateDetails> {
+        let url = `${this.GATEWAY_URL_GitHubAPI_FallBack}${dashboardId}`;
+        this.isFallBackActive = true;
+        if(isDevMode()) {
+            url = url + this.devBranchPath;
+        }
+        return this.http.get(`${url}`).pipe(map((dashboard: TemplateDetails) => {
+            return dashboard;
+        }));
+    }
+
     async installWidget(binary: Blob) {
         await this.runtimeWidgetInstallerService.installWidget(binary, (msg, type) => { });
         this.alertService.success("Widget Added! Page will be refreshed once dashbaord is saved...");
@@ -99,11 +129,21 @@ export class TemplateCatalogService {
         });
     }
 
+    downloadBinaryFallBack(binaryId: string): Observable<ArrayBuffer> {
+        return this.http.get(`${this.GATEWAY_URL_GitHubAsset_FallBack}${binaryId}`, {
+            responseType: 'arraybuffer'
+        });
+    }
+
     getGithubURL(relativePath: string){
-        if(isDevMode()){
-            return `${this.GATEWAY_URL_GitHubAPI}${relativePath}${this.devBranchPath}`;
+        let url = `${this.GATEWAY_URL_GitHubAPI}`;
+        if(this.isFallBackActive) {
+            url = `${this.GATEWAY_URL_GitHubAPI_FallBack}`;
         }
-       return `${this.GATEWAY_URL_GitHubAPI}${relativePath}`;
+        if(isDevMode()){
+            return url + `${relativePath}${this.devBranchPath}`;
+        }
+       return  url + `${relativePath}`;
     }
 
     uploadImage(image: File): Promise<string> {
@@ -218,6 +258,12 @@ export class TemplateCatalogService {
     }
 
     private downloadBinaryFromRepository(binaryId: string): Observable<HttpResponse<Blob>> {
+        if(this.isFallBackActive) {
+            return this.http.get(`${this.GATEWAY_URL_GitHubAsset_FallBack}${binaryId}`, {
+                responseType: 'blob',
+                observe: 'response'
+            });
+        }
         return this.http.get(`${this.GATEWAY_URL_GitHubAsset}${binaryId}`, {
             responseType: 'blob',
             observe: 'response'

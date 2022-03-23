@@ -36,7 +36,10 @@ export class WidgetCatalogService {
     private devBranchPath = "?ref=development";
     private GATEWAY_URL_GitHubAsset = '';
     private GATEWAY_URL_GitHubAPI = '';
+    private GATEWAY_URL_GitHubAsset_FallBack = '';
+    private GATEWAY_URL_GitHubAPI_FallBack = '';
     private GATEWAY_URL_Labcase = '';
+    private GATEWAY_URL_Labcase_FallBack = '';
     private CATALOG_LABCASE_ID = '';
     runtimeLoadingCompleted = false;
     private readonly HTTP_HEADERS = {
@@ -53,8 +56,11 @@ export class WidgetCatalogService {
         private externalService: AppBuilderExternalAssetsService) {
         this.GATEWAY_URL_GitHubAPI = this.externalService.getURL('GITHUB','gatewayURL_Github');
         this.GATEWAY_URL_GitHubAsset =  this.externalService.getURL('GITHUB','gatewayURL_GitHubAsset');
+        this.GATEWAY_URL_GitHubAPI_FallBack = this.externalService.getURL('GITHUB','gatewayURL_Github_Fallback');
+        this.GATEWAY_URL_GitHubAsset_FallBack =  this.externalService.getURL('GITHUB','gatewayURL_GitHubAsset_Fallback');
         this.C8Y_VERSION = packageJson.dependencies['@c8y/ngx-components']
         this.GATEWAY_URL_Labcase = this.externalService.getURL('DBCATALOG', 'gatewayURL');
+        this.GATEWAY_URL_Labcase_FallBack = this.externalService.getURL('DBCATALOG', 'gatewayURL_Fallback');
     }
 
 
@@ -65,11 +71,25 @@ export class WidgetCatalogService {
         return this.http.get<WidgetCatalog>(`${this.GATEWAY_URL_GitHubAPI}${this.WidgetCatalogPath}`, this.HTTP_HEADERS);
     }
 
+    fetchWidgetCatalogFallback(): Observable<WidgetCatalog> {
+      if(isDevMode()){
+        return this.http.get<WidgetCatalog>(`${this.GATEWAY_URL_GitHubAPI_FallBack}${this.WidgetCatalogPath}${this.devBranchPath}`, this.HTTP_HEADERS);
+      }
+      return this.http.get<WidgetCatalog>(`${this.GATEWAY_URL_GitHubAPI_FallBack}${this.WidgetCatalogPath}`, this.HTTP_HEADERS);
+  }
+
     fetchWidgetForDemoCatalog(): Observable<WidgetCatalog> {
       if(isDevMode()){
         return this.http.get<WidgetCatalog>(`${this.GATEWAY_URL_GitHubAPI}${this.DemoCatalogWidgetsPath}${this.devBranchPath}`, this.HTTP_HEADERS);
       }
       return this.http.get<WidgetCatalog>(`${this.GATEWAY_URL_GitHubAPI}${this.DemoCatalogWidgetsPath}`, this.HTTP_HEADERS);
+  }
+
+  fetchWidgetForDemoCatalogFallback(): Observable<WidgetCatalog> {
+    if(isDevMode()){
+      return this.http.get<WidgetCatalog>(`${this.GATEWAY_URL_GitHubAPI_FallBack}${this.DemoCatalogWidgetsPath}${this.devBranchPath}`, this.HTTP_HEADERS);
+    }
+    return this.http.get<WidgetCatalog>(`${this.GATEWAY_URL_GitHubAPI_FallBack}${this.DemoCatalogWidgetsPath}`, this.HTTP_HEADERS);
   }
     async installWidget(binary: Blob, widget: WidgetModel) {
       await this.runtimeWidgetInstallerService.installWidget(binary, (msg, type) => { }, widget);
@@ -77,6 +97,12 @@ export class WidgetCatalogService {
 
     downloadBinary(binaryId: string): Observable<ArrayBuffer> {
       return this.http.get(`${this.GATEWAY_URL_GitHubAsset}${binaryId}`, {
+          responseType: 'arraybuffer'
+      });
+    }
+
+    downloadBinaryFallback(binaryId: string): Observable<ArrayBuffer> {
+      return this.http.get(`${this.GATEWAY_URL_GitHubAsset_FallBack}${binaryId}`, {
           responseType: 'arraybuffer'
       });
     }
@@ -98,6 +124,12 @@ export class WidgetCatalogService {
 
     downloadBinaryFromLabcase(binaryId: string): Observable<ArrayBuffer> {
       return this.http.get(`${this.GATEWAY_URL_Labcase}${binaryId}`, {
+          responseType: 'arraybuffer'
+      });
+    }
+
+    downloadBinaryFromLabcaseFallback(binaryId: string): Observable<ArrayBuffer> {
+      return this.http.get(`${this.GATEWAY_URL_Labcase_FallBack}${binaryId}`, {
           responseType: 'arraybuffer'
       });
     }

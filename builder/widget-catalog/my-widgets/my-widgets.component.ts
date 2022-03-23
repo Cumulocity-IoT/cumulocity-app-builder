@@ -33,7 +33,7 @@ import { concat, forkJoin, from, fromEvent, interval, Observable, of } from 'rxj
 import { RuntimeWidgetLoaderService } from 'cumulocity-runtime-widget-loader';
 import { AlertMessageModalComponent } from "../../utils/alert-message-modal/alert-message-modal.component";
 import { mergeWith } from "lodash-es";
-import { map } from "rxjs/operators";
+import { catchError, map } from "rxjs/operators";
 @Component({
     templateUrl: './my-widgets.component.html',
     styleUrls: ['./my-widgets.component.less']
@@ -93,7 +93,16 @@ export class MyWidgetsComponent implements OnInit{
         this.isBusy = true;
         this.appList = (await this.appService.list({pageSize: 2000})).data;
         
-        forkJoin([this.widgetCatalogService.fetchWidgetCatalog(), this.widgetCatalogService.fetchWidgetForDemoCatalog()])
+        forkJoin([this.widgetCatalogService.fetchWidgetCatalog()
+            .pipe(catchError(err => {
+                console.log('Widget Catalog: Error in primary endpoint using fallback');
+                return this.widgetCatalogService.fetchWidgetCatalogFallback()
+              })), 
+              this.widgetCatalogService.fetchWidgetForDemoCatalog()
+              .pipe(catchError(err => {
+                console.log('Widget Catalog for Demo Catalog: Error in primary endpoint using fallback');
+                return this.widgetCatalogService.fetchWidgetForDemoCatalogFallback()
+              }))])
         .subscribe(async ([widgetList1, widgetList2]) =>{
             this.widgetCatalog = widgetList1;
             widgetList2.widgets.forEach((widget: WidgetModel) => {
@@ -176,7 +185,12 @@ export class MyWidgetsComponent implements OnInit{
         let fileName = "";
         if(widget.binaryLink && widget.binaryLink !== '') {
             blob = await new Promise<any>((resolve) => {
-                this.widgetCatalogService.downloadBinary(widget.binaryLink).subscribe(data => {
+                this.widgetCatalogService.downloadBinary(widget.binaryLink)
+                .pipe(catchError(err => {
+                    console.log('Widget Catalog Binary: Error in primary endpoint using fallback');
+                    return this.widgetCatalogService.downloadBinaryFallback(widget.binaryLink)
+                  }))
+                .subscribe(data => {
                     const blob = new Blob([data], {
                         type: 'application/zip'
                     });
@@ -186,7 +200,12 @@ export class MyWidgetsComponent implements OnInit{
             fileName = widget.binaryLink.replace(/^.*[\\\/]/, '');
         } else {
             blob = await new Promise<any>((resolve) => {
-                this.widgetCatalogService.downloadBinaryFromLabcase(widget.link).subscribe(data => {
+                this.widgetCatalogService.downloadBinaryFromLabcase(widget.link)
+                .pipe(catchError(err => {
+                    console.log('Widget Catalog Labcase Binary: Error in primary endpoint using fallback');
+                    return this.widgetCatalogService.downloadBinaryFromLabcaseFallback(widget.link)
+                  }))
+                  .subscribe(data => {
                     const blob = new Blob([data], {
                         type: 'application/zip'
                     });

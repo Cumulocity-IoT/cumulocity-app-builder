@@ -27,6 +27,7 @@ import { UserService } from "@c8y/ngx-components/api";
 import { AlertService, AppStateService } from "@c8y/ngx-components";
 import { ExternalApp } from "../app-builder-upgrade/app-builder-upgrade.model";
 import { Router } from "@angular/router";
+import { catchError } from "rxjs/operators";
 
 @Component({
     templateUrl: './home.component.html',
@@ -86,7 +87,11 @@ export class HomeComponent implements OnInit{
 
     async installDemoCatalog() {
         if(this.userHasAdminRights) {
-           await this.appBuilderUpgradeService.fetchAppBuilderConfig().subscribe( async appBuilderConfig => {
+           await this.appBuilderUpgradeService.fetchAppBuilderConfig()
+           .pipe(catchError(err => {
+            console.log('Install Demo Catalog: Error in primary endpoint using fallback');
+            return this.appBuilderUpgradeService.fetchAppBuilderConfigFallBack()
+          })).subscribe( async appBuilderConfig => {
                 if(appBuilderConfig && appBuilderConfig.externalApps && appBuilderConfig.externalApps.length > 0){
                     const demoCatalogApp: ExternalApp = appBuilderConfig.externalApps.find( app => app.appName === 'demoCatalog');
                     if(demoCatalogApp && demoCatalogApp.binaryLink){

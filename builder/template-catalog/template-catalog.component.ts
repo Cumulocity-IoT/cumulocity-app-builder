@@ -28,6 +28,7 @@ import { ProgressIndicatorModalComponent } from "../utils/progress-indicator-mod
 
 import './cumulocity.json';
 import { WidgetCatalogService } from "../../builder/widget-catalog/widget-catalog.service";
+import { catchError } from "rxjs/operators";
 
 enum TemplateCatalogStep {
     CATALOG,
@@ -88,7 +89,12 @@ export class TemplateCatalogModalComponent implements OnInit {
 
     loadTemplateCatalog(): void {
         this.showLoadingIndicator();
-        this.catalogService.getTemplateCatalog().subscribe((catalog: Array<TemplateCatalogEntry>) => {
+        this.catalogService.getTemplateCatalog()
+        .pipe(catchError(err => {
+            console.log('Dashboard Catalog: Error in primary endpoint using fallback');
+            return this.catalogService.getTemplateCatalogFallBack()
+        }))
+        .subscribe((catalog: Array<TemplateCatalogEntry>) => {
             this.hideLoadingIndicator();
             this.templates = catalog;
             this.filterTemplates =  (this.templates ? this.templates : []);
@@ -111,7 +117,12 @@ export class TemplateCatalogModalComponent implements OnInit {
 
     loadTemplateDetails(template: TemplateCatalogEntry): void {
         this.showLoadingIndicator();
-        this.catalogService.getTemplateDetails(template.dashboard).subscribe(templateDetails => {
+        this.catalogService.getTemplateDetails(template.dashboard)
+        .pipe(catchError(err => {
+            console.log('Dashboard Catalog Details: Error in primary endpoint using fallback');
+            return this.catalogService.getTemplateDetailsFallBack(template.dashboard)
+        }))
+        .subscribe(templateDetails => {
             this.hideLoadingIndicator();
             this.templateDetails = templateDetails;
             if(this.templateDetails.preview) {
@@ -225,7 +236,12 @@ export class TemplateCatalogModalComponent implements OnInit {
         }
 
         this.showProgressModalDialog(`Install ${dependency.title}`)
-        this.catalogService.downloadBinary(dependency.link).subscribe(data => {
+        this.catalogService.downloadBinary(dependency.link)
+        .pipe(catchError(err => {
+            console.log('Dashboard Catalog Binary: Error in primary endpoint using fallback');
+            return this.catalogService.downloadBinaryFallBack(dependency.link)
+          }))
+        .subscribe(data => {
             const blob = new Blob([data], {
                 type: 'application/zip'
             });

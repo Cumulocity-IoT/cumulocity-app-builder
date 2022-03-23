@@ -32,6 +32,7 @@ import { Observable } from "rxjs";
 import { AppBuilderConfig } from "./app-builder-upgrade.model";
 import { version } from '../../package.json';
 import { AppIdService } from "../app-id.service";
+import { catchError } from "rxjs/operators";
 
 @Injectable({ providedIn: 'root' })
 export class AppBuilderUpgradeService {
@@ -40,6 +41,9 @@ export class AppBuilderUpgradeService {
     private GATEWAY_URL_GitHubAsset = '';
     private GATEWAY_URL_GitHubAPI = '';
     private GATEWAY_URL_Labcase = '';
+    private GATEWAY_URL_GitHubAPI_FallBack = '';
+    private GATEWAY_URL_Labcase_FallBack = '';
+    private GATEWAY_URL_GitHubAsset_FallBack = '';
     private appBuilderConfigPath = '/appbuilderConfig/app-builder-config.json';
     private devBranchPath = "?ref=development";
     private appBuilderConfigModel: AppBuilderConfig;
@@ -59,6 +63,10 @@ export class AppBuilderUpgradeService {
         this.GATEWAY_URL_GitHubAsset = this.externalService.getURL('GITHUB', 'gatewayURL_GitHubAsset');
         this.GATEWAY_URL_GitHubAPI = this.externalService.getURL('GITHUB', 'gatewayURL_Github');
         this.GATEWAY_URL_Labcase = this.externalService.getURL('DBCATALOG', 'gatewayURL');
+        this.GATEWAY_URL_GitHubAPI_FallBack = this.externalService.getURL('GITHUB','gatewayURL_Github_Fallback');
+        this.GATEWAY_URL_GitHubAsset_FallBack =  this.externalService.getURL('GITHUB','gatewayURL_GitHubAsset_Fallback');
+        this.GATEWAY_URL_Labcase_FallBack = this.externalService.getURL('DBCATALOG', 'gatewayURL_Fallback');
+
         appIdService.appIdDelayedUntilAfterLogin$.subscribe(() => {
             this.userHasAdminRights = userService.hasRole(appStateService.currentUser.value, "ROLE_APPLICATION_MANAGEMENT_ADMIN")
         });
@@ -93,7 +101,12 @@ export class AppBuilderUpgradeService {
     }
 
     private async getAppBuilderConfig() {
-        await this.fetchAppBuilderConfig().subscribe(async appBuilderConfig => {
+        await this.fetchAppBuilderConfig()
+        .pipe(catchError(err => {
+            console.log('App Builder Config: Error in primary endpoint using fallback');
+            return this.fetchAppBuilderConfigFallBack()
+          }))
+        .subscribe(async appBuilderConfig => {
             this.appBuilderConfigModel = appBuilderConfig;
             let isValidContextPath = false;
             if (this.appBuilderConfigModel && this.appBuilderConfigModel.versionInfo) {
@@ -278,7 +291,18 @@ export class AppBuilderUpgradeService {
         }
         return this.http.get(url, {
             responseType: 'arraybuffer'
-        }).toPromise();
+        })
+        .pipe(catchError(err => {
+            console.log('App Builder Upgrade Binary: Error in primary endpoint using fallback');
+            let url = `${this.GATEWAY_URL_GitHubAsset_FallBack}${binaryId}`;
+            if (!isGithub) {
+                url = `${this.GATEWAY_URL_Labcase_FallBack}${binaryId}`
+            }
+            return this.http.get(url, {
+                responseType: 'arraybuffer'
+            })
+          }))        
+        .toPromise();
     }
 
     fetchAppBuilderConfig(): Observable<AppBuilderConfig> {
@@ -286,6 +310,13 @@ export class AppBuilderUpgradeService {
           return this.http.get<AppBuilderConfig>(`${this.GATEWAY_URL_GitHubAPI}${this.appBuilderConfigPath}${this.devBranchPath}`, this.HTTP_HEADERS);
         }
         return this.http.get<AppBuilderConfig>(`${this.GATEWAY_URL_GitHubAPI}${this.appBuilderConfigPath}`, this.HTTP_HEADERS);
+    }
+
+    fetchAppBuilderConfigFallBack(): Observable<AppBuilderConfig> {
+        if(isDevMode()){
+          return this.http.get<AppBuilderConfig>(`${this.GATEWAY_URL_GitHubAPI_FallBack}${this.appBuilderConfigPath}${this.devBranchPath}`, this.HTTP_HEADERS);
+        }
+        return this.http.get<AppBuilderConfig>(`${this.GATEWAY_URL_GitHubAPI_FallBack}${this.appBuilderConfigPath}`, this.HTTP_HEADERS);
     }
 
     async getApplicationList() {
