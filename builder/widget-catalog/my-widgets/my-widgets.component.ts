@@ -93,16 +93,7 @@ export class MyWidgetsComponent implements OnInit{
         this.isBusy = true;
         this.appList = (await this.appService.list({pageSize: 2000})).data;
         
-        forkJoin([this.widgetCatalogService.fetchWidgetCatalog()
-            .pipe(catchError(err => {
-                console.log('Widget Catalog: Error in primary endpoint using fallback');
-                return this.widgetCatalogService.fetchWidgetCatalogFallback()
-              })), 
-              this.widgetCatalogService.fetchWidgetForDemoCatalog()
-              .pipe(catchError(err => {
-                console.log('Widget Catalog for Demo Catalog: Error in primary endpoint using fallback');
-                return this.widgetCatalogService.fetchWidgetForDemoCatalogFallback()
-              }))])
+        forkJoin([this.widgetCatalogService.fetchWidgetCatalog(),this.widgetCatalogService.fetchWidgetForDemoCatalog()])
         .subscribe(async ([widgetList1, widgetList2]) =>{
             this.widgetCatalog = widgetList1;
             widgetList2.widgets.forEach((widget: WidgetModel) => {
@@ -186,10 +177,6 @@ export class MyWidgetsComponent implements OnInit{
         if(widget.binaryLink && widget.binaryLink !== '') {
             blob = await new Promise<any>((resolve) => {
                 this.widgetCatalogService.downloadBinary(widget.binaryLink)
-                .pipe(catchError(err => {
-                    console.log('Widget Catalog Binary: Error in primary endpoint using fallback');
-                    return this.widgetCatalogService.downloadBinaryFallback(widget.binaryLink)
-                  }))
                 .subscribe(data => {
                     const blob = new Blob([data], {
                         type: 'application/zip'
@@ -201,11 +188,7 @@ export class MyWidgetsComponent implements OnInit{
         } else {
             blob = await new Promise<any>((resolve) => {
                 this.widgetCatalogService.downloadBinaryFromLabcase(widget.link)
-                .pipe(catchError(err => {
-                    console.log('Widget Catalog Labcase Binary: Error in primary endpoint using fallback');
-                    return this.widgetCatalogService.downloadBinaryFromLabcaseFallback(widget.link)
-                  }))
-                  .subscribe(data => {
+                .subscribe(data => {
                     const blob = new Blob([data], {
                         type: 'application/zip'
                     });

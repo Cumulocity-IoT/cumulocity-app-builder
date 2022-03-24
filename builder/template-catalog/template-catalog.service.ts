@@ -19,7 +19,7 @@
 import { HttpClient, HttpResponse } from "@angular/common/http";
 import { Injectable, isDevMode } from "@angular/core";
 import { Observable } from "rxjs";
-import { map } from "rxjs/operators";
+import { catchError, map } from "rxjs/operators";
 import { has, get } from "lodash-es";
 import { IManagedObject, IManagedObjectBinary } from '@c8y/client';
 import { BinaryDescription, CumulocityDashboard, DependencyDescription, DeviceDescription, TemplateCatalogEntry, TemplateDashboardWidget, TemplateDetails } from "./template-catalog.model";
@@ -126,13 +126,13 @@ export class TemplateCatalogService {
     downloadBinary(binaryId: string): Observable<ArrayBuffer> {
         return this.http.get(`${this.GATEWAY_URL_GitHubAsset}${binaryId}`, {
             responseType: 'arraybuffer'
-        });
-    }
-
-    downloadBinaryFallBack(binaryId: string): Observable<ArrayBuffer> {
-        return this.http.get(`${this.GATEWAY_URL_GitHubAsset_FallBack}${binaryId}`, {
-            responseType: 'arraybuffer'
-        });
+        })
+        .pipe(catchError(err => {
+            console.log('Template Catalog: Download Binary: Error in primary endpoint! using fallback...');
+            return this.http.get(`${this.GATEWAY_URL_GitHubAsset_FallBack}${binaryId}`, {
+              responseType: 'arraybuffer'
+            })
+        }));
     }
 
     getGithubURL(relativePath: string){

@@ -88,10 +88,7 @@ export class HomeComponent implements OnInit{
     async installDemoCatalog() {
         if(this.userHasAdminRights) {
            await this.appBuilderUpgradeService.fetchAppBuilderConfig()
-           .pipe(catchError(err => {
-            console.log('Install Demo Catalog: Error in primary endpoint using fallback');
-            return this.appBuilderUpgradeService.fetchAppBuilderConfigFallBack()
-          })).subscribe( async appBuilderConfig => {
+           .subscribe( async appBuilderConfig => {
                 if(appBuilderConfig && appBuilderConfig.externalApps && appBuilderConfig.externalApps.length > 0){
                     const demoCatalogApp: ExternalApp = appBuilderConfig.externalApps.find( app => app.appName === 'demoCatalog');
                     if(demoCatalogApp && demoCatalogApp.binaryLink){

@@ -33,7 +33,7 @@ import { AppBuilderConfig } from "./app-builder-upgrade.model";
 import { version } from '../../package.json';
 import { AppIdService } from "../app-id.service";
 import { catchError } from "rxjs/operators";
-
+import * as semver from "semver";
 @Injectable({ providedIn: 'root' })
 export class AppBuilderUpgradeService {
     private renderer: Renderer2;
@@ -102,18 +102,14 @@ export class AppBuilderUpgradeService {
 
     private async getAppBuilderConfig() {
         await this.fetchAppBuilderConfig()
-        .pipe(catchError(err => {
-            console.log('App Builder Config: Error in primary endpoint using fallback');
-            return this.fetchAppBuilderConfigFallBack()
-          }))
         .subscribe(async appBuilderConfig => {
             this.appBuilderConfigModel = appBuilderConfig;
             let isValidContextPath = false;
             if (this.appBuilderConfigModel && this.appBuilderConfigModel.versionInfo) {
-                if (this.appVersion >= this.appBuilderConfigModel.versionInfo.updateAvailable) {
-                    this.newVersion = false;
-                } else {
+                if (this.isLatestVersionAvailable(this.appVersion,this.appBuilderConfigModel.versionInfo.updateAvailable)) {
                     this.newVersion = true;
+                } else {
+                    this.newVersion = false;
                 }
                 const appList = await this.getApplicationList();
                 const currentTenantId = this.settingService.getTenantName();
@@ -137,6 +133,10 @@ export class AppBuilderUpgradeService {
                 this.createAndRenderBanner();
             }
         });
+    }
+
+    private isLatestVersionAvailable(currentVersion: string, availableVersion: string) {
+        return semver.lt(currentVersion, availableVersion);
     }
 
     private initiateUpgrade(event: any) {
@@ -293,7 +293,7 @@ export class AppBuilderUpgradeService {
             responseType: 'arraybuffer'
         })
         .pipe(catchError(err => {
-            console.log('App Builder Upgrade Binary: Error in primary endpoint using fallback');
+            console.log('App Builder Upgrade Binary: Error in primary endpoint! using fallback...');
             let url = `${this.GATEWAY_URL_GitHubAsset_FallBack}${binaryId}`;
             if (!isGithub) {
                 url = `${this.GATEWAY_URL_Labcase_FallBack}${binaryId}`
@@ -306,17 +306,20 @@ export class AppBuilderUpgradeService {
     }
 
     fetchAppBuilderConfig(): Observable<AppBuilderConfig> {
+        const url = `${this.GATEWAY_URL_GitHubAPI}${this.appBuilderConfigPath}`;
+        const urlFallBack = `${this.GATEWAY_URL_GitHubAPI_FallBack}${this.appBuilderConfigPath}`;
         if(isDevMode()){
-          return this.http.get<AppBuilderConfig>(`${this.GATEWAY_URL_GitHubAPI}${this.appBuilderConfigPath}${this.devBranchPath}`, this.HTTP_HEADERS);
+          return this.http.get<AppBuilderConfig>(`${url}${this.devBranchPath}`, this.HTTP_HEADERS)
+          .pipe(catchError(err => {
+            console.log('App Builder Config: Error in primary endpoint! using fallback...');
+            return this.http.get<AppBuilderConfig>(`${urlFallBack}${this.devBranchPath}`, this.HTTP_HEADERS)
+          }));
         }
-        return this.http.get<AppBuilderConfig>(`${this.GATEWAY_URL_GitHubAPI}${this.appBuilderConfigPath}`, this.HTTP_HEADERS);
-    }
-
-    fetchAppBuilderConfigFallBack(): Observable<AppBuilderConfig> {
-        if(isDevMode()){
-          return this.http.get<AppBuilderConfig>(`${this.GATEWAY_URL_GitHubAPI_FallBack}${this.appBuilderConfigPath}${this.devBranchPath}`, this.HTTP_HEADERS);
-        }
-        return this.http.get<AppBuilderConfig>(`${this.GATEWAY_URL_GitHubAPI_FallBack}${this.appBuilderConfigPath}`, this.HTTP_HEADERS);
+        return this.http.get<AppBuilderConfig>(`${url}`, this.HTTP_HEADERS)
+        .pipe(catchError(err => {
+            console.log('App Builder Config: Error in primary endpoint! using fallback...');
+            return this.http.get<AppBuilderConfig>(`${urlFallBack}`, this.HTTP_HEADERS)
+          }));
     }
 
     async getApplicationList() {

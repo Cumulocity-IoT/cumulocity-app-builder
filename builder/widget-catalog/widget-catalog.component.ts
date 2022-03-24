@@ -90,10 +90,6 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy{
         this.isBusy = true;
         this.appList = (await this.appService.list({pageSize: 2000})).data;
         await this.widgetCatalogService.fetchWidgetCatalog()
-        .pipe(catchError(err => {
-            console.log('Widget Catalog: Error in primary endpoint using fallback');
-            return this.widgetCatalogService.fetchWidgetCatalogFallback()
-          }))
           .subscribe(async (widgetCatalog: WidgetCatalog) => {
             this.widgetCatalog = widgetCatalog;
             await this.filterInstalledWidgets();
@@ -188,10 +184,6 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy{
         this.showProgressModalDialog(`Installing ${widget.title}`)
         
         this.widgetCatalogService.downloadBinary(widget.binaryLink)
-        .pipe(catchError(err => {
-            console.log('Widget Catalog Binary: Error in primary endpoint using fallback');
-            return  this.widgetCatalogService.downloadBinaryFallback(widget.binaryLink)
-          }))
         .subscribe(data => {
 
             const blob = new Blob([data], {
