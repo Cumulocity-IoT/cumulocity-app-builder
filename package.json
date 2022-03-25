@@ -1,6 +1,6 @@
 {
   "name": "app-builder",
-  "version": "1.3.0-RC-2",
+  "version": "1.3.0",
   "description": "Application builder for Cumulocity (written by Software AG Global Presales)",
   "main": "index.ts",
   "scripts": {
