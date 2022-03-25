@@ -53,7 +53,7 @@ export class SimulatorNotificationService extends Service<any> {
   }
 
   private async verifySimulatorMicroServiceStatus() {
-    const response = await this.client.fetch('service/simulator-microservice/health'); 
+    const response = await this.client.fetch('service/simulator-app-builder/health'); 
     const data = await response.json()
     if(data && data.status && data.status === "UP") { this.isMSExist = true;}
     else { this.isMSExist = false;}

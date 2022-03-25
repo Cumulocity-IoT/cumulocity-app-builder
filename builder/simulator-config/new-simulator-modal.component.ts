@@ -258,7 +258,7 @@ export class NewSimulatorModalComponent {
 
     private async verifySimulatorMicroServiceStatus() {
         this.isMSCheckSpin = true;
-        const response = await this.fetchClient.fetch('service/simulator-microservice/health'); 
+        const response = await this.fetchClient.fetch('service/simulator-app-builder/health'); 
         const data = await response.json()
         if(data && data.status && data.status === "UP") { this.isMSExist = true;}
         else { this.isMSExist = false;}
