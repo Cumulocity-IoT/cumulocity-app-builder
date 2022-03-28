@@ -23,7 +23,7 @@ import { Service, FetchClient } from '@c8y/client';
 })
 export class SimulatorNotificationService extends Service<any> {  
   baseUrl = 'service';                           
-  listUrl = 'simulator-microservice/simulatorNotification';
+  listUrl = 'simulator-app-builder/simulatorNotification';
   isMSExist = false;
   constructor(client: FetchClient) {             
     super(client);
