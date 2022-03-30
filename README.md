@@ -1,6 +1,6 @@
 # Application Builder for Cumulocity
 The Application Builder for Cumulocity provides a simple, coding-free way to create new applications inside Cumulocity. 
-Application Builder is an open-source tool for you to create web applications in a no-code environment. It's being managed by the Software AG's open source community but not officially supported by Software AG. You can log any issues at [GitHub](https://github.com/SoftwareAG/cumulocity-app-builder/issues) or  ask any question on the Software AG Tech Community. Support will provided on best endeavors.
+Application Builder is an open-source tool for you to create web applications in a no-code environment. It's being managed by the Software AG's open-source community but not officially supported by Software AG. You can log any issues at [GitHub](https://github.com/SoftwareAG/cumulocity-app-builder/issues) or ask any question on the Software AG Tech Community. Support will provided on best endeavours.
 
 ![](https://user-images.githubusercontent.com/38696279/72333172-47cec300-36b3-11ea-9abf-1bb29b490a22.png)
 
@@ -32,6 +32,8 @@ Application Builder is an open-source tool for you to create web applications 
 * **Widget Catalog:** Now user has ability to install/update runtime widgets directly from Widget Catalog. This is single place where user can also find widget details such as documentation, preview, license and author details.
 
 ## Installation
+
+### Install Application Builder
 **First Time:**
 1. Grab the **[Latest Release Zip](https://github.com/SoftwareAG/cumulocity-app-builder/releases)**
 2. Go to the **Administration view** in your tenant (/apps/administration)
@@ -45,6 +47,25 @@ Application Builder is an open-source tool for you to create web applications 
 2. Go to the **Administration view** in your tenant (/apps/administration)
 3. Open the **Own applications** section in the navigator
 4. Click **Application Builder**
+5. Click **Archives**
+6. Click **Upload Archive**
+7. Select the Zip you downloaded earlier
+
+### Install Server-Side Simulators
+**First Time:**
+1. Grab the **[simulator-app-builder](https://github.com/SoftwareAG/cumulocity-app-builder/releases)**
+2. Go to the **Administration view** in your tenant (/apps/administration)
+3. Open the **Own applications** section in the navigator
+4. Click **Add application**
+5. Select **Upload microservice**
+7. Select the Zip you downloaded earlier
+8. Click on **Subscribe** button
+
+**Incremental Upgrade:**
+1. Grab the **[simulator-app-builder](https://github.com/SoftwareAG/cumulocity-app-builder/releases)**
+2. Go to the **Administration view** in your tenant (/apps/administration)
+3. Open the **Own applications** section in the navigator
+4. Click **Simulator-app-builder**
 5. Click **Archives**
 6. Click **Upload Archive**
 7. Select the Zip you downloaded earlier
@@ -117,8 +138,24 @@ Would you like to create your own Custom Runtime widget? Please refer our [Demo 
 
 
 ## Troubleshooting
+ *  **Failed to load a runtime custom widget:**
+ ```
+ 	Failed to load a runtime custom widget, it may have been compiled for a different Cumulocity version
+ ```
+  There is multiple reason for above error while loading page:
+   1. **Browser cashing issue:** Try again after clearing browser cache or run incognito/private mode in browser.
+   2. **Widget is not compatible with current version of Application builder:** There are possibilities that your widget is no longer compatible with application builder due to angular/cumulocity upgrade.
+
+If your widget is listed in widget catalog, then follow below steps:
+- Go to widget catalog --> My Widgets
+- Delete the widget which is giving error
+- Go to "Get More Widget" page
+- Install the latest version of same widget
+	
+If your widget is not listed in widget catalog, then you may need to upgrade your custom widget to make it compatible with current version of application builder.
+ 
  *  **Application Builder keep loading:** 
-  If you are building your own version of app builder you may experience below error in browser console due to nv.d3.js bug.
+  If you are building your own version of app builder, you may experience below error in browser console due to nv.d3.js bug.
   ```
   Uncaught (in promise) TypeError: true is not a function
     at eval (nv.d3.js?4bd4:9)
