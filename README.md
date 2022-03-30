@@ -5,10 +5,16 @@ Application Builder is an open-source tool for you to create web applications 
 ![](https://user-images.githubusercontent.com/38696279/72333172-47cec300-36b3-11ea-9abf-1bb29b490a22.png)
 
 ## What's new?
-* **Widget Catalog:** Now user has ability to install/update runtime widgets directly from Widget Catalog. This is single place where user can also find widget details such as documentation, preview, license and author details.
-* **Dashboard Catalog:** User can select any pre-designed template for dashboard and ability to install dependent runtime widgets.
-* **Dashboard Catalog:** User can search various dashboards.
-* **Cumulocity Version:** Based on Cumulocity 1010.0.8
+* **Angular Upgrade:** Application Builder now upgrade to angular 11.
+* **Widget Catalog:** Now user can also delete widget from widget catalog. Widget catalog now also provide update option for the widgets which are installed from Demo Catalog.
+*  **Branding:** Now user can use color picker to choose millions of colors to customize branding. Header, Action bar and tab bar are also customizable.
+*  **Theme:** Application builder now support dark theme and branded themes for dashboards and widgets.
+*  **Server-Side Simulators:** Application Builder now supports Server-side simulators. User just need to install micro-service from here and you will get option while creating simulator to "Run on Server".
+*  **Help & Support:** Try out our new help & support dashboard template while creating dashboard. This will help user to quickly create help and support page for cumulocity application.
+*  **Demo Catalog:** User now able to try out pre-built cumulocity demos by installing Demo Catalog which is available in your home page.
+*  **Auto Upgrade Notification:** From Application Builder 1.3.0 onwards user will get notification whenever new version of app builder available and ability to seamless upgrade by single click.
+*  **Settings:** Now user has abilities to control various features such as hide logo, disable auto upgrade, hide tabs for device specific dashboards, etc.
+* **Cumulocity Version:** Based on Cumulocity 1011.0.20
 * **Various bug fixes**
 
 ## Features
@@ -22,6 +28,8 @@ Application Builder is an open-source tool for you to create web applications 
 * **GainSight Integration:** Gainsight is integrated with app builder and user can control it from settings page.
 * **New Home Page:** New Home Page with quick start videos, help and support information.
 * **Tabs:** Group your dashboards into tabs.
+* **Dashboard Catalog:** User can select any pre-designed template for dashboard and ability to install dependent runtime widgets.
+* **Widget Catalog:** Now user has ability to install/update runtime widgets directly from Widget Catalog. This is single place where user can also find widget details such as documentation, preview, license and author details.
 
 ## Installation
 **First Time:**
