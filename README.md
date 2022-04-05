@@ -149,6 +149,7 @@ Would you like to create your own Custom Runtime widget? Please refer our [Demo 
 If your widget is listed in widget catalog, then follow below steps:
 - Go to widget catalog --> My Widgets
 - Delete the widget which is giving error
+- You can identify widget by looking for this icon![icon](https://user-images.githubusercontent.com/32765455/161679466-bf7df361-bfdb-41b8-8ea5-93bf19eb4474.PNG)
 - Go to "Get More Widget" page
 - Install the latest version of same widget
 	
