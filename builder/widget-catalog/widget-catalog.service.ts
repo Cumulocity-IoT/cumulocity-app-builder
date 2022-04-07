@@ -124,6 +124,10 @@ export class WidgetCatalogService {
       return semver.lt(widget.installedVersion, widget.version);
     }
 
+    compareWidgetVersions(widget1Version:string, Widget2Version: string) {
+      return semver.lt(widget1Version, Widget2Version);
+    }
+
     checkInstalledVersion(widget: WidgetModel) {
       if(!widget.installedVersion) return true;
       const major = '>=' + semver.major(widget.installedVersion) + '.0.0';

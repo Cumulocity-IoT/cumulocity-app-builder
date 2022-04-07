@@ -92,7 +92,7 @@ export class MyWidgetsComponent implements OnInit{
 
         this.isBusy = true;
         this.appList = (await this.appService.list({pageSize: 2000})).data;
-        
+        this.appList = this.appList.filter( app => (app.name && app.name.toLowerCase().includes('widget') || app.contextPath && app.contextPath.includes('widget')) && app.manifest && app.manifest.noAppSwitcher === true);
         forkJoin([this.widgetCatalogService.fetchWidgetCatalog(),this.widgetCatalogService.fetchWidgetForDemoCatalog()])
         .subscribe(async ([widgetList1, widgetList2]) =>{
             this.widgetCatalog = widgetList1;
@@ -101,6 +101,22 @@ export class MyWidgetsComponent implements OnInit{
                 if(!widgetObj) {
                     this.widgetCatalog.widgets.push(widget);
                 }
+            });
+            this.appList.forEach( app => {
+                const appWidgetObj = this.widgetCatalog.widgets.find( widgetObj => widgetObj.contextPath === app.contextPath);
+                if(!appWidgetObj) {
+                    appWidgetObj
+                    this.widgetCatalog.widgets.push({
+                        contextPath: app.contextPath,
+                        title: app.name,
+                        icon: (app.icon && app.icon.class ? app.icon.class : 'delete-document'),
+                        author: (app.manifest && app.manifest.author ? app.manifest.author : ''),
+                        license: (app.manifest && app.manifest.license ? app.manifest.license : ''),
+                        requiredPlatformVersion: (app.manifest && app.manifest.requiredPlatformVersion ? app.manifest.requiredPlatformVersion : ''),
+                        version: (app.manifest && app.manifest.version ? app.manifest.version : ''),
+                    });
+                }
+
             });
             await this.filterInstalledWidgets();
             this.filterWidgets = (this.widgetCatalog ? this.widgetCatalog.widgets : []);
@@ -126,11 +142,55 @@ export class MyWidgetsComponent implements OnInit{
         } 
     }
     async updateAll() {
-        for (const widget of this.widgetCatalog.widgets){
-            if(!widget.isReloadRequired && this.isUpdateAvailable(widget)) {
-                await this.updateWidget(widget);
+        const widgetCompatibility = this.widgetCatalog.widgets.find( wdgt => wdgt.actionCode === "002");
+        if(widgetCompatibility) {
+            const alertMessage = {
+                title: 'Update Confirmation',
+                description: `One or more widgets are supported by current version of application builder and may not work properly.
+                Do you want to proceed?`,
+                type: 'warning',
+                alertType: 'confirm', //info|confirm
+                confirmPrimary: false //confirm Button is primary
+              }
+              const installDemoDialogRef = this.alertModalDialog(alertMessage);
+              await installDemoDialogRef.content.event.subscribe(async data => {
+                if(data && data.isConfirm) {
+                    for (const widget of this.widgetCatalog.widgets){
+                        if(!widget.isReloadRequired && this.isUpdateAvailable(widget)) {
+                            await this.updateWidget(widget, true);
+                        }
+                    };
+                }
+              });
+        } else {
+            for (const widget of this.widgetCatalog.widgets){
+                if(!widget.isReloadRequired && this.isUpdateAvailable(widget)) {
+                    await this.updateWidget(widget, true) ;
+                }
+            };
+        }
+    }
+
+    async unInstallAllWidgets() {
+        const alertMessage = {
+            title: 'Uninstall widgets',
+            description: `You are about to uninstall all widgets.
+            Do you want to proceed?`,
+            type: 'danger',
+            alertType: 'confirm', //info|confirm
+            confirmPrimary: true //confirm Button is primary
+          }
+          const unInstallDemoDialogRef = this.alertModalDialog(alertMessage);
+          await unInstallDemoDialogRef.content.event.subscribe(async data => {
+            if(data && data.isConfirm) {
+                this.showProgressModalDialog(`Uninstalling widgets...`)
+                for (const widget of this.widgetCatalog.widgets){
+                    await this.uninstallWidget(widget, true);
+                };
+                this.hideProgressModalDialog();
+                this.refresh();
             }
-        };
+          });
     }
 
     showProgressModalDialog(message: string): void {
@@ -140,14 +200,14 @@ export class MyWidgetsComponent implements OnInit{
     hideProgressModalDialog(): void {
         this.progressModal.hide();
     }
-    async updateWidget(widget: WidgetModel): Promise<void> {
+    async updateWidget(widget: WidgetModel, bulkUpdate: boolean): Promise<void> {
         const currentHost = window.location.host.split(':')[0];
         if (currentHost === 'localhost' || currentHost === '127.0.0.1' || isDevMode()) {
             this.alertService.warning("Runtime widget installation isn't supported when running Application Builder on localhost or in development mode.");
             return;
         }
 
-        if(widget.actionCode === '002') {
+        if(!bulkUpdate && widget.actionCode === '002') {
             const alertMessage = {
                 title: 'Update Confirmation',
                 description: `${widget.title} is not supported by current version of application builder and may not work properly.
@@ -240,13 +300,13 @@ export class MyWidgetsComponent implements OnInit{
         if(checkWidgetInCatalog && checkWidgetInCatalog.length > 1){
             const isWidgetInstalled = checkWidgetInCatalog.find( installObj => installObj.installed);
             if(isWidgetInstalled) return false;
-
-           return this.widgetCatalogService.checkInstalledVersion(widget);       
+            return widget.isCompatible && this.widgetCatalogService.checkInstalledVersion(widget);       
         }
         return true;
     }
 
     isUpdateAvailable(widget: WidgetModel) {
+        if(!widget.binaryLink && !widget.link) { return false }
         if(!widget.installedVersion && widget.installedVersion === ''){
             return true;
         }
@@ -273,24 +333,33 @@ export class MyWidgetsComponent implements OnInit{
         }
      }
 
-     async uninstallWidget(widget: WidgetModel) {
-        const alertMessage = {
-            title: 'Uninstall widget',
-            description: `You are about to uninstall ${widget.title}.
-            Do you want to proceed?`,
-            type: 'danger',
-            alertType: 'confirm', //info|confirm
-            confirmPrimary: true //confirm Button is primary
-          }
-          const installDemoDialogRef = this.alertModalDialog(alertMessage);
-          await installDemoDialogRef.content.event.subscribe(async data => {
-            if(data && data.isConfirm) {
-                const widgetAppObj = this.appList.find( app => app.contextPath === widget.contextPath)
-                if(widgetAppObj) {
-                    await this.appService.delete(widgetAppObj.id);
-                    this.reload();
+     async uninstallWidget(widget: WidgetModel, bulkDelete: boolean) {
+        if(!bulkDelete){
+            const alertMessage = {
+                title: 'Uninstall widget',
+                description: `You are about to uninstall ${widget.title}.
+                Do you want to proceed?`,
+                type: 'danger',
+                alertType: 'confirm', //info|confirm
+                confirmPrimary: true //confirm Button is primary
+              }
+              const installDemoDialogRef = this.alertModalDialog(alertMessage);
+              await installDemoDialogRef.content.event.subscribe(async data => {
+                if(data && data.isConfirm) {
+                    const widgetAppObj = this.appList.find( app => app.contextPath === widget.contextPath)
+                    if(widgetAppObj) {
+                        await this.appService.delete(widgetAppObj.id);
+                        widget.actionCode = '003';
+                    }
                 }
+              });         
+        } else {
+            const widgetAppObj = this.appList.find( app => app.contextPath === widget.contextPath)
+            if(widgetAppObj) {
+                await this.appService.delete(widgetAppObj.id);
+                widget.actionCode = '003';
             }
-          });         
+        }
+        
      }
 }
