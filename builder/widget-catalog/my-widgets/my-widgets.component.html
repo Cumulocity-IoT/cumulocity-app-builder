@@ -65,7 +65,7 @@
                                 <button class="btn btn-link pull-right" id="refresh-widget" (click)="reload()">
                                     <i c8yIcon="refresh"></i> Reload
                                 </button>
-                                <button *ngIf="userHasAdminRights" class="btn btn-link pull-right" id="uninstall-widget" (click)="unInstallAllWidgets()">
+                                <button *ngIf="userHasAdminRights && filterWidgets?.length" class="btn btn-link pull-right" id="uninstall-widget" (click)="unInstallAllWidgets()">
                                     <i c8yIcon="uninstall-programs" style="font-size: 16px;"></i> Uninstall all
                                 </button>
                                 <button *ngIf="userHasAdminRights && isUpdateRequired" class="btn btn-link pull-right" id="update-widget" (click)="updateAll()">
