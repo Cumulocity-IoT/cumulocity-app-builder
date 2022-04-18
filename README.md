@@ -148,10 +148,9 @@ Would you like to create your own Custom Runtime widget? Please refer our [Demo 
 
 If your widget is listed in widget catalog, then follow below steps:
  1. Go to widget catalog --> My Widgets
- 2. Delete the widget which is giving error
- 3. You can identify widget by looking for this icon![icon](https://user-images.githubusercontent.com/32765455/163791806-86468ac3-5072-4516-85d8-6ef65eff73d7.png)
+ 2. Delete the widget which is giving error (You can identify widget by looking for this icon![icon](https://user-images.githubusercontent.com/32765455/163791806-86468ac3-5072-4516-85d8-6ef65eff73d7.png))
  4. Go to "Get More Widget" page
- 5. Install the latest version of same widget
+ 5. Install the compatible widget/alternate widget
  6. Refresh page
 	
 If your widget is not listed in widget catalog, then you may need to upgrade your custom widget to make it compatible with current version of application builder.
