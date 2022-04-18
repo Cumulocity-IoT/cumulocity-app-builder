@@ -147,13 +147,23 @@ Would you like to create your own Custom Runtime widget? Please refer our [Demo 
    2. **Widget is not compatible with current version of Application builder:** There are possibilities that your widget is no longer compatible with application builder due to angular/cumulocity upgrade.
 
 If your widget is listed in widget catalog, then follow below steps:
-- Go to widget catalog --> My Widgets
-- Delete the widget which is giving error
-- You can identify widget by looking for this icon![icon](https://user-images.githubusercontent.com/32765455/161679466-bf7df361-bfdb-41b8-8ea5-93bf19eb4474.PNG)
-- Go to "Get More Widget" page
-- Install the latest version of same widget
+ 1. Go to widget catalog --> My Widgets
+ 2. Delete the widget which is giving error
+ 3. You can identify widget by looking for this icon![icon](https://user-images.githubusercontent.com/32765455/163791806-86468ac3-5072-4516-85d8-6ef65eff73d7.png)
+ 4. Go to "Get More Widget" page
+ 5. Install the latest version of same widget
+ 6. Refresh page
 	
 If your widget is not listed in widget catalog, then you may need to upgrade your custom widget to make it compatible with current version of application builder.
+ 
+*  **Demo App(Demo Catalog App) not working after upgrade:** There are possibilities that demo installed via demo catalog earlier may not work properly after upgrading application builder. In that scenario, you can perform following steps:
+ 1. Delete Demo using existing Demo Catalog
+ 2. Go to Administration -> Applications -> Own Applications
+ 3. Delete Demo Catalog App 
+ 4. Click on App Switcher and navigate to Application builder  
+ 5. In "Home" Page of application builder, you can find "Install Demo Catalog" option   
+ 6. Install the latest version of Demo Catalog    
+ 7. Install your demo application      
  
  *  **Application Builder keep loading:** 
   If you are building your own version of app builder, you may experience below error in browser console due to nv.d3.js bug.
