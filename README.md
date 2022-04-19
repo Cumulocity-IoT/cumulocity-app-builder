@@ -21,7 +21,7 @@ Application Builder is an open-source tool for you to create web applications 
 * **Browser-based Device Simulators:** Create device simulators that run directly in your browser.
 * **DTDL Simulator:** User can now create simulator based on [DTDL](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md)(Digital Twins Definition Language).
 * **Group Simulator:** User can create simulator for existing device group or new device group.
-* **[Runtime widget loading](https://github.com/SoftwareAG/cumulocity-runtime-widget-loader):** Install widgets without re-compiling.
+* **Runtime widget loading:** Install widgets without re-compiling. Please refer our [Demo Widget](https://github.com/SoftwareAG/cumulocity-demo-widget).
 * **Group template dashboards:** Give every device in a group an identical dashboard (but customized to the device).
 * **Create an App with a custom contextPath:** Change the URL used to access a particular app.
 * **Application Clone**: User can now clone existing application while creating new one.
@@ -132,7 +132,7 @@ A more detailed user guide and quick start videos are available in the Home sect
 ## Runtime Widgets
 
 Application Builder supports runtime widgets deployment. Some of the runtime widgets are already available in widget catalog.
-You can find runtime widgets at [Software AG Open Source](https://open-source.softwareag.com/iot-analytics?search=runtime&topic=cumulocity-iot&repository=widget)
+You can find runtime widgets at [Software AG Open Source](https://open-source.softwareag.com/?search=widget&topic=cumulocity-iot)
 
 Would you like to create your own Custom Runtime widget? Please refer our [Demo Widget](https://github.com/SoftwareAG/cumulocity-demo-widget).
 
