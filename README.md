@@ -51,7 +51,7 @@ Application Builder is an open-source tool for you to create web applications 
 6. Click **Upload Archive**
 7. Select the Zip you downloaded earlier
 
-### Install Server-Side Simulators
+### Install Micro Service for Server-Side Simulators
 **First Time:**
 1. Grab the **[simulator-app-builder](https://github.com/SoftwareAG/cumulocity-app-builder/releases)**
 2. Go to the **Administration view** in your tenant (/apps/administration)
