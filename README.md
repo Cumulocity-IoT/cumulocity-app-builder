@@ -75,7 +75,7 @@ Application Builder is an open-source tool for you to create web applications 
 
 **Requirements:**
 * Git
-* NodeJS (release builds are currently built with `v16.9.1`)
+* NodeJS (release builds are currently built with `v14.18.0`)
 * NPM (Included with NodeJS)
 
 **Instructions**
@@ -89,7 +89,7 @@ cd cumulocity-app-builder
 ```
 2. (Optional) Checkout a specific version: 
 ```
-git checkout v1.2.7
+git checkout v1.3.0
 ```
 3. Install the dependencies: 
 ```
