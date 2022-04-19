@@ -5,7 +5,7 @@ Application Builder is an open-source tool for you to create web applications 
 ![](https://user-images.githubusercontent.com/38696279/72333172-47cec300-36b3-11ea-9abf-1bb29b490a22.png)
 
 ## What's new?
-* **Angular Upgrade:** Application Builder now upgrade to angular 11.
+* **Angular Upgrade:** Application Builder now upgraded to angular 11.
 * **Widget Catalog:** Now user can also delete widget from widget catalog. Widget catalog now also provide update option for the widgets which are installed from Demo Catalog.
 *  **Branding:** Now user can use color picker to choose millions of colors to customize branding. Header, Action bar and tab bar are also customizable.
 *  **Theme:** Application builder now support dark theme and branded themes for dashboards and widgets.
