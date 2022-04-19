@@ -53,7 +53,7 @@ Application Builder is an open-source tool for you to create web applications 
 
 ### Install Micro Service for Server-Side Simulators
 **First Time:**
-1. Grab the **[simulator-app-builder](https://github.com/SoftwareAG/cumulocity-app-builder/releases)**
+1. Download **[simulator-app-builder](https://github.com/SoftwareAG/cumulocity-app-builder/releases/download/v1.3.0/simulator-app-builder.zip)**
 2. Go to the **Administration view** in your tenant (/apps/administration)
 3. Open the **Own applications** section in the navigator
 4. Click **Add application**
@@ -62,7 +62,7 @@ Application Builder is an open-source tool for you to create web applications 
 8. Click on **Subscribe** button
 
 **Incremental Upgrade:**
-1. Grab the **[simulator-app-builder](https://github.com/SoftwareAG/cumulocity-app-builder/releases)**
+1. Download **[simulator-app-builder](https://github.com/SoftwareAG/cumulocity-app-builder/releases/download/v1.3.0/simulator-app-builder.zip)**
 2. Go to the **Administration view** in your tenant (/apps/administration)
 3. Open the **Own applications** section in the navigator
 4. Click **Simulator-app-builder**
