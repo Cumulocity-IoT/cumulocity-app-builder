@@ -9,7 +9,7 @@ Application Builder is an open-source tool for you to create web applications 
 * **Widget Catalog:** Now user can also delete widget from widget catalog. Widget catalog now also provide update option for the widgets which are installed from Demo Catalog.
 *  **Branding:** Now user can use color picker to choose millions of colors to customize branding. Header, Action bar and tab bar are also customizable.
 *  **Theme:** Application builder now support dark theme and branded themes for dashboards and widgets.
-*  **Server-Side Simulators:** Application Builder now supports Server-side simulators. User just need to install micro-service from here and you will get option while creating simulator to "Run on Server".
+*  **Server-Side Simulators:** Application Builder now supports Server-side simulators. User just need to install micro-service from [here](https://github.com/SoftwareAG/cumulocity-app-builder/releases/download/v1.3.0/simulator-app-builder.zip) and you will get option while creating simulator to "Run on Server".
 *  **Help & Support:** Try out our new help & support dashboard template while creating dashboard. This will help user to quickly create help and support page for cumulocity application.
 *  **Demo Catalog:** User now able to try out pre-built cumulocity demos by installing Demo Catalog which is available in your home page.
 *  **Auto Upgrade Notification:** From Application Builder 1.3.0 onwards user will get notification whenever new version of app builder available and ability to seamless upgrade by single click.
