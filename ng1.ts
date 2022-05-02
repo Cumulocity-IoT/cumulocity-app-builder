@@ -11,7 +11,7 @@ import '@c8y/ng1-modules/kpi/cumulocity.json';
 // import '@c8y/ng1-modules/kpiAdmin/cumulocity.json';
 import '@c8y/ng1-modules/devicemanagement-location/cumulocity.json';
 import '@c8y/ng1-modules/dashboard2/cumulocity.json';
-import '@c8y/ng1-modules/dashboardUI/cumulocity.json';
+// import '@c8y/ng1-modules/dashboardUI/cumulocity.json';
 // import '@c8y/ng1-modules/groupsHierarchy/cumulocity.json';
 import '@c8y/ng1-modules/measurements/cumulocity.json';
 import '@c8y/ng1-modules/map/cumulocity.json';

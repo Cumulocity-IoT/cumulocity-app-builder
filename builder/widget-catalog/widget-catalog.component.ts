@@ -212,7 +212,7 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy{
 
         await this.widgetCatalog.widgets.forEach(async widget => {
             const widgetObj = await new Promise<any>((resolve) => {
-                this.componentService.getById$(widget.id).subscribe(widgetObj => {
+                this.componentService.getById(widget.id).then(widgetObj => {
                     resolve(widgetObj);
                 });
             });

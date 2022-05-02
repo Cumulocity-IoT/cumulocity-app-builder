@@ -19,15 +19,16 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, isDevMode } from '@angular/core';
 import { ApplicationService, InventoryBinaryService, InventoryService } from '@c8y/client';
-import { AlertService } from '@c8y/ngx-components';
 import { AppBuilderExternalAssetsService } from 'app-builder-external-assets';
 import { RuntimeWidgetInstallerService } from 'cumulocity-runtime-widget-loader';
 import { Observable } from 'rxjs';
 import { WidgetCatalog, WidgetModel } from './widget-catalog.model';
 import * as semver from "semver";
-import * as packageJson from "./../../package.json";
+// import * as packageJson from "./../../package.json";
 import { catchError } from 'rxjs/operators';
+import { AlertService } from '@c8y/ngx-components';
 
+const c8yVersion = require('./../../package.json')["@c8y/ngx-components"];
 @Injectable()
 export class WidgetCatalogService {
 
@@ -59,7 +60,7 @@ export class WidgetCatalogService {
         this.GATEWAY_URL_GitHubAsset =  this.externalService.getURL('GITHUB','gatewayURL_GitHubAsset');
         this.GATEWAY_URL_GitHubAPI_FallBack = this.externalService.getURL('GITHUB','gatewayURL_Github_Fallback');
         this.GATEWAY_URL_GitHubAsset_FallBack =  this.externalService.getURL('GITHUB','gatewayURL_GitHubAsset_Fallback');
-        this.C8Y_VERSION = packageJson.dependencies['@c8y/ngx-components']
+        this.C8Y_VERSION = c8yVersion; // packageJson.dependencies['@c8y/ngx-components']
         this.GATEWAY_URL_Labcase = this.externalService.getURL('DBCATALOG', 'gatewayURL');
         this.GATEWAY_URL_Labcase_FallBack = this.externalService.getURL('DBCATALOG', 'gatewayURL_Fallback');
     }

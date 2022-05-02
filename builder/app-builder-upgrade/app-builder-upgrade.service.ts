@@ -30,10 +30,12 @@ import * as JSZip from "jszip";
 import { BsModalRef, BsModalService } from "ngx-bootstrap/modal";
 import { Observable } from "rxjs";
 import { AppBuilderConfig } from "./app-builder-upgrade.model";
-import { version } from '../../package.json';
+//import * as packageInfo  from '../../package.json';
 import { AppIdService } from "../app-id.service";
 import { catchError } from "rxjs/operators";
 import * as semver from "semver";
+
+const appVersion = require('../../package.json').version;
 @Injectable({ providedIn: 'root' })
 export class AppBuilderUpgradeService {
     private renderer: Renderer2;
@@ -50,7 +52,7 @@ export class AppBuilderUpgradeService {
     private applicationsList = [];
     userHasAdminRights: boolean;
 
-    public appVersion: string = version;
+    public appVersion: string =  appVersion;
     public newVersion: boolean = false;
     public errorReported = false;
     

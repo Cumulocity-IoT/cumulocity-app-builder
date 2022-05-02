@@ -140,7 +140,7 @@ export class TemplateCatalogModalComponent implements OnInit {
 
         this.templateDetails.input.dependencies.forEach(dependency => {
             this.verifyWidgetCompatibility(dependency);
-            this.componentService.getById$(dependency.id).subscribe(widget => {
+            this.componentService.getById(dependency.id).then(widget => {
                 dependency.isInstalled = (widget != undefined);
             });
         });
@@ -224,8 +224,8 @@ export class TemplateCatalogModalComponent implements OnInit {
         this.progressModal.hide();
     }
 
-    isWidgetInstalled(dependency: DependencyDescription): Observable<DynamicComponentDefinition> {
-        return this.componentService.getById$(dependency.id);
+    isWidgetInstalled(dependency: DependencyDescription): Promise<DynamicComponentDefinition> {
+        return this.componentService.getById(dependency.id);
     }
 
     async installDependency(dependency: DependencyDescription): Promise<void> {

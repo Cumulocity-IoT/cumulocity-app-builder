@@ -18,10 +18,10 @@
 
 import {Injectable} from "@angular/core";
 import * as fa from "fontawesome";
-import * as d3 from "d3-color";
 import * as delay from "delay";
 import { SettingsService } from "../settings/settings.service";
 declare const FontFace: any;
+import * as d3 from "d3-color";
 
 /**
  * Adds style elements to the head which set the css variables required to re-theme cumulocity

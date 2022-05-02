@@ -39,7 +39,7 @@ import { BinaryFileDownloadModule } from '@c8y/ngx-components/binary-file-downlo
     RouterModule.forRoot(),
     NgRouterModule.forRoot([], { enableTracing: false, useHash: true }),
     CoreModule.forRoot(),
-   // PluginsModule,
+    PluginsModule,
     NgUpgradeModule,
     DashboardUpgradeModule,
     BinaryFileDownloadModule,
