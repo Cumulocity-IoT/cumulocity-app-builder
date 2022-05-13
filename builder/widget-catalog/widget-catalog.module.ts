@@ -23,11 +23,14 @@ import { WidgetCatalogComponent } from './widget-catalog.component';
 import { RectangleSpinnerModule } from "../utils/rectangle-spinner/rectangle-spinner.module";
 import { ButtonsModule } from 'ngx-bootstrap/buttons';
 import { WidgetCatalogService } from './widget-catalog.service';
-import {WidgetCatalogTabFactory} from './widget-catalog.tabfactory';
+import { WidgetCatalogTabFactory } from './widget-catalog.tabfactory';
 import { RouterModule, Routes } from '@angular/router';
 import { SortableModule } from 'ngx-bootstrap/sortable';
 import { previewModalComponent } from './preview-modal/preview-modal.component';
 import { MyWidgetsComponent } from './my-widgets/my-widgets.component';
+
+import { BsDropdownModule } from "ngx-bootstrap/dropdown";
+import { WidgetDetailsComponent } from './widget-details/widget-details.component';
 
 const routes: Routes = [
     {
@@ -41,6 +44,10 @@ const routes: Routes = [
     {
         path: 'widget-catalog/get-widgets',
         component: WidgetCatalogComponent
+    },
+    {
+        path: 'widget-catalog/my-widgets/widget-details',
+        component: WidgetDetailsComponent
     }
 ];
 
@@ -52,13 +59,15 @@ const routes: Routes = [
         RectangleSpinnerModule,
         ButtonsModule.forRoot(),
         SortableModule.forRoot(),
+        BsDropdownModule.forRoot()
     ],
     declarations: [
         WidgetCatalogComponent,
         previewModalComponent,
-        MyWidgetsComponent
+        MyWidgetsComponent,
+        WidgetDetailsComponent
     ],
-    entryComponents: [WidgetCatalogComponent, previewModalComponent, MyWidgetsComponent],
+    entryComponents: [WidgetCatalogComponent, previewModalComponent, MyWidgetsComponent, WidgetDetailsComponent],
     providers: [
         WidgetCatalogService,
         {
@@ -66,4 +75,4 @@ const routes: Routes = [
         }
     ]
 })
-export class WidgetCatalogModule {}
+export class WidgetCatalogModule { }
