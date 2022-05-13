@@ -82,6 +82,18 @@ export interface DtdlSimulationModel {
     resetOn?: 'restart' | 'never';
     isGroup?: boolean,
     alternateConfigs?: OperationSupport<DtdlSimulationModel>;
+
+    // file Simulator config
+    headerPresent?: boolean;
+    fileId?: string;
+    generationType?: string;
+    type?: string;
+    loop?: boolean;
+    loopDelay?: number;
+    intervalType?: string;
+    stepValue?: string;
+    dateTime?: string;
+    fileColumns?: any;
 }
 
 /**
