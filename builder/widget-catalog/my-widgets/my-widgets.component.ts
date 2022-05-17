@@ -36,6 +36,7 @@ import { mergeWith } from "lodash-es";
 import { catchError, map } from "rxjs/operators";
 import { ActivatedRoute, Router } from "@angular/router";
 
+
 @Component({
     templateUrl: './my-widgets.component.html',
     styleUrls: ['./my-widgets.component.less']
@@ -53,6 +54,7 @@ export class MyWidgetsComponent implements OnInit {
     filterWidgets: any = [];
     isUpdateRequired = false;
     displayListValue: any;
+    booleanValue: any = false;
 
     constructor(private appStateService: AppStateService, private modalService: BsModalService,
         private userService: UserService, private widgetCatalogService: WidgetCatalogService,
@@ -382,6 +384,17 @@ export class MyWidgetsComponent implements OnInit {
 
     navigateToDetailPage(widget) {
         this.widgetCatalogService.setWidgetDetails(widget);
-        this.router.navigate(['widget-details', {id: widget.id}], {relativeTo: this.route });
+        this.router.navigate(['widget-details', { id: widget.contextPath }], { relativeTo: this.route });
+    }
+
+    onSort(colName, boolean) {
+        if (boolean == true) {
+            this.filterWidgets.sort((a, b) => a[colName] < b[colName] ? 1 : a[colName] > b[colName] ? -1 : 0)
+            this.booleanValue = !this.booleanValue
+        }
+        else {
+            this.filterWidgets.sort((a, b) => a[colName] > b[colName] ? 1 : a[colName] < b[colName] ? -1 : 0)
+            this.booleanValue = !this.booleanValue
+        }
     }
 }

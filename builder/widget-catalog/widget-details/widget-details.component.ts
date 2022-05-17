@@ -41,10 +41,11 @@ export class WidgetDetailsComponent implements OnInit {
     userHasAdminRights: boolean;
     widgetCatalog: WidgetCatalog;
     widgetID: string;
+    filterWidgets: any = [];
 
 
     constructor(private widgetCatalogService: WidgetCatalogService, private router: Router,
-        private modalService: BsModalService, private appService: ApplicationService,  private route: ActivatedRoute,
+        private modalService: BsModalService, private appService: ApplicationService, private route: ActivatedRoute,
         private alertService: AlertService, private userService: UserService, private appStateService: AppStateService) {
         this.userHasAdminRights = userService.hasAllRoles(appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN", "ROLE_APPLICATION_MANAGEMENT_ADMIN"]);
     }
@@ -57,7 +58,6 @@ export class WidgetDetailsComponent implements OnInit {
         if (!this.widgetDetails) {
             this.fetchWidgetDetails();
         }
-        console.log(this.widgetDetails);
     }
 
     getWidgetID() {
@@ -68,13 +68,8 @@ export class WidgetDetailsComponent implements OnInit {
         this.widgetID = this.route.snapshot.paramMap.get('id');
     }
 
-    fetchWidgetDetails() {
+    async fetchWidgetDetails() {
         this.loadWidgetsFromCatalog();
-        this.appList.forEach((app) => {
-            if (this.widgetID === app.id) {
-                this.widgetCatalogService.setWidgetDetails(app);
-            }
-        })
     }
 
     openDocumentation(url: string) {
@@ -104,7 +99,7 @@ export class WidgetDetailsComponent implements OnInit {
                         this.widgetCatalog.widgets.push(widget);
                     }
                 });
-                this.appList.forEach(app => {
+                this.appList.forEach(async app => {
                     const appWidgetObj = this.widgetCatalog.widgets.find(widgetObj => widgetObj.contextPath === app.contextPath);
                     if (!appWidgetObj) {
                         appWidgetObj
@@ -117,13 +112,48 @@ export class WidgetDetailsComponent implements OnInit {
                             requiredPlatformVersion: (app.manifest && app.manifest.requiredPlatformVersion ? app.manifest.requiredPlatformVersion : ''),
                             version: (app.manifest && app.manifest.version ? app.manifest.version : ''),
                         });
-                        console.log(this.appList);
                     }
-
+                    await this.filterInstalledWidgets();
+                    this.filterWidgets = (this.widgetCatalog ? this.widgetCatalog.widgets : []);
+                    this.filterWidgets.forEach((widget) => {
+                        if (this.widgetID === widget.contextPath) {
+                            this.widgetCatalogService.setWidgetDetails(widget);
+                        }
+                    });
                 });
             }, error => {
                 this.alertService.danger("There is some technical error! Please try after sometime.");
             });
+    }
+    private async filterInstalledWidgets() {
+        if (!this.widgetCatalog || !this.widgetCatalog.widgets
+            || this.widgetCatalog.widgets.length === 0) {
+            return;
+        }
+
+        await this.widgetCatalog.widgets.forEach(async widget => {
+            /*  const widgetObj = await new Promise<any>((resolve) => {
+                 this.componentService.getById$(widget.id).subscribe(widgetObj => {
+                     resolve(widgetObj);
+                 });
+             }); */
+            widget.isCompatible = this.widgetCatalogService.isCompatiblieVersion(widget);
+            const appObj = this.appList.find(app => app.contextPath === widget.contextPath);
+            widget.installedVersion = (appObj && appObj.manifest && appObj.manifest.version ? appObj.manifest.version : '');
+            widget.installed = appObj && this.findInstalledWidget(widget); //(widgetObj != undefined);
+            this.actionFlag(widget);
+        });
+        this.widgetCatalog.widgets = this.widgetCatalog.widgets.filter(widget => widget.installed);
+    }
+    // if same widget exists in widget catalog json more than one time with different version
+    private findInstalledWidget(widget: WidgetModel) {
+        const checkWidgetInCatalog = this.widgetCatalog.widgets.filter(widgetCatalogWidget => widgetCatalogWidget.contextPath === widget.contextPath);
+        if (checkWidgetInCatalog && checkWidgetInCatalog.length > 1) {
+            const isWidgetInstalled = checkWidgetInCatalog.find(installObj => installObj.installed);
+            if (isWidgetInstalled) return false;
+            return widget.isCompatible && this.widgetCatalogService.checkInstalledVersion(widget);
+        }
+        return true;
     }
     async uninstallWidget(widget: WidgetModel) {
         this.loadWidgetsFromCatalog();
