@@ -20,6 +20,8 @@ import { Component } from "@angular/core";
 import { SimulationStrategyConfigComponent } from "../../builder/simulator/simulation-strategy";
 import * as _ from 'lodash';
 import { DtdlSimulationModel } from '../../builder/simulator/simulator-config';
+import { ControlContainer, NgForm } from "@angular/forms";
+import { AlertService } from "@c8y/ngx-components";
 
 
 @Component({
@@ -54,7 +56,7 @@ import { DtdlSimulationModel } from '../../builder/simulator/simulator-config';
             <div class="col-xs-12 col-sm-4 col-md-4">
             <div class="form-group">
                 <label for="generationType"><span>Category</span></label>
-                <select name="generationType"  [(ngModel)]="config.generationType" required >
+                <select name="generationType"  [(ngModel)]="config.generationType" required placeholder="select Catagory">
                     <option value="measurement" >Measurement</option>
                     <option value="event" >Event</option>
                 </select>
@@ -63,7 +65,7 @@ import { DtdlSimulationModel } from '../../builder/simulator/simulator-config';
             <div class="col-xs-12 col-sm-4 col-md-4">
             <div class="form-group">
                 <label for="simulationType"><span>Simulation Type</span></label>
-                <select name="simulationType"  [(ngModel)]="config.simulationType" required >
+                <select name="simulationType"  [(ngModel)]="config.simulationType" required placeholder="Simulation Type">
                     <option value="sequential" >Sequential</option>
                     <option value="random">Random</option>
                     <option value="steps"> +Steps </option>
@@ -73,7 +75,7 @@ import { DtdlSimulationModel } from '../../builder/simulator/simulator-config';
             <div class="col-xs-12 col-sm-4 col-md-4">
                 <div class="form-group">
                     <label for="intervalType"><span>Interval Type</span></label>
-                    <select name="intervalType"  [(ngModel)]="config.intervalType" required >
+                    <select name="intervalType"  [(ngModel)]="config.intervalType" required placeholder="Interval Type">
                         <option value="fixed">Fixed</option>
                         <option value="original" >Original</option>
                     </select>
@@ -106,7 +108,7 @@ import { DtdlSimulationModel } from '../../builder/simulator/simulator-config';
             <div class="col-xs-12 col-sm-4 col-md-4">
                 <div class="form-group" >
                     <label for="measurementType"><span>Select Type</span>  </label>
-                    <ng-select [items]="config.fileColumns"  bindLabel="displayName" bindValue="value"  name="measurementType" required [multiple]="false" [closeOnSelect]="true" [searchable]="true"
+                    <ng-select [items]="config.typeColumns"  bindLabel="displayName" bindValue="value"  name="measurementType" required [multiple]="false" [closeOnSelect]="true" [searchable]="true"
                     placeholder="Type Column"  [addTag]="addCustomType" [(ngModel)]="config.alternateConfigs.operations[0].type" >
                     </ng-select>
                 </div>
@@ -114,47 +116,57 @@ import { DtdlSimulationModel } from '../../builder/simulator/simulator-config';
             <div class="col-xs-12 col-sm-4 col-md-4">
                 <div class="form-group" >
                     <label for="fragementType"><span>Select Fragement</span>  </label>
-                    <ng-select [items]="config.fileColumns"  bindLabel="displayName" bindValue="value"  name="fragementType" required [multiple]="false" [closeOnSelect]="true" [searchable]="true"
-                    placeholder="Fragement Column" [(ngModel)]="config.alternateConfigs.operations[0].fragment" >
+                    <ng-select [items]="config.fragmentColumns"  bindLabel="displayName" bindValue="value"  name="fragementType" required [multiple]="false" [closeOnSelect]="true" [searchable]="true"
+                    placeholder="Fragement Type" [addTag]="addCustomFragment" [(ngModel)]="config.alternateConfigs.operations[0].fragment" >
                     </ng-select>
                 </div>
             </div>
-            <div class="col-xs-12 col-sm-4 col-md-4">
+            <div class="col-xs-12 col-sm-4 col-md-4" *ngIf="config.intervalType === 'original'">
                 <div class="form-group" >
-                    <label for="dateTime"><span>Select TimeStamp</span>  </label>
+                    <label for="dateTime"><span>Select Timestamp</span>  </label>
                     <ng-select [items]="config.fileColumns" name="dateTime"  bindLabel="displayName" bindValue="value"  required [multiple]="false" [closeOnSelect]="true" [searchable]="true"
-                    placeholder="TimeStamp Column" [(ngModel)]="config.alternateConfigs.operations[0].dateTime" >
+                    placeholder="TimeStamp" [(ngModel)]="config.alternateConfigs.operations[0].dateTime" >
                     </ng-select>
                 </div>
             </div>
          </div>
         
-        <div class="form-group">
-            <label for="series"><span>Series column(s)</span></label>
-            <ng-select [items]="config.fileColumns" bindLabel="displayName" bindValue="value" name="series" required [multiple]="true" [closeOnSelect]="false" [searchable]="true"
-             placeholder="Select Series columns" [(ngModel)]="config.alternateConfigs.operations[0].series" >
-             </ng-select>
-        </div> 
-
-        <div class="form-group">
-            <label for="value"><span>Value column(s)</span></label>
-            <ng-select [items]="config.fileColumns" name="value"  bindLabel="displayName" bindValue="value" required [multiple]="true" [closeOnSelect]="false" [searchable]="true"
-             placeholder="Select Measurements value columns" [(ngModel)]="config.alternateConfigs.operations[0].value" >
-             </ng-select>
-        </div> 
-
-        <div class="form-group">
-            <label for="unit"><span>Unit column(s)</span></label>
-            <ng-select [items]="config.fileColumns" name="unit" required [multiple]="true"  bindLabel="displayName" bindValue="value"  [closeOnSelect]="false" [searchable]="true"
-             placeholder="Select Measurements unit columns" [(ngModel)]="config.alternateConfigs.operations[0].unit" >
-             </ng-select>
-        </div> 
-
-         <div class="form-group">
-            <label for="interval"><span>Interval (seconds)</span></label>
-            <input type="number" class="form-control" id="interval" name="interval" placeholder="e.g. 10 (required)" required [(ngModel)]="config.interval" (ngModelChange)="changeInterval(config)">
+        <div class="row">
+            <div class="col-xs-12 col-sm-6 col-md-6">
+                <div class="form-group">
+                    <label for="series"><span>Series column(s)</span></label>
+                    <ng-select [items]="config.fileColumns" bindLabel="displayName" bindValue="value" name="series" required [multiple]="true" [closeOnSelect]="false" [searchable]="true"
+                    placeholder="Select Series(s)" [(ngModel)]="config.alternateConfigs.operations[0].series" >
+                    </ng-select>
+                </div> 
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-6">
+                <div class="form-group">
+                    <label for="value"><span>Value column(s)</span></label>
+                    <ng-select [items]="config.fileColumns" name="value"  bindLabel="displayName" bindValue="value" required [multiple]="true" [closeOnSelect]="false" [searchable]="true"
+                    placeholder="Select Measurements value(s)" [(ngModel)]="config.alternateConfigs.operations[0].value" >
+                    </ng-select>
+                </div> 
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12 col-sm-6 col-md-6">
+                <div class="form-group">
+                    <label for="unit"><span>Unit column(s)</span></label>
+                    <ng-select [items]="config.fileColumns" name="unit" required [multiple]="true"  bindLabel="displayName" bindValue="value"  [closeOnSelect]="false" [searchable]="true"
+                    placeholder="Select Measurements unit(s)" [(ngModel)]="config.alternateConfigs.operations[0].unit" >
+                    </ng-select>
+                </div> 
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-6">
+                <div class="form-group">
+                    <label for="interval"><span>Interval (seconds)</span></label>
+                    <input type="number" class="form-control" id="interval" name="interval" placeholder="e.g. 10 (required)" required [(ngModel)]="config.interval" (ngModelChange)="changeInterval(config)">
+                </div>
+            </div>
         </div>  
-    `
+    `,
+    viewProviders: [ { provide: ControlContainer, useExisting: NgForm } ]
 })
 export class FileValuesSimulationStrategyConfigComponent extends SimulationStrategyConfigComponent {
 
@@ -162,7 +174,24 @@ export class FileValuesSimulationStrategyConfigComponent extends SimulationStrat
     isUploading = false;
     isError = false;
     firstLine = '';
-    addCustomType = (term: string) => ({ 'displayName' : term, 'value' : term, 'tag' : 'type'});
+    constructor(private alertService: AlertService) {
+        super();
+    }
+
+    addCustomType = (term: string) => this.addCustomTypeField(term);
+    addCustomFragment = (term: string) => this.addCustomFragmentField(term);
+    addCustomTypeField(term: string) {
+        const newField = { 'displayName' : term, 'value' : term, 'tag' : 'type'};
+        this.config.typeColumns.push(newField);
+        return newField;
+
+    };
+    addCustomFragmentField(term: string) {
+        const newField = { 'displayName' : term, 'value' : term, 'tag' : 'fragment'};
+        this.config.fragmentColumns.push(newField);
+        return newField;
+
+    };
     initializeConfig(existingConfig?: DtdlSimulationModel) {
         let c: DtdlSimulationModel = {
             deviceId: "",
@@ -173,7 +202,6 @@ export class FileValuesSimulationStrategyConfigComponent extends SimulationStrat
             interval: 30,
             alternateConfigs: undefined
         };
-        this.config.modalSize = "modal-md";
 
         this.checkAlternateConfigs(c);
 
@@ -193,19 +221,26 @@ export class FileValuesSimulationStrategyConfigComponent extends SimulationStrat
             c.alternateConfigs.operations.push(copy);
         }
         this.config = c;
+        this.config.modalSize = "modal-md";
     }
 
     fileUploaded(events){
         this.isError = false;
         this.isUploading = true;
-        const file = events.target.files[0];
-        const fileType = file.type;
-        console.log('file type', fileType);
+        this.config.csvJsonFile = events.target.files[0];
+        const filesize = parseFloat((Math.round((this.config.csvJsonFile.size / 1024 / 1024) * 100) / 100).toFixed(2));
+        if(this.config.csvJsonFile && filesize > 500) {
+            this.alertService.danger("File size shoud be less than 500mb!", `Current file size  ${filesize} mb`);
+            this.config.csvJsonFile = null;
+            this.isUploading = false;
+            return;
+        }
+       
         const reader = new FileReader();
         let input = null;
-        reader.addEventListener('load', (event: any) => {
-            input = event.target.result;
-            if(file && file.type && file.type.toLowerCase().includes('csv')) {
+        reader.addEventListener('load', () => {
+            input = reader.result; // event.target.result;
+            if(this.config.csvJsonFile && this.config.csvJsonFile.type && this.config.csvJsonFile.type.toLowerCase().includes('csv')) {
                 this.firstLine = (input.toString().replace(/\r\n/g,'\n').split('\n'))[0];
                 this.config.type = 'CSV';
                 this.loadFieldColumns();
@@ -213,7 +248,6 @@ export class FileValuesSimulationStrategyConfigComponent extends SimulationStrat
                 this.config.type = 'JSON';
                 // TODO for json file
             }
-            console.log('file data', input);
             /* const validJson = this.isValidJson(input);
             if (validJson) {
                 this.dtdlFile = validJson;
@@ -224,9 +258,9 @@ export class FileValuesSimulationStrategyConfigComponent extends SimulationStrat
                 events.srcElement.value = "";
             } */
             this.isUploading = false;
-        });
-        if(file) { 
-            reader.readAsText(file);
+        }, false);
+        if(this.config.csvJsonFile) { 
+            reader.readAsText(this.config.csvJsonFile);
         } else {
             this.isUploading = false;
         }
@@ -234,6 +268,7 @@ export class FileValuesSimulationStrategyConfigComponent extends SimulationStrat
 
     private loadFieldColumns() {
         this.config.fileColumns = [];
+        this.config.typeColumns = [];
         if(this.firstLine) {
             if(this.config && this.config.headerPresent) {
                 const fieldList = this.firstLine.split(",");
@@ -258,6 +293,9 @@ export class FileValuesSimulationStrategyConfigComponent extends SimulationStrat
                 }
             }
         }
+        this.config.typeColumns = _.cloneDeep(this.config.fileColumns);
+        this.config.fragmentColumns = _.cloneDeep(this.config.fileColumns);
+        
     }
 
     headerPresentChange() {

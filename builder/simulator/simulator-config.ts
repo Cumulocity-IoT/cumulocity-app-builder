@@ -94,6 +94,10 @@ export interface DtdlSimulationModel {
     stepValue?: string;
     dateTime?: string;
     fileColumns?: any;
+    typeColumns?: any;
+    fragmentColumns?: any;
+    csvJsonFile?: any;
+
 }
 
 /**
