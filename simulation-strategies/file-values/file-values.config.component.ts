@@ -33,14 +33,6 @@ import { AlertService } from "@c8y/ngx-components";
                     <input type="text" class="form-control" id="name" name="name" placeholder="e.g. My First Simulator (required)" required autofocus [(ngModel)]="config.deviceName">
                 </div>
             </div>
-            <div class="col-xs-12 col-sm-3 col-md-3">
-            <div class="form-group">
-                <label for="headerPresent"><span>Column Header</span></label>
-                <button class="btn btn-xs" id="headerPresent" name="headerPresent" [(ngModel)]="config.headerPresent" 
-                (ngModelChange)="headerPresentChange()" 
-                btnCheckbox>{{config?.headerPresent? 'First Row' : 'No Header' }}</button>
-                </div>
-            </div>
             <div class="col-xs-12 col-sm-5 col-md-5">
                 <div class="form-group">
                         <label for="csvJsonFile"><span>Upload a File</span></label>
@@ -49,6 +41,14 @@ import { AlertService } from "@c8y/ngx-components";
                         <div *ngIf="isUploading" style="color:blue;margin: 5px;"><i class="fa fa-circle-o-notch fa-spin"></i></div>
                         </div>
                         <div *ngIf="isError" style="color:red;">Invalid File Format!</div>
+                </div>
+            </div>
+            <div class="col-xs-12 col-sm-3 col-md-3" *ngIf="config.type === 'CSV'">
+                <div class="form-group">
+                    <label for="headerPresent"><span>Column Header</span></label>
+                    <button class="btn btn-xs" id="headerPresent" name="headerPresent" [(ngModel)]="config.headerPresent" 
+                    (ngModelChange)="headerPresentChange()" 
+                    btnCheckbox>{{config?.headerPresent? 'First Row' : 'No Header' }}</button>
                 </div>
             </div>
         </div>
@@ -121,48 +121,48 @@ import { AlertService } from "@c8y/ngx-components";
                     </ng-select>
                 </div>
             </div>
-            <div class="col-xs-12 col-sm-4 col-md-4" *ngIf="config.intervalType === 'original'">
-                <div class="form-group" >
-                    <label for="dateTime"><span>Select Timestamp</span>  </label>
-                    <ng-select [items]="config.fileColumns" name="dateTime"  bindLabel="displayName" bindValue="value"  required [multiple]="false" [closeOnSelect]="true" [searchable]="true"
-                    placeholder="TimeStamp" [(ngModel)]="config.alternateConfigs.operations[0].dateTime" >
-                    </ng-select>
-                </div>
+            <div class="col-xs-12 col-sm-4 col-md-4" >
+                <div class="form-group">
+                    <label for="interval"><span>Interval (seconds)</span></label>
+                    <input type="number" class="form-control" id="interval" name="interval" placeholder="e.g. 10 (required)" required [(ngModel)]="config.interval" (ngModelChange)="changeInterval(config)">
+                </div> 
             </div>
          </div>
         
         <div class="row">
             <div class="col-xs-12 col-sm-6 col-md-6">
                 <div class="form-group">
-                    <label for="series"><span>Series column(s)</span></label>
+                    <label for="series"><span>Series </span></label>
                     <ng-select [items]="config.fileColumns" bindLabel="displayName" bindValue="value" name="series" required [multiple]="true" [closeOnSelect]="false" [searchable]="true"
-                    placeholder="Select Series(s)" [(ngModel)]="config.alternateConfigs.operations[0].series" >
+                    placeholder="Select Series(s)" [appendTo]="(appendTo ?  appendTo : 'body')"  [(ngModel)]="config.alternateConfigs.operations[0].series" >
                     </ng-select>
                 </div> 
             </div>
             <div class="col-xs-12 col-sm-6 col-md-6">
-                <div class="form-group">
-                    <label for="value"><span>Value column(s)</span></label>
+                <div class="form-group" *ngIf="config.type === 'CSV'">
+                    <label for="value"><span>Value </span></label>
                     <ng-select [items]="config.fileColumns" name="value"  bindLabel="displayName" bindValue="value" required [multiple]="true" [closeOnSelect]="false" [searchable]="true"
-                    placeholder="Select Measurements value(s)" [(ngModel)]="config.alternateConfigs.operations[0].value" >
+                    placeholder="Select Measurements value(s)" [appendTo]="(appendTo ?  appendTo : 'body')" [(ngModel)]="config.alternateConfigs.operations[0].value" >
                     </ng-select>
                 </div> 
             </div>
         </div>
         <div class="row">
             <div class="col-xs-12 col-sm-6 col-md-6">
-                <div class="form-group">
-                    <label for="unit"><span>Unit column(s)</span></label>
+                <div class="form-group" *ngIf="config.type === 'CSV'">
+                    <label for="unit"><span>Unit </span></label>
                     <ng-select [items]="config.fileColumns" name="unit" required [multiple]="true"  bindLabel="displayName" bindValue="value"  [closeOnSelect]="false" [searchable]="true"
                     placeholder="Select Measurements unit(s)" [(ngModel)]="config.alternateConfigs.operations[0].unit" >
                     </ng-select>
                 </div> 
             </div>
-            <div class="col-xs-12 col-sm-6 col-md-6">
-                <div class="form-group">
-                    <label for="interval"><span>Interval (seconds)</span></label>
-                    <input type="number" class="form-control" id="interval" name="interval" placeholder="e.g. 10 (required)" required [(ngModel)]="config.interval" (ngModelChange)="changeInterval(config)">
-                </div>
+            <div class="col-xs-12 col-sm-6 col-md-6" *ngIf="config.intervalType === 'original'">
+                <div class="form-group" >
+                        <label for="dateTime"><span>Select Timestamp</span>  </label>
+                        <ng-select [items]="config.fileColumns" name="dateTime"  bindLabel="displayName" bindValue="value"  required [multiple]="false" [closeOnSelect]="true" [searchable]="true"
+                        placeholder="TimeStamp" [(ngModel)]="config.alternateConfigs.operations[0].dateTime" >
+                        </ng-select>
+                    </div>    
             </div>
         </div>  
     `,
@@ -228,47 +228,55 @@ export class FileValuesSimulationStrategyConfigComponent extends SimulationStrat
         this.isError = false;
         this.isUploading = true;
         this.config.csvJsonFile = events.target.files[0];
-        const filesize = parseFloat((Math.round((this.config.csvJsonFile.size / 1024 / 1024) * 100) / 100).toFixed(2));
-        if(this.config.csvJsonFile && filesize > 500) {
-            this.alertService.danger("File size shoud be less than 500mb!", `Current file size  ${filesize} mb`);
-            this.config.csvJsonFile = null;
-            this.isUploading = false;
-            return;
-        }
-       
-        const reader = new FileReader();
-        let input = null;
-        reader.addEventListener('load', () => {
-            input = reader.result; // event.target.result;
-            if(this.config.csvJsonFile && this.config.csvJsonFile.type && this.config.csvJsonFile.type.toLowerCase().includes('csv')) {
-                this.firstLine = (input.toString().replace(/\r\n/g,'\n').split('\n'))[0];
-                this.config.type = 'CSV';
-                this.loadFieldColumns();
-            } else  {
-                this.config.type = 'JSON';
-                // TODO for json file
+        if(this.config.csvJsonFile) {
+            const filesize = parseFloat((Math.round((this.config.csvJsonFile.size / 1024 / 1024) * 100) / 100).toFixed(2));
+            if(this.config.csvJsonFile && filesize > 500) {
+                this.alertService.danger("File size shoud be less than 500mb!", `Current file size  ${filesize} mb`);
+                this.config.csvJsonFile = null;
+                this.isUploading = false;
+                return;
             }
-            /* const validJson = this.isValidJson(input);
-            if (validJson) {
-                this.dtdlFile = validJson;
-                this.processDTDL(validJson);
-                this.preselectMeasurements();
+           
+            const reader = new FileReader();
+            let input = null;
+            reader.addEventListener('load', () => {
+                this.config.fileColumns = [];
+                this.config.fragmentColumns = [];
+                this.config.typeColumns = [];
+                this.firstLine = '';
+                input = reader.result; // event.target.result;
+                if(this.config.csvJsonFile && this.config.csvJsonFile.type && this.config.csvJsonFile.type.toLowerCase().includes('csv')) {
+                    this.firstLine = (input.toString().replace(/\r\n/g,'\n').split('\n'))[0];
+                    this.config.type = 'CSV';
+                    this.loadFieldColumns();
+                } else  {
+                    this.config.type = 'JSON';
+                    // TODO for json file
+                    const validJson = this.isValidJson(input);
+                    if (validJson) {
+                        console.log(validJson);
+                       this.processJSON(validJson);
+                    } else {
+                        this.isError = true;
+                        events.srcElement.value = "";
+                    } 
+                }
+             
+                this.isUploading = false;
+            }, false);
+            if(this.config.csvJsonFile) { 
+                reader.readAsText(this.config.csvJsonFile);
             } else {
-                this.isError = true;
-                events.srcElement.value = "";
-            } */
-            this.isUploading = false;
-        }, false);
-        if(this.config.csvJsonFile) { 
-            reader.readAsText(this.config.csvJsonFile);
-        } else {
-            this.isUploading = false;
-        }
+                this.isUploading = false;
+            }
+        } else { this.isUploading = false;}
+        
     }
 
     private loadFieldColumns() {
         this.config.fileColumns = [];
         this.config.typeColumns = [];
+        this.config.fragmentColumns = []
         if(this.firstLine) {
             if(this.config && this.config.headerPresent) {
                 const fieldList = this.firstLine.split(",");
@@ -310,6 +318,33 @@ export class FileValuesSimulationStrategyConfigComponent extends SimulationStrat
         }
         this.loadFieldColumns();
     }
+
+
+    private processJSON(jsonFile: any){
+        if(jsonFile.constructor === Object) {
+           this.processKeys(jsonFile);
+        } else if (jsonFile && jsonFile.length > 0 ){
+            this.processKeys(jsonFile[0]);
+        }
+    }
+
+    private processKeys(jsonObject: any) {
+        this.config.fileColumns = [];
+        this.config.typeColumns = [];
+        this.config.fragmentColumns = []
+        const keys = Object.keys(jsonObject);
+        if(keys && keys.length > 0) {
+            keys.forEach( key => {
+                this.config.fileColumns.push(key);
+                if(jsonObject[key].constructor === Object) {
+                    this.config.fileColumns.push.apply(this.config.fileColumns, Object.keys(jsonObject[key]));
+                }
+            })
+            this.config.typeColumns = _.cloneDeep(this.config.fileColumns);
+            this.config.fragmentColumns = _.cloneDeep(this.config.fileColumns);
+        }
+    }
+
     /**
      *
      * @param input Validate JSON Input
