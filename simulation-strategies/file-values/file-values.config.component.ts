@@ -56,7 +56,7 @@ import { AlertService } from "@c8y/ngx-components";
             <div class="col-xs-12 col-sm-4 col-md-4">
             <div class="form-group">
                 <label for="generationType"><span>Category</span></label>
-                <select name="generationType"  [(ngModel)]="config.generationType" required placeholder="select Catagory">
+                <select name="generationType"  [(ngModel)]="config.generationType" (ngModelChange)="generationTypeChange()" required placeholder="select Catagory">
                     <option value="measurement" >Measurement</option>
                     <option value="event" >Event</option>
                 </select>
@@ -75,7 +75,7 @@ import { AlertService } from "@c8y/ngx-components";
             <div class="col-xs-12 col-sm-4 col-md-4">
                 <div class="form-group">
                     <label for="intervalType"><span>Interval Type</span></label>
-                    <select name="intervalType"  [(ngModel)]="config.intervalType" required placeholder="Interval Type">
+                    <select name="intervalType"  [(ngModel)]="config.intervalType" required placeholder="Interval Type" (ngModelChange)="changeIntervalType()">
                         <option value="fixed">Fixed</option>
                         <option value="original" >Original</option>
                     </select>
@@ -106,18 +106,30 @@ import { AlertService } from "@c8y/ngx-components";
 
         <div class="row">
             <div class="col-xs-12 col-sm-4 col-md-4">
-                <div class="form-group" >
+                <div class="form-group" *ngIf="config.generationType === 'measurement'">
                     <label for="measurementType"><span>Select Type</span>  </label>
                     <ng-select [items]="config.typeColumns"  bindLabel="displayName" bindValue="value"  name="measurementType" required [multiple]="false" [closeOnSelect]="true" [searchable]="true"
-                    placeholder="Type Column"  [addTag]="addCustomType" [(ngModel)]="config.alternateConfigs.operations[0].type" >
+                    placeholder="Type Column"  [appendTo]="(appendTo ?  appendTo : 'body')" [addTag]="addCustomType" [(ngModel)]="config.alternateConfigs.operations[0].type" >
+                    </ng-select>
+                </div>
+                <div class="form-group" *ngIf="config.generationType === 'event'">
+                    <label for="eventType"><span>Event Type</span>  </label>
+                    <ng-select [items]="config.eventTypeColumns"  bindLabel="displayName" bindValue="value"  name="eventType" required [multiple]="false" [closeOnSelect]="true" [searchable]="true"
+                    placeholder="Event Type" [appendTo]="(appendTo ?  appendTo : 'body')" [addTag]="addCustomEventType" [(ngModel)]="config.alternateConfigs.operations[0].eventType" >
                     </ng-select>
                 </div>
             </div>
             <div class="col-xs-12 col-sm-4 col-md-4">
-                <div class="form-group" >
+                <div class="form-group" *ngIf="config.generationType === 'measurement'">
                     <label for="fragementType"><span>Select Fragement</span>  </label>
                     <ng-select [items]="config.fragmentColumns"  bindLabel="displayName" bindValue="value"  name="fragementType" required [multiple]="false" [closeOnSelect]="true" [searchable]="true"
-                    placeholder="Fragement Type" [addTag]="addCustomFragment" [(ngModel)]="config.alternateConfigs.operations[0].fragment" >
+                    placeholder="Fragement Type" [appendTo]="(appendTo ?  appendTo : 'body')" [addTag]="addCustomFragment" [(ngModel)]="config.alternateConfigs.operations[0].fragment" >
+                    </ng-select>
+                </div>
+                <div class="form-group" *ngIf="config.generationType === 'event'">
+                    <label for="eventText"><span>Select Event Text</span>  </label>
+                    <ng-select [items]="config.fileColumns"  bindLabel="displayName" bindValue="value"  name="eventText" required [multiple]="false" [closeOnSelect]="true" [searchable]="true"
+                    placeholder="Event Text" [(ngModel)]="config.alternateConfigs.operations[0].eventText"  [appendTo]="(appendTo ?  appendTo : 'body')">
                     </ng-select>
                 </div>
             </div>
@@ -129,7 +141,7 @@ import { AlertService } from "@c8y/ngx-components";
             </div>
          </div>
         
-        <div class="row">
+        <div class="row" *ngIf="config.generationType === 'measurement'">
             <div class="col-xs-12 col-sm-6 col-md-6">
                 <div class="form-group">
                     <label for="series"><span>Series </span></label>
@@ -148,8 +160,8 @@ import { AlertService } from "@c8y/ngx-components";
             </div>
         </div>
         <div class="row">
-            <div class="col-xs-12 col-sm-6 col-md-6">
-                <div class="form-group" *ngIf="config.type === 'CSV'">
+            <div class="col-xs-12 col-sm-6 col-md-6"  *ngIf="config.type === 'CSV' && config.generationType === 'measurement'">
+                <div class="form-group">
                     <label for="unit"><span>Unit </span></label>
                     <ng-select [items]="config.fileColumns" name="unit" required [multiple]="true"  bindLabel="displayName" bindValue="value"  [closeOnSelect]="false" [searchable]="true"
                     placeholder="Select Measurements unit(s)" [(ngModel)]="config.alternateConfigs.operations[0].unit" >
@@ -174,54 +186,53 @@ export class FileValuesSimulationStrategyConfigComponent extends SimulationStrat
     isUploading = false;
     isError = false;
     firstLine = '';
+    jsonData = null;
     constructor(private alertService: AlertService) {
         super();
     }
-
     addCustomType = (term: string) => this.addCustomTypeField(term);
     addCustomFragment = (term: string) => this.addCustomFragmentField(term);
+    addCustomEventType = (term: string) => this.addCustomEventTypeField(term);
+    
     addCustomTypeField(term: string) {
         const newField = { 'displayName' : term, 'value' : term, 'tag' : 'type'};
         this.config.typeColumns.push(newField);
         return newField;
 
     };
+    
     addCustomFragmentField(term: string) {
         const newField = { 'displayName' : term, 'value' : term, 'tag' : 'fragment'};
         this.config.fragmentColumns.push(newField);
         return newField;
-
     };
+
+    addCustomEventTypeField(term:string) {
+        const newField = { 'displayName' : term, 'value' : term, 'tag' : 'eventType'};
+        this.config.eventTypeColumns.push(newField);
+        return newField;
+
+    }
     initializeConfig(existingConfig?: DtdlSimulationModel) {
         let c: DtdlSimulationModel = {
             deviceId: "",
             matchingValue: "default",
-            latitude: "",
-            longitude: "",
-            altitude: "",
             interval: 30,
             alternateConfigs: undefined
         };
 
         this.checkAlternateConfigs(c);
 
-        //TODO: copy alternateconfigs
         if( existingConfig ) {
-            c.interval = existingConfig.interval;
-            c.latitude = existingConfig.latitude;
-            c.longitude = existingConfig.longitude;
-            c.altitude = existingConfig.altitude;
             c.alternateConfigs = _.cloneDeep(existingConfig.alternateConfigs);
         } else {
-            //New objects can duplicate the default so it can be restored
-            //we will create the config entries if old simulators are edited
-            //duplication is to avoid changing old code.
             let copy : DtdlSimulationModel = _.cloneDeep(c);
             copy.alternateConfigs = undefined;
             c.alternateConfigs.operations.push(copy);
         }
         this.config = c;
         this.config.modalSize = "modal-md";
+        this.config.generationType = 'measurement'
     }
 
     fileUploaded(events){
@@ -251,11 +262,9 @@ export class FileValuesSimulationStrategyConfigComponent extends SimulationStrat
                     this.loadFieldColumns();
                 } else  {
                     this.config.type = 'JSON';
-                    // TODO for json file
-                    const validJson = this.isValidJson(input);
-                    if (validJson) {
-                        console.log(validJson);
-                       this.processJSON(validJson);
+                    this.jsonData = this.isValidJson(input);
+                    if ( this.jsonData) {
+                       this.processJSON();
                     } else {
                         this.isError = true;
                         events.srcElement.value = "";
@@ -288,7 +297,6 @@ export class FileValuesSimulationStrategyConfigComponent extends SimulationStrat
                         }); 
                     });
                 }
-                console.log(this.config.fileColumns);
             } else {
                 const colList = this.firstLine.split(",");
                 if(colList && colList.length > 0) {
@@ -303,7 +311,10 @@ export class FileValuesSimulationStrategyConfigComponent extends SimulationStrat
         }
         this.config.typeColumns = _.cloneDeep(this.config.fileColumns);
         this.config.fragmentColumns = _.cloneDeep(this.config.fileColumns);
-        
+        if(this.config.generationType === 'event') {
+            this.config.eventTypeColumns = [];
+            this.config.eventTypeColumns = _.cloneDeep(this.config.fileColumns);
+        }
     }
 
     headerPresentChange() {
@@ -319,12 +330,20 @@ export class FileValuesSimulationStrategyConfigComponent extends SimulationStrat
         this.loadFieldColumns();
     }
 
-
-    private processJSON(jsonFile: any){
-        if(jsonFile.constructor === Object) {
-           this.processKeys(jsonFile);
-        } else if (jsonFile && jsonFile.length > 0 ){
-            this.processKeys(jsonFile[0]);
+    generationTypeChange() {
+        if(this.config.type === 'CSV') { this.loadFieldColumns()}
+        else { this.processJSON();}
+    }
+    changeIntervalType() {
+        if(this.config.intervalType === 'fixed'){
+            this.config.alternateConfigs.operations[0].dateTime = '';
+        }
+    }
+    private processJSON(){
+        if(this.jsonData.constructor === Object) {
+           this.processKeys(this.jsonData);
+        } else if (this.jsonData && this.jsonData.length > 0 ){
+            this.processKeys(this.jsonData[0]);
         }
     }
 
@@ -342,6 +361,10 @@ export class FileValuesSimulationStrategyConfigComponent extends SimulationStrat
             })
             this.config.typeColumns = _.cloneDeep(this.config.fileColumns);
             this.config.fragmentColumns = _.cloneDeep(this.config.fileColumns);
+            if(this.config.generationType === 'event') {
+                this.config.eventTypeColumns = [];
+                this.config.eventTypeColumns = _.cloneDeep(this.config.fileColumns);
+            }
         }
     }
 
@@ -363,11 +386,6 @@ export class FileValuesSimulationStrategyConfigComponent extends SimulationStrat
 
 
      // Patch fix for server side simulators
-     applyValuetoOperations(model:any) {
-        model.alternateConfigs.operations[0].latitude = model.latitude;
-        model.alternateConfigs.operations[0].altitude = model.altitude;
-        model.alternateConfigs.operations[0].longitude = model.longitude;
-    }
     changeInterval(model:any) {
         model.alternateConfigs.operations[0].interval = model.interval;
     }

@@ -38,15 +38,9 @@ export interface C8yPosition {
     configComponent: FileValuesSimulationStrategyConfigComponent
 })
 export class FileValuesSimulationStrategy extends DeviceIntervalSimulator {
-    latitude = [];
-    longitude = [];
-    altitude = [];
-    measurementCounter = 0;
-    private invService: InventoryService;
     constructor(protected injector: Injector, private eventService: EventService, 
          private config: DtdlSimulationModel) {
         super(injector);
-        this.invService = injector.get(InventoryService);
     }
 
     protected get interval() {
@@ -57,46 +51,13 @@ export class FileValuesSimulationStrategy extends DeviceIntervalSimulator {
         return this.config;
     } 
     
-    private updatePosition(deviceId: string, position: C8yPosition){
-        const deviceToUpdate: Partial<IManagedObject> = {
-            id: deviceId,
-            c8y_Position: position
-        };
-        this.invService.update(deviceToUpdate);
-    }
+    
     onStart() {
-        this.latitude = this.config.latitude.split(',').map(value => parseFloat(value.trim()));
-        this.longitude = this.config.longitude.split(',').map(value => parseFloat(value.trim()));
-        this.altitude = this.config.altitude.split(',').map(value => parseFloat(value.trim()));
         super.onStart();
     }
 
     onTick(groupDeviceId?: any) {
-        const time = new Date().toISOString();
-        const deviceId = (groupDeviceId? groupDeviceId : this.config.deviceId);
-        if (this.measurementCounter >= this.latitude.length || this.measurementCounter >= this.longitude.length) {
-            this.measurementCounter = 0;
-        }
-        const position: C8yPosition = {
-            lat: this.latitude[this.measurementCounter],
-            alt: this.altitude[this.measurementCounter],
-            lng: this.longitude[this.measurementCounter] 
-        };
-        this.updatePosition(deviceId, position);
-
-        this.eventService.create({
-            source: {
-                id: deviceId
-            },
-            type: "c8y_LocationUpdate",
-            time: time,
-            text: "LocationUpdate",
-            c8y_Position: {
-                lng: this.longitude[this.measurementCounter],
-                alt: this.altitude[this.measurementCounter],
-                lat: this.latitude[this.measurementCounter++], 
-                }
-        });        
+        // This is server side simulator
     }
 }
 

@@ -97,6 +97,7 @@ export interface DtdlSimulationModel {
     typeColumns?: any;
     fragmentColumns?: any;
     csvJsonFile?: any;
+    eventTypeColumns?: any;
 
 }
 
