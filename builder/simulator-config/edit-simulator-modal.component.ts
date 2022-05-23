@@ -33,7 +33,7 @@ import {SimulationStrategiesService} from "../simulator/simulation-strategies.se
 import {SimulatorCommunicationService} from "../simulator/mainthread/simulator-communication.service";
 import * as _ from 'lodash';
 import { SimulatorNotificationService } from './simulatorNotification.service';
-import { CSVSimulatorNotificationService } from './csv-simulator.service';
+import { FileSimulatorNotificationService } from './file-simulator.service';
 
 @Component({
     templateUrl: './edit-simulator-modal.component.html'
@@ -51,7 +51,7 @@ export class EditSimulatorModalComponent implements OnInit {
         public bsModalRef: BsModalRef, private simulationStrategiesService: SimulationStrategiesService,
         private resolver: ComponentFactoryResolver, private injector: Injector,
         private appService: ApplicationService, private appIdService: AppIdService, private fetchClient: FetchClient,
-        private simulatorNotificationService: SimulatorNotificationService, private csvSimulatorNotificationService: CSVSimulatorNotificationService
+        private simulatorNotificationService: SimulatorNotificationService, private fileSimulatorNotificationService: FileSimulatorNotificationService
     ) {}
 
     ngOnInit() {
@@ -71,7 +71,7 @@ export class EditSimulatorModalComponent implements OnInit {
         if(metadata && metadata.name.includes('File (CSV/JSON)')) {
             this.isCSVSimulator = true;
             this.isMSCheckSpin = true;
-            this.isMSExist = await this.csvSimulatorNotificationService.verifyCSVSimulatorMicroServiceStatus();
+            this.isMSExist = await this.fileSimulatorNotificationService.verifyCSVSimulatorMicroServiceStatus();
             this.isMSCheckSpin = false;
         } else { this.verifySimulatorMicroServiceStatus(); }
 
@@ -164,7 +164,7 @@ export class EditSimulatorModalComponent implements OnInit {
         } as any);
 
         if(this.isCSVSimulator) {
-            this.csvSimulatorNotificationService.post({
+            this.fileSimulatorNotificationService.post({
                 id: app.id,
                 name: app.name,
                 tenant: (app.owner && app.owner.tenant && app.owner.tenant.id ? app.owner.tenant.id : ''),

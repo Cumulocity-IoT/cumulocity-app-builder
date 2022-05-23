@@ -33,7 +33,7 @@ import { SimulationStrategiesService } from "../simulator/simulation-strategies.
 import { SimulatorCommunicationService } from "../simulator/mainthread/simulator-communication.service";
 import { throwError } from 'rxjs';
 import { SimulatorNotificationService } from './simulatorNotification.service';
-import { CSVSimulatorNotificationService } from './csv-simulator.service';
+import { FileSimulatorNotificationService } from './file-simulator.service';
 import { AlertService } from '@c8y/ngx-components';
 import { UpdateableAlert } from '../../builder/utils/UpdateableAlert';
 
@@ -68,7 +68,7 @@ export class NewSimulatorModalComponent {
         public bsModalRef: BsModalRef, public simulationStrategiesService: SimulationStrategiesService,
         private resolver: ComponentFactoryResolver, private injector: Injector, private inventoryService: InventoryService,
         private appService: ApplicationService, private appIdService: AppIdService, private fetchClient: FetchClient,
-        private simulatorNotificationService: SimulatorNotificationService, private csvSimulatorNotificationService: CSVSimulatorNotificationService
+        private simulatorNotificationService: SimulatorNotificationService, private fileSimulatorNotificationService: FileSimulatorNotificationService
     ) {}
 
     async openSimulatorConfig() {
@@ -78,7 +78,7 @@ export class NewSimulatorModalComponent {
         if(metadata && metadata.name.includes('File (CSV/JSON)')) {
             this.isCSVSimulator = true;
             this.isMSCheckSpin = true;
-            this.isMSExist = await this.csvSimulatorNotificationService.verifyCSVSimulatorMicroServiceStatus();
+            this.isMSExist = await this.fileSimulatorNotificationService.verifyCSVSimulatorMicroServiceStatus();
             this.isMSCheckSpin = false;
             this.runOnServer = true;
         } else { this.verifySimulatorMicroServiceStatus(); }
@@ -130,7 +130,7 @@ export class NewSimulatorModalComponent {
         if(this.isCSVSimulator) {
             const uploadAlert = new UpdateableAlert(this.alertService);
             uploadAlert.update("Uploading file...");
-            fileId =  await(await this.csvSimulatorNotificationService.createBinary(this.newConfig.csvJsonFile)).data.id;
+            fileId =  await(await this.fileSimulatorNotificationService.createBinary(this.newConfig.csvJsonFile)).data.id;
             uploadAlert.close();
             if(!fileId) {
                 this.alertService.danger('Unable to upload File!');
@@ -202,7 +202,7 @@ export class NewSimulatorModalComponent {
         } as any);
 
         if(this.isCSVSimulator) {
-            this.csvSimulatorNotificationService.post({
+            this.fileSimulatorNotificationService.post({
                 id: appId,
                 name: appServiceData.name,
                 tenant: (appServiceData.owner && appServiceData.owner.tenant && appServiceData.owner.tenant.id ? appServiceData.owner.tenant.id : ''),

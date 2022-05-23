@@ -21,7 +21,7 @@ import { Service, FetchClient, InventoryBinaryService, IResult, IManagedObjectBi
 @Injectable({
   providedIn: 'root'
 })
-export class CSVSimulatorNotificationService extends Service<any> {  
+export class FileSimulatorNotificationService extends Service<any> {  
   baseUrl = 'service';                           
   listUrl = 'csv-simulator-ms/csvSimulatorNotification';
   isMSExist = false;
