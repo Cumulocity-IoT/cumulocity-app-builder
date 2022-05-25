@@ -112,16 +112,17 @@
                         <h3>No Widget to list.</h3>
                     </div>
                     <div class="table-responsive" *ngIf="filterWidgets?.length" style="margin-top: -15px;">
-                        <table class="table table-hover table-sortable" id="myWidgets" >
+                        <table class="table table-hover table-striped table-sortable" id="myWidgets" >
                             <thead>
                                 <tr>
                                     <th></th>
                                     <th></th>
-                                    <th class="cursor-pointer" (click)="onSort('title', booleanValue)">Widget</th>
-                                    <th class="cursor-pointer" (click)="onSort('version', booleanValue)">Latest Version</th>
-                                    <th class="cursor-pointer" (click)="onSort('installedVersion', booleanValue)">Current Version</th>
-                                    <th class="cursor-pointer" (click)="onSort('license', booleanValue)">License</th>
-                                    <th class="cursor-pointer" (click)="onSort('author', booleanValue)">Author</th>
+                                    <th class="cursor-pointer" style="text-transform: capitalize;" (click)="onSort('title', booleanValue)">Widget</th>
+                                    <th class="cursor-pointer" style="text-transform: capitalize;" (click)="onSort('version', booleanValue)">Latest Version</th>
+                                    <th class="cursor-pointer" style="text-transform: capitalize;" (click)="onSort('installedVersion', booleanValue)">Current Version</th>
+                                    <th class="cursor-pointer" style="text-transform: capitalize;" (click)="onSort('license', booleanValue)">License</th>
+                                    <th class="cursor-pointer" style="text-transform: capitalize;" (click)="onSort('releaseDate', booleanValue)">Release Date</th>
+                                    <th class="cursor-pointer" style="text-transform: capitalize;" (click)="onSort('author', booleanValue)">Author</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -146,15 +147,16 @@
                                     <td>
                                         <div class="widget-icon"><i [c8yIcon]="widget.icon"></i></div>
                                     </td>
-                                    <td>{{widget.title}}
+                                    <td style="font-size: 12px;">{{widget.title}}
                                         <i *ngIf="!widget.isCompatible || widget.isDeprecated"
                                             title="This widget may not compatible or deprecated!" c8yIcon="warning"
                                             class="warning-icon text-warning"></i>
                                     </td>
-                                    <td>{{widget.version}}</td>
-                                    <td>{{widget.installedVersion ? widget.installedVersion : 'Not Available'}}</td>
-                                    <td>{{widget.license}}</td>
-                                    <td>{{widget.author}}</td>
+                                    <td style="font-size: 12px;">{{widget.version}}</td>
+                                    <td style="font-size: 12px;">{{widget.installedVersion ? widget.installedVersion : 'Not Available'}}</td>
+                                    <td style="font-size: 12px;">{{widget.license}}</td>
+                                    <td style="font-size: 12px;">{{widget.releaseDate | date : "dd-MM-yyyy"}}</td>
+                                    <td style="font-size: 12px;">{{widget.author}}</td>
                                     <td>
                                         <div>
                                             <button class="text-info btn btn-clean btn-icon btn-md" title="Preview"

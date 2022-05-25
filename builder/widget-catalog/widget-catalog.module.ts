@@ -31,6 +31,7 @@ import { MyWidgetsComponent } from './my-widgets/my-widgets.component';
 
 import { BsDropdownModule } from "ngx-bootstrap/dropdown";
 import { WidgetDetailsComponent } from './widget-details/widget-details.component';
+import { MarkdownModule } from 'ngx-markdown';
 
 const routes: Routes = [
     {
@@ -48,6 +49,10 @@ const routes: Routes = [
     {
         path: 'widget-catalog/my-widgets/widget-details',
         component: WidgetDetailsComponent
+    },
+    {
+        path: 'widget-catalog/get-widgets/widget-details',
+        component: WidgetDetailsComponent
     }
 ];
 
@@ -59,7 +64,8 @@ const routes: Routes = [
         RectangleSpinnerModule,
         ButtonsModule.forRoot(),
         SortableModule.forRoot(),
-        BsDropdownModule.forRoot()
+        BsDropdownModule.forRoot(),
+        MarkdownModule.forRoot(),
     ],
     declarations: [
         WidgetCatalogComponent,

@@ -48,6 +48,9 @@ export class WidgetCatalogService {
   widgetDetails$: Observable<any> = this.widgetDetailsSource.asObservable();
   displayListSource: BehaviorSubject<any> = new BehaviorSubject(null);
   displayListValue$: Observable<any> = this.displayListSource.asObservable();
+  
+  displayListSourceMoreWidgets: BehaviorSubject<any> = new BehaviorSubject(null);
+  displayListValueMoreWidgets$: Observable<any> = this.displayListSourceMoreWidgets.asObservable();
 
   private readonly HTTP_HEADERS = {
     headers: new HttpHeaders({
@@ -158,5 +161,20 @@ export class WidgetCatalogService {
 
   setDisplayListValue(value: any) {
     this.displayListSource.next(value);
+  }
+
+  setDisplayListValueMoreWidgets(value: any) {
+    this.displayListSourceMoreWidgets.next(value);
+  }
+  getWidgetDetailsFromRepo(widgetRepoPath): Observable<any> {
+    const url = `https://democenter.gateway.webmethodscloud.com/gateway/GitHubAPIService/1.0/repos/SoftwareAG${widgetRepoPath}/readme`;
+    return this.http.get(`${url}`, {
+      responseType: 'text'
+    }).pipe(catchError(err => {
+      console.log('Widget Catalog: Get Widget Details From Readme: Error in primary endpoint! using fallback...');
+      return this.http.get(`${url}`, {
+        responseType: 'text'
+      })
+    }));
   }
 }

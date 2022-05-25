@@ -42,6 +42,8 @@ export class WidgetDetailsComponent implements OnInit {
     widgetCatalog: WidgetCatalog;
     widgetID: string;
     filterWidgets: any = [];
+    description: any;
+    getMoreWidgetsFlag: boolean = false;
 
 
     constructor(private widgetCatalogService: WidgetCatalogService, private router: Router,
@@ -54,9 +56,74 @@ export class WidgetDetailsComponent implements OnInit {
         this.getWidgetID();
         this.widgetCatalogService.widgetDetails$.subscribe(widget => {
             this.widgetDetails = widget;
+            if (widget && widget.repository) {
+                let repoURL = widget.repository.split('SoftwareAG')[1];
+                let repoName = repoURL.substring(
+                    repoURL.indexOf("/") + 0,
+                    repoURL.lastIndexOf("#")
+                );
+                this.widgetCatalogService.getWidgetDetailsFromRepo(repoName).subscribe((data) => {
+                    let widgetdata = JSON.stringify(data);
+                    this.fetchWidgetDescription(widgetdata);
+                });
+            }
         });
-        if (!this.widgetDetails) {
-            this.fetchWidgetDetails();
+        this.loadWidgetsFromCatalog();
+        this.extractURL();
+    }
+
+    fetchWidgetDescription(widgetData) {
+        this.description = widgetData;
+        const matches1 = widgetData.match("^(.*?)## Installation");
+        this.description = matches1[0];
+        if (this.description.match(/### Installation/g))
+            this.description = this.description.replace("### Installation", '');
+        else
+            this.description = this.description.replace("## Installation", '');
+        this.description = this.description.replace(/\\n/g, "<br />");
+        this.description = this.description.replace(/<img[^>]+>/g, "");
+        this.description = this.description.replace(/(?:https?):\/\/[\n\S]+/g, '');
+        if (this.description.match(/### Please(.*?)/g)) {
+            if (this.description.match("### Please(.*?)## Features")) {
+                const matches2 = this.description.match("### Please(.*?)## Features");
+                this.description = this.description.replace(matches2[1], "");
+            } else {
+                const matches2 = this.description.match(/### Please(.*)/g);
+                this.description = this.description.replace(matches2[0], "");
+            }
+        }
+        const matches3 = this.description.match("#(.*?)/>");
+        this.description = this.description.replace(matches3[1], "");
+        this.description = this.description.replace(/(?:<br \/>\s*){2,}/, "");
+        this.description = this.description.replace(/(?:<br \/>\s*){2,}/g, '<br /><br />');
+        this.description = this.description.replace("## Features", "\n#### **Features**\n");
+        if (this.description.match(/(\!).*?(?=\])/g))
+            this.description = this.description.replace(/(\!).*?(?=\])/g, "");
+        if (this.description.match(/## Prerequisite(.*)/g)) {
+            const regex4 = this.description.match(/## Prerequisite(.*)/g);
+            this.description = this.description.replace(regex4[0], "");
+        }
+        if (this.description.match(/## Supported(.*)/g)) {
+            const regex5 = this.description.match(/## Supported(.*)/g);
+            this.description = this.description.replace(regex5[0], "");
+        }
+        this.description = this.replaceWithEmptyString({ '[](': '', '( />': '', ']': '', '### Please': '', '#/>': '', '"': '' });
+    }
+    replaceWithEmptyString(obj) {
+        for (let x in obj) {
+            this.description = this.description.replace(x, obj[x]);
+        }
+        return this.description;
+    }
+
+    extractURL() {
+        let url = window.location.href;
+        let path = url.split('/');
+        for (let p in path) {
+            if (path[p] === "get-widgets") {
+                this.getMoreWidgetsFlag = true;
+                break;
+            }
         }
     }
 
@@ -66,10 +133,6 @@ export class WidgetDetailsComponent implements OnInit {
             return;
         }
         this.widgetID = this.route.snapshot.paramMap.get('id');
-    }
-
-    async fetchWidgetDetails() {
-        this.loadWidgetsFromCatalog();
     }
 
     openDocumentation(url: string) {
@@ -111,6 +174,7 @@ export class WidgetDetailsComponent implements OnInit {
                             license: (app.manifest && app.manifest.license ? app.manifest.license : ''),
                             requiredPlatformVersion: (app.manifest && app.manifest.requiredPlatformVersion ? app.manifest.requiredPlatformVersion : ''),
                             version: (app.manifest && app.manifest.version ? app.manifest.version : ''),
+                            releaseDate: (app.manifest && app.manifest.releaseDate ? app.manifest.releaseDate : '')
                         });
                     }
                     await this.filterInstalledWidgets();
@@ -118,6 +182,17 @@ export class WidgetDetailsComponent implements OnInit {
                     this.filterWidgets.forEach((widget) => {
                         if (this.widgetID === widget.contextPath) {
                             this.widgetCatalogService.setWidgetDetails(widget);
+                            if (widget && widget.repository) {
+                                let repoURL = widget.repository.split('SoftwareAG')[1];
+                                let repoName = repoURL.substring(
+                                    repoURL.indexOf("/") + 0,
+                                    repoURL.lastIndexOf("#")
+                                );
+                                this.widgetCatalogService.getWidgetDetailsFromRepo(repoName).subscribe((data) => {
+                                    let widgetdata = JSON.stringify(data);
+                                    this.fetchWidgetDescription(widgetdata);
+                                });
+                            }
                         }
                     });
                 });
@@ -156,7 +231,6 @@ export class WidgetDetailsComponent implements OnInit {
         return true;
     }
     async uninstallWidget(widget: WidgetModel) {
-        this.loadWidgetsFromCatalog();
         const alertMessage = {
             title: 'Uninstall widget',
             description: `You are about to uninstall ${widget.title}.
@@ -175,8 +249,6 @@ export class WidgetDetailsComponent implements OnInit {
                 }
             }
         });
-
-
     }
     preview(imageURL: string) {
         this.modalService.show(previewModalComponent, { class: 'modal-lg', initialState: { imageURL } });
@@ -275,5 +347,70 @@ export class WidgetDetailsComponent implements OnInit {
             return true;
         }
         return this.widgetCatalogService.isLatestVersionAvailable(widget);
+    }
+    async installWidget(widget: WidgetModel): Promise<void> {
+        const currentHost = window.location.host.split(':')[0];
+        if (currentHost === 'localhost' || currentHost === '127.0.0.1' || isDevMode()) {
+            this.alertService.warning("Runtime widget installation isn't supported when running Application Builder on localhost or in development mode.");
+            return;
+        }
+
+        const appFound = this.appList.find(app => app.name.toLowerCase() === widget.title?.toLowerCase() ||
+            (app.contextPath && app.contextPath?.toLowerCase() === widget.contextPath.toLowerCase()))
+        if (appFound) {
+            this.alertService.danger(" Widget name or context path already exists!");
+            return;
+        }
+
+        if (widget.actionCode === '002' || widget.isDeprecated) {
+            let alertMessage = {};
+            if (widget.actionCode === '002') {
+                alertMessage = {
+                    title: 'Installation Confirmation',
+                    description: `${widget.title} is not supported by current version of application builder and may not work properly.
+                    Do you want to proceed?`,
+                    type: 'warning',
+                    alertType: 'confirm', //info|confirm
+                    confirmPrimary: false //confirm Button is primary
+                }
+            } else {
+                alertMessage = {
+                    title: 'Installation Confirmation',
+                    description: `${widget.title} is deprecated. Please refer documentation for more detail.
+                    Do you want to proceed?`,
+                    type: 'warning',
+                    alertType: 'confirm', //info|confirm
+                    confirmPrimary: false //confirm Button is primary
+                }
+            }
+
+            const installDemoDialogRef = this.alertModalDialog(alertMessage);
+            await installDemoDialogRef.content.event.subscribe(async data => {
+                if (data && data.isConfirm) {
+                    await this.initiateInstallWidgetProcess(widget);
+                }
+            });
+
+        } else { await this.initiateInstallWidgetProcess(widget); }
+
+    }
+    private async initiateInstallWidgetProcess(widget: WidgetModel) {
+        this.showProgressModalDialog(`Installing ${widget.title}`)
+
+        this.widgetCatalogService.downloadBinary(widget.binaryLink)
+            .subscribe(data => {
+
+                const blob = new Blob([data], {
+                    type: 'application/zip'
+                });
+                const fileName = widget.binaryLink.replace(/^.*[\\\/]/, '');
+                const fileOfBlob = new File([blob], fileName);
+                this.widgetCatalogService.installWidget(fileOfBlob, widget).then(() => {
+                    widget.installed = true;
+                    widget.isReloadRequired = true;
+                    this.actionFlag(widget);
+                    this.hideProgressModalDialog();
+                });
+            });
     }
 }

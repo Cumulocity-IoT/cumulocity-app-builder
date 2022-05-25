@@ -127,6 +127,7 @@ export class MyWidgetsComponent implements OnInit {
                             license: (app.manifest && app.manifest.license ? app.manifest.license : ''),
                             requiredPlatformVersion: (app.manifest && app.manifest.requiredPlatformVersion ? app.manifest.requiredPlatformVersion : ''),
                             version: (app.manifest && app.manifest.version ? app.manifest.version : ''),
+                            releaseDate: (app.manifest && app.manifest.releaseDate ? app.manifest.releaseDate : '')
                         });
                     }
 

@@ -45,4 +45,5 @@ export interface WidgetModel {
     installedVersion?: string;
     actionCode?: string;
     isDeprecated?: boolean;
+    releaseDate?: string;
 }
