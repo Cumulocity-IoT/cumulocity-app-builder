@@ -136,16 +136,23 @@ body {
     --navigator-text-color: ${this.colorToHex(app.applicationBuilder.branding.colors.textOnPrimary)};
     --navigator-title-color: ${this.colorToHex(app.applicationBuilder.branding.colors.textOnPrimary)};
     --navigator-active-color: ${this.colorToHex(app.applicationBuilder.branding.colors.textOnActive)};
+    --navigator-hover-color: ${this.colorToHex(app.applicationBuilder.branding.colors.hover)};
+    
     
     /* All the other text: */
     --brand-dark: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     --input-focus-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
-
+    --header-hover-color: ${app.applicationBuilder.branding.colors.headerBar ? this.colorToHex(app.applicationBuilder.branding.colors.hover) : '#ffffff' };
     --header-color: ${app.applicationBuilder.branding.colors.headerBar ? this.colorToHex(app.applicationBuilder.branding.colors.headerBar) : '#ffffff' };
     --dropdown-background: ${app.applicationBuilder.branding.colors.headerBar ? this.colorToHex(app.applicationBuilder.branding.colors.headerBar) : '#ffffff' };
     --toolbar-background:${app.applicationBuilder.branding.colors.toolBar ? this.colorToHex(app.applicationBuilder.branding.colors.toolBar) : '#ffffff' };
     --page-tabs-background:${app.applicationBuilder.branding.colors.tabBar ? this.colorToHex(app.applicationBuilder.branding.colors.tabBar) : '#ffffff' };
-    
+    --toolbar-actions-color-hover: ${app.applicationBuilder.branding.colors.toolBar ? this.colorToHex(app.applicationBuilder.branding.colors.hover) : '#ffffff' };
+    --toolbar-focus-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+    --dropdown-actions-color-hover: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+    --component-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+    --component-actions-color-hover: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+    --component-border:
     ${app.applicationBuilder.branding.logoHeight != undefined ? '--navigator-platform-logo-height: ' + app.applicationBuilder.branding.logoHeight + 'px;' : ''}
 }
 

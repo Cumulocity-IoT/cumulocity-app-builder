@@ -100,7 +100,8 @@
 }
 
 .preview-img {
-  width: 100%;
+  background-image: url(./../img/AppBuilderLogo.png);
+  width: 90%;
   /* padding-right: 10px; */
   /* padding-left: 10px; */
   height: 100%;
@@ -109,6 +110,14 @@
   // margin: 10px auto;
   // -o-object-fit: fill;
   // object-fit: fill;
+  min-height: 150px;
+  max-height: 150px;
+}
+
+.preview {
+  width: 90%;
+  height: 100%;
+  border: 1px solid;
   min-height: 150px;
   max-height: 150px;
 }
@@ -125,3 +134,24 @@ table#myWidgets td {
 table#myWidgets th {
   line-height: 2.4;
 }
+
+.arrow-down:after,.arrow-up:after{
+  content: ' ';
+  position: relative;
+  left: 5px;
+  border: 6px solid transparent;
+ }
+ 
+ .arrow-down:after{
+  top: 10px;
+  border-top-color: black;
+ }
+ 
+ .arrow-up:after{
+  bottom: 15px;
+  border-bottom-color: black;
+ }
+ 
+ .arrow-down,.arrow-up{
+  padding-right: 10px;
+ }

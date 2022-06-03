@@ -120,6 +120,13 @@
                                     <input type="color" style="height: 32px; border:0; background: transparent;" id="text-activePicker" class="m-l-4" name="text-activePicker" [(ngModel)]="app.applicationBuilder.branding.colors.textOnActive" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
                                 </div>
                             </div>
+                            <div class="form-group">
+                                <label for="hover"><span>Hover</span></label>
+                                <div style="display: inline-flex;width: 100%;">
+                                    <input type="text" class="form-control" id="hover" name="hover" placeholder="e.g. salmon (required)" required [(ngModel)]="app.applicationBuilder.branding.colors.hover" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
+                                    <input type="color" style="height: 32px; border:0; background: transparent;" id="hoverPicker" class="m-l-4" name="hoverPicker" [(ngModel)]="app.applicationBuilder.branding.colors.hover" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
+                                </div>
+                            </div>
                         </div>
                         <div class="col-xs-12 col-md-4">
                             <div class="form-group">

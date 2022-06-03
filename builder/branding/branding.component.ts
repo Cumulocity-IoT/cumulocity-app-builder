@@ -110,13 +110,14 @@ export class BrandingComponent implements OnDestroy{
         this.showBrandingChange(app);
     }
 
-    setTheme(app, primary, active, text, textOnPrimary, textOnActive, headerBar, tabBar, toolBar) {
+    setTheme(app, primary, active, text, textOnPrimary, textOnActive,hover, headerBar, tabBar, toolBar) {
         app.applicationBuilder.branding.enabled = true;
         app.applicationBuilder.branding.colors.primary = primary;
         app.applicationBuilder.branding.colors.active = active;
         app.applicationBuilder.branding.colors.text = text;
         app.applicationBuilder.branding.colors.textOnPrimary = textOnPrimary;
         app.applicationBuilder.branding.colors.textOnActive = textOnActive;
+        app.applicationBuilder.branding.colors.hover = hover;
         app.applicationBuilder.branding.colors.headerBar = headerBar;
         app.applicationBuilder.branding.colors.tabBar = tabBar;
         app.applicationBuilder.branding.colors.toolBar = toolBar;

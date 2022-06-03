@@ -138,7 +138,8 @@ export class NewApplicationModalComponent implements OnInit {
                         active: '#14629F',
                         text: '#333333',
                         textOnPrimary: 'white',
-                        textOnActive: 'white'
+                        textOnActive: 'white',
+                        hover: 'white'
                     }
                 },
                 dashboards: [],

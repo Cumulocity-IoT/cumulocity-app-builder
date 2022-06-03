@@ -117,17 +117,17 @@
                                 <tr>
                                     <th></th>
                                     <th></th>
-                                    <th class="cursor-pointer" style="text-transform: capitalize;" (click)="onSort('title', booleanValue)">Widget</th>
-                                    <th class="cursor-pointer" style="text-transform: capitalize;" (click)="onSort('version', booleanValue)">Latest Version</th>
-                                    <th class="cursor-pointer" style="text-transform: capitalize;" (click)="onSort('installedVersion', booleanValue)">Current Version</th>
-                                    <th class="cursor-pointer" style="text-transform: capitalize;" (click)="onSort('license', booleanValue)">License</th>
-                                    <th class="cursor-pointer" style="text-transform: capitalize;" (click)="onSort('releaseDate', booleanValue)">Release Date</th>
-                                    <th class="cursor-pointer" style="text-transform: capitalize;" (click)="onSort('author', booleanValue)">Author</th>
+                                    <th class="cursor-pointer" style="text-transform: capitalize;" (click)="sortColumn('title')" [ngClass]="sortClass('title')">Widget</th>
+                                    <th class="cursor-pointer" style="text-transform: capitalize;" (click)="sortColumn('version')" [ngClass]="sortClass('version')">Latest Version</th>
+                                    <th class="cursor-pointer" style="text-transform: capitalize;" (click)="sortColumn('installedVersion')" [ngClass]="sortClass('installedVersion')">Current Version</th>
+                                    <th class="cursor-pointer" style="text-transform: capitalize;" (click)="sortColumn('license')" [ngClass]="sortClass('license')">License</th>
+                                    <th class="cursor-pointer" style="text-transform: capitalize;" (click)="sortColumn('releaseDate')" [ngClass]="sortClass('releaseDate')">Release Date</th>
+                                    <th class="cursor-pointer" style="text-transform: capitalize;" (click)="sortColumn('author')" [ngClass]="sortClass('author')">Author</th>
                                     <th></th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr *ngFor="let widget of filterWidgets">
+                                <tr *ngFor="let widget of filterWidgets;">
                                     <td>
                                         <div class="text-warning" [ngSwitch]="widget.actionCode">
                                             <button class="btn btn-clean btn-icon btn-md" title="Update" *ngSwitchCase="'001'">
@@ -311,17 +311,10 @@
                         <span class="label label-primary" *ngIf="!widget.installedVersion">Not Available</span>
                     </div>
                     <div>
-                        <a (click)="preview(widget.preview)" class="cursor-pointer">
-                            <img class="preview-img" [src]="widget.preview" />
+                        <a (click)="preview(widget.preview)" class="cursor-pointer" *ngIf="widget.preview !== ''">
+                            <img class="preview-img" [src]="widget.preview && widget.preview !== '' ? widget.preview : '../images/AppBuilderLogo.png'" />
                         </a>
                     </div>
-                    <!--<div class="margin-10">
-                        <span class="label label-default" style="color: black;">{{widget.license}}</span>
-                    </div>
-                    <div class="col-xs-12 col-md-12 col-sm-12 text-center">
-                        <span class="fs-12">{{widget.author}}</span>
-                    </div>
-                     -->
                     <button class="btn btn-xs btn-default margin-10" (click)="navigateToDetailPage(widget)">
                         <i c8yicon="more-details" title="Details" class="dlt-c8y-icon-more-details"></i> Details
                     </button>

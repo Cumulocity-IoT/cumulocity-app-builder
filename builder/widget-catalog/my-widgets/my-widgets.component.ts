@@ -54,7 +54,8 @@ export class MyWidgetsComponent implements OnInit {
     filterWidgets: any = [];
     isUpdateRequired = false;
     displayListValue: any;
-    booleanValue: any = false;
+    column = 'title';
+    reverse = false;
 
     constructor(private appStateService: AppStateService, private modalService: BsModalService,
         private userService: UserService, private widgetCatalogService: WidgetCatalogService,
@@ -387,15 +388,27 @@ export class MyWidgetsComponent implements OnInit {
         this.widgetCatalogService.setWidgetDetails(widget);
         this.router.navigate(['widget-details', { id: widget.contextPath }], { relativeTo: this.route });
     }
-
-    onSort(colName, boolean) {
-        if (boolean == true) {
-            this.filterWidgets.sort((a, b) => a[colName] < b[colName] ? 1 : a[colName] > b[colName] ? -1 : 0)
-            this.booleanValue = !this.booleanValue
+    
+    sortColumn(col) {
+        this.column = col;
+        if (this.reverse) {
+            this.filterWidgets.sort((a, b) => a[col] < b[col] ? 1 : a[col] > b[col] ? -1 : 0);
+            this.reverse = false;
+        } else {
+            this.filterWidgets.sort((a, b) => a[col] > b[col] ? 1 : a[col] < b[col] ? -1 : 0);
+            this.reverse = true;
         }
-        else {
-            this.filterWidgets.sort((a, b) => a[colName] > b[colName] ? 1 : a[colName] < b[colName] ? -1 : 0)
-            this.booleanValue = !this.booleanValue
+    }
+
+    sortClass(col) {
+        if (this.column === col) {
+            if (this.reverse) {
+                return 'arrow-down';
+            } else {
+                return 'arrow-up';
+            }
+        } else {
+            return '';
         }
     }
 }

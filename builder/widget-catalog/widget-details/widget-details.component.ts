@@ -52,7 +52,7 @@ export class WidgetDetailsComponent implements OnInit {
         this.userHasAdminRights = userService.hasAllRoles(appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN", "ROLE_APPLICATION_MANAGEMENT_ADMIN"]);
     }
 
-    ngOnInit() {
+    async ngOnInit() {
         this.getWidgetID();
         this.widgetCatalogService.widgetDetails$.subscribe(widget => {
             this.widgetDetails = widget;
@@ -68,46 +68,54 @@ export class WidgetDetailsComponent implements OnInit {
                 });
             }
         });
-        this.loadWidgetsFromCatalog();
+        await this.loadWidgetsFromCatalog();
         this.extractURL();
     }
 
     fetchWidgetDescription(widgetData) {
         this.description = widgetData;
-        const matches1 = widgetData.match("^(.*?)## Installation");
-        this.description = matches1[0];
+        const regex1 = widgetData.match("^(.*?)## Installation");
+        this.description = regex1[0];
         if (this.description.match(/### Installation/g))
             this.description = this.description.replace("### Installation", '');
         else
             this.description = this.description.replace("## Installation", '');
-        this.description = this.description.replace(/\\n/g, "<br />");
+        this.description = this.description.replace(/\\n/g, "<br />");  
         this.description = this.description.replace(/<img[^>]+>/g, "");
         this.description = this.description.replace(/(?:https?):\/\/[\n\S]+/g, '');
         if (this.description.match(/### Please(.*?)/g)) {
             if (this.description.match("### Please(.*?)## Features")) {
-                const matches2 = this.description.match("### Please(.*?)## Features");
-                this.description = this.description.replace(matches2[1], "");
+                const regex2 = this.description.match("### Please(.*?)## Features");
+                this.description = this.description.replace(regex2[1], "");
             } else {
-                const matches2 = this.description.match(/### Please(.*)/g);
-                this.description = this.description.replace(matches2[0], "");
+                const regex2 = this.description.match(/### Please(.*)/g);
+                this.description = this.description.replace(regex2[0], "");
             }
         }
-        const matches3 = this.description.match("#(.*?)/>");
-        this.description = this.description.replace(matches3[1], "");
+        const regex3 = this.description.match("#(.*?)/>");
+        this.description = this.description.replace(regex3[1], "");
         this.description = this.description.replace(/(?:<br \/>\s*){2,}/, "");
         this.description = this.description.replace(/(?:<br \/>\s*){2,}/g, '<br /><br />');
         this.description = this.description.replace("## Features", "\n#### **Features**\n");
         if (this.description.match(/(\!).*?(?=\])/g))
-            this.description = this.description.replace(/(\!).*?(?=\])/g, "");
-        if (this.description.match(/## Prerequisite(.*)/g)) {
-            const regex4 = this.description.match(/## Prerequisite(.*)/g);
-            this.description = this.description.replace(regex4[0], "");
-        }
-        if (this.description.match(/## Supported(.*)/g)) {
-            const regex5 = this.description.match(/## Supported(.*)/g);
-            this.description = this.description.replace(regex5[0], "");
-        }
-        this.description = this.replaceWithEmptyString({ '[](': '', '( />': '', ']': '', '### Please': '', '#/>': '', '"': '' });
+            this.description = this.description.replace(/(\!).*?(?=\])/g, "");  
+        if (this.description.match(/## Prerequisite(.*)/g)) 
+            this.description = this.description.replace("## Prerequisite", "\n#### **Prerequisite**\n");
+        if (this.description.match(/## Supported(.*)/g)) 
+            this.description = this.description.replace("## Supported Cumulocity Environments", "\n#### **Supported Cumulocity Environments**\n");
+        if (this.description.match(/(\|).*?(?=\|)/g))
+            this.description = this.description.replace(/(\|).*?(?=\|)/g, '');
+        if (this.description.match(/(\().*?(?=\))/g))
+            this.description = this.description.replace(/(\().*?(?=\))/g, '');
+        this.description = this.replaceWithEmptyString({ '[](': '', '( />': '', ']': '', '### Please': '', '#/>': '', '"': '', '|': ''});
+        
+        //     const regex4 = this.description.match(/## Prerequisite(.*)/g);
+        //     this.description = this.description.replace(regex4[0], "");
+        // }
+        // if (this.description.match(/## Supported(.*)/g)) {
+        //     const regex5 = this.description.match(/## Supported(.*)/g);
+        //     this.description = this.description.replace(regex5[0], "");
+        // }
     }
     replaceWithEmptyString(obj) {
         for (let x in obj) {

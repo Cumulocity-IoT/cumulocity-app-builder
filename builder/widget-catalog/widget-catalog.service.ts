@@ -78,7 +78,7 @@ export class WidgetCatalogService {
     const url = `${this.GATEWAY_URL_GitHubAPI}${this.WidgetCatalogPath}`;
     const urlFallBack = `${this.GATEWAY_URL_GitHubAPI_FallBack}${this.WidgetCatalogPath}`;
     if (isDevMode()) {
-      return this.http.get<WidgetCatalog>(`${url}${this.devBranchPath}`, this.HTTP_HEADERS)
+      return this.http.get<WidgetCatalog>(`${url}`, this.HTTP_HEADERS)
         .pipe(catchError(err => {
           console.log('Fetch Widget Catalog: Error in primary endpoint! using fallback...');
           return this.http.get<WidgetCatalog>(`${urlFallBack}${this.devBranchPath}`, this.HTTP_HEADERS)

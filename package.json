@@ -4,7 +4,7 @@
   "description": "Application builder for Cumulocity (written by Software AG Global Presales)",
   "main": "index.ts",
   "scripts": {
-    "start": "c8ycli server --env.extraWebpackConfig=./extra-webpack.config.js",
+    "start": "c8ycli server --env.extraWebpackConfig=./extra-webpack.config.js --env.beta=true -u https://appbuilder-next.latest.stage.c8y.io",
     "build": "set NODE_OPTIONS=--max_old_space_size=4096 && c8ycli build --env.extraWebpackConfig=./extra-webpack.config.js --env.mode=production",
     "build-dev": "set NODE_OPTIONS=--max_old_space_size=4096 && c8ycli build --env.extraWebpackConfig=./extra-webpack.config.js --env.mode=development",
     "deploy-ci": "c8ycli deploy  -u $npm_config_param1 -T $npm_config_param2 -U $npm_config_param3 -P $npm_config_param4",

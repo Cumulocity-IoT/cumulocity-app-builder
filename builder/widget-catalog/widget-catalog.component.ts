@@ -44,8 +44,6 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
     private progressModal: BsModalRef;
     private appList = [];
 
-    booleanValue: any = false;
-
     userHasAdminRights: boolean;
     isBusy: boolean = false;
     widgetCatalog: WidgetCatalog;
@@ -53,6 +51,8 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
     filterWidgets: any = [];
     selectMultipe = false;
     showAllWidgets = false;
+    column = 'title';
+    reverse = false;
 
     displayListValue: any;
     constructor(private appStateService: AppStateService, private modalService: BsModalService,
@@ -263,14 +263,27 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
     ngOnDestroy() {
     }
 
-    onSort(colName, boolean) {
-        if (boolean == true) {
-            this.filterWidgets.sort((a, b) => a[colName] < b[colName] ? 1 : a[colName] > b[colName] ? -1 : 0)
-            this.booleanValue = !this.booleanValue
+    
+    sortColumn(col) {
+        this.column = col;
+        if (this.reverse) {
+            this.filterWidgets.sort((a, b) => a[col] < b[col] ? 1 : a[col] > b[col] ? -1 : 0);
+            this.reverse = false;
+        } else {
+            this.filterWidgets.sort((a, b) => a[col] > b[col] ? 1 : a[col] < b[col] ? -1 : 0);
+            this.reverse = true;
         }
-        else {
-            this.filterWidgets.sort((a, b) => a[colName] > b[colName] ? 1 : a[colName] < b[colName] ? -1 : 0)
-            this.booleanValue = !this.booleanValue
+    }
+
+    sortClass(col) {
+        if (this.column === col) {
+            if (this.reverse) {
+                return 'arrow-down';
+            } else {
+                return 'arrow-up';
+            }
+        } else {
+            return '';
         }
     }
     // Tile List View

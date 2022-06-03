@@ -107,19 +107,12 @@
                                 <tr>
                                     <th></th>
                                     <th></th>
-                                    <th class="cursor-pointer" style="text-transform: capitalize;"
-                                        (click)="onSort('title', booleanValue)">Widget</th>
-                                    <th class="cursor-pointer" style="text-transform: capitalize;"
-                                        (click)="onSort('version', booleanValue)">Latest Version</th>
-                                    <th class="cursor-pointer" style="text-transform: capitalize;"
-                                        (click)="onSort('requiredPlatformVersion', booleanValue)">Supported C8Y
-                                        Platforms</th>
-                                    <th class="cursor-pointer" style="text-transform: capitalize;"
-                                        (click)="onSort('license', booleanValue)">License</th>
-                                    <th class="cursor-pointer" style="text-transform: capitalize;"
-                                        (click)="onSort('releaseDate', booleanValue)">Release Date</th>
-                                    <th class="cursor-pointer" style="text-transform: capitalize;"
-                                        (click)="onSort('author', booleanValue)">Author</th>
+                                    <th class="cursor-pointer" style="text-transform: capitalize;" (click)="sortColumn('title')" [ngClass]="sortClass('title')">Widget</th>
+                                    <th class="cursor-pointer" style="text-transform: capitalize;" (click)="sortColumn('version')" [ngClass]="sortClass('version')">Latest Version</th>
+                                    <th class="cursor-pointer" style="text-transform: capitalize;" (click)="sortColumn('requiredPlatformVersion')" [ngClass]="sortClass('requiredPlatformVersion')">Supported C8Y Platforms</th>
+                                    <th class="cursor-pointer" style="text-transform: capitalize;" (click)="sortColumn('license')" [ngClass]="sortClass('license')">License</th>
+                                    <th class="cursor-pointer" style="text-transform: capitalize;" (click)="sortColumn('releaseDate')" [ngClass]="sortClass('releaseDate')">Release Date</th>
+                                    <th class="cursor-pointer" style="text-transform: capitalize;" (click)="sortColumn('author')" [ngClass]="sortClass('author')">Author</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -302,8 +295,11 @@
                             *ngIf="widget.version">{{widget.version}}</span>
                     </div>
                     <div>
-                        <a (click)="preview(widget.preview)" class="cursor-pointer">
+                        <a (click)="preview(widget.preview)" class="cursor-pointer" *ngIf="widget.preview !== ''">
                             <img class="preview-img" [src]="widget.preview" />
+                        </a>
+                        <a (click)="preview(widget.preview)" class="cursor-pointer" *ngIf="widget.preview === ''">
+                            <img class="preview" src="./../../ui-assets/img/AppBuilderLogo.png"/>
                         </a>
                     </div>
                     <!--<div class="margin-10">
