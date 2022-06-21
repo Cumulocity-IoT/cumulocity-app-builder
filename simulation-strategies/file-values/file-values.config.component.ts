@@ -122,8 +122,11 @@ import { AlertService } from "@c8y/ngx-components";
             <div class="col-xs-12 col-sm-4 col-md-4">
                 <div class="form-group" *ngIf="config.generationType === 'measurement'">
                     <label for="fragementType"><span>Select Fragement</span>  </label>
-                    <ng-select [items]="config.fragmentColumns"  bindLabel="displayName" bindValue="value"  name="fragementType" required [multiple]="false" [closeOnSelect]="true" [searchable]="true"
+                    <ng-select *ngIf="config.type === 'CSV'"  [items]="config.fragmentColumns"  bindLabel="displayName" bindValue="value"  name="fragementType" required [multiple]="false" [closeOnSelect]="true" [searchable]="true"
                     placeholder="Fragement Type" [appendTo]="(appendTo ?  appendTo : 'body')" [addTag]="addCustomFragment" [(ngModel)]="config.alternateConfigs.operations[0].fragment" >
+                    </ng-select>
+                    <ng-select *ngIf="config.type === 'JSON'" [items]="config.fragmentColumns"  bindLabel="displayName" bindValue="value"  name="fragementType" required [multiple]="false" [closeOnSelect]="true" [searchable]="true"
+                    placeholder="Fragement Type" [appendTo]="(appendTo ?  appendTo : 'body')"  [(ngModel)]="config.alternateConfigs.operations[0].fragment" >
                     </ng-select>
                 </div>
                 <div class="form-group" *ngIf="config.generationType === 'event'">
@@ -340,7 +343,7 @@ export class FileValuesSimulationStrategyConfigComponent extends SimulationStrat
         }
     }
     private processJSON(){
-        if(this.jsonData.constructor === Object) {
+        if(this.jsonData && this.jsonData.constructor === Object) {
            this.processKeys(this.jsonData);
         } else if (this.jsonData && this.jsonData.length > 0 ){
             this.processKeys(this.jsonData[0]);
