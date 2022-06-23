@@ -122,7 +122,7 @@ import { AlertService } from "@c8y/ngx-components";
             <div class="col-xs-12 col-sm-4 col-md-4">
                 <div class="form-group" *ngIf="config.generationType === 'measurement'">
                     <label for="fragementType"><span>Select Fragement</span>  </label>
-                    <ng-select *ngIf="config.type === 'CSV'"  [items]="config.fragmentColumns"  bindLabel="displayName" bindValue="value"  name="fragementType" required [multiple]="false" [closeOnSelect]="true" [searchable]="true"
+                    <ng-select *ngIf="config.type !== 'JSON'"  [items]="config.fragmentColumns"  bindLabel="displayName" bindValue="value"  name="fragementType" required [multiple]="false" [closeOnSelect]="true" [searchable]="true"
                     placeholder="Fragement Type" [appendTo]="(appendTo ?  appendTo : 'body')" [addTag]="addCustomFragment" [(ngModel)]="config.alternateConfigs.operations[0].fragment" >
                     </ng-select>
                     <ng-select *ngIf="config.type === 'JSON'" [items]="config.fragmentColumns"  bindLabel="displayName" bindValue="value"  name="fragementType" required [multiple]="false" [closeOnSelect]="true" [searchable]="true"
@@ -324,9 +324,9 @@ export class FileValuesSimulationStrategyConfigComponent extends SimulationStrat
         if(this.config && this.config?.alternateConfigs?.operations[0]) {
             this.config.alternateConfigs.operations[0].type = '';
             this.config.alternateConfigs.operations[0].fragment = '';
-            this.config.alternateConfigs.operations[0].series = '';
-            this.config.alternateConfigs.operations[0].value = '';
-            this.config.alternateConfigs.operations[0].unit = '';
+            this.config.alternateConfigs.operations[0].series = [];
+            this.config.alternateConfigs.operations[0].value = [];
+            this.config.alternateConfigs.operations[0].unit = [];
             this.config.alternateConfigs.operations[0].dateTime = '';
 
         }
