@@ -167,7 +167,7 @@ import { AlertService } from "@c8y/ngx-components";
                 <div class="form-group">
                     <label for="unit"><span>Unit </span></label>
                     <ng-select [items]="config.fileColumns" name="unit" required [multiple]="true"  bindLabel="displayName" bindValue="value"  [closeOnSelect]="false" [searchable]="true"
-                    placeholder="Select Measurements unit(s)" [(ngModel)]="config.alternateConfigs.operations[0].unit" >
+                    placeholder="Select Measurements unit(s)" [appendTo]="(appendTo ?  appendTo : 'body')" [(ngModel)]="config.alternateConfigs.operations[0].unit" >
                     </ng-select>
                 </div> 
             </div>
@@ -175,7 +175,7 @@ import { AlertService } from "@c8y/ngx-components";
                 <div class="form-group" >
                         <label for="dateTime"><span>Select Timestamp</span>  </label>
                         <ng-select [items]="config.fileColumns" name="dateTime"  bindLabel="displayName" bindValue="value"  required [multiple]="false" [closeOnSelect]="true" [searchable]="true"
-                        placeholder="TimeStamp" [(ngModel)]="config.alternateConfigs.operations[0].dateTime" >
+                        placeholder="TimeStamp" [appendTo]="(appendTo ?  appendTo : 'body')" [(ngModel)]="config.alternateConfigs.operations[0].dateTime" >
                         </ng-select>
                     </div>    
             </div>
