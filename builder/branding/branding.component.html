@@ -9,7 +9,7 @@
 
     <div class="card-group">
         <div class="col-xs-12 col-md-5">
-            <div class="card">
+            <div class="card card-color">
                 <div class="card-header">
                     <h2 class="text-light" style="margin-top: 20px;" translate="">Application Styling</h2>
                 </div>
@@ -25,14 +25,14 @@
             </div>
         </div>
         <div class="col-xs-12 col-md-7">
-            <div class="card">
+            <div class="card card-color">
                 <div class="card-header">
                     <h4 translate>Logo</h4>
                 </div>
                 <hr/>
                 <div class="card-block">
                     <div class="form-group">
-                        <label for="logo"><span>Logo</span></label>
+                        <label for="logo" class="label-color"><span>Logo</span></label>
                         <div style="display: flex">
                             <!--suppress TypeScriptUnresolvedVariable -->
                             <input class="form-control" style="flex: 1;" id="logo" name="logo" type="file" [disabled]="!app.applicationBuilder.branding.enabled" (change)="logoChange(app, $event.target.files)">
@@ -41,7 +41,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="height"><span>Height</span></label>
+                        <label for="height" class="label-color"><span>Height</span></label>
 
                         <div class="input-group">
                             <input class="form-control" id="height" name="height" type="number" min="0" step="1" placeholder="eg. 40 (optional)" [disabled]="!app.applicationBuilder.branding.enabled" [(ngModel)]="app.applicationBuilder.branding.logoHeight" (ngModelChange)="showBrandingChange(app)">
@@ -50,7 +50,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="hide-icon"><span>App Icon</span></label>
+                        <label for="hide-icon" class="label-color"><span>App Icon</span></label>
                         <button class="btn btn-default" id="hide-icon" name="hide-icon" [(ngModel)]="showIcon" 
                         (ngModelChange)="showBrandingLogoChange(app)" [disabled]="!app.applicationBuilder.branding.enabled" 
                         [class.disabled]="!app.applicationBuilder.branding.enabled" btnCheckbox tabindex="0">{{!showIcon ? 'Disabled' : 'Enabled' }}</button>
@@ -59,46 +59,46 @@
             </div>
         </div>
         <div class="col-xs-12">
-            <div class="card">
+            <div class="card card-color">
                 <div class="card-header">
                     <h4 translate>Themes</h4>
                 </div>
                 <hr/>
                 <div class="card-block">
-                    <button class="btn btn-primary" style="--brand-primary: #1776BF; color: white" (click)="setTheme(app, '#1776BF', '#14629F', '#333333', '#ffffff', '#ffffff','#ffffff', '#ffffff', '#ffffff')">Software AG Blue</button>
-                    <button class="btn btn-primary" style="--brand-primary: #FFCC00; color: black;" (click)="setTheme(app, '#FFCC00', 'firebrick', 'firebrick', 'firebrick', '#ffffff','#ffffff', '#ffffff', '#ffffff')">Yellow</button>
-                    <button class="btn btn-primary" style="--brand-primary: #D40511; color: #ffffff;" (click)="setTheme(app, '#D40511', '#8b0000', 'firebrick', '#ffffff', '#ffffff','#ffffff', '#ffffff', '#ffffff')">Red</button>
-                    <button class="btn btn-primary" style="--brand-primary: #009000; color: #ffffff;" (click)="setTheme(app, '#009000', '#205115', '#333333', '#ffffff', '#ffffff','#ffffff', '#ffffff', '#ffffff')">Green</button>
-                    <button class="btn btn-primary" style="--brand-primary: salmon; color: black;" (click)="setTheme(app, 'salmon', 'firebrick', 'firebrick', 'firebrick', '#ffffff','#ffffff', '#ffffff','#ffffff')">Salmon</button>
+                    <button class="btn btn-primary" style="--brand-primary: #011f3d; border: solid 1px var(--brand-light)" (click)="setTheme(app, '#011f3d', '#14629F', '#ffffff', '#ffffff', '#ffffff','#ffffff', '#012c57', '#012c57', '#012c57')">Default</button>
+                    <button class="btn btn-primary" style="--brand-primary: #FFCC00; border: solid 1px var(--brand-light)" (click)="setTheme(app, '#FFCC00', 'firebrick', 'firebrick', 'firebrick', '#ffffff','firebrick', '#ffff00', '#ffff00', '#ffff00')">Yellow</button>
+                    <button class="btn btn-primary" style="--brand-primary: #D40511; border: solid 1px var(--brand-light)" (click)="setTheme(app, '#D40511', '#8b0000', '#ffffff', '#ffffff', '#ffffff','#8b0000', '#ff0718', '#ff0718', '#ff0718')">Red</button>
+                    <button class="btn btn-primary" style="--brand-primary: #009000; border: solid 1px var(--brand-light)" (click)="setTheme(app, '#009000', '#205115', '#ffffff', '#ffffff', '#ffffff','#205115', '#00ce00', '#00ce00', '#00ce00')">Green</button>
+                    <button class="btn btn-primary" style="--brand-primary: #243138; border: solid 1px var(--brand-light)" (click)="setTheme(app, '#243138', '#13202a', '#ffffff', '#ffffff', '#ffffff','#ffffff', '#334650','#334650', '#334650')">Dark</button>
                 </div>
             </div>
         </div>
         <div class="col-xs-12">
-            <div class="card">
+            <div class="card card-color">
                 <div class="card-header">
                     <h4 translate>Colors</h4>
                 </div>
                 <hr/>
                 <div class="card-block">
-                    Colors can be entered as any valid CSS color (salmon, #fff, #ffffff, rgb(255, 255, 255))<br>
+                    Colors can be entered as any valid CSS color (white, #fff, #ffffff, rgb(255, 255, 255))<br>
                     <div class="row">
                         <div class="col-xs-12 col-md-4">
                             <div class="form-group">
-                                <label for="primary"><span>Primary</span></label>
+                                <label for="primary" class="label-color"><span>Primary</span></label>
                                 <div style="display: inline-flex;width: 100%;">
                                     <input type="text" class="form-control" id="primary" name="primary" placeholder="e.g. salmon (required)" required [(ngModel)]="app.applicationBuilder.branding.colors.primary" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
                                     <input type="color" style="height: 32px; border:0; background: transparent;" id="primaryPicker" class="m-l-4" name="primaryPicker" [(ngModel)]="app.applicationBuilder.branding.colors.primary" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="active"><span>Active</span></label>
+                                <label for="active" class="label-color"><span>Active</span></label>
                                 <div style="display: inline-flex;width: 100%;">
                                     <input type="text" class="form-control" id="active" name="active" placeholder="e.g. salmon (required)" required [(ngModel)]="app.applicationBuilder.branding.colors.active" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
                                     <input type="color" style="height: 32px; border:0; background: transparent;" id="activePicker" class="m-l-4" name="activePicker" [(ngModel)]="app.applicationBuilder.branding.colors.active" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="text"><span>Text</span></label>
+                                <label for="text" class="label-color"><span>Text</span></label>
                                 <div style="display: inline-flex;width: 100%;">
                                     <input type="text" class="form-control" id="text" name="text" placeholder="e.g. salmon (required)" required [(ngModel)]="app.applicationBuilder.branding.colors.text" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
                                     <input type="color" style="height: 32px; border:0; background: transparent;" id="textPicker" class="m-l-4" name="textPicker" [(ngModel)]="app.applicationBuilder.branding.colors.text" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
@@ -107,21 +107,21 @@
                         </div>
                         <div class="col-xs-12 col-md-4">
                             <div class="form-group">
-                                <label for="text-primary"><span>Text on Primary</span></label>
+                                <label for="text-primary" class="label-color"><span>Text on Primary</span></label>
                                 <div style="display: inline-flex;width: 100%;">
                                     <input type="text" class="form-control" id="text-primary" name="text-primary" placeholder="e.g. salmon (required)" required [(ngModel)]="app.applicationBuilder.branding.colors.textOnPrimary" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
                                     <input type="color" style="height: 32px; border:0; background: transparent;" id="text-primaryPicker" class="m-l-4" name="text-primaryPicker" [(ngModel)]="app.applicationBuilder.branding.colors.textOnPrimary" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="text-active"><span>Text on Active</span></label>
+                                <label for="text-active" class="label-color"><span>Text on Active</span></label>
                                 <div style="display: inline-flex;width: 100%;">
                                     <input type="text" class="form-control" id="text-active" name="text-active" placeholder="e.g. salmon (required)" required [(ngModel)]="app.applicationBuilder.branding.colors.textOnActive" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
                                     <input type="color" style="height: 32px; border:0; background: transparent;" id="text-activePicker" class="m-l-4" name="text-activePicker" [(ngModel)]="app.applicationBuilder.branding.colors.textOnActive" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="hover"><span>Hover</span></label>
+                                <label for="hover" class="label-color"><span>Hover</span></label>
                                 <div style="display: inline-flex;width: 100%;">
                                     <input type="text" class="form-control" id="hover" name="hover" placeholder="e.g. salmon (required)" required [(ngModel)]="app.applicationBuilder.branding.colors.hover" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
                                     <input type="color" style="height: 32px; border:0; background: transparent;" id="hoverPicker" class="m-l-4" name="hoverPicker" [(ngModel)]="app.applicationBuilder.branding.colors.hover" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
@@ -130,21 +130,21 @@
                         </div>
                         <div class="col-xs-12 col-md-4">
                             <div class="form-group">
-                                <label for="primary"><span>Header bar</span></label>
+                                <label for="primary" class="label-color"><span>Header bar</span></label>
                                 <div style="display: inline-flex;width: 100%;">
                                     <input type="text" class="form-control" id="headerBar" name="headerBar" placeholder="e.g. white (required)" required [(ngModel)]="app.applicationBuilder.branding.colors.headerBar" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
                                     <input type="color" style="height: 32px; border:0; background: transparent;" id="headerBarPicker" class="m-l-4" name="headerBarPicker" [(ngModel)]="app.applicationBuilder.branding.colors.headerBar" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="text"><span>Tool Bar</span></label>
+                                <label for="text" class="label-color"><span>Tool Bar</span></label>
                                 <div style="display: inline-flex;width: 100%;">
                                     <input type="text" class="form-control" id="toolBar" name="toolBar" placeholder="e.g. white (required)" required [(ngModel)]="app.applicationBuilder.branding.colors.toolBar" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
                                     <input type="color" style="height: 32px; border:0; background: transparent;" id="toolBarPicker" class="m-l-4" name="toolBarPicker" [(ngModel)]="app.applicationBuilder.branding.colors.toolBar" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="active"><span>Tab Bar</span></label>
+                                <label for="active" class="label-color"><span>Tab Bar</span></label>
                                 <div style="display: inline-flex;width: 100%;">
                                     <input type="text" class="form-control" id="tabBar" name="tabBar" placeholder="e.g. white (required)" required [(ngModel)]="app.applicationBuilder.branding.colors.tabBar" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">
                                     <input type="color" style="height: 32px; border:0; background: transparent;" id="tabBarPicker" class="m-l-4" name="toolBarPicker" [(ngModel)]="app.applicationBuilder.branding.colors.tabBar" [disabled]="!app.applicationBuilder.branding.enabled" (ngModelChange)="showBrandingChange(app)">

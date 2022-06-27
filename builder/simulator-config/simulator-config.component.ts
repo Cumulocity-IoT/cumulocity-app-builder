@@ -16,7 +16,7 @@
 * limitations under the License.
  */
 
-import {Component, OnDestroy} from '@angular/core';
+import {Component, Inject, OnDestroy, OnInit, Renderer2} from '@angular/core';
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import {NewSimulatorModalComponent} from "./new-simulator-modal.component";
 import {EditSimulatorModalComponent} from "./edit-simulator-modal.component";
@@ -32,10 +32,12 @@ import {SimulationStrategiesService} from "../simulator/simulation-strategies.se
 import { AppStateService } from '@c8y/ngx-components';
 import * as cloneDeep from "clone-deep";
 import { SimulatorNotificationService } from './simulatorNotification.service';
+import { DOCUMENT } from '@angular/common';
 @Component({
-    templateUrl: './simulator-config.component.html'
+    templateUrl: './simulator-config.component.html',
+    styleUrls: ['./simulator-config.component.less']
 })
-export class SimulatorConfigComponent implements OnDestroy {
+export class SimulatorConfigComponent implements OnInit, OnDestroy {
     bsModalRef: BsModalRef;
 
     lockStatus$ = new BehaviorSubject<{isLocked: boolean, isLockOwned: boolean, lockStatus?: LockStatus}>({isLocked: false, isLockOwned: false});
@@ -50,13 +52,18 @@ export class SimulatorConfigComponent implements OnDestroy {
         private appIdService: AppIdService, private appService: ApplicationService,
         public simulationStrategiesService: SimulationStrategiesService,
         private appStateService: AppStateService, private userService: UserService,
-        private simulatorNotificationService: SimulatorNotificationService
+        private simulatorNotificationService: SimulatorNotificationService,
+        @Inject(DOCUMENT) private document: Document, private renderer: Renderer2
     ) {
         this._lockStatusListener = simSvc.simulator.addLockStatusListener(Comlink.proxy(lockStatus => this.lockStatus$.next(lockStatus)));
         this._simulatorConfigListener = simSvc.simulator.addSimulatorConfigListener(Comlink.proxy(simulatorConfigById =>
             this.simulatorConfigById$.next(simulatorConfigById)));
         this.userHasAdminRights = userService.hasAllRoles(appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN","ROLE_APPLICATION_MANAGEMENT_ADMIN"])
 
+    }
+
+    ngOnInit() {
+        this.renderer.addClass(this.document.body, 'simulator-body-theme');
     }
 
     showCreateSimulatorDialog() {
@@ -143,6 +150,7 @@ export class SimulatorConfigComponent implements OnDestroy {
     ngOnDestroy(): void {
         this._lockStatusListener.then(id => this.simSvc.simulator.removeListener(id));
         this._simulatorConfigListener.then(id => this.simSvc.simulator.removeListener(id));
+        this.renderer.removeClass(this.document.body, 'simulator-body-theme');
     }
 
     // for keyValue pipe

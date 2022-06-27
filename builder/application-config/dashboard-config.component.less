@@ -30,11 +30,12 @@
   padding: 5px 16px;
 
   &:nth-child(odd) {
-    background-color: #fbfbfc;
+    background-color: var(--brand-light,#fbfbfc);
   }
 
   &:hover {
     background-color: #EFF1F3;
+    color: #000;
   }
 
   .drag-handle {
@@ -51,9 +52,19 @@
     text-overflow: ellipsis;
   }
 }
+/deep/ .dashboard-body-theme {
+  background: linear-gradient(0deg,rgba(0,0,0,0.43),rgba(0,0,0,0.43)) var(--brand-primary,#1776bf);
+  --body-background-color: var(--brand-primary,#1776bf);
+}
 
+.label-color {
+  color: var(--navigator-active-color, #000);
+}
 
-
+.card-color {
+  background: var(--brand-primary);
+  color: var(--navigator-active-color);
+}
 
 
 

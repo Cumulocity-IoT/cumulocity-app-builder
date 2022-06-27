@@ -16,21 +16,23 @@
 * limitations under the License.
  */
 
-import {Component, OnDestroy} from "@angular/core";
-import {ActivatedRoute} from "@angular/router";
-import {ApplicationService} from "@c8y/client";
-import {map, switchMap, tap} from "rxjs/operators";
-import {from, Observable} from "rxjs";
-import {BrandingService} from "./branding.service";
+import { Component, Inject, OnDestroy, OnInit, Renderer2 } from "@angular/core";
+import { ActivatedRoute } from "@angular/router";
+import { ApplicationService } from "@c8y/client";
+import { map, switchMap, tap } from "rxjs/operators";
+import { from, Observable } from "rxjs";
+import { BrandingService } from "./branding.service";
+import { DOCUMENT } from "@angular/common";
 
 @Component({
     templateUrl: './branding.component.html'
 })
-export class BrandingComponent implements OnDestroy{
+export class BrandingComponent implements OnInit,OnDestroy {
     app: Observable<any>;
     dirty = false;
     showIcon = true;
-    constructor(private route: ActivatedRoute, private appService: ApplicationService, private brandingService: BrandingService) {
+    constructor(private route: ActivatedRoute, private appService: ApplicationService, private brandingService: BrandingService,
+        @Inject(DOCUMENT) private document: Document, private renderer: Renderer2) {
         const appId = route.paramMap.pipe(
             map(paramMap => paramMap.get('applicationId'))
         );
@@ -40,10 +42,14 @@ export class BrandingComponent implements OnDestroy{
                 appService.detail(appId)
                     .then(res => res.data as any)
             )),
-            tap((app: any & {applicationBuilder: any}) => { 
+            tap((app: any & { applicationBuilder: any }) => {
                 this.showIcon = !app.applicationBuilder.branding.hideIcon;
             })
         )
+    }
+
+    ngOnInit(): void {
+        this.renderer.addClass(this.document.body, 'body-theme');
     }
 
     async save(app) {
@@ -58,7 +64,7 @@ export class BrandingComponent implements OnDestroy{
 
     showBrandingChange(app) {
         this.dirty = true;
-   //     this.showIcon = !app.applicationBuilder.branding.hideIcon;
+        //     this.showIcon = !app.applicationBuilder.branding.hideIcon;
         this.brandingService.updateStyleForApp(app);
     }
 
@@ -72,6 +78,7 @@ export class BrandingComponent implements OnDestroy{
         const appId = this.route.snapshot.paramMap.get('applicationId');
         const app = ((await this.appService.detail(appId)).data as any);
         this.brandingService.updateStyleForApp(app);
+        this.renderer.removeClass(this.document.body, 'body-theme');
     }
 
     async logoChange(app, files: FileList) {
@@ -95,7 +102,7 @@ export class BrandingComponent implements OnDestroy{
                 img.src = dataUrl;
             });
             app.applicationBuilder.branding.logo = dataUrl;
-            app.applicationBuilder.branding.logoHeight = Math.min(logoHeight, Math.ceil(240*logoHeight/logoWidth));
+            app.applicationBuilder.branding.logoHeight = Math.min(logoHeight, Math.ceil(240 * logoHeight / logoWidth));
         } else {
             this.removeLogo(app);
             return;
@@ -110,7 +117,7 @@ export class BrandingComponent implements OnDestroy{
         this.showBrandingChange(app);
     }
 
-    setTheme(app, primary, active, text, textOnPrimary, textOnActive,hover, headerBar, tabBar, toolBar) {
+    setTheme(app, primary, active, text, textOnPrimary, textOnActive, hover, headerBar, tabBar, toolBar) {
         app.applicationBuilder.branding.enabled = true;
         app.applicationBuilder.branding.colors.primary = primary;
         app.applicationBuilder.branding.colors.active = active;
@@ -122,5 +129,7 @@ export class BrandingComponent implements OnDestroy{
         app.applicationBuilder.branding.colors.tabBar = tabBar;
         app.applicationBuilder.branding.colors.toolBar = toolBar;
         this.showBrandingChange(app);
+
+        this.renderer.addClass(this.document.body, 'body-theme');
     }
 }
