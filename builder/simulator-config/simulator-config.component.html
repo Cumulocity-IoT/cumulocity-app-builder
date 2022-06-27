@@ -8,7 +8,7 @@
             Add Simulator
         </a>
         <ng-template #locked>
-            <div class="card add-card card-color">
+            <div class="card add-card add-card-color">
                <i c8yIcon="lock"></i><br>
                 <ng-container *ngIf="lockStatus.isLocked && lockStatus.lockStatus else gettingStatus">
                     <span *ngIf="!isUnlocking else unlocking">Locked <small *ngIf="userHasAdminRights">(<a class="clickable" (click)="forceUnlock()" class="label-color">Force Unlock</a>)</small></span>
@@ -64,7 +64,7 @@
             </div>
             <div class="card-block row" style="margin-bottom: 5px;">
                 <div class="col-xs-6">
-                    <label class="c8y-switch" class="label-color">
+                    <label class="c8y-switch label-color">
                         <input type="checkbox" [disabled]="!userHasAdminRights || !lockStatus.isLockOwned" [ngModel]="simulatorConfig.started" (ngModelChange)="changeSimulatorStarted(simulatorConfig, $event)"/>
                         <span></span>
                         {{simulatorConfig.started ? 'Running' : 'Paused'}}

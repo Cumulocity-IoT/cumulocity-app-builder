@@ -184,15 +184,23 @@ body {
 }
 
 .body-theme {
-    background: linear-gradient(0deg,rgba(0,0,0,0.43),rgba(0,0,0,0.43)) var(--brand-primary,#1776bf);
-    --body-background-color: var(--brand-primary,#1776bf);
+    background: linear-gradient(0deg,rgba(0,0,0,0.43),rgba(0,0,0,0.43)) var(--brand-primary,#f2f3f4);
+    --body-background-color: var(--brand-primary,#f2f3f4);
+}
+.simulator-body-theme {
+   background: linear-gradient(0deg, rgba(0, 0, 0, 0.43), rgba(0, 0, 0, 0.43)) var(--brand-primary, #f2f3f4);
+  --body-background-color: var(--brand-primary, #f2f3f4);
+}
+.dashboard-body-theme {
+    background: linear-gradient(0deg,rgba(0,0,0,0.43),rgba(0,0,0,0.43)) var(--brand-primary,#f2f3f4);
+    --body-background-color: var(--brand-primary,#f2f3f4);
 }
 .label-color {
     color: var(--navigator-active-color, #000);
 }
 .card-color {
-    background: var(--brand-primary);
-    color: var(--navigator-active-color);
+    background: var(--brand-primary, #fff);
+    color: var(--navigator-active-color, #000);
 }
 .nav-tabs > li > button {
     color: var(--brand-primary,#1776bf);
