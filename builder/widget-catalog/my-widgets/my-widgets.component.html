@@ -311,8 +311,8 @@
                         <span class="label label-primary" *ngIf="!widget.installedVersion">Not Available</span>
                     </div>
                     <div>
-                        <a (click)="preview(widget.preview)" class="cursor-pointer" *ngIf="widget.preview !== ''">
-                            <img class="preview-img" [src]="widget.preview && widget.preview !== '' ? widget.preview : '../images/AppBuilderLogo.png'" />
+                        <a (click)="preview(widget.preview)" class="cursor-pointer">
+                            <img class="preview-img" [src]="widget.preview && widget.preview !== '' ? widget.preview : './img/AppBuilderLogo.png'" />
                         </a>
                     </div>
                     <button class="btn btn-xs btn-default margin-10" (click)="navigateToDetailPage(widget)">

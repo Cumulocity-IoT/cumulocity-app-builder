@@ -295,11 +295,8 @@
                             *ngIf="widget.version">{{widget.version}}</span>
                     </div>
                     <div>
-                        <a (click)="preview(widget.preview)" class="cursor-pointer" *ngIf="widget.preview !== ''">
-                            <img class="preview-img" [src]="widget.preview" />
-                        </a>
-                        <a (click)="preview(widget.preview)" class="cursor-pointer" *ngIf="widget.preview === ''">
-                            <img class="preview" src="./../../ui-assets/img/AppBuilderLogo.png"/>
+                        <a (click)="preview(widget.preview)" class="cursor-pointer">
+                            <img class="preview-img" [src]="widget.preview && widget.preview !== '' ? widget.preview : './img/AppBuilderLogo.png'" />
                         </a>
                     </div>
                     <!--<div class="margin-10">

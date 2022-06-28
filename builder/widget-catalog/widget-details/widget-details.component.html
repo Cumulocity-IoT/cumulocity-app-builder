@@ -74,8 +74,7 @@
                 <div class="card-block bg-white">
                     <div class="card-block bg-white" >
                         <a (click)="preview(widgetDetails.preview)" class="cursor-pointer">
-                            <img class="widget-details-preview"
-                                [src]="widgetDetails.preview ? widgetDetails.preview : './../../ui-assets/img/AppBuilderLogo.png'" />
+                                <img class="widget-details-preview" [src]="widgetDetails.preview && widgetDetails.preview !== '' ? widgetDetails.preview : './img/AppBuilderLogo.png'" />
                         </a>
                     </div>
                 </div>
