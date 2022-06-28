@@ -33,6 +33,7 @@ import {SimulationStrategiesService} from "../simulator/simulation-strategies.se
 import {SimulatorCommunicationService} from "../simulator/mainthread/simulator-communication.service";
 import * as _ from 'lodash';
 import { SimulatorNotificationService } from './simulatorNotification.service';
+import { FileSimulatorNotificationService } from './file-simulator.service';
 
 @Component({
     templateUrl: './edit-simulator-modal.component.html'
@@ -44,20 +45,20 @@ export class EditSimulatorModalComponent implements OnInit {
 
     isMSExist: boolean = false;
     isMSCheckSpin: boolean = false;
-
+    isCSVSimulator: boolean = false;
     constructor(
         private simSvc: SimulatorCommunicationService,
         public bsModalRef: BsModalRef, private simulationStrategiesService: SimulationStrategiesService,
         private resolver: ComponentFactoryResolver, private injector: Injector,
         private appService: ApplicationService, private appIdService: AppIdService, private fetchClient: FetchClient,
-        private simulatorNotificationService: SimulatorNotificationService
+        private simulatorNotificationService: SimulatorNotificationService, private fileSimulatorNotificationService: FileSimulatorNotificationService
     ) {}
 
     ngOnInit() {
         this.openSimulatorConfig();
     }
 
-    openSimulatorConfig() {
+    async openSimulatorConfig() {
         const strategyFactory = this.simulationStrategiesService.strategiesByName.get(this.simulatorConfig.type);
         if (strategyFactory == undefined) {
             console.error("Unknown simulator strategy:", this.simulatorConfig.type);
@@ -65,13 +66,21 @@ export class EditSimulatorModalComponent implements OnInit {
             return;
         }
 
-        this.verifySimulatorMicroServiceStatus();
+        const metadata = strategyFactory.getSimulatorMetadata();
+        
+        if(metadata && metadata.name.includes('File (CSV/JSON)')) {
+            this.isCSVSimulator = true;
+            this.isMSCheckSpin = true;
+            this.isMSExist = await this.fileSimulatorNotificationService.verifyCSVSimulatorMicroServiceStatus();
+            this.isMSCheckSpin = false;
+        } else { this.verifySimulatorMicroServiceStatus(); }
+
         // For exisitng simulators
         if(this.simulatorConfig.config && !this.simulatorConfig.config.deviceName) {
             this.simulatorConfig.config.deviceName = this.simulatorConfig.config.deviceId;
         }
         
-        const metadata = strategyFactory.getSimulatorMetadata();
+       
 
         this.configWrapper.clear();
         
@@ -154,13 +163,24 @@ export class EditSimulatorModalComponent implements OnInit {
             applicationBuilder: app.applicationBuilder
         } as any);
 
-        this.simulatorNotificationService.post({
-            id: app.id,
-            name: app.name,
-            tenant: (app.owner && app.owner.tenant && app.owner.tenant.id ? app.owner.tenant.id : ''),
-            type: app.type,
-            simulator: this.simulatorConfig
-        });
+        if(this.isCSVSimulator) {
+            this.fileSimulatorNotificationService.post({
+                id: app.id,
+                name: app.name,
+                tenant: (app.owner && app.owner.tenant && app.owner.tenant.id ? app.owner.tenant.id : ''),
+                type: app.type,
+                simulator: this.simulatorConfig
+             })
+        } else if (this.simulatorConfig.serverSide) {
+            this.simulatorNotificationService.post({
+                id: app.id,
+                name: app.name,
+                tenant: (app.owner && app.owner.tenant && app.owner.tenant.id ? app.owner.tenant.id : ''),
+                type: app.type,
+                simulator: this.simulatorConfig
+            });
+        }
+        
         // We could just wait for them to refresh, but it's nicer to instantly refresh
         await this.simSvc.simulator.checkForSimulatorConfigChanges();
 

@@ -33,6 +33,9 @@ import { SimulationStrategiesService } from "../simulator/simulation-strategies.
 import { SimulatorCommunicationService } from "../simulator/mainthread/simulator-communication.service";
 import { throwError } from 'rxjs';
 import { SimulatorNotificationService } from './simulatorNotification.service';
+import { FileSimulatorNotificationService } from './file-simulator.service';
+import { AlertService } from '@c8y/ngx-components';
+import { UpdateableAlert } from '../../builder/utils/UpdateableAlert';
 
 @Component({
     templateUrl: './new-simulator-modal.component.html'
@@ -58,21 +61,29 @@ export class NewSimulatorModalComponent {
     runOnServer: boolean = false;
     isMSExist: boolean = false;
     isMSCheckSpin: boolean = false;
+    isCSVSimulator: boolean = false;
 
     constructor(
-        private simSvc: SimulatorCommunicationService,
+        private simSvc: SimulatorCommunicationService, private alertService: AlertService,
         public bsModalRef: BsModalRef, public simulationStrategiesService: SimulationStrategiesService,
         private resolver: ComponentFactoryResolver, private injector: Injector, private inventoryService: InventoryService,
         private appService: ApplicationService, private appIdService: AppIdService, private fetchClient: FetchClient,
-        private simulatorNotificationService: SimulatorNotificationService
+        private simulatorNotificationService: SimulatorNotificationService, private fileSimulatorNotificationService: FileSimulatorNotificationService
     ) {}
 
-    openSimulatorConfig() {
+    async openSimulatorConfig() {
         this.wizard.selectStep('config');
 
-        this.verifySimulatorMicroServiceStatus();
         const metadata = this.selectedStrategyFactory.getSimulatorMetadata();
+        if(metadata && metadata.name.includes('File (CSV/JSON)')) {
+            this.isCSVSimulator = true;
+            this.isMSCheckSpin = true;
+            this.isMSExist = await this.fileSimulatorNotificationService.verifyCSVSimulatorMicroServiceStatus();
+            this.isMSCheckSpin = false;
+            this.runOnServer = true;
+        } else { this.verifySimulatorMicroServiceStatus(); }
 
+        console.log(this.isCSVSimulator);
         this.configWrapper.clear();
 
         if (metadata.configComponent != null) {
@@ -113,6 +124,22 @@ export class NewSimulatorModalComponent {
         this.busy = true;
 
         const metadata = this.selectedStrategyFactory.getSimulatorMetadata();
+        
+        // If Flie CSV/JSON simulator then upload binary
+        let fileId = '';
+        if(this.isCSVSimulator) {
+            const uploadAlert = new UpdateableAlert(this.alertService);
+            uploadAlert.update("Uploading file...");
+            fileId =  await(await this.fileSimulatorNotificationService.createBinary(this.newConfig.csvJsonFile)).data.id;
+            uploadAlert.close();
+            if(!fileId) {
+                this.alertService.danger('Unable to upload File!');
+                this.busy = false;
+                return;
+            } else {
+                this.newConfig.fileId = fileId;
+            }
+        }
         // get simulator Name from strategy's deviceName field
         if (metadata.hideSimulatorName) {
             this.simulatorName = this.newConfig.deviceName;
@@ -174,13 +201,23 @@ export class NewSimulatorModalComponent {
             applicationBuilder: appServiceData.applicationBuilder
         } as any);
 
-        this.simulatorNotificationService.post({
-            id: appId,
-            name: appServiceData.name,
-            tenant: (appServiceData.owner && appServiceData.owner.tenant && appServiceData.owner.tenant.id ? appServiceData.owner.tenant.id : ''),
-            type: appServiceData.type,
-            simulator: newSimulatorObject
-        });
+        if(this.isCSVSimulator) {
+            this.fileSimulatorNotificationService.post({
+                id: appId,
+                name: appServiceData.name,
+                tenant: (appServiceData.owner && appServiceData.owner.tenant && appServiceData.owner.tenant.id ? appServiceData.owner.tenant.id : ''),
+                type: appServiceData.type,
+                simulator: newSimulatorObject
+            });
+        } else if (this.runOnServer) {
+            this.simulatorNotificationService.post({
+                id: appId,
+                name: appServiceData.name,
+                tenant: (appServiceData.owner && appServiceData.owner.tenant && appServiceData.owner.tenant.id ? appServiceData.owner.tenant.id : ''),
+                type: appServiceData.type,
+                simulator: newSimulatorObject
+            });
+        }
         // We could just wait for them to refresh, but it's nicer to instantly refresh
         await this.simSvc.simulator.checkForSimulatorConfigChanges();
 

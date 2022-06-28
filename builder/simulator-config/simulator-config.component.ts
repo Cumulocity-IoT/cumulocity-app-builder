@@ -33,6 +33,7 @@ import { AppStateService } from '@c8y/ngx-components';
 import * as cloneDeep from "clone-deep";
 import { SimulatorNotificationService } from './simulatorNotification.service';
 import { DOCUMENT } from '@angular/common';
+import { FileSimulatorNotificationService } from './file-simulator.service';
 @Component({
     templateUrl: './simulator-config.component.html',
     styleUrls: ['./simulator-config.component.less']
@@ -53,7 +54,8 @@ export class SimulatorConfigComponent implements OnInit, OnDestroy {
         public simulationStrategiesService: SimulationStrategiesService,
         private appStateService: AppStateService, private userService: UserService,
         private simulatorNotificationService: SimulatorNotificationService,
-        @Inject(DOCUMENT) private document: Document, private renderer: Renderer2
+        @Inject(DOCUMENT) private document: Document, private renderer: Renderer2,
+        private fileSimulatorNotificationService: FileSimulatorNotificationService
     ) {
         this._lockStatusListener = simSvc.simulator.addLockStatusListener(Comlink.proxy(lockStatus => this.lockStatus$.next(lockStatus)));
         this._simulatorConfigListener = simSvc.simulator.addSimulatorConfigListener(Comlink.proxy(simulatorConfigById =>
@@ -114,13 +116,23 @@ export class SimulatorConfigComponent implements OnInit, OnDestroy {
             applicationBuilder: app.applicationBuilder
         } as IApplication);
 
-        this.simulatorNotificationService.post({
-            id: appId,
-            name: app.name,
-            tenant: (app.owner && app.owner.tenant && app.owner.tenant.id ? app.owner.tenant.id : ''),
-            type: app.type,
-            simulator: simulatorConfig
-        });
+        if(simulatorConfig &&  simulatorConfig.type && simulatorConfig.type.includes('File (CSV/JSON)')) {
+            this.fileSimulatorNotificationService.post({
+                id: app.id,
+                name: app.name,
+                tenant: (app.owner && app.owner.tenant && app.owner.tenant.id ? app.owner.tenant.id : ''),
+                type: app.type,
+                simulator: simulatorConfig
+             })
+        } else {
+            this.simulatorNotificationService.post({
+                id: appId,
+                name: app.name,
+                tenant: (app.owner && app.owner.tenant && app.owner.tenant.id ? app.owner.tenant.id : ''),
+                type: app.type,
+                simulator: simulatorConfig
+            });
+        }
         // We could just wait for them to refresh, but it's nicer to instantly refresh
         await this.simSvc.simulator.checkForSimulatorConfigChanges();
     }

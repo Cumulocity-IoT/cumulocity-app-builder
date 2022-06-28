@@ -24,6 +24,7 @@ import {WaveSimulationStrategyModule} from "./wave/wave.simulation-strategy.modu
 import {FirmwareUpdateSimulationStrategyModule} from "./firmware-update/firmware-update.simulation-strategy.module";
 import { DtdlSimulationStrategyModule } from './dtdl/dtdl.simulation-strategy.module';
 import { PositionUpdateSimulationStrategyModule } from './position-update/position-update.simulation-strategy.module';
+import { FileValuesSimulationStrategyModule } from "./file-values/file-values.simulation-strategy.module";
 
 @NgModule({
     imports: [
@@ -33,7 +34,8 @@ import { PositionUpdateSimulationStrategyModule } from './position-update/positi
         WaveSimulationStrategyModule,
         FirmwareUpdateSimulationStrategyModule,
         DtdlSimulationStrategyModule,
-        PositionUpdateSimulationStrategyModule
+        PositionUpdateSimulationStrategyModule,
+        FileValuesSimulationStrategyModule
     ]
 })
 export class SimulationStrategiesModule {}
