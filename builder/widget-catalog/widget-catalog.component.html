@@ -20,37 +20,6 @@
     </rectangle-spinner>
 </div>
 <div class="card-group interact-grid" *ngIf="!isBusy && displayListValue !== '1'">
-    <!-- <ng-template #itemTemplate let-item="item" let-index="index">
-            <div class="text-warning" [ngSwitch]="item.value.actionCode">
-
-                <button class="btn btn-clean btn-icon btn-md"  title="Install"
-                *ngSwitchCase="'001'" (click)="installWidget(item.value)">
-                    <i c8yIcon="upload" class="action-icon" ></i>
-                </button>
-                <button class="btn btn-clean btn-icon btn-md"  title="Install (Not Compatible)"
-                *ngSwitchCase="'002'" (click)="installWidget(item.value)">
-                    <i c8yIcon="level-up" class="action-icon" ></i>
-                </button>
-                <button class="btn btn-clean btn-icon btn-md" *ngSwitchCase="'003'" title="Refresh">
-                    <i c8yIcon="refresh" class="action-icon text-info" (click)="refresh()"></i>
-                </button>
-                <button class="invisible btn btn-clean btn-icon btn-md" title="Refresh" *ngSwitchDefault>
-                    <i c8yIcon="refresh" class="action-icon text-info" (click)="refresh()"></i>
-                </button>
-            </div>
-            <div class="widget-icon" ><i [c8yIcon]="item.value.icon"></i></div>
-            <div class="col col-overflow" title="{{item.value.title}}">{{item.value.title}} <i *ngIf="item.value.isDeprecated" title="This widget is deprecated!" c8yIcon="warning" class="warning-icon text-warning" ></i></div>
-            <div class="col col-overflow" title="{{item.value.version}}" >{{item.value.version}}</div>
-            <div class="col col-overflow" title="{{item.value.requiredPlatformVersion}}" >{{item.value.requiredPlatformVersion}}</div>
-            <div class="col col-overflow" title="{{item.value.license}}">{{item.value.license}}</div>
-            <div class="col col-overflow" title="{{item.value.author}}">{{item.value.author}}</div>
-            <div class="text-info" >
-                <button class="btn btn-clean btn-icon btn-md" title="Preview" [disabled] = "!item.value.preview" (click)="preview(item.value.preview)"><i c8yIcon="eye" class="action-icon-button" ></i></button></div>
-            <div class="text-info" > 
-                <button class="btn btn-clean btn-icon btn-md" title="Documentation" [disabled] = "!item.value.repository" (click)="openDocumentation(item.value.repository)"><i c8yIcon="document-with-code"  class="action-icon-button"></i></button>
-            </div>
-        </ng-template> -->
-
     <div class="card-group col-xs-12 col-sm-12 col-md-12 col-lg-12">
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
             <div class="card">
@@ -171,26 +140,6 @@
                             </tbody>
                         </table>
                     </div>
-                    <!-- <ng-container *ngIf="filterWidgets?.length">
-                            <div class="sortable-grid-header">
-                                <div class="invisible widget-icon text-primary" style="width: 20px;" >
-                                    <button class="invisible btn btn-clean btn-icon btn-md">
-                                        <i c8yIcon="refresh" class="action-icon" ></i>
-                                    </button>    
-                                </div>
-                                <div class="invisible widget-icon"><i class="fa custom-icon-drag-handle"></i></div>
-                                <div class="col" style="margin-left: 60px;">Widget</div>
-                                <div class="col" style="margin-left: -60px;">Latest Version</div>
-                                <div class="col">Supported C8Y Platforms</div>
-                                <div class="col">License</div>
-                                <div class="col">Author</div>
-                                <div class="invisible widget-icon text-info"  style="width: 20px;"><i [c8yIcon]="eye"></i></div>
-                                <div class="invisible widget-icon text-success" style="width: 20px;"><i [c8yIcon]="external-link"></i></div>
-                            </div>
-                            <bs-sortable [ngModel]="filterWidgets" [itemTemplate]="itemTemplate"
-                                itemClass="sortable-item" itemActiveClass="sortable-item-active"
-                                wrapperClass="sortable-grid" ></bs-sortable>
-                        </ng-container> -->
                 </div>
             </div>
         </div>
@@ -299,13 +248,6 @@
                             <img class="preview-img" [src]="widget.preview && widget.preview !== '' ? widget.preview : './img/AppBuilderLogo.png'" />
                         </a>
                     </div>
-                    <!--<div class="margin-10">
-                        <span class="label label-default" style="color: black;">{{widget.license}}</span>
-                    </div>
-                    <div class="col-xs-12 col-md-12 col-sm-12 text-center">
-                        <span class="fs-12">{{widget.author}}</span>
-                    </div>
-                     -->
                     <button class="btn btn-xs btn-default margin-10" (click)="navigateToDetailPage(widget)">
                         <i c8yicon="more-details" title="Details" class="dlt-c8y-icon-more-details"></i> Details
                     </button>

@@ -42,6 +42,8 @@ export class WidgetCatalogService {
   private GATEWAY_URL_Labcase = '';
   private GATEWAY_URL_Labcase_FallBack = '';
   private CATALOG_LABCASE_ID = '';
+  private GATEWAY_URL_GitHub = '';
+  private GATEWAY_URL_GitHub_FallBack = '';
   runtimeLoadingCompleted = false;
 
   widgetDetailsSource: BehaviorSubject<any> = new BehaviorSubject(null);
@@ -71,6 +73,8 @@ export class WidgetCatalogService {
     this.C8Y_VERSION = packageJson.dependencies['@c8y/ngx-components']
     this.GATEWAY_URL_Labcase = this.externalService.getURL('DBCATALOG', 'gatewayURL');
     this.GATEWAY_URL_Labcase_FallBack = this.externalService.getURL('DBCATALOG', 'gatewayURL_Fallback');
+    this.GATEWAY_URL_GitHub = this.externalService.getURL('GITHUB','gatewayURL_GithubAPI');
+    this.GATEWAY_URL_GitHub_FallBack = this.externalService.getURL('GITHUB','gatewayURL_GithubAPI_Fallback');
   }
 
 
@@ -78,7 +82,7 @@ export class WidgetCatalogService {
     const url = `${this.GATEWAY_URL_GitHubAPI}${this.WidgetCatalogPath}`;
     const urlFallBack = `${this.GATEWAY_URL_GitHubAPI_FallBack}${this.WidgetCatalogPath}`;
     if (isDevMode()) {
-      return this.http.get<WidgetCatalog>(`${url}`, this.HTTP_HEADERS)
+      return this.http.get<WidgetCatalog>(`${url}${this.devBranchPath}`, this.HTTP_HEADERS)
         .pipe(catchError(err => {
           console.log('Fetch Widget Catalog: Error in primary endpoint! using fallback...');
           return this.http.get<WidgetCatalog>(`${urlFallBack}${this.devBranchPath}`, this.HTTP_HEADERS)
@@ -167,12 +171,13 @@ export class WidgetCatalogService {
     this.displayListSourceMoreWidgets.next(value);
   }
   getWidgetDetailsFromRepo(widgetRepoPath): Observable<any> {
-    const url = `https://democenter.gateway.webmethodscloud.com/gateway/GitHubAPIService/1.0/repos/SoftwareAG${widgetRepoPath}/readme`;
+    const url =  `${this.GATEWAY_URL_GitHub}/${widgetRepoPath}/readme`;
+    const urlFallBack = `${this.GATEWAY_URL_GitHub_FallBack}/${widgetRepoPath}/readme`;
     return this.http.get(`${url}`, {
       responseType: 'text'
     }).pipe(catchError(err => {
       console.log('Widget Catalog: Get Widget Details From Readme: Error in primary endpoint! using fallback...');
-      return this.http.get(`${url}`, {
+      return this.http.get(`${urlFallBack}`, {
         responseType: 'text'
       })
     }));

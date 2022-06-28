@@ -32,8 +32,6 @@ import { WidgetCatalogService } from '../widget-catalog.service';
 import { concat, forkJoin, from, fromEvent, interval, Observable, of } from 'rxjs';
 import { RuntimeWidgetLoaderService } from 'cumulocity-runtime-widget-loader';
 import { AlertMessageModalComponent } from "../../utils/alert-message-modal/alert-message-modal.component";
-import { mergeWith } from "lodash-es";
-import { catchError, map } from "rxjs/operators";
 import { ActivatedRoute, Router } from "@angular/router";
 
 
@@ -94,8 +92,6 @@ export class MyWidgetsComponent implements OnInit {
     }
 
     reload() {
-        /* this.filterWidgets = [];
-        this.loadWidgetsFromCatalog(); */
         window.location.reload();
     }
 
@@ -292,11 +288,6 @@ export class MyWidgetsComponent implements OnInit {
         }
 
         await this.widgetCatalog.widgets.forEach(async widget => {
-            /*  const widgetObj = await new Promise<any>((resolve) => {
-                 this.componentService.getById$(widget.id).subscribe(widgetObj => {
-                     resolve(widgetObj);
-                 });
-             }); */
             widget.isCompatible = this.widgetCatalogService.isCompatiblieVersion(widget);
             const appObj = this.appList.find(app => app.contextPath === widget.contextPath);
             widget.installedVersion = (appObj && appObj.manifest && appObj.manifest.version ? appObj.manifest.version : '');

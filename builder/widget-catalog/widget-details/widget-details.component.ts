@@ -108,14 +108,6 @@ export class WidgetDetailsComponent implements OnInit {
         if (this.description.match(/(\().*?(?=\))/g))
             this.description = this.description.replace(/(\().*?(?=\))/g, '');
         this.description = this.replaceWithEmptyString({ '[](': '', '( />': '', ']': '', '### Please': '', '#/>': '', '"': '', '|': ''});
-        
-        //     const regex4 = this.description.match(/## Prerequisite(.*)/g);
-        //     this.description = this.description.replace(regex4[0], "");
-        // }
-        // if (this.description.match(/## Supported(.*)/g)) {
-        //     const regex5 = this.description.match(/## Supported(.*)/g);
-        //     this.description = this.description.replace(regex5[0], "");
-        // }
     }
     replaceWithEmptyString(obj) {
         for (let x in obj) {
@@ -215,11 +207,6 @@ export class WidgetDetailsComponent implements OnInit {
         }
 
         await this.widgetCatalog.widgets.forEach(async widget => {
-            /*  const widgetObj = await new Promise<any>((resolve) => {
-                 this.componentService.getById$(widget.id).subscribe(widgetObj => {
-                     resolve(widgetObj);
-                 });
-             }); */
             widget.isCompatible = this.widgetCatalogService.isCompatiblieVersion(widget);
             const appObj = this.appList.find(app => app.contextPath === widget.contextPath);
             widget.installedVersion = (appObj && appObj.manifest && appObj.manifest.version ? appObj.manifest.version : '');

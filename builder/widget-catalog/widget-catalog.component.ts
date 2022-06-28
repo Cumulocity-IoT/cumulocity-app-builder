@@ -90,8 +90,6 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
     }
 
     reload() {
-        /* this.filterWidgets = [];
-        this.loadWidgetsFromCatalog(); */
         window.location.reload();
     }
 
