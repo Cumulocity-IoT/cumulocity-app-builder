@@ -126,7 +126,12 @@
                     </select>
                 </div>
                 </ng-template>
-
+                <div class="form-group">
+                    <label for="globalRoles"><span>Global Roles (Optional)</span></label>
+                    <ng-select [items]="[{name: 'Role 1'}, {name: 'Role 2'}, {name: 'Role 3'}]" name="value"  bindLabel="name" bindValue="name" required [multiple]="true" [closeOnSelect]="false" [searchable]="true"
+                    placeholder="select Role(s)" [appendTo]="(appendTo ?  appendTo : 'body')"  >
+                    </ng-select>
+                </div>
                 <div class="form-group" style="min-height: 50px;" *ngIf="creationMode === 'group-template' else nonGroupTemplate">
                     <label for="group"><span>Group/Asset </span></label>
                    <!--  <input type="text" class="form-control" id="group" name="group" placeholder="e.g. 12345" [(ngModel)]="deviceId"> -->
@@ -141,6 +146,13 @@
                     (selectedDevice)= "getSelectedDevice($event)" (onBlurDevice)= "getSelectedDevice($event)"></device-selector>
                 </div>
                 </ng-template>
+                
+                <div class="form-group" *ngIf="deviceName !== ''">
+                    <label for="globalRoles"><span>Inventory Roles (Optional)</span></label>
+                    <ng-select [items]="[{name: 'Inventory Role 1'}, {name: 'Inventory Role 2'}, {name: 'Inventory Role 3'}]" name="value"  bindLabel="name" bindValue="name" required [multiple]="true" [closeOnSelect]="false" [searchable]="true"
+                    placeholder="select Role(s)" [appendTo]="(appendTo ?  appendTo : 'body')"  >
+                    </ng-select>
+                </div>
                 <div class="form-group">
                     <label for="icon"><span>Icon</span></label>
                     <icon-selector id="icon" name="icon" [(value)]="dashboardIcon" appendTo=".modal-content"></icon-selector>

@@ -143,6 +143,8 @@ export class NewDashboardModalComponent {
 
     async addTemplateDashboard(application, name: string, visibility: '' | 'hidden' | 'no-nav', icon: string, template: any, tabGroup: string, isGroupTemplate: boolean = false) {
         const dashboardManagedObject = (await this.inventoryService.create({
+            c8y_Global: {},
+            "c8y_Dashboard!name!app-builder-db": {},
             "c8y_Dashboard": {
                 ...template,
                 name,
