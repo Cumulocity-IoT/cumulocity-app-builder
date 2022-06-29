@@ -16,7 +16,7 @@
 * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit } from "@angular/core";
+import { Component, Inject, OnDestroy, OnInit, Renderer2 } from "@angular/core";
 import { ApplicationService, InventoryService, IApplication, IManagedObject } from "@c8y/client";
 import { Observable, from, Subject, Subscription } from "rxjs";
 import { debounceTime, filter, switchMap, tap } from "rxjs/operators";
@@ -35,6 +35,7 @@ import { TemplateUpdateModalComponent } from "../template-catalog/template-updat
 import { BinaryDescription, DeviceDescription } from "../template-catalog/template-catalog.model";
 import { SettingsService } from './../../builder/settings/settings.service';
 import { AlertMessageModalComponent } from "./../../builder/utils/alert-message-modal/alert-message-modal.component";
+import { DOCUMENT } from "@angular/common";
 
 
 export interface DashboardConfig {
@@ -76,7 +77,8 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     constructor(
         private appIdService: AppIdService, private appService: ApplicationService, private appStateService: AppStateService,
         private brandingService: BrandingService, private inventoryService: InventoryService, private navigation: AppBuilderNavigationService,
-        private modalService: BsModalService, private alertService: AlertService, private settngService: SettingsService
+        private modalService: BsModalService, private alertService: AlertService, private settngService: SettingsService,
+        @Inject(DOCUMENT) private document: Document, private renderer: Renderer2
     ) {
         this.app = this.appIdService.appIdDelayedUntilAfterLogin$.pipe(
             switchMap(appId => from(
@@ -101,6 +103,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
 
     async ngOnInit() {
         this.isDashboardCatalogEnabled = await this.settngService.isDashboardCatalogEnabled();
+        this.renderer.addClass(this.document.body, 'dashboard-body-theme');
     }
 
     private alertModalDialog(message: any): BsModalRef {
@@ -241,6 +244,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
+        this.renderer.removeClass(this.document.body, 'dashboard-body-theme');
         this.delayedAppUpdateSubscription.unsubscribe();
     }
 }
