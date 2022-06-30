@@ -49,6 +49,7 @@ export class WidgetDetailsComponent implements OnInit {
     constructor(private widgetCatalogService: WidgetCatalogService, private router: Router,
         private modalService: BsModalService, private appService: ApplicationService, private route: ActivatedRoute,
         private alertService: AlertService, private userService: UserService, private appStateService: AppStateService) {
+        this.extractURL();
         this.userHasAdminRights = userService.hasAllRoles(appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN", "ROLE_APPLICATION_MANAGEMENT_ADMIN"]);
     }
 
@@ -69,7 +70,6 @@ export class WidgetDetailsComponent implements OnInit {
             }
         });
         await this.loadWidgetsFromCatalog();
-        this.extractURL();
     }
 
     fetchWidgetDescription(widgetData) {
@@ -80,7 +80,7 @@ export class WidgetDetailsComponent implements OnInit {
             this.description = this.description.replace("### Installation", '');
         else
             this.description = this.description.replace("## Installation", '');
-        this.description = this.description.replace(/\\n/g, "<br />");  
+        this.description = this.description.replace(/\\n/g, "<br />");
         this.description = this.description.replace(/<img[^>]+>/g, "");
         this.description = this.description.replace(/(?:https?):\/\/[\n\S]+/g, '');
         if (this.description.match(/### Please(.*?)/g)) {
@@ -98,16 +98,16 @@ export class WidgetDetailsComponent implements OnInit {
         this.description = this.description.replace(/(?:<br \/>\s*){2,}/g, '<br /><br />');
         this.description = this.description.replace("## Features", "\n#### **Features**\n");
         if (this.description.match(/(\!).*?(?=\])/g))
-            this.description = this.description.replace(/(\!).*?(?=\])/g, "");  
-        if (this.description.match(/## Prerequisite(.*)/g)) 
+            this.description = this.description.replace(/(\!).*?(?=\])/g, "");
+        if (this.description.match(/## Prerequisite(.*)/g))
             this.description = this.description.replace("## Prerequisite", "\n#### **Prerequisite**\n");
-        if (this.description.match(/## Supported(.*)/g)) 
+        if (this.description.match(/## Supported(.*)/g))
             this.description = this.description.replace("## Supported Cumulocity Environments", "\n#### **Supported Cumulocity Environments**\n");
         if (this.description.match(/(\|).*?(?=\|)/g))
             this.description = this.description.replace(/(\|).*?(?=\|)/g, '');
         if (this.description.match(/(\().*?(?=\))/g))
             this.description = this.description.replace(/(\().*?(?=\))/g, '');
-        this.description = this.replaceWithEmptyString({ '[](': '', '( />': '', ']': '', '### Please': '', '#/>': '', '"': '', '|': ''});
+        this.description = this.replaceWithEmptyString({ '[](': '', '( />': '', ']': '', '### Please': '', '#/>': '', '"': '', '|': '' });
     }
     replaceWithEmptyString(obj) {
         for (let x in obj) {
@@ -123,6 +123,8 @@ export class WidgetDetailsComponent implements OnInit {
             if (path[p] === "get-widgets") {
                 this.getMoreWidgetsFlag = true;
                 break;
+            } else {
+                this.getMoreWidgetsFlag = false;
             }
         }
     }
@@ -407,5 +409,13 @@ export class WidgetDetailsComponent implements OnInit {
                     this.hideProgressModalDialog();
                 });
             });
+    }
+
+    navigateToGridView() {
+        if (this.getMoreWidgetsFlag) {
+            this.router.navigate(['widget-catalog/get-widgets']);
+        } else {
+            this.router.navigate(['widget-catalog/my-widgets']);
+        }
     }
 }

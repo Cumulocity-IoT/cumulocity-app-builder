@@ -171,8 +171,8 @@ export class WidgetCatalogService {
     this.displayListSourceMoreWidgets.next(value);
   }
   getWidgetDetailsFromRepo(widgetRepoPath): Observable<any> {
-    const url =  `${this.GATEWAY_URL_GitHub}/${widgetRepoPath}/readme`;
-    const urlFallBack = `${this.GATEWAY_URL_GitHub_FallBack}/${widgetRepoPath}/readme`;
+    const url =  `${this.GATEWAY_URL_GitHub}${widgetRepoPath}/readme`;
+    const urlFallBack = `${this.GATEWAY_URL_GitHub_FallBack}${widgetRepoPath}/readme`;
     return this.http.get(`${url}`, {
       responseType: 'text'
     }).pipe(catchError(err => {
