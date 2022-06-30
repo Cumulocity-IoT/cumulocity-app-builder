@@ -75,7 +75,6 @@
                             <thead>
                                 <tr>
                                     <th></th>
-                                    <th></th>
                                     <th class="cursor-pointer" style="text-transform: capitalize;" (click)="sortColumn('title')" [ngClass]="sortClass('title')">Widget</th>
                                     <th class="cursor-pointer" style="text-transform: capitalize;" (click)="sortColumn('version')" [ngClass]="sortClass('version')">Latest Version</th>
                                     <th class="cursor-pointer" style="text-transform: capitalize;" (click)="sortColumn('requiredPlatformVersion')" [ngClass]="sortClass('requiredPlatformVersion')">Supported C8Y Platforms</th>
@@ -88,31 +87,29 @@
                             <tbody>
                                 <tr *ngFor="let widget of filterWidgets">
                                     <td>
-                                        <div class="text-warning" [ngSwitch]="widget.actionCode">
-                                            <button class="btn btn-clean btn-icon btn-md" title="Install"
+                                        <ng-container [ngSwitch]="widget.actionCode">
+                                            <button class="btn btn-clean btn-icon btn-md text-warning" title="Install"
                                                 *ngSwitchCase="'001'">
                                                 <i c8yIcon="upload" class="action-icon"
                                                     (click)="installWidget(widget, false)"></i>
                                             </button>
-                                            <button class="btn btn-clean btn-icon btn-md"
+                                            <button class="btn btn-clean btn-icon btn-md text-warning"
                                                 title="Install (Not Compatible)" *ngSwitchCase="'002'">
                                                 <i c8yIcon="level-up" class="action-icon"
                                                     (click)="installWidget(widget, false)"></i>
                                             </button>
-                                            <button class="btn btn-clean btn-icon btn-md" title="Refresh"
+                                            <button class="btn btn-clean btn-icon btn-md text-warning" title="Refresh"
                                                 *ngSwitchCase="'003'">
                                                 <i c8yIcon="refresh" class="action-icon text-info"
                                                     (click)="refresh()"></i>
                                             </button>
-                                            <button class="invisible btn btn-clean btn-icon btn-md" title="Refresh"
+                                            <button class="invisible btn btn-clean btn-icon btn-md text-warning" title="Refresh"
                                                 *ngSwitchDefault>
                                                 <i c8yIcon="refresh" class="action-icon text-info"
                                                     (click)="refresh()"></i>
                                             </button>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="widget-icon"><i [c8yIcon]="widget.icon"></i></div>
+                                        </ng-container>
+                                        <i class="widget-icon" [c8yIcon]="widget.icon"></i>
                                     </td>
                                     <td style="font-size: 12px;">{{widget.title}}
                                         <i *ngIf="!widget.isCompatible || widget.isDeprecated"

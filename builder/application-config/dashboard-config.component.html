@@ -12,7 +12,7 @@
 
     <div class="card-group">
         <div class="col-xs-12 col-md-5">
-            <div class="card card-color">
+            <div class="card"  [ngClass]="{'card-color': applyTheme}">
                 <div class="card-header">
                     <h2 class="text-light" style="margin-top: 20px;" translate="">Application Configuration</h2>
                 </div>
@@ -22,7 +22,7 @@
             </div>
         </div>
         <div class="col-xs-12 col-md-7">
-            <div class="card card-color">
+            <div class="card"  [ngClass]="{'card-color': applyTheme}">
                 <div class="card-header">
                     <h4 translate>Details</h4>
                 </div>
@@ -30,19 +30,19 @@
                 <div class="card-block">
                     <form name="editAppBuilderAppForm" #editAppBuilderAppForm="ngForm">
                         <div class="form-group">
-                            <label for="name" class="label-color"><span>Name</span></label>
+                            <label for="name" [ngClass]="{'label-color': applyTheme}"><span>Name</span></label>
                             <input type="text" class="form-control" id="name" name="name"
                                 placeholder="e.g. My First Application (required)" required [(ngModel)]="newAppName">
                         </div>
 
                         <div class="form-group" *ngIf="app.contextPath != undefined">
-                            <label for="contextpath" class="label-color"><span>Context Path</span></label>
+                            <label for="contextpath" [ngClass]="{'label-color': applyTheme}"><span>Context Path</span></label>
                             <input type="text" class="form-control" id="contextpath" name="contextpath"
                                 placeholder="e.g. my-app (required)" required [(ngModel)]="newAppContextPath">
                         </div>
 
                         <div class="form-group">
-                            <label for="icon" class="label-color"><span>Icon</span></label>
+                            <label for="icon" [ngClass]="{'label-color': applyTheme}"><span>Icon</span></label>
                             <icon-selector id="icon" name="icon" [(value)]="newAppIcon" ></icon-selector>
                         </div>
                     </form>
@@ -72,7 +72,7 @@
 
     <div class="card-group">
         <div class="col-xs-12">
-            <div class="card card-color">
+            <div class="card"  [ngClass]="{'card-color': applyTheme}">
                 <div class="card-header">
                     <h4 translate>Dashboards</h4>
                 </div>

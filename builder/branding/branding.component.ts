@@ -31,6 +31,7 @@ export class BrandingComponent implements OnInit,OnDestroy {
     app: Observable<any>;
     dirty = false;
     showIcon = true;
+    applyTheme = false;
     constructor(private route: ActivatedRoute, private appService: ApplicationService, private brandingService: BrandingService,
         @Inject(DOCUMENT) private document: Document, private renderer: Renderer2) {
         const appId = route.paramMap.pipe(
@@ -49,7 +50,14 @@ export class BrandingComponent implements OnInit,OnDestroy {
     }
 
     ngOnInit(): void {
-        this.renderer.addClass(this.document.body, 'body-theme');
+        this.app.subscribe((app) => {
+            if (app.applicationBuilder.branding.enabled && app.applicationBuilder.branding.colors.primary !== '#1776bf') {
+                this.applyTheme = true;
+                this.renderer.addClass(this.document.body, 'body-theme');
+            } else {
+                this.applyTheme = false;
+            }
+        }); 
     }
 
     async save(app) {
@@ -129,7 +137,12 @@ export class BrandingComponent implements OnInit,OnDestroy {
         app.applicationBuilder.branding.colors.tabBar = tabBar;
         app.applicationBuilder.branding.colors.toolBar = toolBar;
         this.showBrandingChange(app);
-
-        this.renderer.addClass(this.document.body, 'body-theme');
+        if (primary === '#1776bf') {
+            this.renderer.removeClass(this.document.body, 'body-theme');
+            this.applyTheme = false;
+        } else {
+            this.applyTheme = true;
+            this.renderer.addClass(this.document.body, 'body-theme');
+        }
     }
 }
