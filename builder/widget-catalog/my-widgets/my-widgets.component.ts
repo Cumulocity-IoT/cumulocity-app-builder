@@ -68,7 +68,7 @@ export class MyWidgetsComponent implements OnInit {
             if (value) {
                 this.displayListValue = value;
             } else {
-                this.displayListValue = '2';
+                this.displayListValue = '1';
             }
         });
     }

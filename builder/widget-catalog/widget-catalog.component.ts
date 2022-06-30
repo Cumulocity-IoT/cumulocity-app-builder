@@ -68,7 +68,7 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
             if (value) {
                 this.displayListValue = value;
             } else {
-                this.displayListValue = '2';
+                this.displayListValue = '1';
             }
         });
     }

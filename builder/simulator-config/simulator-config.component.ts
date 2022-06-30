@@ -45,6 +45,7 @@ export class SimulatorConfigComponent implements OnInit, OnDestroy {
     simulatorConfigById$ = new BehaviorSubject<Map<number, SimulatorConfig>>(new Map());
 
     isUnlocking = false;
+    applyTheme = false;
     private _lockStatusListener: Promise<number>;
     private _simulatorConfigListener: Promise<number>;
     userHasAdminRights: boolean;
@@ -60,12 +61,20 @@ export class SimulatorConfigComponent implements OnInit, OnDestroy {
         this._lockStatusListener = simSvc.simulator.addLockStatusListener(Comlink.proxy(lockStatus => this.lockStatus$.next(lockStatus)));
         this._simulatorConfigListener = simSvc.simulator.addSimulatorConfigListener(Comlink.proxy(simulatorConfigById =>
             this.simulatorConfigById$.next(simulatorConfigById)));
-        this.userHasAdminRights = userService.hasAllRoles(appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN","ROLE_APPLICATION_MANAGEMENT_ADMIN"])
+        this.userHasAdminRights = userService.hasAllRoles(appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN","ROLE_APPLICATION_MANAGEMENT_ADMIN"]);
+        
 
     }
 
-    ngOnInit() {
-        this.renderer.addClass(this.document.body, 'simulator-body-theme');
+    async ngOnInit() {
+        const appId = this.appIdService.getCurrentAppId();
+        const app = (await this.appService.detail(appId)).data as IApplication  & {applicationBuilder};
+        if (app.applicationBuilder.branding.enabled && app.applicationBuilder.branding.colors.primary !== '#1776bf') {
+            this.applyTheme = true;
+            this.renderer.addClass(this.document.body, 'simulator-body-theme');
+        } else {
+            this.applyTheme = false;
+        }
     }
 
     showCreateSimulatorDialog() {

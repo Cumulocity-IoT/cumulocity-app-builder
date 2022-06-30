@@ -73,6 +73,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     delayedAppUpdateSubscription: Subscription;
 
     bsModalRef: BsModalRef;
+    applyTheme = false;
 
     constructor(
         private appIdService: AppIdService, private appService: ApplicationService, private appStateService: AppStateService,
@@ -99,11 +100,18 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
                 // TODO?
                 //this.tabs.refresh();
             });
+        this.app.subscribe((app) => {
+            if (app.applicationBuilder.branding.enabled && app.applicationBuilder.branding.colors.primary !== '#1776bf') {
+                this.applyTheme = true;
+                this.renderer.addClass(this.document.body, 'dashboard-body-theme');
+            } else {
+                this.applyTheme = false;
+            }
+        });
     }
 
     async ngOnInit() {
         this.isDashboardCatalogEnabled = await this.settngService.isDashboardCatalogEnabled();
-        this.renderer.addClass(this.document.body, 'dashboard-body-theme');
     }
 
     private alertModalDialog(message: any): BsModalRef {
