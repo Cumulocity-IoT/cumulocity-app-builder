@@ -236,6 +236,7 @@ export class FileValuesSimulationStrategyConfigComponent extends SimulationStrat
         this.config = c;
         this.config.modalSize = "modal-md";
         this.config.generationType = 'measurement'
+        this.config.headerPresent = false;
     }
 
     fileUploaded(events){
