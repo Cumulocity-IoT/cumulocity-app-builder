@@ -21,22 +21,22 @@
                                 (click)="updateWidget(widgetDetails, false)"></i>
                         </button>
                         <button class="btn btn-clean btn-icon btn-md" title="Refresh" *ngSwitchCase="'003'">
-                            <i c8yIcon="refresh" class="widget-action-icon text-info" (click)="refresh('update')"></i>
+                            <i c8yIcon="refresh" class="widget-action-icon text-info" (click)="refresh()"></i>
                         </button>
                     </div>
                     <div class="text-warning action-btn" [ngSwitch]="widgetDetails.actionCode" *ngIf="getMoreWidgetsFlag">
                         <button class="btn btn-clean btn-icon btn-md"
                             title="Install - Available Version - {{widgetDetails.version}}" *ngSwitchCase="'001'">
                             <i c8yIcon="upload" class="widget-action-icon"
-                                (click)="installWidget(widgetDetails, false)"></i>
+                                (click)="installWidget(widgetDetails)"></i>
                         </button>
                         <button class="btn btn-clean btn-icon btn-md" title="Install (Not Compatible)"
                             *ngSwitchCase="'002'">
                             <i c8yIcon="level-up" class="widget-action-icon"
-                                (click)="installWidget(widgetDetails, false)"></i>
+                                (click)="installWidget(widgetDetails)"></i>
                         </button>
                         <button class="btn btn-clean btn-icon btn-md" title="Refresh" *ngSwitchCase="'003'">
-                            <i c8yIcon="refresh" class="widget-action-icon text-info" (click)="refresh('update')"></i>
+                            <i c8yIcon="refresh" class="widget-action-icon text-info" (click)="refresh()"></i>
                         </button>
                     </div>
                     <div class="action-btn">
@@ -70,7 +70,7 @@
                     <div *ngIf="userHasAdminRights && !getMoreWidgetsFlag" class="text-warning" [ngSwitch]="widgetDetails.actionCode"
                         style="position: absolute; right: 10px;">
                         <div title="Refresh" *ngSwitchCase="'003'">
-                            <i c8yIcon="refresh" class="widget-action-icon text-info" (click)="refresh('uninstall')"></i>
+                            <i c8yIcon="refresh" class="widget-action-icon text-info" (click)="refresh()"></i>
                         </div>
                         <div class="text-danger" title="Uninstall Widget" *ngSwitchDefault><i class="widget-action-icon"
                                 c8yIcon="minus-circle" title="Uninstall Widget" (click)="uninstallWidget(widgetDetails)"></i></div>

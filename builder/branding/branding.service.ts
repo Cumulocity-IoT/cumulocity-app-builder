@@ -203,7 +203,7 @@ body {
     color: var(--navigator-active-color, #000);
 }
 .nav-tabs > li > button {
-    color: var(--brand-primary,#1776bf);
+    color: var(--brand-light,#333333);
 }
 .nav-tabs > li > button:hover:not([disabled]) {
     color: var(--brand-primary,#1776bf);
