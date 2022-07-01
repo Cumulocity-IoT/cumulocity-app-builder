@@ -56,7 +56,7 @@ import { AlertService } from "@c8y/ngx-components";
             <div class="col-xs-12 col-sm-4 col-md-4">
             <div class="form-group">
                 <label for="generationType"><span>Category</span></label>
-                <select name="generationType"  [(ngModel)]="config.generationType" (ngModelChange)="generationTypeChange()" required placeholder="select Catagory">
+                <select name="generationType"  id="generationType" [(ngModel)]="config.generationType" (ngModelChange)="generationTypeChange()" required placeholder="select Catagory">
                     <option value="measurement" >Measurement</option>
                     <option value="event" >Event</option>
                 </select>
@@ -65,7 +65,7 @@ import { AlertService } from "@c8y/ngx-components";
             <div class="col-xs-12 col-sm-4 col-md-4">
             <div class="form-group">
                 <label for="simulationType"><span>Simulation Type</span></label>
-                <select name="simulationType"  [(ngModel)]="config.simulationType" required placeholder="Simulation Type">
+                <select name="simulationType" id="simulationType" [(ngModel)]="config.simulationType" required placeholder="Simulation Type">
                     <option value="sequential" >Sequential</option>
                     <option value="random">Random</option>
                     <option value="steps"> +Steps </option>
@@ -75,7 +75,7 @@ import { AlertService } from "@c8y/ngx-components";
             <div class="col-xs-12 col-sm-4 col-md-4">
                 <div class="form-group">
                     <label for="intervalType"><span>Interval Type</span></label>
-                    <select name="intervalType"  [(ngModel)]="config.intervalType" required placeholder="Interval Type" (ngModelChange)="changeIntervalType()">
+                    <select name="intervalType" id="intervalType" [(ngModel)]="config.intervalType" required placeholder="Interval Type" (ngModelChange)="changeIntervalType()">
                         <option value="fixed">Fixed</option>
                         <option value="original" >Original</option>
                     </select>
@@ -108,13 +108,13 @@ import { AlertService } from "@c8y/ngx-components";
             <div class="col-xs-12 col-sm-4 col-md-4">
                 <div class="form-group" *ngIf="config.generationType === 'measurement'">
                     <label for="measurementType"><span>Select Type</span>  </label>
-                    <ng-select [items]="config.typeColumns"  bindLabel="displayName" bindValue="value"  name="measurementType" required [multiple]="false" [closeOnSelect]="true" [searchable]="true"
+                    <ng-select [items]="config.typeColumns"  bindLabel="displayName" bindValue="value" id="measurementType" name="measurementType" required [multiple]="false" [closeOnSelect]="true" [searchable]="true"
                     placeholder="Type Column"  [appendTo]="(appendTo ?  appendTo : 'body')" [addTag]="addCustomType" [(ngModel)]="config.alternateConfigs.operations[0].type" >
                     </ng-select>
                 </div>
                 <div class="form-group" *ngIf="config.generationType === 'event'">
                     <label for="eventType"><span>Event Type</span>  </label>
-                    <ng-select [items]="config.eventTypeColumns"  bindLabel="displayName" bindValue="value"  name="eventType" required [multiple]="false" [closeOnSelect]="true" [searchable]="true"
+                    <ng-select [items]="config.eventTypeColumns"  bindLabel="displayName" bindValue="value"  id="eventType"  name="eventType" required [multiple]="false" [closeOnSelect]="true" [searchable]="true"
                     placeholder="Event Type" [appendTo]="(appendTo ?  appendTo : 'body')" [addTag]="addCustomEventType" [(ngModel)]="config.alternateConfigs.operations[0].eventType" >
                     </ng-select>
                 </div>
@@ -122,16 +122,16 @@ import { AlertService } from "@c8y/ngx-components";
             <div class="col-xs-12 col-sm-4 col-md-4">
                 <div class="form-group" *ngIf="config.generationType === 'measurement'">
                     <label for="fragementType"><span>Select Fragement</span>  </label>
-                    <ng-select *ngIf="config.type !== 'JSON'"  [items]="config.fragmentColumns"  bindLabel="displayName" bindValue="value"  name="fragementType" required [multiple]="false" [closeOnSelect]="true" [searchable]="true"
+                    <ng-select *ngIf="config.type !== 'JSON'"  [items]="config.fragmentColumns"  bindLabel="displayName" bindValue="value"  id="fragementType"  name="fragementType" required [multiple]="false" [closeOnSelect]="true" [searchable]="true"
                     placeholder="Fragement Type" [appendTo]="(appendTo ?  appendTo : 'body')" [addTag]="addCustomFragment" [(ngModel)]="config.alternateConfigs.operations[0].fragment" >
                     </ng-select>
-                    <ng-select *ngIf="config.type === 'JSON'" [items]="config.fragmentColumns"  bindLabel="displayName" bindValue="value"  name="fragementType" required [multiple]="false" [closeOnSelect]="true" [searchable]="true"
+                    <ng-select *ngIf="config.type === 'JSON'" [items]="config.fragmentColumns"  bindLabel="displayName" bindValue="value"  id="fragementType" name="fragementType" required [multiple]="false" [closeOnSelect]="true" [searchable]="true"
                     placeholder="Fragement Type" [appendTo]="(appendTo ?  appendTo : 'body')"  [(ngModel)]="config.alternateConfigs.operations[0].fragment" >
                     </ng-select>
                 </div>
                 <div class="form-group" *ngIf="config.generationType === 'event'">
                     <label for="eventText"><span>Select Event Text</span>  </label>
-                    <ng-select [items]="config.fileColumns"  bindLabel="displayName" bindValue="value"  name="eventText" required [multiple]="false" [closeOnSelect]="true" [searchable]="true"
+                    <ng-select [items]="config.fileColumns"  bindLabel="displayName" bindValue="value"  id="eventText" name="eventText" required [multiple]="false" [closeOnSelect]="true" [searchable]="true"
                     placeholder="Event Text" [(ngModel)]="config.alternateConfigs.operations[0].eventText"  [appendTo]="(appendTo ?  appendTo : 'body')">
                     </ng-select>
                 </div>
@@ -148,7 +148,7 @@ import { AlertService } from "@c8y/ngx-components";
             <div class="col-xs-12 col-sm-6 col-md-6">
                 <div class="form-group">
                     <label for="series"><span>Series </span></label>
-                    <ng-select [items]="config.fileColumns" bindLabel="displayName" bindValue="value" name="series" required [multiple]="true" [closeOnSelect]="false" [searchable]="true"
+                    <ng-select [items]="config.fileColumns" bindLabel="displayName" bindValue="value" id="series" name="series" required [multiple]="true" [closeOnSelect]="false" [searchable]="true"
                     placeholder="Select Series(s)" [appendTo]="(appendTo ?  appendTo : 'body')"  [(ngModel)]="config.alternateConfigs.operations[0].series" >
                     </ng-select>
                 </div> 
@@ -156,7 +156,7 @@ import { AlertService } from "@c8y/ngx-components";
             <div class="col-xs-12 col-sm-6 col-md-6">
                 <div class="form-group" *ngIf="config.type === 'CSV'">
                     <label for="value"><span>Value </span></label>
-                    <ng-select [items]="config.fileColumns" name="value"  bindLabel="displayName" bindValue="value" required [multiple]="true" [closeOnSelect]="false" [searchable]="true"
+                    <ng-select [items]="config.fileColumns" id="value" name="value"  bindLabel="displayName" bindValue="value" required [multiple]="true" [closeOnSelect]="false" [searchable]="true"
                     placeholder="Select Measurements value(s)" [appendTo]="(appendTo ?  appendTo : 'body')" [(ngModel)]="config.alternateConfigs.operations[0].value" >
                     </ng-select>
                 </div> 
@@ -166,7 +166,7 @@ import { AlertService } from "@c8y/ngx-components";
             <div class="col-xs-12 col-sm-6 col-md-6"  *ngIf="config.type === 'CSV' && config.generationType === 'measurement'">
                 <div class="form-group">
                     <label for="unit"><span>Unit </span></label>
-                    <ng-select [items]="config.fileColumns" name="unit" required [multiple]="true"  bindLabel="displayName" bindValue="value"  [closeOnSelect]="false" [searchable]="true"
+                    <ng-select [items]="config.fileColumns" id="unit" name="unit" required [multiple]="true"  bindLabel="displayName" bindValue="value"  [closeOnSelect]="false" [searchable]="true"
                     placeholder="Select Measurements unit(s)" [appendTo]="(appendTo ?  appendTo : 'body')" [(ngModel)]="config.alternateConfigs.operations[0].unit" >
                     </ng-select>
                 </div> 
@@ -174,7 +174,7 @@ import { AlertService } from "@c8y/ngx-components";
             <div class="col-xs-12 col-sm-6 col-md-6" *ngIf="config.intervalType === 'original'">
                 <div class="form-group" >
                         <label for="dateTime"><span>Select Timestamp</span>  </label>
-                        <ng-select [items]="config.fileColumns" name="dateTime"  bindLabel="displayName" bindValue="value"  required [multiple]="false" [closeOnSelect]="true" [searchable]="true"
+                        <ng-select [items]="config.fileColumns" id="dateTime" name="dateTime"  bindLabel="displayName" bindValue="value"  required [multiple]="false" [closeOnSelect]="true" [searchable]="true"
                         placeholder="TimeStamp" [appendTo]="(appendTo ?  appendTo : 'body')" [(ngModel)]="config.alternateConfigs.operations[0].dateTime" >
                         </ng-select>
                     </div>    
@@ -236,6 +236,7 @@ export class FileValuesSimulationStrategyConfigComponent extends SimulationStrat
         this.config = c;
         this.config.modalSize = "modal-md";
         this.config.generationType = 'measurement'
+        this.config.headerPresent = false;
     }
 
     fileUploaded(events){
