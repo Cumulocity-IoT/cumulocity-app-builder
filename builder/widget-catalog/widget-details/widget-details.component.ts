@@ -141,13 +141,8 @@ export class WidgetDetailsComponent implements OnInit {
         window.open(url);
     }
 
-    refresh(action) {
-        if (action === 'update') {
-            window.location.reload();
-        } else if (action === 'uninstall') {
-            this.router.navigate(['widget-catalog/my-widgets']);
-        }
-
+    refresh() {
+        window.location.reload();
     }
     private alertModalDialog(message: any): BsModalRef {
         return this.modalService.show(AlertMessageModalComponent, { class: 'c8y-wizard', initialState: { message } });
@@ -329,10 +324,17 @@ export class WidgetDetailsComponent implements OnInit {
     private actionFlag(widget: WidgetModel) {
 
         if (this.userHasAdminRights) {
-            if (widget.isCompatible && this.isUpdateAvailable(widget) && !widget.isReloadRequired) { widget.actionCode = '001'; }
-            else if (!widget.isCompatible && this.isUpdateAvailable(widget) && !widget.isReloadRequired) { widget.actionCode = '002'; }
-            else if (widget.isReloadRequired && !this.isUpdateAvailable(widget)) { widget.actionCode = '003'; }
-            else { widget.actionCode = '000'; }
+            if (!this.getMoreWidgetsFlag) {
+                if (widget.isCompatible && this.isUpdateAvailable(widget) && !widget.isReloadRequired) { widget.actionCode = '001'; }
+                else if (!widget.isCompatible && this.isUpdateAvailable(widget) && !widget.isReloadRequired) { widget.actionCode = '002'; }
+                else if (widget.isReloadRequired && !this.isUpdateAvailable(widget)) { widget.actionCode = '003'; }
+                else { widget.actionCode = '000'; }
+            } else {
+                if (widget.isCompatible && !widget.installed) { widget.actionCode = '001'; }
+                else if (!widget.isCompatible && !widget.installed) { widget.actionCode = '002'; }
+                else if (widget.isReloadRequired && widget.installed) { widget.actionCode = '003'; }
+                else { widget.actionCode = '000'; }
+            } 
         } else {
             widget.actionCode = '000';
         }

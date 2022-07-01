@@ -85,16 +85,16 @@
                                 <tr *ngFor="let widget of filterWidgets;">
                                     <td>
                                         <ng-container [ngSwitch]="widget.actionCode">
-                                            <button class="btn btn-clean btn-icon btn-md text-warning" title="Update" *ngSwitchCase="'001'">
+                                            <button class="btn btn-clean btn-icon btn-md text-warning verticalAlign" title="Update" *ngSwitchCase="'001'">
                                                 <i c8yIcon="cloud-upload" class="action-icon" (click)="updateWidget(widget, false)"></i>
                                             </button>
-                                            <button class="btn btn-clean btn-icon btn-md text-warning" title="Update (Not Compatible)" *ngSwitchCase="'002'">
+                                            <button class="btn btn-clean btn-icon btn-md text-warning verticalAlign" title="Update (Not Compatible)" *ngSwitchCase="'002'">
                                                 <i c8yIcon="level-up" class="action-icon" (click)="updateWidget(widget, false)"></i>
                                             </button>
-                                            <button class="btn btn-clean btn-icon btn-md text-warning" title="Refresh" *ngSwitchCase="'003'">
+                                            <button class="btn btn-clean btn-icon btn-md text-warning verticalAlign" title="Refresh" *ngSwitchCase="'003'">
                                                 <i c8yIcon="refresh" class="action-icon text-info" (click)="refresh()"></i>
                                             </button>
-                                            <button class="invisible btn btn-clean btn-icon btn-md text-warning" title="Refresh" *ngSwitchDefault>
+                                            <button class="invisible btn btn-clean btn-icon btn-md text-warning verticalAlign" title="Refresh" *ngSwitchDefault>
                                                 <i c8yIcon="refresh" class="action-icon text-info" (click)="refresh()"></i>
                                             </button>
                                         </ng-container>

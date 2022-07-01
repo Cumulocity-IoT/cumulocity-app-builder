@@ -136,13 +136,16 @@ export class BrandingComponent implements OnInit,OnDestroy {
         app.applicationBuilder.branding.colors.headerBar = headerBar;
         app.applicationBuilder.branding.colors.tabBar = tabBar;
         app.applicationBuilder.branding.colors.toolBar = toolBar;
-        this.showBrandingChange(app);
+        
         if (primary === '#1776bf') {
             this.renderer.removeClass(this.document.body, 'body-theme');
             this.applyTheme = false;
+            app.applicationBuilder.branding.enabled = false;
+            this.showBrandingChange(app);
         } else {
             this.applyTheme = true;
             this.renderer.addClass(this.document.body, 'body-theme');
+            this.showBrandingChange(app);
         }
     }
 }
