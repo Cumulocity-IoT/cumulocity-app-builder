@@ -140,7 +140,7 @@ export class BrandingComponent implements OnInit,OnDestroy {
         if (primary === '#1776bf') {
             this.renderer.removeClass(this.document.body, 'body-theme');
             this.applyTheme = false;
-            app.applicationBuilder.branding.enabled = false;
+            //app.applicationBuilder.branding.enabled = false;
             this.showBrandingChange(app);
         } else {
             this.applyTheme = true;

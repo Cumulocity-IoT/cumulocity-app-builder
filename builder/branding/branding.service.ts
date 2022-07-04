@@ -142,7 +142,7 @@ body {
     
     /* All the other text: */
     --brand-dark: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
-    --input-focus-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+    /* --input-focus-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)}; */
     --header-hover-color: ${this.colorToHex(app.applicationBuilder.branding.colors.hover)};
     --header-color: ${app.applicationBuilder.branding.colors.headerBar ? this.colorToHex(app.applicationBuilder.branding.colors.headerBar) : '#ffffff'};
     --dropdown-background: ${app.applicationBuilder.branding.colors.headerBar ? this.colorToHex(app.applicationBuilder.branding.colors.headerBar) : '#ffffff'};
@@ -154,10 +154,10 @@ body {
     --dropdown-actions-color-hover: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     --component-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     --component-actions-color-hover: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
-    --page-tabs-link-color: #1776bf;
+    --page-tabs-link-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     --page-tabs-actions-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     --page-tabs-actions-color-hover: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
-    --list-group-actions-color: ${this.colorToHex(app.applicationBuilder.branding.colors.primary)};
+    --list-group-actions-color: var(--component-link-color, #000);
     ${app.applicationBuilder.branding.logoHeight != undefined ? '--navigator-platform-logo-height: ' + app.applicationBuilder.branding.logoHeight + 'px;' : ''}
 }
 
@@ -208,12 +208,7 @@ body {
 .nav-tabs > li > button:hover:not([disabled]) {
     color: var(--brand-primary,#1776bf);
 }
-select, select.form-control {
-    --form-control-bg-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
-    --form-control-color: ${this.colorToHex(app.applicationBuilder.branding.colors.primary)};
-}
 select.form-control:focus, select:focus {
-    background-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     color: ${this.colorToHex(app.applicationBuilder.branding.colors.primary)};
 }
 `;
