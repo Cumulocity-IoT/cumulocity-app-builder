@@ -51,7 +51,7 @@ export class BrandingComponent implements OnInit,OnDestroy {
 
     ngOnInit(): void {
         this.app.subscribe((app) => {
-            if (app.applicationBuilder.branding.enabled && app.applicationBuilder.branding.colors.primary !== '#1776bf') {
+            if (app.applicationBuilder.branding.enabled && (app.applicationBuilder.branding.colors.primary !== '#1776bf' && app.applicationBuilder.branding.colors.primary !== '#1776BF')) {
                 this.applyTheme = true;
                 this.renderer.addClass(this.document.body, 'body-theme');
             } else {
