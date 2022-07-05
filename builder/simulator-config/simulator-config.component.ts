@@ -69,7 +69,7 @@ export class SimulatorConfigComponent implements OnInit, OnDestroy {
     async ngOnInit() {
         const appId = this.appIdService.getCurrentAppId();
         const app = (await this.appService.detail(appId)).data as IApplication  & {applicationBuilder};
-        if (app.applicationBuilder.branding.enabled && app.applicationBuilder.branding.colors.primary !== '#1776bf') {
+        if (app.applicationBuilder.branding.enabled && (app.applicationBuilder.branding.colors.primary !== '#1776bf' && app.applicationBuilder.branding.colors.primary !== '#1776BF')) {
             this.applyTheme = true;
             this.renderer.addClass(this.document.body, 'simulator-body-theme');
         } else {

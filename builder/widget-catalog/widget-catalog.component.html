@@ -200,7 +200,7 @@
         <div class="col-xs-12 col-sm-4 col-md-3" *ngFor="let widget of filterWidgets">
             <div class="card">
                 <div class="dropdown card-actions" dropdown (click)="$event.stopPropagation()"
-                    style="top: 0 !important;z-index: 1;cursor: pointer;">
+                    style="z-index: 1;cursor: pointer;">
                     <button type="button" title="Settings" id="appSettings-{{widget.name}}"
                         class="dropdown-toggle c8y-dropdown cursor-pointer" dropdownToggle>
                         <i c8yIcon="ellipsis-v"></i>
@@ -213,7 +213,7 @@
                         </li>
                     </ul>
                 </div>
-                <div class="card-actions" style="left: 5px !important; top: 10px !important">
+                <div class="card-actions" style="left: 0px !important; top: 10px !important">
                     <div class="text-warning" [ngSwitch]="widget.actionCode">
                         <button class="btn btn-clean btn-icon btn-md"
                             title="Install" *ngSwitchCase="'001'">
@@ -229,7 +229,7 @@
                     </div>
                 </div>
                 <div class="card-block text-center card-column-30">
-                    <div>
+                    <div style="display:block; width:95%;">
                         <i *ngIf="!widget.isCompatible || widget.isDeprecated"
                         title="This widget may not compatible or deprecated!" c8yIcon="warning"
                         class="wi-grid text-warning"></i>
@@ -242,7 +242,7 @@
                     </div>
                     <div>
                         <a (click)="preview(widget.preview)" class="cursor-pointer">
-                            <img class="preview-img" [src]="widget.preview && widget.preview !== '' ? widget.preview : './img/AppBuilderLogo.png'" />
+                            <img class="preview-img" [src]="widget.preview && widget.preview !== '' ? widget.preview : './img/no-image.png'" />
                         </a>
                     </div>
                     <button class="btn btn-xs btn-default margin-10" (click)="navigateToDetailPage(widget)">

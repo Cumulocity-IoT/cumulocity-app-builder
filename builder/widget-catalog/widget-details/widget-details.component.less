@@ -21,6 +21,7 @@
     font-size: 16px;
     margin-left: 35px;
     cursor: auto;
+    margin-top: 5px;
 }
 
 .widget-icons {
@@ -40,4 +41,14 @@
     background: #d7dadc;
     -webkit-border-radius: 1ex;
     border-radius: 1ex;
+}
+
+.blink_me_update {
+    animation: blinker 1s linear infinite;
+}
+
+@keyframes blinker {
+    50% {
+        opacity: 0;
+    }
 }
