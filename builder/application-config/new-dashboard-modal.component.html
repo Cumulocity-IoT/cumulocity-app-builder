@@ -127,9 +127,13 @@
                 </div>
                 </ng-template>
                 <div class="form-group">
-                    <label for="globalRoles"><span>Global Roles (Optional)</span></label>
-                    <ng-select [items]="[{name: 'Role 1'}, {name: 'Role 2'}, {name: 'Role 3'}]" name="value"  bindLabel="name" bindValue="name" required [multiple]="true" [closeOnSelect]="false" [searchable]="true"
-                    placeholder="select Role(s)" [appendTo]="(appendTo ?  appendTo : 'body')"  >
+                    <label for="globalRoles"><span>Global Roles (Optional)</span> 
+                        <button class="btn btn-link">
+                            <i c8y-icon="question-circle-o"  class="dlt-c8y-icon-question-circle-o" tooltip="Global Roles grant permissions on a dashboard level."></i>
+                        </button>
+                    </label> 
+                    <ng-select  [items]="globalRoles" name="globalRole" id="globalRole"  bindLabel="name" bindValue="name" required [multiple]="true" [closeOnSelect]="false" [searchable]="true"
+                    placeholder="select Role(s)" [(ngModel)]="selectedGlobalRoles"  [appendTo]="(appendTo ?  appendTo : 'body')"  >
                     </ng-select>
                 </div>
                 <div class="form-group" style="min-height: 50px;" *ngIf="creationMode === 'group-template' else nonGroupTemplate">
@@ -146,13 +150,6 @@
                     (selectedDevice)= "getSelectedDevice($event)" (onBlurDevice)= "getSelectedDevice($event)"></device-selector>
                 </div>
                 </ng-template>
-                
-                <div class="form-group" *ngIf="deviceName !== ''">
-                    <label for="globalRoles"><span>Inventory Roles (Optional)</span></label>
-                    <ng-select [items]="[{name: 'Inventory Role 1'}, {name: 'Inventory Role 2'}, {name: 'Inventory Role 3'}]" name="value"  bindLabel="name" bindValue="name" required [multiple]="true" [closeOnSelect]="false" [searchable]="true"
-                    placeholder="select Role(s)" [appendTo]="(appendTo ?  appendTo : 'body')"  >
-                    </ng-select>
-                </div>
                 <div class="form-group">
                     <label for="icon"><span>Icon</span></label>
                     <icon-selector id="icon" name="icon" [(value)]="dashboardIcon" appendTo=".modal-content"></icon-selector>

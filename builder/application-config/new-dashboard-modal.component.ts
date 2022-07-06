@@ -39,10 +39,11 @@ export class NewDashboardModalComponent {
     deviceName: string = '';
     tabGroup: string = '';
     dashboardVisibility: '' | 'hidden' | 'no-nav' = '';
-
+    selectedGlobalRoles: any;
     dashboardTemplate: 'welcome' = 'welcome';
 
     app: any;
+    globalRoles: any;
 
     @ViewChild(WizardComponent, {static: true}) wizard: WizardComponent;
 
@@ -67,23 +68,23 @@ export class NewDashboardModalComponent {
         this.busy = true;
         switch(this.creationMode) {
             case "blank": {
-                await this.addNewDashboard(this.app, this.dashboardName, this.dashboardVisibility, this.dashboardIcon, this.tabGroup);
+                await this.addNewDashboard(this.app, this.dashboardName, this.dashboardVisibility, this.dashboardIcon, this.tabGroup, this.selectedGlobalRoles);
                 break;
             }
             case "template": {
-                await this.addTemplateDashboardByTemplateName(this.app, this.dashboardName, this.dashboardVisibility, this.dashboardIcon, this.dashboardTemplate, this.tabGroup);
+                await this.addTemplateDashboardByTemplateName(this.app, this.dashboardName, this.dashboardVisibility, this.dashboardIcon, this.dashboardTemplate, this.tabGroup, this.selectedGlobalRoles);
                 break;
             }
             case "existing": {
-                await this.addExistingDashboard(this.app, this.dashboardName, this.dashboardVisibility, this.dashboardId, this.dashboardIcon, this.tabGroup);
+                await this.addExistingDashboard(this.app, this.dashboardName, this.dashboardVisibility, this.dashboardId, this.dashboardIcon, this.tabGroup, this.selectedGlobalRoles);
                 break;
             }
             case "clone": {
-                await this.addClonedDashboard(this.app, this.dashboardName, this.dashboardVisibility, this.dashboardId, this.dashboardIcon, this.tabGroup);
+                await this.addClonedDashboard(this.app, this.dashboardName, this.dashboardVisibility, this.dashboardId, this.dashboardIcon, this.tabGroup, this.selectedGlobalRoles);
                 break;
             }
             case "group-template": {
-                await this.addNewDashboard(this.app, this.dashboardName, this.dashboardVisibility, this.dashboardIcon, this.tabGroup, true);
+                await this.addNewDashboard(this.app, this.dashboardName, this.dashboardVisibility, this.dashboardIcon, this.tabGroup, this.selectedGlobalRoles, true);
                 break;
             }
             default: {
@@ -93,15 +94,15 @@ export class NewDashboardModalComponent {
         this.bsModalRef.hide()
     }
 
-    async addClonedDashboard(application, name: string, visibility: '' | 'hidden' | 'no-nav', dashboardId: string, icon: string, tabGroup: string) {
+    async addClonedDashboard(application, name: string, visibility: '' | 'hidden' | 'no-nav', dashboardId: string, icon: string, tabGroup: string, selectedGlobalRoles: any) {
         const dashboardManagedObject = (await this.inventoryService.detail(dashboardId)).data;
 
         const template = dashboardManagedObject.c8y_Dashboard;
 
-        await this.addTemplateDashboard(application, name, visibility, icon, template, tabGroup);
+        await this.addTemplateDashboard(application, name, visibility, icon, template, tabGroup, selectedGlobalRoles);
     }
 
-    async addExistingDashboard(application, name: string, visibility: '' | 'hidden' | 'no-nav', dashboardId: string, icon: string, tabGroup: string) {
+    async addExistingDashboard(application, name: string, visibility: '' | 'hidden' | 'no-nav', dashboardId: string, icon: string, tabGroup: string, selectedGlobalRoles: any) {
         application.applicationBuilder.dashboards = [
             ...application.applicationBuilder.dashboards || [],
             {
@@ -110,7 +111,8 @@ export class NewDashboardModalComponent {
                 visibility,
                 icon,
                 ...(this.deviceId != '' ? { deviceId: this.deviceId } : {}),
-                tabGroup
+                tabGroup,
+                roles: selectedGlobalRoles
             }
         ];
         await this.appService.update({
@@ -123,25 +125,25 @@ export class NewDashboardModalComponent {
         // this.tabs.refresh();
     }
 
-    async addNewDashboard(application, name: string, visibility: '' | 'hidden' | 'no-nav', icon: string, tabGroup: string, isGroupTemplate: boolean = false) {
+    async addNewDashboard(application, name: string, visibility: '' | 'hidden' | 'no-nav', icon: string, tabGroup: string, selectedGlobalRoles: any,isGroupTemplate: boolean = false) {
         await this.addTemplateDashboard(application, name, visibility, icon, {
             children: {},
             name,
             icon,
             global: true,
             priority: 10000
-        }, tabGroup, isGroupTemplate);
+        }, tabGroup, selectedGlobalRoles, isGroupTemplate);
     }
 
-    async addTemplateDashboardByTemplateName(application, name: string, visibility: '' | 'hidden' | 'no-nav', icon: string, templateName: 'welcome', tabGroup: string) {
+    async addTemplateDashboardByTemplateName(application, name: string, visibility: '' | 'hidden' | 'no-nav', icon: string, templateName: 'welcome', tabGroup: string, selectedGlobalRoles: any) {
         const template = {
             welcome: WELCOME_DASHBOARD_TEMPLATE,
             helpsupport: HELP_SUPPORT_DASHBOARD_TEMPLATE
         }[templateName];
-        await this.addTemplateDashboard(application, name, visibility, icon, template, tabGroup);
+        await this.addTemplateDashboard(application, name, visibility, icon, template, tabGroup, selectedGlobalRoles);
     }
 
-    async addTemplateDashboard(application, name: string, visibility: '' | 'hidden' | 'no-nav', icon: string, template: any, tabGroup: string, isGroupTemplate: boolean = false) {
+    async addTemplateDashboard(application, name: string, visibility: '' | 'hidden' | 'no-nav', icon: string, template: any, tabGroup: string, selectedGlobalRoles: any, isGroupTemplate: boolean = false) {
         const dashboardManagedObject = (await this.inventoryService.create({
             c8y_Global: {},
             "c8y_Dashboard!name!app-builder-db": {},
@@ -166,6 +168,7 @@ export class NewDashboardModalComponent {
                 visibility,
                 icon,
                 tabGroup,
+                roles: selectedGlobalRoles,
                 ...(this.deviceId != '' ? { deviceId: this.deviceId } : {}),
                 ...(isGroupTemplate ? { groupTemplate: true } : {})
             }

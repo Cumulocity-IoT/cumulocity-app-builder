@@ -17,7 +17,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { ApplicationService, InventoryService, ICurrentTenant, IApplication } from '@c8y/client';
+import { ApplicationService, InventoryService, ICurrentTenant, IApplication, UserGroupService } from '@c8y/client';
 import { AlertService, AppStateService } from '@c8y/ngx-components';
 import { AppBuilderExternalAssetsService } from 'app-builder-external-assets';
 import { AppIdService } from '../app-id.service';
@@ -44,11 +44,12 @@ export class SettingsService {
     private currentTenant: ICurrentTenant;
     private analyticsProvider: any = {};
     private isAppConfigNotFound = false;
+    private allGlobalRoles: any = [];
     delayedTenantUpdateSubject = new Subject<any>();
     
     constructor(appIdService: AppIdService, private appService: ApplicationService, private inventoryService: InventoryService,
         private alertService: AlertService, private externalAssetService: AppBuilderExternalAssetsService,
-        private appStateService: AppStateService ){
+        private appStateService: AppStateService,  private userGroupService: UserGroupService ){
             const providerList = this.externalAssetService.getAssetsList('ANALYTICS')
             this.analyticsProvider = providerList.find( provider => provider.key === 'gainsight');
             this.analyticsProvider.providerURL = this.externalAssetService.getURL('ANALYTICS','gainsight');
@@ -202,5 +203,25 @@ export class SettingsService {
     async isAppUpgradeNotification() {
         const customProp = await this.getCustomProperties();
         return (!customProp || (customProp  && ( !customProp.appUpgradeNotification || customProp.appUpgradeNotification === "true")));
+    }
+
+    private async getGlobalRoles() {
+        const userGroupFilter = {
+            pageSize: 1000,
+            withTotalPages: true
+        };
+        const {data, res, paging} = await this.userGroupService.list(userGroupFilter)
+        this.allGlobalRoles = data;
+        if(this.allGlobalRoles && this.allGlobalRoles.length > 0) {
+            this.allGlobalRoles = this.allGlobalRoles.sort((a, b) => a.name?.toLowerCase() > b.name?.toLowerCase() ? 1 : -1);
+        }
+    }
+
+    async getAllGlobalRoles() {
+        if(this.allGlobalRoles && this.allGlobalRoles.length > 0) { return this.allGlobalRoles;}
+        else {
+            await this.getGlobalRoles();
+            return this.allGlobalRoles;
+        }
     }
 }
