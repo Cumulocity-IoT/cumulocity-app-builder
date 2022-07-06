@@ -25,6 +25,8 @@ import { IconSelectorModule } from "../../icon-selector/icon-selector.module";
 import { RectangleSpinnerModule } from "../utils/rectangle-spinner/rectangle-spinner.module";
 import { DeviceSelectorModalModule } from "../utils/device-selector-modal/device-selector.module";
 import { TemplateUpdateModalComponent } from "./template-update.component";
+import { NgSelectModule } from "@ng-select/ng-select";
+import {TooltipModule} from "ngx-bootstrap/tooltip";
 
 @NgModule({
     imports: [
@@ -33,7 +35,9 @@ import { TemplateUpdateModalComponent } from "./template-update.component";
         CoreModule,
         IconSelectorModule,
         RectangleSpinnerModule,
-        DeviceSelectorModalModule
+        DeviceSelectorModalModule,
+        NgSelectModule,
+        TooltipModule
     ],
     declarations: [
         TemplateCatalogModalComponent,

@@ -78,7 +78,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     constructor(
         private appIdService: AppIdService, private appService: ApplicationService, private appStateService: AppStateService,
         private brandingService: BrandingService, private inventoryService: InventoryService, private navigation: AppBuilderNavigationService,
-        private modalService: BsModalService, private alertService: AlertService, private settngService: SettingsService
+        private modalService: BsModalService, private alertService: AlertService, private settingsService: SettingsService
     ) {
         this.app = this.appIdService.appIdDelayedUntilAfterLogin$.pipe(
             switchMap(appId => from(
@@ -102,8 +102,8 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     }
 
     async ngOnInit() {
-        this.isDashboardCatalogEnabled = await this.settngService.isDashboardCatalogEnabled();
-        this.globalRoles = await this.settngService.getAllGlobalRoles();  
+        this.isDashboardCatalogEnabled = await this.settingsService.isDashboardCatalogEnabled();
+        this.globalRoles = await this.settingsService.getAllGlobalRoles();  
     }
 
     private alertModalDialog(message: any): BsModalRef {
