@@ -5,7 +5,7 @@
             <div class="form-group">
                 <label class="m-r-8"> Display as </label>
                 <div class="c8y-select-wrapper">
-                    <select class="form-control" [(ngModel)]="displayListValue"
+                    <select class="form-control" [(ngModel)]="displayListValue" id="getMoreWidgetDropdown"
                         (change)="displayList($event.target.value)">
                         <option value="1">Grid</option>
                         <option value="2">List</option>
@@ -213,18 +213,18 @@
                         </li>
                     </ul>
                 </div>
-                <div class="card-actions" style="left: 0px !important; top: 10px !important">
+                <div class="card-actions" style="left: 0px !important; top: 15px !important">
                     <div class="text-warning" [ngSwitch]="widget.actionCode">
                         <button class="btn btn-clean btn-icon btn-md"
                             title="Install" *ngSwitchCase="'001'">
-                            <i c8yIcon="upload" class="action-icon" (click)="installWidget(widget, false)"></i>
+                            <i c8yIcon="upload" class="action-icon-grid" (click)="installWidget(widget, false)"></i>
                         </button>
                         <button class="btn btn-clean btn-icon btn-md" title="Install (Not Compatible)"
                             *ngSwitchCase="'002'">
-                            <i c8yIcon="level-up" class="action-icon" (click)="installWidget(widget, false)"></i>
+                            <i c8yIcon="level-up" class="action-icon-grid" (click)="installWidget(widget, false)"></i>
                         </button>
                         <button class="btn btn-clean btn-icon btn-md" *ngSwitchCase="'003'" title="Refresh">
-                            <i c8yIcon="refresh" class="action-icon text-info" (click)="refresh()"></i>
+                            <i c8yIcon="refresh" class="action-icon-grid text-info" (click)="refresh()"></i>
                         </button>
                     </div>
                 </div>
