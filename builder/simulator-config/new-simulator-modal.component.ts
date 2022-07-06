@@ -83,7 +83,6 @@ export class NewSimulatorModalComponent {
             this.runOnServer = true;
         } else { this.verifySimulatorMicroServiceStatus(); }
 
-        console.log(this.isCSVSimulator);
         this.configWrapper.clear();
 
         if (metadata.configComponent != null) {
