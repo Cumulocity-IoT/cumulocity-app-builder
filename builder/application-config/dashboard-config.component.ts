@@ -106,7 +106,6 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     async ngOnInit() {
         this.isDashboardCatalogEnabled = await this.settingsService.isDashboardCatalogEnabled();
         this.globalRoles = await this.accessRightsService.getAllGlobalRoles();  
-        console.log(this.globalRoles);
     }
 
     private alertModalDialog(message: any): BsModalRef {
