@@ -23,6 +23,7 @@ import {flatMap, map, startWith, switchMap} from "rxjs/operators";
 import {ApplicationService, InventoryService} from "@c8y/client";
 import {AppIdService} from "../app-id.service";
 import {DashboardConfig} from "../application-config/dashboard-config.component";
+import { AccessRightsService } from "./../../builder/access-rights.service";
 
 /**
  * Constructs the navigation menu items from an app's dashboard list
@@ -33,7 +34,8 @@ export class AppBuilderNavigationService implements NavigatorNodeFactory {
 
     private refreshSubject = new BehaviorSubject<void>(undefined);
 
-    constructor(private appIdService: AppIdService, private appService: ApplicationService, private inventoryService: InventoryService) {
+    constructor(private appIdService: AppIdService, private appService: ApplicationService, 
+        private accessRightsService: AccessRightsService, private inventoryService: InventoryService) {
         // Listen for appId changes or to forced refreshes and then update the navigation menu
         combineLatest(appIdService.appIdDelayedUntilAfterLogin$, this.refreshSubject).pipe(
             map(([appId]) => appId),
@@ -67,6 +69,9 @@ export class AppBuilderNavigationService implements NavigatorNodeFactory {
         const hierarchy =  {children: {}, node: new NavigatorNode({})};
         for(const [i, dashboard] of dashboards.map((d, i) => [i, d] as [number, DashboardConfig])) {
             if (['no-nav', 'hidden'].includes(dashboard.visibility)) {
+                continue;
+            }
+            if(!this.accessRightsService.userHasAccess(dashboard.roles)) {
                 continue;
             }
             const path = dashboard.name.split('/').filter(pathSegment => pathSegment != '');

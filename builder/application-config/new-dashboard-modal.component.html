@@ -132,7 +132,7 @@
                             <i c8y-icon="question-circle-o"  class="dlt-c8y-icon-question-circle-o" tooltip="Global Roles grant permissions on a dashboard level."></i>
                         </button>
                     </label> 
-                    <ng-select  [items]="globalRoles" name="globalRole" id="globalRole"  bindLabel="name" bindValue="name" required [multiple]="true" [closeOnSelect]="false" [searchable]="true"
+                    <ng-select  [items]="globalRoles" name="globalRole" id="globalRole"  bindLabel="name"  [multiple]="true" [closeOnSelect]="false" [searchable]="true"
                     placeholder="select Role(s)" [(ngModel)]="selectedGlobalRoles"  [appendTo]="(appendTo ?  appendTo : 'body')"  >
                     </ng-select>
                 </div>

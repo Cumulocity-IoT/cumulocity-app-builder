@@ -35,6 +35,7 @@ import { TemplateUpdateModalComponent } from "../template-catalog/template-updat
 import { BinaryDescription, DeviceDescription } from "../template-catalog/template-catalog.model";
 import { SettingsService } from './../../builder/settings/settings.service';
 import { AlertMessageModalComponent } from "./../../builder/utils/alert-message-modal/alert-message-modal.component";
+import { AccessRightsService } from "./../../builder/access-rights.service";
 
 
 export interface DashboardConfig {
@@ -78,7 +79,8 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     constructor(
         private appIdService: AppIdService, private appService: ApplicationService, private appStateService: AppStateService,
         private brandingService: BrandingService, private inventoryService: InventoryService, private navigation: AppBuilderNavigationService,
-        private modalService: BsModalService, private alertService: AlertService, private settingsService: SettingsService
+        private modalService: BsModalService, private alertService: AlertService, private settingsService: SettingsService,
+        private accessRightsService: AccessRightsService
     ) {
         this.app = this.appIdService.appIdDelayedUntilAfterLogin$.pipe(
             switchMap(appId => from(
@@ -103,7 +105,8 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
 
     async ngOnInit() {
         this.isDashboardCatalogEnabled = await this.settingsService.isDashboardCatalogEnabled();
-        this.globalRoles = await this.settingsService.getAllGlobalRoles();  
+        this.globalRoles = await this.accessRightsService.getAllGlobalRoles();  
+        console.log(this.globalRoles);
     }
 
     private alertModalDialog(message: any): BsModalRef {

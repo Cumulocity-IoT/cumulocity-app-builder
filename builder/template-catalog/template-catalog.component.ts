@@ -29,7 +29,7 @@ import { ProgressIndicatorModalComponent } from "../utils/progress-indicator-mod
 import './cumulocity.json';
 import { WidgetCatalogService } from "../../builder/widget-catalog/widget-catalog.service";
 import { catchError } from "rxjs/operators";
-import { SettingsService } from "../../builder/settings/settings.service";
+import { AccessRightsService } from "../../builder/access-rights.service";
 
 enum TemplateCatalogStep {
     CATALOG,
@@ -84,13 +84,13 @@ export class TemplateCatalogModalComponent implements OnInit {
     constructor(private modalService: BsModalService, private modalRef: BsModalRef,
         private catalogService: TemplateCatalogService, private componentService: DynamicComponentService,
         private alertService: AlertService, private widgetCatalogService: WidgetCatalogService,
-        private settingsService: SettingsService) {
+        private accessRightsService: AccessRightsService) {
         this.onSave = new Subject();
     }
 
     async ngOnInit() {
         this.loadTemplateCatalog();
-        this.globalRoles = await this.settingsService.getAllGlobalRoles();  
+        this.globalRoles = await this.accessRightsService.getAllGlobalRoles();  
     }
 
     loadTemplateCatalog(): void {

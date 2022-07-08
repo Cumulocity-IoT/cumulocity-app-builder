@@ -26,6 +26,7 @@ import {IApplicationBuilderApplication} from "../iapplication-builder-applicatio
 import {AppStateService} from "@c8y/ngx-components";
 import {RuntimeWidgetInstallerModalService} from "cumulocity-runtime-widget-loader";
 import { SettingsService } from "../../builder/settings/settings.service";
+import { AccessRightsService } from "../../builder/access-rights.service";
 
 @Component({
     selector: 'app-builder-context-dashboard',
@@ -90,7 +91,8 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
         private userService: UserService,
         private appStateService: AppStateService,
         private runtimeWidgetInstallerModalService: RuntimeWidgetInstallerModalService,
-        private settingsService: SettingsService
+        private settingsService: SettingsService,
+        private accessRightsService: AccessRightsService
     ) {
         this.subscriptions.add(this.activatedRoute.paramMap.subscribe(async paramMap => {
             // Always defined
@@ -151,7 +153,8 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
 
             if (this.tabGroup) {
                 const dashboardsInTabgroup = app.applicationBuilder.dashboards
-                    .filter(dashboard => (dashboard.tabGroup === this.tabGroup || (dashboard && dashboard.groupTemplate && dashboard.tabGroup === 'deviceId')) && dashboard.visibility !== 'hidden')
+                    .filter(dashboard => (dashboard.tabGroup === this.tabGroup || (dashboard && dashboard.groupTemplate && dashboard.tabGroup === 'deviceId'))
+                     && dashboard.visibility !== 'hidden' && this.accessRightsService.userHasAccess(dashboard.roles))
                 tabs.push(...await Promise.all(dashboardsInTabgroup.map(async (dashboard, i) => {
                     const isGroupTemplate = (dashboard && dashboard.groupTemplate) || false;
                     if (isGroupTemplate) {
