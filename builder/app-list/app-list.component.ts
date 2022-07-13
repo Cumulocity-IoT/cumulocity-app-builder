@@ -49,16 +49,6 @@ export class AppListComponent {
     constructor(private router: Router, private appService: ApplicationService, 
         private appStateService: AppStateService, private modalService: BsModalService, 
         private userService: UserService, private appListService: AppListService, private realTimeService: Realtime) {
-        console.log("current user", appStateService.currentUser.value);
-       /* (async () => {
-                const userInventoryRoleService = userService.inventoryAssignment(appStateService.currentUser.value);
-                const filter: object = {
-                        pageSize: 100,
-                        withTotalPages: true
-                      };
-                 const {data, res} = await userInventoryRoleService.list(filter);
-                 console.log('data', data);
-             })(); */
         this.userHasAdminRights = userService.hasRole(appStateService.currentUser.value, "ROLE_APPLICATION_MANAGEMENT_ADMIN")
         this.appListService.refreshAppList$.subscribe( () => {
             this.getListOfApplications();

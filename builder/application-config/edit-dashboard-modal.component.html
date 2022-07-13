@@ -44,7 +44,7 @@
                 </button>
             </label> 
             <ng-select  [items]="globalRoles" name="globalRole"  bindLabel="name"  [multiple]="true" [closeOnSelect]="false" [searchable]="true"
-            placeholder="select Role(s)" [(ngModel)]="roles" id="globalRoleEdit" [appendTo]="(appendTo ?  appendTo : 'body')"  >
+            placeholder="select Role(s)" [(ngModel)]="roles" id="globalRoleEdit" [appendTo]="'.modal-content'"  >
             </ng-select>
         </div>
         <div class="form-group" style="min-height: 50px;"  *ngIf="dashboardType === 'group-template' else nonGroupTemplate">

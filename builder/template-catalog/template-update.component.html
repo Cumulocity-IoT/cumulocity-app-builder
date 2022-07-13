@@ -47,7 +47,7 @@
                         </button>
                     </label> 
                     <ng-select  [items]="globalRoles" name="globalRole" id="globalRole"  bindLabel="name"   [multiple]="true" [closeOnSelect]="false" [searchable]="true"
-                    placeholder="select Role(s)" [(ngModel)]="dashboardConfig.roles"  [appendTo]="(appendTo ?  appendTo : 'body')"  >
+                    placeholder="select Role(s)" [(ngModel)]="dashboardConfig.roles"   [appendTo]="'.modal-content'" >
                     </ng-select>
                 </div>
 

@@ -104,7 +104,7 @@
                         </button>
                     </label> 
                     <ng-select  [items]="globalRoles" name="globalRole" id="globalRole"  bindLabel="name" [multiple]="true" [closeOnSelect]="false" [searchable]="true"
-                    placeholder="select Role(s)" [(ngModel)]="dashboardConfiguration.roles"  [appendTo]="(appendTo ?  appendTo : 'body')"  >
+                    placeholder="select Role(s)" [(ngModel)]="dashboardConfiguration.roles"  [appendTo]="'.modal-content'"  >
                     </ng-select>
                 </div>
                 <div *ngIf="templateDetails.input?.devices?.length > 0">

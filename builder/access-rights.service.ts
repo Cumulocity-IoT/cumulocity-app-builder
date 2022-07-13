@@ -20,7 +20,7 @@ import { Injectable } from "@angular/core";
 import { AppStateService } from "@c8y/ngx-components";
 import { UserGroupService, UserService } from "@c8y/ngx-components/api";
 import { from, of } from "rxjs";
-import { switchMap } from "rxjs/operators";
+import { switchMap, tap } from "rxjs/operators";
 import { AppIdService } from "./app-id.service";
 
 @Injectable({providedIn: 'root'})
@@ -30,12 +30,9 @@ export class AccessRightsService {
     private userHasAdminRights: boolean;
     constructor(appIdService: AppIdService, private userGroupService: UserGroupService, 
         private userService: UserService, private appStateService: AppStateService) {
-        appIdService.appIdDelayedUntilAfterLogin$.pipe(switchMap(appId => {
-            if (appId != undefined) {
+        appIdService.appIdDelayedUntilAfterLogin$.pipe(tap(() => {
                 this.getLoggedInUserRoles();
                 this.userHasAdminRights = userService.hasRole(appStateService.currentUser.value, "ROLE_APPLICATION_MANAGEMENT_ADMIN")
-            } 
-            return of(undefined); 
         }))
         .subscribe(async app => {
                // TODO
@@ -47,7 +44,6 @@ export class AccessRightsService {
             const user: any = this.appStateService.currentUser.value;
            this.loggedInUserRoles = user.groups?.references;
         }
-        console.log('loggedIn User Roles', this.loggedInUserRoles);
     }
 
     private async getGlobalRoles() {
@@ -71,7 +67,7 @@ export class AccessRightsService {
     }
 
     userHasAccess(dashboardRoles: any) {
-    //    if(this.userHasAdminRights) { return true;}
+        if(this.userHasAdminRights) { return true;}
 
         if(dashboardRoles && dashboardRoles.length > 0) {
             for(let role of dashboardRoles) {

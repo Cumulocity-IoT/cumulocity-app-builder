@@ -16,7 +16,7 @@
 * limitations under the License.
  */
 import {Component, Inject, OnDestroy} from "@angular/core";
-import {ActivatedRoute} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 import {interval, Subscription} from "rxjs";
 import {ContextDashboardType} from "@c8y/ngx-components/context-dashboard";
 import { InventoryService, ApplicationService, UserService } from "@c8y/client";
@@ -84,7 +84,7 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
     subscriptions = new Subscription();
 
     constructor(
-        private activatedRoute: ActivatedRoute,
+        private activatedRoute: ActivatedRoute, private router:Router,
         private inventoryService: InventoryService,
         private applicationService: ApplicationService,
         @Inject(SMART_RULES_AVAILABILITY_TOKEN) private c8ySmartRulesAvailability: any,
@@ -143,12 +143,13 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
 
             const app = (await this.applicationService.detail(this.applicationId)).data as IApplicationBuilderApplication;
             const dashboard = app.applicationBuilder.dashboards
-                .find(dashboard => dashboard.id === this.dashboardId);
+                .find(dashboard => dashboard.id === this.dashboardId && this.accessRightsService.userHasAccess(dashboard.roles));
 
             this.isGroupTemplate = (dashboard && dashboard.groupTemplate) || false;
 
             if (!dashboard) {
                 console.warn(`Dashboard: ${this.dashboardId} isn't part of application: ${this.applicationId}`);
+                this.router.navigateByUrl(`/home`);
             }
 
             if (this.tabGroup) {
