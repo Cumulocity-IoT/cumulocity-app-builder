@@ -51,13 +51,13 @@ export interface DtdlSimulationModel {
     matchingValue: string,
     measurementName?: string,
     fragment?: string,
-    series?: string,
-    unit?: string,
+    series?: any,
+    unit?: any,
     schema?: any,
     id?: string,
     minValue?: number, // random value, random walk
     maxValue?: number, // random value, random walk
-    value?: string, // value series
+    value?: any, // value series
     startingValue?: number, // random walk
     maxDelta?: number, // random walk
     latitude?: string, // position update

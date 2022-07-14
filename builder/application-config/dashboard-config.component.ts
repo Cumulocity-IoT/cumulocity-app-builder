@@ -16,7 +16,7 @@
 * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit } from "@angular/core";
+import { Component, Inject, OnDestroy, OnInit, Renderer2 } from "@angular/core";
 import { ApplicationService, InventoryService, IApplication, IManagedObject } from "@c8y/client";
 import { Observable, from, Subject, Subscription } from "rxjs";
 import { debounceTime, filter, switchMap, tap } from "rxjs/operators";
@@ -36,6 +36,7 @@ import { BinaryDescription, DeviceDescription } from "../template-catalog/templa
 import { SettingsService } from './../../builder/settings/settings.service';
 import { AlertMessageModalComponent } from "./../../builder/utils/alert-message-modal/alert-message-modal.component";
 import { AccessRightsService } from "./../../builder/access-rights.service";
+import { DOCUMENT } from "@angular/common";
 
 
 export interface DashboardConfig {
@@ -75,12 +76,14 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     delayedAppUpdateSubscription: Subscription;
 
     bsModalRef: BsModalRef;
+    applyTheme = false;
 
     constructor(
         private appIdService: AppIdService, private appService: ApplicationService, private appStateService: AppStateService,
         private brandingService: BrandingService, private inventoryService: InventoryService, private navigation: AppBuilderNavigationService,
         private modalService: BsModalService, private alertService: AlertService, private settingsService: SettingsService,
-        private accessRightsService: AccessRightsService
+        private accessRightsService: AccessRightsService,
+        @Inject(DOCUMENT) private document: Document, private renderer: Renderer2
     ) {
         this.app = this.appIdService.appIdDelayedUntilAfterLogin$.pipe(
             switchMap(appId => from(
@@ -101,6 +104,14 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
                 // TODO?
                 //this.tabs.refresh();
             });
+        this.app.subscribe((app) => {
+            if (app.applicationBuilder.branding.enabled && (app.applicationBuilder.branding.colors.primary !== '#1776bf' && app.applicationBuilder.branding.colors.primary !== '#1776BF')) {
+                this.applyTheme = true;
+                this.renderer.addClass(this.document.body, 'dashboard-body-theme');
+            } else {
+                this.applyTheme = false;
+            }
+        });
     }
 
     async ngOnInit() {
@@ -248,6 +259,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
+        this.renderer.removeClass(this.document.body, 'dashboard-body-theme');
         this.delayedAppUpdateSubscription.unsubscribe();
     }
 }

@@ -1,0 +1,119 @@
+<c8y-action-bar-item [placement]="'left'">
+    <div class="btn btn-link" (click)="navigateToGridView()">
+      <i class="dlt-c8y-icon-arrow-circle-left"></i> Back to Grid View
+    </div>
+  </c8y-action-bar-item>
+<div class="container-fluid content-row">
+    <div class="row d-flex">
+        <div class="col-sm-12 col-lg-6">
+            <div class="card card-dashboard bg-gray-lighter" *ngIf="widgetDetails"
+                style="height:100%;">
+                <div class="card-header actions bg-white" style="justify-content: center;">
+                    <div class="text-warning action-btn" [ngSwitch]="widgetDetails.actionCode" *ngIf="!getMoreWidgetsFlag">
+                        <button class="btn btn-clean btn-icon btn-md"
+                            title="Update - Latest version available - {{widgetDetails.version}}" *ngSwitchCase="'001'">
+                            <i c8yIcon="cloud-upload" class="widget-action-icon blink_me_update"
+                                (click)="updateWidget(widgetDetails, false)"></i>
+                        </button>
+                        <button class="btn btn-clean btn-icon btn-md" title="Update (Not Compatible)"
+                            *ngSwitchCase="'002'">
+                            <i c8yIcon="level-up" class="widget-action-icon blink_me_update"
+                                (click)="updateWidget(widgetDetails, false)"></i>
+                        </button>
+                        <button class="btn btn-clean btn-icon btn-md" title="Refresh" *ngSwitchCase="'003'">
+                            <i c8yIcon="refresh" class="widget-action-icon text-info" (click)="refresh()"></i>
+                        </button>
+                    </div>
+                    <div class="text-warning action-btn" [ngSwitch]="widgetDetails.actionCode" *ngIf="getMoreWidgetsFlag">
+                        <button class="btn btn-clean btn-icon btn-md"
+                            title="Install - Available Version - {{widgetDetails.version}}" *ngSwitchCase="'001'">
+                            <i c8yIcon="upload" class="widget-action-icon"
+                                (click)="installWidget(widgetDetails)"></i>
+                        </button>
+                        <button class="btn btn-clean btn-icon btn-md" title="Install (Not Compatible)"
+                            *ngSwitchCase="'002'">
+                            <i c8yIcon="level-up" class="widget-action-icon"
+                                (click)="installWidget(widgetDetails)"></i>
+                        </button>
+                        <button class="btn btn-clean btn-icon btn-md" title="Refresh" *ngSwitchCase="'003'">
+                            <i c8yIcon="refresh" class="widget-action-icon text-info" (click)="refresh()"></i>
+                        </button>
+                    </div>
+                    <div class="action-btn">
+                        <i *ngIf="!widgetDetails.isCompatible || widgetDetails.isDeprecated"
+                            title="This widget may not compatible or deprecated!" c8yIcon="warning"
+                            class="deprecate-icon text-warning"></i>
+                    </div>
+                    <div class="card-title" style="align-items: center; color: #0B385B">
+                        <i [c8yIcon]="widgetDetails.icon"></i>&ensp;<span>{{widgetDetails.title}}</span>
+                    </div>
+                    <div style="position: absolute;top: 40px;" *ngIf="!getMoreWidgetsFlag">
+                        <span class="label label-primary"
+                            *ngIf="widgetDetails.installedVersion">{{widgetDetails.installedVersion}}</span>
+                        <span class="label label-primary" *ngIf="!widgetDetails.installedVersion">Not Available</span>
+                    </div>
+                    <div style="position: absolute;top: 40px;" *ngIf="getMoreWidgetsFlag">
+                        <span class="label label-primary"
+                            *ngIf="widgetDetails.version">{{widgetDetails.version}}</span>
+                    </div>
+                    <div class="text-info" style="position: absolute; right: 60px;">
+                        <button class="btn btn-clean btn-icon btn-md" title="Preview"
+                            [disabled]="!widgetDetails.preview"><i c8yIcon="eye" class="widget-action-icon" title="Preview"
+                                (click)="preview(widgetDetails.preview)"></i></button>
+                    </div>
+                    <div class="text-info" style="position: absolute; right: 30px;">
+                        <button class="btn btn-clean btn-icon btn-md" title="Documentation"
+                            [disabled]="!widgetDetails.repository"><i c8yIcon="document-with-code" title="Documentation"
+                                class="widget-action-icon"
+                                (click)="openDocumentation(widgetDetails.repository)"></i></button>
+                    </div>
+                    <div *ngIf="userHasAdminRights && !getMoreWidgetsFlag" class="text-warning" [ngSwitch]="widgetDetails.actionCode"
+                        style="position: absolute; right: 10px;">
+                        <div title="Refresh" *ngSwitchCase="'003'">
+                            <i c8yIcon="refresh" class="widget-action-icon text-info" (click)="refresh()"></i>
+                        </div>
+                        <div class="text-danger" title="Uninstall Widget" *ngSwitchDefault><i class="widget-action-icon"
+                                c8yIcon="minus-circle" title="Uninstall Widget" (click)="uninstallWidget(widgetDetails)"></i></div>
+                    </div>
+                </div>
+                <div class="card-block bg-white">
+                    <div class="card-block bg-white" >
+                        <a (click)="preview(widgetDetails.preview)" class="cursor-pointer">
+                                <img class="widget-details-preview" [src]="widgetDetails.preview && widgetDetails.preview !== '' ? widgetDetails.preview : './img/no-image.png'" />
+                        </a>
+                    </div>
+                </div>
+                <div class="card-block bg-gray-lighter">
+                    <div class="row" style="margin-top:10px; text-align: center;" *ngIf="getMoreWidgetsFlag">
+                        <span class="label label-info" style="color: white;">{{widgetDetails.requiredPlatformVersion}}</span>
+                    </div>
+                    <div class="row" style="margin-top:10px; text-align: center;">
+                        <i c8yIcon="copyright" style="font-size: 18px;position: absolute; margin-left: -30px;"></i> {{widgetDetails.author}}
+                    </div>
+                    <div class="row" style="margin-top:10px; text-align: center;">
+                        <span class="label label-default" style="color: black;">{{widgetDetails.license}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-12 col-lg-6">
+            <div class="card card-dashboard" *ngIf="widgetDetails"
+                style="height:100%;">
+                <div class="card-header actions bg-white">
+                    <div class="card-title" style="color: #0B385B">
+                        About
+                    </div>
+                </div>
+                <div class="card-block bg-white">
+                    <markdown ngPreserveWhitespaces class="variable-binding" name="description" [data]="description"></markdown>
+                   
+                </div>
+                <div class="card-block bg-white">
+                    <button class="btn btn-primary" style="position: absolute;bottom: 20px"
+                        (click)="openDocumentation(widgetDetails.repository)">Learn
+                        More >></button>                   
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -15,43 +15,43 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
  */
-import {Injector, NgModule} from '@angular/core';
+import { Injector, NgModule } from '@angular/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import {NavigationError, Router, RouterModule as NgRouterModule} from '@angular/router';
+import { NavigationError, Router, RouterModule as NgRouterModule } from '@angular/router';
 import { UpgradeModule as NgUpgradeModule } from '@angular/upgrade/static';
-import {AppStateService, CoreModule, RouterModule, PluginsModule} from '@c8y/ngx-components';
-import {DashboardUpgradeModule, UpgradeModule, HybridAppModule} from '@c8y/ngx-components/upgrade';
-import {BuilderModule} from "./builder/builder.module";
-import {filter, first, map, startWith, tap, withLatestFrom} from "rxjs/operators";
+import { AppStateService, CoreModule, RouterModule, PluginsModule } from '@c8y/ngx-components';
+import { DashboardUpgradeModule, UpgradeModule, HybridAppModule } from '@c8y/ngx-components/upgrade';
+import { BuilderModule } from "./builder/builder.module";
+import { filter, first, map, startWith, tap, withLatestFrom } from "rxjs/operators";
 import { IUser } from '@c8y/client';
-import {SimulationStrategiesModule} from "./simulation-strategies/simulation-strategies.module";
-import {CustomWidgetsModule} from "./custom-widgets/custom-widgets.module";
-import {RuntimeWidgetInstallerModule, RuntimeWidgetLoaderService} from "cumulocity-runtime-widget-loader";
+import { SimulationStrategiesModule } from "./simulation-strategies/simulation-strategies.module";
+import { CustomWidgetsModule } from "./custom-widgets/custom-widgets.module";
+import { RuntimeWidgetInstallerModule, RuntimeWidgetLoaderService } from "cumulocity-runtime-widget-loader";
 import { interval } from 'rxjs';
 import { SettingsService } from './builder/settings/settings.service';
 
 import { BinaryFileDownloadModule } from '@c8y/ngx-components/binary-file-download';
 @NgModule({
-  imports: [
-    // Upgrade module must be the first
-    UpgradeModule,
-    BrowserAnimationsModule,
-    RouterModule.forRoot(),
-    NgRouterModule.forRoot([], { enableTracing: false, useHash: true }),
-    CoreModule.forRoot(),
-   // PluginsModule,
-    NgUpgradeModule,
-    DashboardUpgradeModule,
-    BinaryFileDownloadModule,
-    BuilderModule,
-    SimulationStrategiesModule,
-    CustomWidgetsModule,
-    RuntimeWidgetInstallerModule
-  ]
+    imports: [
+        // Upgrade module must be the first
+        UpgradeModule,
+        BrowserAnimationsModule,
+        RouterModule.forRoot(),
+        NgRouterModule.forRoot([], { enableTracing: false, useHash: true }),
+        CoreModule.forRoot(),
+        // PluginsModule,
+        NgUpgradeModule,
+        DashboardUpgradeModule,
+        BinaryFileDownloadModule,
+        BuilderModule,
+        SimulationStrategiesModule,
+        CustomWidgetsModule,
+        RuntimeWidgetInstallerModule
+    ]
 })
 export class AppModule extends HybridAppModule {
-    constructor(protected upgrade: NgUpgradeModule, appStateService: AppStateService, private router: Router, 
-        private runtimeWidgetLoaderService: RuntimeWidgetLoaderService, 
+    constructor(protected upgrade: NgUpgradeModule, appStateService: AppStateService, private router: Router,
+        private runtimeWidgetLoaderService: RuntimeWidgetLoaderService,
         private injector: Injector,
         private settingsService: SettingsService) {
         super();
@@ -90,7 +90,7 @@ export class AppModule extends HybridAppModule {
                 const nextSplit = next.split('#');
                 const currentSplit = current.split('#');
                 // For gainsight tracking
-                if(nextSplit.length > 1) { this.trackRouteEvents(nextSplit[1]); }
+                if (nextSplit.length > 1) { this.trackRouteEvents(nextSplit[1]); }
                 if (nextSplit[0] != currentSplit[0]) {
                     return;
                 }
@@ -103,54 +103,54 @@ export class AppModule extends HybridAppModule {
         const actionOutletSub = actionOutletInt.subscribe(async val => {
             let actionOutlet = document.querySelector('c8y-action-outlet button') as any;
             if (actionOutlet) {
-                    actionOutlet.disabled = true;
-                    actionOutlet.style.color = '#B0B9BF';
-                    actionOutlet.style.display = 'none';
-                    actionOutletSub.unsubscribe();
+                actionOutlet.disabled = true;
+                actionOutlet.style.color = '#B0B9BF';
+                actionOutlet.style.display = 'none';
+                actionOutletSub.unsubscribe();
             }
         });
     }
 
     // Gainsight Events Tracking
-    private trackRouteEvents(url: string){
+    private trackRouteEvents(url: string) {
         const urlParams = url.split('/');
-        if(urlParams.length> 0) {
+        if (urlParams.length > 0) {
             let appId = '';
             let dashboardId = '';
             let other = "";
-            if(urlParams.length > 2) {
-                urlParams.forEach( (param , index) => {
+            if (urlParams.length > 2) {
+                urlParams.forEach((param, index) => {
                     switch (param) {
                         case 'application':
                             appId = urlParams[index + 1];
                             break;
                         case 'dashboard':
                             dashboardId = urlParams[index + 1];
-                            break;   
+                            break;
                         case 'config':
                         case 'branding':
                         case 'simulator-config':
                             other = param;
-                            break; 
-                        default: 
+                            break;
+                        default:
                             break;
                     }
                 });
-                if(window && window['aptrinsic'] ){
-                        window['aptrinsic']('track', 'gp_appbuilder_apppage_viewed',  {
-                            "appId": appId, 
-                            "tenantId": this.settingsService.getTenantName(), 
-                            "dashboardId": dashboardId,
-                            "pageId": other
-                        });
-                }
-            } else if(urlParams.length > 1) {
-                other = urlParams[1];
-                if(window && window['aptrinsic'] ){
-                    window['aptrinsic']('track', 'gp_appbuilder_page_viewed',  {
-                        "tenantId": this.settingsService.getTenantName(), 
+                if (window && window['aptrinsic']) {
+                    window['aptrinsic']('track', 'gp_appbuilder_apppage_viewed', {
+                        "appId": appId,
+                        "tenantId": this.settingsService.getTenantName(),
+                        "dashboardId": dashboardId,
                         "pageId": other
-                });
+                    });
+                }
+            } else if (urlParams.length > 1) {
+                other = urlParams[1];
+                if (window && window['aptrinsic']) {
+                    window['aptrinsic']('track', 'gp_appbuilder_page_viewed', {
+                        "tenantId": this.settingsService.getTenantName(),
+                        "pageId": other
+                    });
                 }
             }
         }

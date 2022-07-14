@@ -16,7 +16,7 @@
 * limitations under the License.
  */
 
-import {Injectable} from "@angular/core";
+import { Injectable } from "@angular/core";
 import * as fa from "fontawesome";
 import * as d3 from "d3-color";
 import * as delay from "delay";
@@ -36,16 +36,16 @@ export class BrandingService {
 
     fontAwesomeLoaded: Promise<void>;
     isFontAwesomeLoaded: boolean = false;
-    
+
     private isNavlogoVisible = true;
-    constructor( private settingService: SettingsService) {
+    constructor(private settingService: SettingsService) {
         this.appGeneral = document.createElement('style');
         this.appBranding = document.createElement('style');
         this.powerByBlock = document.createElement('style');
         document.head.appendChild(this.appGeneral);
         document.head.appendChild(this.appBranding);
         document.head.appendChild(this.powerByBlock);
-        this.settingService.isNavlogoVisible().then ( isVisible => {
+        this.settingService.isNavlogoVisible().then(isVisible => {
             this.isNavlogoVisible = isVisible;
             this.updatePowerbyLogo(this.isNavlogoVisible);
         });
@@ -127,6 +127,7 @@ export class BrandingService {
 
                 this.appBranding.innerText = `
 body {
+    
     /* Navigator color: */
     --brand-primary: ${this.colorToHex(app.applicationBuilder.branding.colors.primary)};
     --brand-light: ${this.lighter(app.applicationBuilder.branding.colors.primary)};
@@ -136,16 +137,27 @@ body {
     --navigator-text-color: ${this.colorToHex(app.applicationBuilder.branding.colors.textOnPrimary)};
     --navigator-title-color: ${this.colorToHex(app.applicationBuilder.branding.colors.textOnPrimary)};
     --navigator-active-color: ${this.colorToHex(app.applicationBuilder.branding.colors.textOnActive)};
+    --navigator-hover-color: ${this.colorToHex(app.applicationBuilder.branding.colors.hover)};
+    
     
     /* All the other text: */
     --brand-dark: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
-    --input-focus-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
-
-    --header-color: ${app.applicationBuilder.branding.colors.headerBar ? this.colorToHex(app.applicationBuilder.branding.colors.headerBar) : '#ffffff' };
-    --dropdown-background: ${app.applicationBuilder.branding.colors.headerBar ? this.colorToHex(app.applicationBuilder.branding.colors.headerBar) : '#ffffff' };
-    --toolbar-background:${app.applicationBuilder.branding.colors.toolBar ? this.colorToHex(app.applicationBuilder.branding.colors.toolBar) : '#ffffff' };
-    --page-tabs-background:${app.applicationBuilder.branding.colors.tabBar ? this.colorToHex(app.applicationBuilder.branding.colors.tabBar) : '#ffffff' };
-    
+    /* --input-focus-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)}; */
+    --header-hover-color: ${this.colorToHex(app.applicationBuilder.branding.colors.hover)};
+    --header-color: ${app.applicationBuilder.branding.colors.headerBar ? this.colorToHex(app.applicationBuilder.branding.colors.headerBar) : '#ffffff'};
+    --dropdown-background: ${app.applicationBuilder.branding.colors.headerBar ? this.colorToHex(app.applicationBuilder.branding.colors.headerBar) : '#ffffff'};
+    --toolbar-background:${app.applicationBuilder.branding.colors.toolBar ? this.colorToHex(app.applicationBuilder.branding.colors.toolBar) : '#ffffff'};
+    --toolbar-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+    --page-tabs-background:${app.applicationBuilder.branding.colors.tabBar ? this.colorToHex(app.applicationBuilder.branding.colors.tabBar) : '#ffffff'};
+    --toolbar-actions-color-hover: ${app.applicationBuilder.branding.colors.toolBar ? this.colorToHex(app.applicationBuilder.branding.colors.hover) : '#ffffff'};
+    --toolbar-focus-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+    --dropdown-actions-color-hover: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+    --component-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+    --component-actions-color-hover: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+    --page-tabs-link-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+    --page-tabs-actions-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+    --page-tabs-actions-color-hover: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+    --list-group-actions-color: var(--component-link-color, #000);
     ${app.applicationBuilder.branding.logoHeight != undefined ? '--navigator-platform-logo-height: ' + app.applicationBuilder.branding.logoHeight + 'px;' : ''}
 }
 
@@ -155,7 +167,7 @@ body {
 }
 
 .title .c8y-app-icon {
-    ${app.applicationBuilder.branding.logoHeight != undefined ? '': 'margin-top: -16px;'}
+    ${app.applicationBuilder.branding.logoHeight != undefined ? '' : 'margin-top: -16px;'}
 }
 
 .btn.btn-primary {
@@ -167,11 +179,43 @@ body {
 .btn.btn-primary:hover,.btn.btn-primary:focus {
     color: var(--brand-primary, #1776BF);
 }
+.btn-link:focus {
+    color: ${this.contrastingTextColor(app.applicationBuilder.branding.colors.text)};
+}
+
+.body-theme {
+    background: linear-gradient(0deg,rgba(0,0,0,0.43),rgba(0,0,0,0.43)) var(--brand-primary,#f2f3f4);
+    --body-background-color: var(--brand-primary,#f2f3f4);
+}
+.simulator-body-theme {
+   background: linear-gradient(0deg, rgba(0, 0, 0, 0.43), rgba(0, 0, 0, 0.43)) var(--brand-primary, #f2f3f4);
+  --body-background-color: var(--brand-primary, #f2f3f4);
+}
+.dashboard-body-theme {
+    background: linear-gradient(0deg,rgba(0,0,0,0.43),rgba(0,0,0,0.43)) var(--brand-primary,#f2f3f4);
+    --body-background-color: var(--brand-primary,#f2f3f4);
+}
+.label-color {
+    color: var(--navigator-active-color, #000);
+}
+.card-color {
+    background: var(--brand-primary, #fff);
+    color: var(--navigator-active-color, #000);
+}
+.nav-tabs > li > button {
+    color: var(--brand-light,#333333);
+}
+.nav-tabs > li > button:hover:not([disabled]) {
+    color: var(--brand-primary,#1776bf);
+}
+select.form-control:focus, select:focus {
+    color: ${this.colorToHex(app.applicationBuilder.branding.colors.primary)};
+}
 `;
             } else {
-               /*  const faviconUrl = this.createFaviconUrl('#1776BF', app.applicationBuilder.icon);
-                this.favicon.setAttribute('type', 'image/png');
-                this.favicon.setAttribute('href', faviconUrl); */
+                /*  const faviconUrl = this.createFaviconUrl('#1776BF', app.applicationBuilder.icon);
+                 this.favicon.setAttribute('type', 'image/png');
+                 this.favicon.setAttribute('href', faviconUrl); */
                 this.loadFaviconURL(app);
 
                 this.appBranding.innerText = '';
@@ -194,7 +238,7 @@ body {
     colorToHex(color: string): string {
         try {
             return d3.color(color).hex();
-        } catch(e) {
+        } catch (e) {
             return 'white'
         }
     }
@@ -202,7 +246,7 @@ body {
     lighter(color: string): string {
         try {
             return d3.color(color).brighter().hex()
-        } catch(e) {
+        } catch (e) {
             return 'white'
         }
     }
@@ -212,14 +256,14 @@ body {
             const color = d3.color(primaryColor).rgb();
             // Formula from Gacek: https://stackoverflow.com/a/1855903/11530669
             return (0.299 * color.r + 0.587 * color.g + 0.114 * color.b) / 255 > 0.5 ? 'black' : 'white';
-        } catch(e) {
+        } catch (e) {
             return 'white';
         }
     }
 
     private async loadFaviconURL(app) {
         await delay(1000);
-        if (app.applicationBuilder.branding && app.applicationBuilder.branding.enabled && app.applicationBuilder.branding.colors)  {
+        if (app.applicationBuilder.branding && app.applicationBuilder.branding.enabled && app.applicationBuilder.branding.colors) {
             const faviconUrl = this.createFaviconUrl(app.applicationBuilder.branding.colors.primary, app.applicationBuilder.icon);
             this.favicon.setAttribute('type', 'image/png');
             this.favicon.setAttribute('href', faviconUrl);
@@ -228,7 +272,7 @@ body {
             this.favicon.setAttribute('type', 'image/png');
             this.favicon.setAttribute('href', faviconUrl);
         }
-        
+
 
     }
     createFaviconUrl(primaryColor: string, icon: string): string {
@@ -246,7 +290,7 @@ body {
     }
 
     private updatePowerbyLogo(isLogoVisible: boolean) {
-        if(isLogoVisible){
+        if (isLogoVisible) {
             this.powerByBlock.innerText = `
             .powered-by {
                 display: block;

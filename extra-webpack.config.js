@@ -15,6 +15,10 @@ module.exports = function config() {
                    {
                       from: "./ui-assets/fonts",
                       to: "./fonts/",
+                },
+                {
+                    from: "./ui-assets/img",
+                    to: "./img/",
                 }],
             }),
             new webpack.DefinePlugin({
