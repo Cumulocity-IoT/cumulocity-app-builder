@@ -37,16 +37,21 @@ export class SimulatorCommunicationService {
 
     private async checkUserPermissions(appId: string) {
         const result = await this.applicationService.detail(appId);
-
-        if (result.res.status === 401) {
-            this.alertService.danger("User does not have the required permissions to start simulators", "Missing Application Read Permission");
-        } else if (result.res.status < 200 && result.res.status >= 300) {
-            this.alertService.danger("Unable to start simulators", await result.res.text());
-        }
-
-        const userWithRoles = ((await this.userService.currentWithEffectiveRoles()).data as any) as IUser;
-        if (!this.userService.hasRole(userWithRoles, "ROLE_INVENTORY_ADMIN")) {
-            this.alertService.danger("User does not have the required permissions to start simulators", "Missing Inventory Admin Permission");
+        const simulators = result.data?.applicationBuilder?.simulators;
+        if(simulators && simulators.length > 0 ) {
+            const isBrowserBasedSim = simulators.find( sim => sim.started && !sim?.serverSide );
+            if(isBrowserBasedSim) {
+                if (result.res.status === 401) {
+                    this.alertService.danger("User does not have the required permissions to start simulators", "Missing Application Read Permission");
+                } else if (result.res.status < 200 && result.res.status >= 300) {
+                    this.alertService.danger("Unable to start simulators", await result.res.text());
+                }
+        
+                const userWithRoles = ((await this.userService.currentWithEffectiveRoles()).data as any) as IUser;
+                if (!this.userService.hasRole(userWithRoles, "ROLE_INVENTORY_ADMIN")) {
+                    this.alertService.danger("User does not have the required permissions to start simulators", "Missing Inventory Admin Permission");
+                }
+            }
         }
     }
 }
