@@ -51,7 +51,7 @@ export class BrandingComponent implements OnInit,OnDestroy {
 
     ngOnInit(): void {
         this.app.subscribe((app) => {
-            if (app.applicationBuilder.branding.enabled && (app.applicationBuilder.branding.colors.primary !== '#1776bf' && app.applicationBuilder.branding.colors.primary !== '#1776BF')) {
+            if (app.applicationBuilder.branding.enabled && (app.applicationBuilder.selectedTheme && app.applicationBuilder.selectedTheme !== 'Default')) {
                 this.applyTheme = true;
                 this.renderer.addClass(this.document.body, 'body-theme');
             } else {
@@ -125,7 +125,7 @@ export class BrandingComponent implements OnInit,OnDestroy {
         this.showBrandingChange(app);
     }
 
-    setTheme(app, primary, active, text, textOnPrimary, textOnActive, hover, headerBar, tabBar, toolBar) {
+    setTheme(app, primary, active, text, textOnPrimary, textOnActive, hover, headerBar, tabBar, toolBar,selectedTheme) {
         app.applicationBuilder.branding.enabled = true;
         app.applicationBuilder.branding.colors.primary = primary;
         app.applicationBuilder.branding.colors.active = active;
@@ -136,11 +136,13 @@ export class BrandingComponent implements OnInit,OnDestroy {
         app.applicationBuilder.branding.colors.headerBar = headerBar;
         app.applicationBuilder.branding.colors.tabBar = tabBar;
         app.applicationBuilder.branding.colors.toolBar = toolBar;
+        app.applicationBuilder.selectedTheme = selectedTheme;
         
-        if (primary === '#1776bf') {
+        if (selectedTheme === 'Default') {
             this.renderer.removeClass(this.document.body, 'body-theme');
+            this.renderer.removeClass(this.document.body, 'dashboard-body-theme');
             this.applyTheme = false;
-            //app.applicationBuilder.branding.enabled = false;
+           // app.applicationBuilder.branding.enabled = false;
             this.showBrandingChange(app);
         } else {
             this.applyTheme = true;
