@@ -35,7 +35,9 @@ export class EditDashboardModalComponent implements OnInit{
     deviceId: string = '';
     deviceName: string ='';
     tabGroup: string = '';
+    roles: any = '';
     dashboardVisibility: '' | 'hidden' | 'no-nav' = '';
+    globalRoles: any;
 
     index: number = 0;
 
@@ -78,6 +80,7 @@ export class EditDashboardModalComponent implements OnInit{
         dashboard.tabGroup = this.tabGroup;
         dashboard.icon = this.dashboardIcon;
         dashboard.deviceId = this.deviceId;
+        dashboard.roles =  this.roles;
 
         await this.appService.update({
             id: this.app.id,
