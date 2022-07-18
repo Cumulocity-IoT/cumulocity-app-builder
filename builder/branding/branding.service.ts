@@ -139,7 +139,7 @@ body {
     --navigator-active-color: ${this.colorToHex(app.applicationBuilder.branding.colors.textOnActive)};
     --navigator-hover-color: ${this.colorToHex(app.applicationBuilder.branding.colors.hover)};
     
-    
+
     /* All the other text: */
     --brand-dark: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     /* --input-focus-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)}; */
@@ -158,6 +158,7 @@ body {
     --page-tabs-actions-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     --page-tabs-actions-color-hover: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     --list-group-actions-color: var(--component-link-color, #000);
+    --dropdown-active-color:${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     ${app.applicationBuilder.branding.logoHeight != undefined ? '--navigator-platform-logo-height: ' + app.applicationBuilder.branding.logoHeight + 'px;' : ''}
 }
 
