@@ -62,10 +62,10 @@ import { AppListService } from './app-list.service';
                       <span id="helpBlockCloneApp" class="help-block">Only application builder's applications can be cloned here.</span>
             </div>
             
-            <!-- <div class="form-group">
+            <div class="form-group">
                 <label for="appImport"><span>Import Application</span></label>
                 <input accept=".json" class="form-control" id="appImport" name="appImport" type="file" (change)="importFile($event.target.files)">
-            </div> -->
+            </div>
         </form>
     </div>
     <div class="modal-footer">
@@ -138,11 +138,16 @@ export class NewApplicationModalComponent implements OnInit {
         }
         let defaultAppBuilderData: any;
         if (this.isImportApp) {
+            const appDashboards = this.fileData.dashboards;
+                    await Promise.all(appDashboards.map(async dashboard => {
+                        await this.addClonedDashboard(this.fileData, dashboard.name, dashboard.id, dashboard.icon,
+                            (dashboard.deviceId ? dashboard.deviceId : ''), dashboard.groupTemplate);
+                    }));
             defaultAppBuilderData = {
                 applicationBuilder: {
                     version: this.fileData.version,
                     branding: this.fileData.branding,
-                    dashboards: this.fileData.dashboards,
+                    dashboards: appDashboards,
                     icon: this.fileData.icon,
                     simulators: this.fileData.simulators
                 },
