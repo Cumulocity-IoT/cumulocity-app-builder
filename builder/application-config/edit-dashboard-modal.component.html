@@ -37,7 +37,16 @@
                 </select>
             </div>
         </ng-template>
-
+        <div class="form-group">
+            <label for="globalRoles"><span>Global Roles (Optional)</span> 
+                <button class="btn btn-link">
+                    <i c8y-icon="question-circle-o"  class="dlt-c8y-icon-question-circle-o" tooltip="Global Roles grant permissions on a dashboard level."></i>
+                </button>
+            </label> 
+            <ng-select  [items]="globalRoles" name="globalRole"  bindLabel="name"  [multiple]="true" [closeOnSelect]="false" [searchable]="true"
+            placeholder="select Role(s)" [(ngModel)]="roles" id="globalRoleEdit" [appendTo]="'.modal-content'"  >
+            </ng-select>
+        </div>
         <div class="form-group" style="min-height: 50px;"  *ngIf="dashboardType === 'group-template' else nonGroupTemplate">
             <label for="group"><span>Group </span></label>
             <!-- <input type="text" class="form-control" id="group" name="group" placeholder="e.g. 12345" [(ngModel)]="deviceId"> -->

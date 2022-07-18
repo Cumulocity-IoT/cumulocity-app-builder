@@ -41,6 +41,8 @@ export class TemplateUpdateModalComponent implements OnInit {
 
     templateDetails: TemplateDetails;
 
+    globalRoles: any;
+
     isLoadingIndicatorDisplayed = false;
 
     private deviceSelectorModalRef: BsModalRef;

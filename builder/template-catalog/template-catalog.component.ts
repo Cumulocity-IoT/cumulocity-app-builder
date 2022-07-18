@@ -29,6 +29,7 @@ import { ProgressIndicatorModalComponent } from "../utils/progress-indicator-mod
 import './cumulocity.json';
 import { WidgetCatalogService } from "../../builder/widget-catalog/widget-catalog.service";
 import { catchError } from "rxjs/operators";
+import { AccessRightsService } from "../../builder/access-rights.service";
 
 enum TemplateCatalogStep {
     CATALOG,
@@ -66,7 +67,8 @@ export class TemplateCatalogModalComponent implements OnInit {
         dashboardIcon: 'th',
         deviceId: '',
         tabGroup: '',
-        dashboardVisibility: ''
+        dashboardVisibility: '',
+        roles: ''
     };
 
     public selectedDevice: IManagedObject;
@@ -77,14 +79,18 @@ export class TemplateCatalogModalComponent implements OnInit {
 
     private progressModal: BsModalRef;
 
+    globalRoles: any;
+
     constructor(private modalService: BsModalService, private modalRef: BsModalRef,
         private catalogService: TemplateCatalogService, private componentService: DynamicComponentService,
-        private alertService: AlertService, private widgetCatalogService: WidgetCatalogService) {
+        private alertService: AlertService, private widgetCatalogService: WidgetCatalogService,
+        private accessRightsService: AccessRightsService) {
         this.onSave = new Subject();
     }
 
-    ngOnInit(): void {
+    async ngOnInit() {
         this.loadTemplateCatalog();
+        this.globalRoles = await this.accessRightsService.getAllGlobalRoles();  
     }
 
     loadTemplateCatalog(): void {

@@ -60,6 +60,7 @@ import { HomeComponent } from './home/home.component';
 import { WidgetCatalogModule } from './widget-catalog/widget-catalog.module';
 import { AlertMessageModalModule } from "./utils/alert-message-modal/alert-message-modal.module";
 import { AppBuilderUpgradeService } from "./app-builder-upgrade/app-builder-upgrade.service";
+import { NgSelectModule } from "@ng-select/ng-select";
 @NgModule({
     imports: [
         ApplicationModule,
@@ -109,7 +110,8 @@ import { AppBuilderUpgradeService } from "./app-builder-upgrade/app-builder-upgr
         MarkdownModule.forRoot(),
         SettingsModule,
         WidgetCatalogModule,
-        AlertMessageModalModule
+        AlertMessageModalModule,
+        NgSelectModule
     ],
     declarations: [
         DashboardConfigComponent,

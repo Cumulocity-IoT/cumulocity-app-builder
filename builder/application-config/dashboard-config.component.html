@@ -60,6 +60,11 @@
         <div class="col col-overflow" >{{item.value.visibility === 'no-nav' ? 'Tabs Only' : 
             item.value.visibility === 'hidden' ? 'Hidden': item.value.visibility}}</div>
         <div class="col col-overflow" title="{{item.value.tabGroup}}">{{item.value.tabGroup}}</div>
+        <div class="col col-overflow" >
+            <span *ngFor="let role of item.value.roles"  title="{{role.name}}">
+                {{role.name}} <br>
+            </span>
+        </div>
         <div class="col col-overflow"><i [c8yIcon]="item.value.icon"></i> {{item.value.icon}}</div>
         <div class="col col-overflow" title="{{item.value.deviceId}}">{{item.value.groupTemplate ? 'Children of: ' : ''}}{{item.value.deviceId || '-'}}</div>
         <div>
@@ -71,6 +76,7 @@
     </ng-template>
 
     <div class="card-group">
+
         <div class="col-xs-12">
             <div class="card"  [ngClass]="{'card-color': applyTheme}">
                 <div class="card-header">
@@ -93,6 +99,7 @@
                             <div class="col">Dashboard ID</div>
                             <div class="col">Visibility</div>
                             <div class="col">Tab Group</div>
+                            <div class="col">Global Roles</div>
                             <div class="col">Icon</div>
                             <div class="col">Device(s)</div>
                             <div class="invisible"><button class="btn btn-default">Edit</button><button

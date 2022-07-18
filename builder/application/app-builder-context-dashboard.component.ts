@@ -15,17 +15,18 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
  */
-import { Component, Inject, OnDestroy, Renderer2 } from "@angular/core";
-import { ActivatedRoute } from "@angular/router";
+import {Component, Inject, OnDestroy, Renderer2} from "@angular/core";
+import {ActivatedRoute, Router} from "@angular/router";
 import { from, interval, Observable, Subscription } from "rxjs";
-import { ContextDashboardType } from "@c8y/ngx-components/context-dashboard";
+import {ContextDashboardType} from "@c8y/ngx-components/context-dashboard";
 import { InventoryService, ApplicationService, UserService, IApplication } from "@c8y/client";
-import { last } from "lodash-es";
-import { SMART_RULES_AVAILABILITY_TOKEN } from "./smartrules/smart-rules-availability.upgraded-provider";
-import { IApplicationBuilderApplication } from "../iapplication-builder-application";
-import { AppStateService } from "@c8y/ngx-components";
-import { RuntimeWidgetInstallerModalService } from "cumulocity-runtime-widget-loader";
+import {last} from "lodash-es";
+import {SMART_RULES_AVAILABILITY_TOKEN} from "./smartrules/smart-rules-availability.upgraded-provider";
+import {IApplicationBuilderApplication} from "../iapplication-builder-application";
+import {AppStateService} from "@c8y/ngx-components";
+import {RuntimeWidgetInstallerModalService} from "cumulocity-runtime-widget-loader";
 import { SettingsService } from "../../builder/settings/settings.service";
+import { AccessRightsService } from "../../builder/access-rights.service";
 import { switchMap, tap } from "rxjs/operators";
 import { AppIdService } from "../../builder/app-id.service";
 import { DOCUMENT } from "@angular/common";
@@ -86,7 +87,7 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
     subscriptions = new Subscription();
 
     constructor(
-        private activatedRoute: ActivatedRoute,
+        private activatedRoute: ActivatedRoute, private router:Router,
         private inventoryService: InventoryService,
         private applicationService: ApplicationService,
         @Inject(SMART_RULES_AVAILABILITY_TOKEN) private c8ySmartRulesAvailability: any,
@@ -94,6 +95,7 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
         private appStateService: AppStateService,
         private runtimeWidgetInstallerModalService: RuntimeWidgetInstallerModalService,
         private settingsService: SettingsService,
+        private accessRightsService: AccessRightsService,
         private appIdService: AppIdService,
         @Inject(DOCUMENT) private document: Document, private renderer: Renderer2
     ) {
@@ -152,17 +154,19 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
 
             const app = (await this.applicationService.detail(this.applicationId)).data as IApplicationBuilderApplication;
             const dashboard = app.applicationBuilder.dashboards
-                .find(dashboard => dashboard.id === this.dashboardId);
+                .find(dashboard => dashboard.id === this.dashboardId && this.accessRightsService.userHasAccess(dashboard.roles));
 
             this.isGroupTemplate = (dashboard && dashboard.groupTemplate) || false;
 
             if (!dashboard) {
                 console.warn(`Dashboard: ${this.dashboardId} isn't part of application: ${this.applicationId}`);
+                this.router.navigateByUrl(`/home`);
             }
 
             if (this.tabGroup) {
                 const dashboardsInTabgroup = app.applicationBuilder.dashboards
-                    .filter(dashboard => (dashboard.tabGroup === this.tabGroup || (dashboard && dashboard.groupTemplate && dashboard.tabGroup === 'deviceId')) && dashboard.visibility !== 'hidden')
+                    .filter(dashboard => (dashboard.tabGroup === this.tabGroup || (dashboard && dashboard.groupTemplate && dashboard.tabGroup === 'deviceId'))
+                     && dashboard.visibility !== 'hidden' && this.accessRightsService.userHasAccess(dashboard.roles))
                 tabs.push(...await Promise.all(dashboardsInTabgroup.map(async (dashboard, i) => {
                     const isGroupTemplate = (dashboard && dashboard.groupTemplate) || false;
                     if (isGroupTemplate) {

@@ -35,6 +35,7 @@ import { TemplateUpdateModalComponent } from "../template-catalog/template-updat
 import { BinaryDescription, DeviceDescription } from "../template-catalog/template-catalog.model";
 import { SettingsService } from './../../builder/settings/settings.service';
 import { AlertMessageModalComponent } from "./../../builder/utils/alert-message-modal/alert-message-modal.component";
+import { AccessRightsService } from "./../../builder/access-rights.service";
 import { DOCUMENT } from "@angular/common";
 
 
@@ -45,6 +46,7 @@ export interface DashboardConfig {
     tabGroup: string,
     icon: string,
     deviceId?: string,
+    roles?: any,
     groupTemplate: {
         groupId: string
     },
@@ -66,6 +68,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     newAppContextPath: string;
     newAppIcon: string;
     isDashboardCatalogEnabled: boolean = true;
+    private globalRoles = [];
 
     app: Observable<any>;
 
@@ -78,7 +81,8 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     constructor(
         private appIdService: AppIdService, private appService: ApplicationService, private appStateService: AppStateService,
         private brandingService: BrandingService, private inventoryService: InventoryService, private navigation: AppBuilderNavigationService,
-        private modalService: BsModalService, private alertService: AlertService, private settngService: SettingsService,
+        private modalService: BsModalService, private alertService: AlertService, private settingsService: SettingsService,
+        private accessRightsService: AccessRightsService,
         @Inject(DOCUMENT) private document: Document, private renderer: Renderer2
     ) {
         this.app = this.appIdService.appIdDelayedUntilAfterLogin$.pipe(
@@ -111,7 +115,8 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     }
 
     async ngOnInit() {
-        this.isDashboardCatalogEnabled = await this.settngService.isDashboardCatalogEnabled();
+        this.isDashboardCatalogEnabled = await this.settingsService.isDashboardCatalogEnabled();
+        this.globalRoles = await this.accessRightsService.getAllGlobalRoles();  
     }
 
     private alertModalDialog(message: any): BsModalRef {
@@ -208,7 +213,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     }
 
     showCreateDashboardDialog(app) {
-        this.bsModalRef = this.modalService.show(NewDashboardModalComponent, { class: 'c8y-wizard', initialState: { app } });
+        this.bsModalRef = this.modalService.show(NewDashboardModalComponent, { class: 'c8y-wizard', initialState: { app,  globalRoles: this.globalRoles} });
     }
 
     showEditDashboardDialog(app, dashboards: DashboardConfig[], index: number) {
@@ -222,12 +227,14 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
                 class: 'c8y-wizard',
                 initialState: {
                     app,
+                    globalRoles: this.globalRoles,
                     index,
                     dashboardName: dashboard.name,
                     dashboardVisibility: dashboard.visibility || '',
                     dashboardIcon: dashboard.icon,
                     deviceId: dashboard.deviceId,
                     tabGroup: dashboard.tabGroup,
+                    roles: dashboard.roles,
                     ...(dashboard.groupTemplate ? {
                         dashboardType: 'group-template'
                     } : {
@@ -248,7 +255,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     }
 
     showTemplateDashboardEditModalDialog(app, dashboardConfig: DashboardConfig, index: number): void {
-        this.bsModalRef = this.modalService.show(TemplateUpdateModalComponent, { backdrop: 'static', class: 'modal-lg', initialState: { app, dashboardConfig, index } });
+        this.bsModalRef = this.modalService.show(TemplateUpdateModalComponent, { backdrop: 'static', class: 'modal-lg', initialState: { app, dashboardConfig, index, globalRoles: this.globalRoles } });
     }
 
     ngOnDestroy(): void {

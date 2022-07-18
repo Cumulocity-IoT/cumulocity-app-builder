@@ -17,7 +17,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { ApplicationService, InventoryService, ICurrentTenant, IApplication } from '@c8y/client';
+import { ApplicationService, InventoryService, ICurrentTenant, IApplication, UserGroupService } from '@c8y/client';
 import { AlertService, AppStateService } from '@c8y/ngx-components';
 import { AppBuilderExternalAssetsService } from 'app-builder-external-assets';
 import { AppIdService } from '../app-id.service';
@@ -203,4 +203,5 @@ export class SettingsService {
         const customProp = await this.getCustomProperties();
         return (!customProp || (customProp  && ( !customProp.appUpgradeNotification || customProp.appUpgradeNotification === "true")));
     }
+
 }
