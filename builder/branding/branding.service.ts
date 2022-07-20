@@ -159,6 +159,8 @@ body {
     --page-tabs-actions-color-hover: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     --list-group-actions-color: var(--component-link-color, #000);
     --dropdown-active-color:${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+    --tooltip-background: ${this.lighter(app.applicationBuilder.branding.colors.primary)};
+    --tooltip-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     ${app.applicationBuilder.branding.logoHeight != undefined ? '--navigator-platform-logo-height: ' + app.applicationBuilder.branding.logoHeight + 'px;' : ''}
 }
 
