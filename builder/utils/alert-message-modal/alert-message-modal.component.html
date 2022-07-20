@@ -7,9 +7,8 @@
         </h3>
         <p
           class="text-break-word"
-          ng-bind-html="body | translate"
+          ng-bind-html="body | translate" [innerText]="message.description"
         >
-        {{message.description}}
       </p><br>
         
         <div class="alert-footer" >

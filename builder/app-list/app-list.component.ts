@@ -21,18 +21,18 @@ import {
     ApplicationService,
     IApplication,
     Realtime,
+    InventoryService,
     // PagingStrategy,
     // RealtimeAction,
     UserService
 } from "@c8y/client";
-import { catchError, map } from "rxjs/operators";
-import { from, Observable } from "rxjs";
 import { AppStateService } from "@c8y/ngx-components";
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import { NewApplicationModalComponent } from "./new-application-modal.component";
 import { Router } from "@angular/router";
 import { contextPathFromURL } from "../utils/contextPathFromURL";
 import { AppListService } from "./app-list.service";
+import { AlertMessageModalComponent } from "../utils/alert-message-modal/alert-message-modal.component";
 
 @Component({
     templateUrl: './app-list.component.html'
@@ -48,7 +48,8 @@ export class AppListComponent {
 
     constructor(private router: Router, private appService: ApplicationService,
         private appStateService: AppStateService, private modalService: BsModalService,
-        private userService: UserService, private appListService: AppListService, private realTimeService: Realtime) {
+        private userService: UserService, private appListService: AppListService, private realTimeService: Realtime,
+        private inventoryService: InventoryService) {
         this.userHasAdminRights = userService.hasRole(appStateService.currentUser.value, "ROLE_APPLICATION_MANAGEMENT_ADMIN")
         this.appListService.refreshAppList$.subscribe(() => {
             this.getListOfApplications();
@@ -120,16 +121,63 @@ export class AppListComponent {
             this.router.navigateByUrl(`/application/${app.id}${subPath || ''}`);
         }
     }
-    exportApp(app: IApplication) {
-        console.log(app);
-        const filename = app.name + '.json';
-        const jsonStr = JSON.stringify(app.applicationBuilder);
-        let element = document.createElement('a');
-        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(jsonStr));
-        element.setAttribute('download', filename);
-        element.style.display = 'none';
-        document.body.appendChild(element);
-        element.click();
-        document.body.removeChild(element);
+
+    lookup(obj,key) {
+        for (let k in obj) {
+            let value = obj[k];
+        
+            if (k === key) {
+                if (value.id) {
+                    value.id = "";
+                }
+            }
+        
+            if (typeof(value) === "object" && !Array.isArray(value)) {
+              let y = this.lookup(value, key);
+              if (y && y[0] == key) return y;
+            }
+            if (Array.isArray(value)) {
+              for (let i = 0; i < value.length; ++i) {
+                let x = this.lookup(value[i], key);
+                if (x && x[0] == key) return x;
+              }
+            }
+          }
+    }
+    async fetchDashboardDetails(app) {
+        await Promise.all(app.applicationBuilder.dashboards.map(async dashboard => {
+            const dashboardManagedObject = (await this.inventoryService.detail(dashboard.id)).data;
+            dashboard.c8y_Dashboard = dashboardManagedObject.c8y_Dashboard;
+            this.lookup(dashboard.c8y_Dashboard, 'device');
+        }));
+    }
+    alertModalDialog(message: any): BsModalRef {
+        return this.modalService.show(AlertMessageModalComponent, { class: 'c8y-wizard', initialState: { message } });
+    }
+
+    async exportApp(app: IApplication) {
+        let desc = "You are about to export application " + app.name + ". Please note that devices, widgets, and smart rules are not supported. You may require to configure those manually." + "\n" + " Do you want to proceed ?";
+        const alertMessage = {
+            title: 'Export Application',
+            description: desc,
+            type: 'info',
+            alertType: 'confirm', //info|confirm
+            confirmPrimary: true //confirm Button is primary
+        }
+        const exportAppDialogRef = this.alertModalDialog(alertMessage);
+        exportAppDialogRef.content.event.subscribe(async data => {
+            if (data && data.isConfirm) {
+                await this.fetchDashboardDetails(app);
+                const filename = app.name + '.json';
+                const jsonStr = JSON.stringify(app.applicationBuilder);
+                let element = document.createElement('a');
+                element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(jsonStr));
+                element.setAttribute('download', filename);
+                element.style.display = 'none';
+                document.body.appendChild(element);
+                element.click();
+                document.body.removeChild(element);
+            }
+        });
     }
 }
