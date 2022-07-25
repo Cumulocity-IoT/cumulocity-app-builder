@@ -159,8 +159,8 @@ body {
     --page-tabs-actions-color-hover: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     --list-group-actions-color: var(--component-link-color, #000);
     --dropdown-active-color:${this.colorToHex(app.applicationBuilder.branding.colors.text)};
-    --tooltip-background: ${this.lighter(app.applicationBuilder.branding.colors.primary)};
-    --tooltip-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+    --tooltip-background: ${this.colorToHex(app.applicationBuilder.branding.colors.active)};/*0b385b*/
+    --tooltip-color: ${this.colorToHex(app.applicationBuilder.branding.colors.textOnActive)};
     ${app.applicationBuilder.branding.logoHeight != undefined ? '--navigator-platform-logo-height: ' + app.applicationBuilder.branding.logoHeight + 'px;' : ''}
 }
 
@@ -206,7 +206,7 @@ body {
     color: var(--navigator-active-color, #000);
 }
 .nav-tabs > li > button {
-    color: var(--brand-light,#333333);
+    color: var(--navigator-active-bg,#0b385b);
 }
 .nav-tabs > li > button:hover:not([disabled]) {
     color: var(--brand-primary,#1776bf);

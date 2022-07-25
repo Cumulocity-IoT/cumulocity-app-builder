@@ -159,7 +159,7 @@ export class NewApplicationModalComponent implements OnInit {
                         colors: {
                             primary: '#1776BF',
                             active: '#14629F',
-                            text: '#333333',
+                            text: '#0b385b',
                             textOnPrimary: 'white',
                             textOnActive: 'white',
                             hover: 'white'
