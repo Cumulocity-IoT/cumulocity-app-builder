@@ -216,7 +216,7 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
             this.tabs.forEach((tab) => {
                 if (tab.label === 'Smart rules' || tab.label === 'Alarms' || tab.label === 'Data explorer') {
                     this.app.subscribe((app) => {
-                        if (app.applicationBuilder.branding.enabled && (app.applicationBuilder.branding.selectedTheme !== 'Default')) {
+                        if (app.applicationBuilder.branding.enabled && (app.applicationBuilder.selectedTheme !== 'Default')) {
                             this.renderer.addClass(this.document.body, 'dashboard-body-theme');
                         } else {
                             this.renderer.removeClass(this.document.body, 'dashboard-body-theme');
