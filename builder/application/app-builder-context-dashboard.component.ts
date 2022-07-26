@@ -213,18 +213,6 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
             // Removing undefined tab for group template
             this.tabs = this.tabs.filter(tab => tab !== undefined);
 
-            this.tabs.forEach((tab) => {
-                if (tab.label === 'Smart rules' || tab.label === 'Alarms' || tab.label === 'Data explorer') {
-                    this.app.subscribe((app) => {
-                        if (app.applicationBuilder.branding.enabled && (app.applicationBuilder.branding.selectedTheme !== 'Default')) {
-                            this.renderer.addClass(this.document.body, 'dashboard-body-theme');
-                        } else {
-                            this.renderer.removeClass(this.document.body, 'dashboard-body-theme');
-                        }
-                    });
-                }
-            });
-
             // Bug ? mutliple active tabs while routing. Hack by hijacking DOM
             const tabOutletInt = interval(50);
             const tabOutletSub = tabOutletInt.subscribe(async val => {
@@ -234,7 +222,32 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
                         if (tab.textContent !== 'Smart rules' && tab.textContent !== 'Alarms' && tab.textContent !== 'Data explorer') {
                             tab.classList.remove('active');
                         }
+                        if (tab.textContent === 'Smart rules' || tab.textContent === 'Alarms' || tab.textContent === 'Data explorer') {
+                            this.app.subscribe((app) => {
+                                if (app.applicationBuilder.branding.enabled && (app.applicationBuilder.selectedTheme !== 'Default')) {
+                                    this.renderer.addClass(this.document.body, 'dashboard-body-theme');
+                                } else {
+                                    this.renderer.removeClass(this.document.body, 'dashboard-body-theme');
+                                }
+                            });
+                        } else {
+                            this.renderer.removeClass(this.document.body, 'dashboard-body-theme');
+                        }
                     });
+                } else {
+                    activeTabs.forEach(tab => {
+                        if (tab.textContent === 'Smart rules' || tab.textContent === 'Alarms' || tab.textContent === 'Data explorer') {
+                            this.app.subscribe((app) => {
+                                if (app.applicationBuilder.branding.enabled && (app.applicationBuilder.selectedTheme !== 'Default')) {
+                                    this.renderer.addClass(this.document.body, 'dashboard-body-theme');
+                                } else {
+                                    this.renderer.removeClass(this.document.body, 'dashboard-body-theme');
+                                }
+                            });
+                        } else {
+                            this.renderer.removeClass(this.document.body, 'dashboard-body-theme');
+                        }
+                    }); 
                 }
                 tabOutletSub.unsubscribe();
             });
