@@ -158,7 +158,7 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
 
             this.isGroupTemplate = (dashboard && dashboard.groupTemplate) || false;
 
-            if (!dashboard) {
+            if (!dashboard && !this.deviceDetail) {
                 console.warn(`Dashboard: ${this.dashboardId} isn't part of application: ${this.applicationId}`);
                 this.router.navigateByUrl(`/home`);
             }
