@@ -224,7 +224,7 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
                         }
                         if (tab.textContent === 'Smart rules' || tab.textContent === 'Alarms' || tab.textContent === 'Data explorer') {
                             this.app.subscribe((app) => {
-                                if (app.applicationBuilder.branding.enabled && (app.applicationBuilder.selectedTheme !== 'Default')) {
+                                if (app.applicationBuilder.branding.enabled && (app.applicationBuilder.selectedTheme && app.applicationBuilder.selectedTheme !== 'Default')) {
                                     this.renderer.addClass(this.document.body, 'dashboard-body-theme');
                                 } else {
                                     this.renderer.removeClass(this.document.body, 'dashboard-body-theme');
@@ -238,7 +238,7 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
                     activeTabs.forEach(tab => {
                         if (tab.textContent === 'Smart rules' || tab.textContent === 'Alarms' || tab.textContent === 'Data explorer') {
                             this.app.subscribe((app) => {
-                                if (app.applicationBuilder.branding.enabled && (app.applicationBuilder.selectedTheme !== 'Default')) {
+                                if (app.applicationBuilder.branding.enabled && (app.applicationBuilder.selectedTheme && app.applicationBuilder.selectedTheme !== 'Default')) {
                                     this.renderer.addClass(this.document.body, 'dashboard-body-theme');
                                 } else {
                                     this.renderer.removeClass(this.document.body, 'dashboard-body-theme');
