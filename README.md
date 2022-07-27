@@ -5,16 +5,10 @@ Application Builder is an open-source tool for you to create web applications 
 ![](https://user-images.githubusercontent.com/38696279/72333172-47cec300-36b3-11ea-9abf-1bb29b490a22.png)
 
 ## What's new?
-* **Angular Upgrade:** Application Builder now upgraded to angular 11.
-* **Widget Catalog:** Now user can also delete widget from widget catalog. Widget catalog now also provide update option for the widgets which are installed from Demo Catalog.
-*  **Branding:** Now user can use color picker to choose millions of colors to customize branding. Header, Action bar and tab bar are also customizable.
-*  **Theme:** Application builder now support dark theme and branded themes for dashboards and widgets.
-*  **Server-Side Simulators:** Application Builder now supports Server-side simulators. User just need to install micro-service from [here](https://github.com/SoftwareAG/cumulocity-app-builder/releases/download/v1.3.0/simulator-app-builder.zip) and you will get option while creating simulator to "Run on Server".
-*  **Help & Support:** Try out our new help & support dashboard template while creating dashboard. This will help user to quickly create help and support page for cumulocity application.
-*  **Demo Catalog:** User now able to try out pre-built cumulocity demos by installing Demo Catalog which is available in your home page.
-*  **Auto Upgrade Notification:** From Application Builder 1.3.0 onwards user will get notification whenever new version of app builder available and ability to seamless upgrade by single click.
-*  **Settings:** Now user has abilities to control various features such as hide logo, disable auto upgrade, hide tabs for device specific dashboards, etc.
-* **Cumulocity Version:** Based on Cumulocity 1011.0.20
+* **Role Based Access:** User can now control dashboard visibility in application builder by assigning global role(s) to a dashboard.
+* **File(CSV/JSON) Based Simulator:** Application Builder now supports File Based Simulators(Server-side). User just need to install micro-service from [here](https://github.com/SoftwareAG/cumulocity-app-builder/releases/download/v1.3.1/csv-simulator-ms.zip) and use simulator type as File(CSV/JSON). User can import CSV/JSON file to create measurements/events to simulate use cases.
+* **Widget Catalog:** Grid view introduced to enhance user experience.
+* **Branding:** Improvement in branding functionalities such as one clicks theme selections and addtion of new themes (SoftwareAG Blue, Dark).
 * **Various bug fixes**
 
 ## Features
@@ -30,6 +24,13 @@ Application Builder is an open-source tool for you to create web applications 
 * **Tabs:** Group your dashboards into tabs.
 * **Dashboard Catalog:** User can select any pre-designed template for dashboard and ability to install dependent runtime widgets.
 * **Widget Catalog:** Now user has ability to install/update runtime widgets directly from Widget Catalog. This is single place where user can also find widget details such as documentation, preview, license and author details.
+*  **Branding:** Now user can use color picker to choose millions of colors to customize branding. Header, Action bar and tab bar are also customizable.
+*  **Theme:** Application builder now support dark theme and branded themes for dashboards and widgets.
+*  **Server-Side Simulators:** Application Builder now supports Server-side simulators. User just need to install micro-service from [here](https://github.com/SoftwareAG/cumulocity-app-builder/releases/download/v1.3.1/simulator-app-builder.zip) and you will get option while creating simulator to "Run on Server".
+*  **Help & Support:** Try out our new help & support dashboard template while creating dashboard. This will help user to quickly create help and support page for cumulocity application.
+*  **Demo Catalog:** User now able to try out pre-built cumulocity demos by installing Demo Catalog which is available in your home page.
+*  **Auto Upgrade Notification:** From Application Builder 1.3.0 onwards user will get notification whenever new version of app builder available and ability to seamless upgrade by single click.
+*  **Settings:** Now user has abilities to control various features such as hide logo, disable auto upgrade, hide tabs for device specific dashboards, etc.
 
 ## Installation
 
@@ -37,7 +38,7 @@ Application Builder is an open-source tool for you to create web applications 
 **First Time:**
 1. Grab the **[Latest Release Zip](https://github.com/SoftwareAG/cumulocity-app-builder/releases)**
 2. Go to the **Administration view** in your tenant (/apps/administration)
-3. Open the **Own applications** section in the navigator
+3. Open the **Ecosystem** section in the navigator and click **Applications**
 4. Click **Add application**
 5. Select **Upload web application**
 6. Select the Zip you downloaded earlier
@@ -45,30 +46,49 @@ Application Builder is an open-source tool for you to create web applications 
 **Incremental Upgrade:**
 1. Grab the **[Latest Release Zip](https://github.com/SoftwareAG/cumulocity-app-builder/releases)**
 2. Go to the **Administration view** in your tenant (/apps/administration)
-3. Open the **Own applications** section in the navigator
+3. Open the **Ecosystem** section in the navigator and click **Applications**
 4. Click **Application Builder**
-5. Click **Archives**
-6. Click **Upload Archive**
-7. Select the Zip you downloaded earlier
+5. Click **Upload a *.zip file**
+6. Select the Zip you downloaded earlier
 
 ### Install Micro Service for Server-Side Simulators
 **First Time:**
-1. Download **[simulator-app-builder](https://github.com/SoftwareAG/cumulocity-app-builder/releases/download/v1.3.0/simulator-app-builder.zip)**
+1. Download **[simulator-app-builder](https://github.com/SoftwareAG/cumulocity-app-builder/releases/download/v1.3.1/simulator-app-builder.zip)**
 2. Go to the **Administration view** in your tenant (/apps/administration)
-3. Open the **Own applications** section in the navigator
-4. Click **Add application**
+3. Open the **Ecosystem** section in the navigator and click **Microservices**
+4. Click **Add microservice**
 5. Select **Upload microservice**
 7. Select the Zip you downloaded earlier
 8. Click on **Subscribe** button
 
 **Incremental Upgrade:**
-1. Download **[simulator-app-builder](https://github.com/SoftwareAG/cumulocity-app-builder/releases/download/v1.3.0/simulator-app-builder.zip)**
+1. Download **[simulator-app-builder](https://github.com/SoftwareAG/cumulocity-app-builder/releases/download/v1.3.1/simulator-app-builder.zip)**
 2. Go to the **Administration view** in your tenant (/apps/administration)
-3. Open the **Own applications** section in the navigator
+3. Open the **Ecosystem** section in the navigator and click **Microservices**
 4. Click **Simulator-app-builder**
-5. Click **Archives**
-6. Click **Upload Archive**
+5. Click **Upload a *.zip file**
+6. Select the Zip you downloaded earlier
+7. Unsubscribe and subscribe again microservice
+
+
+### Install Micro Service for File Based Simulators(Server Side)
+**First Time:**
+1. Download **[csv-simulator-ms](https://github.com/SoftwareAG/cumulocity-app-builder/releases/download/v1.3.1/csv-simulator-ms.zip)**
+2. Go to the **Administration view** in your tenant (/apps/administration)
+3. Open the **Ecosystem** section in the navigator and click **Microservices**
+4. Click **Add microservice**
+5. Select **Upload microservice**
 7. Select the Zip you downloaded earlier
+8. Click on **Subscribe** button
+
+**Incremental Upgrade:**
+1. Download **[csv-simulator-ms](https://github.com/SoftwareAG/cumulocity-app-builder/releases/download/v1.3.1/csv-simulator-ms.zip)**
+2. Go to the **Administration view** in your tenant (/apps/administration)
+3. pen the **Ecosystem** section in the navigator and click **Microservices**
+4. Click **csv-simulator-ms**
+5. Click **Upload a *.zip file**
+6. Select the Zip you downloaded earlier
+7. Unsubscribe and subscribe again microservice
 
 ## Build Instructions
 **Note:** It is only necessary to follow these instructions if you are modifying/extending the Application Builder (such as adding custom widgets, branding, etc.), otherwise see the [Installation Guide](#Installation).
@@ -89,7 +109,7 @@ cd cumulocity-app-builder
 ```
 2. (Optional) Checkout a specific version: 
 ```
-git checkout v1.3.0
+git checkout v1.3.1
 ```
 3. Install the dependencies: 
 ```
@@ -174,7 +194,7 @@ If your widget is not listed in widget catalog, then you may need to upgrade you
   If you encounter above error, please follow below steps:
   
    1. Stop the server.
-   2. Goto /cumulocity_app_builder/node_modules/nvd3 folder
+   2. Go to /cumulocity_app_builder/node_modules/nvd3 folder
    3. Open nv.d3.js file
    4. add ";" at line number 7. Refer below code snippet.
     
@@ -191,9 +211,9 @@ If your widget is not listed in widget catalog, then you may need to upgrade you
     
     ```
    5. Save file
-   6. Goto /cumulocity_app_builder/patches 
+   6. Go to /cumulocity_app_builder/patches 
    7. Delete nvd3+0.0.1.patch file
-   8. Goto /cumulocity_app_builder 
+   8. Go to /cumulocity_app_builder 
    9. Execute "npx patch-package nvd3" command in your terminal
    10. Start the server
 
