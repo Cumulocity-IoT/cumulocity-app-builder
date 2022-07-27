@@ -8,7 +8,7 @@ Application Builder is an open-source tool for you to create web applications 
 * **Role Based Access:** User can now control dashboard visibility in application builder by assigning global role(s) to a dashboard.
 * **File(CSV/JSON) Based Simulator:** Application Builder now supports File Based Simulators(Server-side). User just need to install micro-service from [here](https://github.com/SoftwareAG/cumulocity-app-builder/releases/download/v1.3.1/csv-simulator-ms.zip) and use simulator type as File(CSV/JSON). User can import CSV/JSON file to create measurements/events to simulate use cases.
 * **Widget Catalog:** Grid view introduced to enhance user experience.
-* **Branding:** Improvement in branding functionalities such as one clicks theme selections and addtion of new themes (SoftwareAG Blue, Dark).
+* **Branding:** Improvement in branding functionalities such as one clicks theme selections and addition of new themes (SoftwareAG Blue, Dark).
 * **Various bug fixes**
 
 ## Features
