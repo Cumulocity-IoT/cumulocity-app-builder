@@ -272,7 +272,7 @@ export class AppBuilderUpgradeService {
             });
             if (window && window['aptrinsic']) {
                 window['aptrinsic']('track', 'gp_application_installed', {
-                    "widgetName": custmApp.name,
+                    "appBuilder": custmApp.name,
                     "tenantId": this.settingService.getTenantName(),
                 });
             }
