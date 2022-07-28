@@ -163,7 +163,7 @@ Would you like to create your own Custom Runtime widget? Please refer our [Demo 
  	Failed to load a runtime custom widget, it may have been compiled for a different Cumulocity version
  ```
   There is multiple reason for above error while loading page:
-   1. **Browser cashing issue:** Try again after clearing browser cache or run incognito/private mode in browser.
+   1. **Browser cashing issue:** Try again after clearing browser cache or run incognito/private mode in browser. This is usually happened when new version of application builder installed or upgraded.
    2. **Widget is not compatible with current version of Application builder:** There are possibilities that your widget is no longer compatible with application builder due to angular/cumulocity upgrade.
 
 If your widget is listed in widget catalog, then follow below steps:
