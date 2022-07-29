@@ -158,13 +158,14 @@ export class AppBuilderUpgradeService {
             if (data && data.isConfirm) {
                 this.showProgressModalDialog('Updating Application Builder...');
                 const updateURL = this.appBuilderConfigModel.versionInfo.updateURL;
+                const successMsg = this.appBuilderConfigModel?.versionInfo?.successMsg;
                 const fileName = updateURL.replace(/^.*[\\\/]/, '');
                 await this.downloadAndInstall(updateURL, fileName, true, 'UPGRADE');
                 this.progressModal.hide();
                 if(!this.errorReported) {
                     const postUpdationMsg = {
                         title: 'Updation Completed',
-                        description: 'Application Builder is successfully updated.',
+                        description: (successMsg ? successMsg: 'Application Builder is successfully updated.'),
                         type: 'info',
                         alertType: 'info' //info|confirm
                     };
