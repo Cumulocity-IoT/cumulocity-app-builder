@@ -53,11 +53,8 @@ export class SettingsService {
             this.analyticsProvider = providerList.find( provider => provider.key === 'gainsight');
             this.analyticsProvider.providerURL = this.externalAssetService.getURL('ANALYTICS','gainsight');
             appIdService.appIdDelayedUntilAfterLogin$.pipe(switchMap(appId => {
-                if (appId != undefined) {
-                    return from(this.getAppBuilderConfig());
-                } else {
-                    return of(undefined);
-                }
+                return from(this.getAppBuilderConfig());
+              
             }))
                 .subscribe(async app => {
                    // TODO
