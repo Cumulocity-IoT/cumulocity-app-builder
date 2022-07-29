@@ -94,6 +94,11 @@ table#getMoreWidgets th {
   line-height: 2.4;
 }
 
+table#getMoreWidgets {
+  table-layout: fixed;
+  width: 100%;
+}
+
 .cursor-pointer {
   cursor: pointer;
 }
@@ -152,4 +157,9 @@ table#getMoreWidgets th {
 
 .verticalAlign {
   vertical-align: super;
+}
+
+a.disabled {
+  pointer-events: none;
+  color: #ccc !important;
 }
