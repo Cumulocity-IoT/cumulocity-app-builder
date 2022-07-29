@@ -141,8 +141,8 @@ export class AppBuilderUpgradeService {
 
     private initiateUpgrade(event: any) {
         const currentHost = window.location.host.split(':')[0];
-        if (currentHost === 'localhost' || currentHost === '127.0.0.1' || isDevMode()) {
-            this.alertService.warning("Application Updation isn't supported when running Application Builder on localhost or in development mode.");
+        if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
+            this.alertService.warning("Application Updation isn't supported when running Application Builder on localhost.");
             return;
         }
         const alertMessage = {
