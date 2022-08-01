@@ -27,6 +27,7 @@ export interface VersionInfo {
     fileName?: string;
     contextPath?: string;
     successMsg?: string;
+    confirmMsg?: string;
 }
 
 export interface ExternalApp {

@@ -145,10 +145,11 @@ export class AppBuilderUpgradeService {
             this.alertService.warning("Application Updation isn't supported when running Application Builder on localhost.");
             return;
         }
+        const confirmMsg = this.appBuilderConfigModel?.versionInfo?.confirmMsg;
         const alertMessage = {
             title: 'Installation Confirmation',
-            description: `You are about to upgrade Application Builder.
-            Do you want to proceed?`,
+            description: (confirmMsg ? confirmMsg: `You are about to upgrade Application Builder.
+            Do you want to proceed?`),
             type: 'info',
             alertType: 'confirm', //info|confirm
             confirmPrimary: true //confirm Button is primary
@@ -229,31 +230,22 @@ export class AppBuilderUpgradeService {
     private async upgradeApp(binaryFile: any, appC8yJson: any, installationType: any) {
         if (installationType !== "INSTALL") {
             const appList = await this.getApplicationList();
-            const appName = appList.find(app => app.contextPath === appC8yJson.contextPath);
-            const appTenantId = (appName && appName.owner && appName.owner.tenant ? appName.owner.tenant.id : undefined);
-            if(appName && (String(appName.availability) === 'PRIVATE' || appTenantId === this.settingService.getTenantName())) {
-                this.progressIndicatorService.setProgress(50);
-                // Upload the binary
-                const appBinary = (await this.appService.binary(appName).upload(binaryFile)).data;
-                // Update the app
-                this.progressIndicatorService.setProgress(70);
-                await this.appService.update({
-                    ...appC8yJson,
-                    id: appName.id,
-                    activeVersionId: appBinary.id.toString()
-                });
-                if (window && window['aptrinsic']) {
-                    window['aptrinsic']('track', 'gp_application_updated', {
-                        "appBuilder": appName.name,
-                        "tenantId": this.settingService.getTenantName(),
-                    });
+            const appName = appList.find(app => app.contextPath === appC8yJson.contextPath && app.availability === 'PRIVATE');
+            if(appName) {
+                await this.uploadApp(appName, binaryFile, appC8yJson);
+            } 
+            else{
+                const appName = appList.find(app => app.contextPath === appC8yJson.contextPath);
+                const appTenantId = (appName && appName.owner && appName.owner.tenant ? appName.owner.tenant.id : undefined);
+                if(appName && (String(appName.availability) === 'PRIVATE' || appTenantId === this.settingService.getTenantName())) {
+                    await this.uploadApp(appName, binaryFile, appC8yJson);
                 }
-            } else {
-                this.alertService.danger("Unable to upgrade application!", "Please verify that you are owner of the tenant and not using subscribed application.")
-                this.errorReported = true;
-                return;
+                else {
+                    this.alertService.danger("Unable to upgrade application!", "Please verify that you are owner of the tenant and not using subscribed application.")
+                    this.errorReported = true;
+                    return;
+                }
             }
-            
         } else if(installationType !== "UPGRADE") {
             // Create the custom App
             this.progressIndicatorService.setProgress(50);
@@ -285,6 +277,24 @@ export class AppBuilderUpgradeService {
         this.progressIndicatorService.setProgress(80);
     }
 
+    private async uploadApp(appName: any, binaryFile: any, appC8yJson: any){
+        this.progressIndicatorService.setProgress(50);
+                // Upload the binary
+                const appBinary = (await this.appService.binary(appName).upload(binaryFile)).data;
+                // Update the app
+                this.progressIndicatorService.setProgress(70);
+                await this.appService.update({
+                    ...appC8yJson,
+                    id: appName.id,
+                    activeVersionId: appBinary.id.toString()
+                });
+                if (window && window['aptrinsic']) {
+                    window['aptrinsic']('track', 'gp_application_updated', {
+                        "appBuilder": appName.name,
+                        "tenantId": this.settingService.getTenantName(),
+                    });
+                }
+    }
     private downloadBinary(binaryId: string, isGithub: boolean): Promise<ArrayBuffer> {
         let url = `${this.GATEWAY_URL_GitHubAsset}${binaryId}`;
         if (!isGithub) {
