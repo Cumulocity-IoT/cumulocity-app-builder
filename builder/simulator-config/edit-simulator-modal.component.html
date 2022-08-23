@@ -17,12 +17,13 @@
                 [(ngModel)]="simulatorConfig.name">
         </div>
         <div *ngIf="isMSCheckSpin" style="text-align: center;"><c8y-loading></c8y-loading></div>
-        <div class="form-group" *ngIf="isMSExist">
+        <div class="form-group" *ngIf="isMSExist  && !isCSVSimulator">
                     <label class="c8y-switch">
                         <input type="checkbox"  [(ngModel)]="simulatorConfig.serverSide"  id="serverSideFlag" name="serverSideFlag" />
                         <span></span>Run on Server
                       </label>
         </div>
+        <div *ngIf="!isMSCheckSpin && !isMSExist && isCSVSimulator" style="margin-bottom: 5px; text-align: center; color:red;">Microservice "csv-simulator-ms" must be subscribed and running!</div>
           <div class="form-group" *ngIf="simulatorConfig.config.isGroup" style="padding-bottom: 30px;">
               <label for="deviceName"><span>Group Name</span></label>
                <device-selector id="deviceName" name="deviceName" [(value)]="simulatorConfig.config.deviceName" [isGroup]='true' [placeHolder]="'Type your Group Name'" [required]="true"

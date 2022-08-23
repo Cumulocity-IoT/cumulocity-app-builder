@@ -12,7 +12,7 @@
 
     <div class="card-group">
         <div class="col-xs-12 col-md-5">
-            <div class="card">
+            <div class="card"  [ngClass]="{'card-color': applyTheme}">
                 <div class="card-header">
                     <h2 class="text-light" style="margin-top: 20px;" translate="">Application Configuration</h2>
                 </div>
@@ -22,7 +22,7 @@
             </div>
         </div>
         <div class="col-xs-12 col-md-7">
-            <div class="card">
+            <div class="card"  [ngClass]="{'card-color': applyTheme}">
                 <div class="card-header">
                     <h4 translate>Details</h4>
                 </div>
@@ -30,19 +30,19 @@
                 <div class="card-block">
                     <form name="editAppBuilderAppForm" #editAppBuilderAppForm="ngForm">
                         <div class="form-group">
-                            <label for="name"><span>Name</span></label>
+                            <label for="name" [ngClass]="{'label-color': applyTheme}"><span>Name</span></label>
                             <input type="text" class="form-control" id="name" name="name"
                                 placeholder="e.g. My First Application (required)" required [(ngModel)]="newAppName">
                         </div>
 
                         <div class="form-group" *ngIf="app.contextPath != undefined">
-                            <label for="contextpath"><span>Context Path</span></label>
+                            <label for="contextpath" [ngClass]="{'label-color': applyTheme}"><span>Context Path</span></label>
                             <input type="text" class="form-control" id="contextpath" name="contextpath"
                                 placeholder="e.g. my-app (required)" required [(ngModel)]="newAppContextPath">
                         </div>
 
                         <div class="form-group">
-                            <label for="icon"><span>Icon</span></label>
+                            <label for="icon" [ngClass]="{'label-color': applyTheme}"><span>Icon</span></label>
                             <icon-selector id="icon" name="icon" [(value)]="newAppIcon" ></icon-selector>
                         </div>
                     </form>
@@ -60,6 +60,11 @@
         <div class="col col-overflow" >{{item.value.visibility === 'no-nav' ? 'Tabs Only' : 
             item.value.visibility === 'hidden' ? 'Hidden': item.value.visibility}}</div>
         <div class="col col-overflow" title="{{item.value.tabGroup}}">{{item.value.tabGroup}}</div>
+        <div class="col col-overflow" >
+            <span *ngFor="let role of item.value.roles"  title="{{role.name}}">
+                {{role.name}} <br>
+            </span>
+        </div>
         <div class="col col-overflow"><i [c8yIcon]="item.value.icon"></i> {{item.value.icon}}</div>
         <div class="col col-overflow" title="{{item.value.deviceId}}">{{item.value.groupTemplate ? 'Children of: ' : ''}}{{item.value.deviceId || '-'}}</div>
         <div>
@@ -71,8 +76,9 @@
     </ng-template>
 
     <div class="card-group">
+
         <div class="col-xs-12">
-            <div class="card">
+            <div class="card"  [ngClass]="{'card-color': applyTheme}">
                 <div class="card-header">
                     <h4 translate>Dashboards</h4>
                 </div>
@@ -93,6 +99,7 @@
                             <div class="col">Dashboard ID</div>
                             <div class="col">Visibility</div>
                             <div class="col">Tab Group</div>
+                            <div class="col">Global Roles</div>
                             <div class="col">Icon</div>
                             <div class="col">Device(s)</div>
                             <div class="invisible"><button class="btn btn-default">Edit</button><button

@@ -1,118 +1,254 @@
 <c8y-title>Widget Catalog</c8y-title>
-    <div *ngIf="isBusy" class="col-xs-12 col-sm-12 col-md-12" style="padding-bottom:50px;padding-top:20px">
-        <rectangle-spinner  style="position: relative; left: 47%;">
-        </rectangle-spinner>
-    </div>
-    <div class="card-group interact-grid" *ngIf="!isBusy">
-        <ng-template #itemTemplate let-item="item" let-index="index">
-            <div class="text-warning" [ngSwitch]="item.value.actionCode" >
-                <button class="btn btn-clean btn-icon btn-md" title="Update" *ngSwitchCase="'001'">
-                    <i c8yIcon="cloud-upload" class="action-icon" (click)="updateWidget(item.value, false)"></i>
-                </button>
-                <button class="btn btn-clean btn-icon btn-md" title="Update (Not Compatible)" *ngSwitchCase="'002'">
-                    <i c8yIcon="level-up" class="action-icon" (click)="updateWidget(item.value, false)"></i>
-                </button>
-                <button class="btn btn-clean btn-icon btn-md" title="Refresh" *ngSwitchCase="'003'">
-                    <i c8yIcon="refresh" class="action-icon text-info" (click)="refresh()"></i>
-                </button>
-                <button class="invisible btn btn-clean btn-icon btn-md" title="Refresh" *ngSwitchDefault>
-                    <i c8yIcon="refresh" class="action-icon text-info" (click)="refresh()"></i>
-                </button>
-            </div>
-            <div class="widget-icon" ><i [c8yIcon]="item.value.icon"></i></div>
-            <div class="col col-overflow" title="{{item.value.title}}">{{item.value.title}}<i *ngIf="!item.value.isCompatible || item.value.isDeprecated" title="This widget may not compatible or deprecated!" c8yIcon="warning" class="warning-icon text-warning" ></i></div>
-            <div class="col col-overflow" title="{{item.value.version}}" >{{item.value.version}}</div>
-            <div class="col col-overflow" title="{{item.value.installedVersion}}" >{{item.value.installedVersion ? item.value.installedVersion : 'Not Available'}}</div>
-            <div class="col col-overflow" title="{{item.value.license}}">{{item.value.license}}</div>
-            <div class="col col-overflow" title="{{item.value.author}}">{{item.value.author}}</div>
-            <div class="text-info">
-                <button class="btn btn-clean btn-icon btn-md" title="Preview" [disabled] = "!item.value.preview" ><i c8yIcon="eye" class="action-icon-button" (click)="preview(item.value.preview)"></i></button></div>
-            <div class=" text-info" >
-                <button class="btn btn-clean btn-icon btn-md"  title="Documentation" [disabled] = "!item.value.repository" ><i c8yIcon="document-with-code" class="action-icon-button" (click)="openDocumentation(item.value.repository)"></i></button></div>
-            
-            <div *ngIf="userHasAdminRights"  class="text-warning" [ngSwitch]="item.value.actionCode" >
-                <div class="action-icon " title="Refresh" *ngSwitchCase="'003'">
-                    <i c8yIcon="refresh" class="action-icon text-info" (click)="refresh()"></i>
-                </div>
-                <div class="action-icon text-danger" title="Uninstall Widget" *ngSwitchDefault><i c8yIcon="minus-circle" (click)="uninstallWidget(item.value)"></i></div>
-            </div>
-        </ng-template>
 
-        <div class="card-group col-xs-12 col-sm-12 col-md-12 col-lg-12">
-            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                <div class="card">
-                    <div class="card-header">
-                       <!-- Search -->
-                        <div id="searchWidget" class="col-xs-12 col-sm-6 col-md-6 col-lg-6 input-group input-group-search">
-                            <input
-                            type="search"
-                            class="form-control"
-                            placeholder="Search widget..."
-                            [(ngModel)]="searchWidget"
-                            (keyup)="applyFilter()"
-                            />
-                            <span class="input-group-addon">
+<c8y-action-bar-item [placement]="'left'">
+    <ul class="nav navbar-nav navbar-left">
+        <li class="hidden-xs navbar-form">
+            <div class="form-group">
+                <label class="m-r-8"> Display as </label>
+                <div class="c8y-select-wrapper">
+                    <select class="form-control" [(ngModel)]="displayListValue" id="myWidgetDropdown"
+                        (change)="displayList($event.target.value)">
+                        <option value="1">Grid</option>
+                        <option value="2">List</option>
+                    </select>
+                </div>
+            </div>
+        </li>
+    </ul>
+</c8y-action-bar-item>
+
+<div *ngIf="isBusy" class="col-xs-12 col-sm-12 col-md-12" style="padding-bottom:50px;padding-top:20px">
+    <rectangle-spinner style="position: relative; left: 47%;">
+    </rectangle-spinner>
+</div>
+<div class="card-group interact-grid" *ngIf="!isBusy && displayListValue !== '1'">
+    <div class="card-group col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <!-- Search -->
+                    <div id="searchWidget" class="col-xs-12 col-sm-6 col-md-6 col-lg-6 input-group input-group-search">
+                        <input type="search" class="form-control" placeholder="Search widget..."
+                            [(ngModel)]="searchWidget" (keyup)="applyFilter()" />
+                        <span class="input-group-addon">
                             <i c8yIcon="search" *ngIf="!searchString || searchString.length === 0"></i>
-                            <i
-                                c8yIcon="times"
-                                class="text-muted"
-                                *ngIf="searchWidget && searchWidget.length > 0"
-                                (click)="searchWidget = '';applyFilter() "
-                            ></i>
-                            </span>
-                        </div>
-                        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6" >
-                                <button class="btn btn-link pull-right" id="refresh-widget" (click)="reload()">
-                                    <i c8yIcon="refresh"></i> Reload
-                                </button>
-                                <button *ngIf="userHasAdminRights && filterWidgets?.length" class="btn btn-link pull-right" id="uninstall-widget" (click)="unInstallAllWidgets()">
-                                    <i c8yIcon="uninstall-programs" style="font-size: 16px;"></i> Uninstall all
-                                </button>
-                                <button *ngIf="userHasAdminRights && isUpdateRequired" class="btn btn-link pull-right" id="update-widget" (click)="updateAll()">
-                                    <i c8yIcon="cloud-upload" style="font-size: 16px;"></i> Update all
-                                </button>
-                               <!--  <label class="c8y-switch pull-right" title="Select Multiple">
+                            <i c8yIcon="times" class="text-muted" *ngIf="searchWidget && searchWidget.length > 0"
+                                (click)="searchWidget = '';applyFilter() "></i>
+                        </span>
+                    </div>
+                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+                        <button class="btn btn-link pull-right" id="refresh-widget" (click)="reload()">
+                            <i c8yIcon="refresh"></i> Reload
+                        </button>
+                        <button *ngIf="userHasAdminRights && filterWidgets?.length" class="btn btn-link pull-right"
+                            id="uninstall-widget" (click)="unInstallAllWidgets()">
+                            <i c8yIcon="uninstall-programs" style="font-size: 16px;"></i> Uninstall all
+                        </button>
+                        <button *ngIf="userHasAdminRights && isUpdateRequired" class="btn btn-link pull-right"
+                            id="update-widget" (click)="updateAll()">
+                            <i c8yIcon="cloud-upload" style="font-size: 16px;"></i> Update all
+                        </button>
+                        <!--  <label class="c8y-switch pull-right" title="Select Multiple">
                                     <input type="checkbox" />
                                     <span></span> Select multiple
                                   </label> -->
-                        </div>
-                        
                     </div>
-                    <hr />
-                    <div class="card-block">
-                        <div class="c8y-empty-state text-center" style="flex-direction: column; align-items: center;"
-                            *ngIf="!widgetCatalog?.widgets?.length">
-                            <h1 c8yIcon="package" class="c8y-icon-duocolor" style="font-size: 90px;"></h1>
-                            <h3>No Widget to list.</h3>
-                            <p>Please Install widgets.</p>
-                        </div>
-                        <div class="c8y-empty-state text-center" style="flex-direction: column; align-items: center;"
-                            *ngIf="widgetCatalog?.widgets?.length && !filterWidgets?.length">
-                            <h3>No Widget to list.</h3>
-                        </div>
-                        <ng-container *ngIf="filterWidgets?.length">
-                            <div class="sortable-grid-header">
-                                <div class="invisible widget-icon text-primary" style="width: 20px;" >
-                                    <button class="invisible btn btn-clean btn-icon btn-md">
-                                        <i c8yIcon="refresh" class="action-icon" ></i>
-                                    </button>    
-                                </div>
-                                <div class="invisible widget-icon"><i class="fa custom-icon-drag-handle"></i></div>
-                                <div class="col" style="margin-left: 25px;">Widget</div>
-                                <div class="col">Latest Version</div>
-                                <div class="col">Current Version</div>
-                                <div class="col">License</div>
-                                <div class="col">Author</div>
-                                <div class="invisible widget-icon text-info"  style="width: 20px;"><i [c8yIcon]="eye"></i></div>
-                                <div class="invisible widget-icon text-success" style="width: 20px;"><i [c8yIcon]="external-link"></i></div>
-                                <div class="invisible widget-icon text-success" style="width: 20px;"><i [c8yIcon]="minus-circle"></i></div>
-                            </div>
-                            <bs-sortable [ngModel]="filterWidgets" [itemTemplate]="itemTemplate"
-                                itemClass="sortable-item" itemActiveClass="sortable-item-active"
-                                wrapperClass="sortable-grid" ></bs-sortable>
-                        </ng-container>
+
+                </div>
+                <hr />
+                <div class="card-block">
+                    <div class="c8y-empty-state text-center" style="flex-direction: column; align-items: center;"
+                        *ngIf="!widgetCatalog?.widgets?.length">
+                        <h1 c8yIcon="package" class="c8y-icon-duocolor" style="font-size: 90px;"></h1>
+                        <h3>No Widget to list.</h3>
+                        <p>Please Install widgets.</p>
+                    </div>
+                    <div class="c8y-empty-state text-center" style="flex-direction: column; align-items: center;"
+                        *ngIf="widgetCatalog?.widgets?.length && !filterWidgets?.length">
+                        <h3>No Widget to list.</h3>
+                    </div>
+                    <div class="table-responsive" *ngIf="filterWidgets?.length" style="margin-top: -15px;">
+                        <table class="table table-hover table-striped table-sortable" id="myWidgets" >
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th class="cursor-pointer" style="text-transform: capitalize;" (click)="sortColumn('title')" [ngClass]="sortClass('title')">Widget</th>
+                                    <th class="cursor-pointer" style="text-transform: capitalize;" (click)="sortColumn('version')" [ngClass]="sortClass('version')">Latest Version</th>
+                                    <th class="cursor-pointer" style="text-transform: capitalize;" (click)="sortColumn('installedVersion')" [ngClass]="sortClass('installedVersion')">Current Version</th>
+                                    <th class="cursor-pointer" style="text-transform: capitalize;" (click)="sortColumn('license')" [ngClass]="sortClass('license')">License</th>
+                                    <th class="cursor-pointer" style="text-transform: capitalize;" (click)="sortColumn('releaseDate')" [ngClass]="sortClass('releaseDate')">Release Date</th>
+                                    <th class="cursor-pointer" style="text-transform: capitalize;" (click)="sortColumn('author')" [ngClass]="sortClass('author')">Author</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let widget of filterWidgets;">
+                                    <td>
+                                        <ng-container [ngSwitch]="widget.actionCode">
+                                            <button class="btn btn-clean btn-icon btn-md text-warning verticalAlign" title="Update" *ngSwitchCase="'001'">
+                                                <i c8yIcon="cloud-upload" class="action-icon" (click)="updateWidget(widget, false)"></i>
+                                            </button>
+                                            <button class="btn btn-clean btn-icon btn-md text-warning verticalAlign" title="Update (Not Compatible)" *ngSwitchCase="'002'">
+                                                <i c8yIcon="level-up" class="action-icon" (click)="updateWidget(widget, false)"></i>
+                                            </button>
+                                            <button class="btn btn-clean btn-icon btn-md text-warning verticalAlign" title="Refresh" *ngSwitchCase="'003'">
+                                                <i c8yIcon="refresh" class="action-icon text-info" (click)="refresh()"></i>
+                                            </button>
+                                            <button class="invisible btn btn-clean btn-icon btn-md text-warning verticalAlign" title="Refresh" *ngSwitchDefault>
+                                                <i c8yIcon="refresh" class="action-icon text-info" (click)="refresh()"></i>
+                                            </button>
+                                        </ng-container>
+                                        <i class="widget-icon" [c8yIcon]="widget.icon"></i>
+                                    </td>
+                                    <td style="font-size: 12px;word-wrap: break-word;">{{widget.title}}
+                                        <i *ngIf="!widget.isCompatible || widget.isDeprecated"
+                                            title="This widget may not compatible or deprecated!" c8yIcon="warning"
+                                            class="warning-icon text-warning"></i>
+                                    </td>
+                                    <td style="font-size: 12px;">{{widget.version}}</td>
+                                    <td style="font-size: 12px;">{{widget.installedVersion ? widget.installedVersion : 'Not Available'}}</td>
+                                    <td style="font-size: 12px;">{{widget.license}}</td>
+                                    <td style="font-size: 12px;">{{widget.releaseDate | date : "dd-MM-yyyy"}}</td>
+                                    <td style="font-size: 12px;">{{widget.author}}</td>
+                                    <td>
+                                        <div>
+                                            <button class="text-info btn btn-clean btn-icon btn-md" title="Preview"
+                                                [disabled]="!widget.preview"><i c8yIcon="eye" class="action-icon-button"
+                                                    (click)="preview(widget.preview)"></i></button>
+                                            <button class="text-info btn btn-clean btn-icon btn-md"
+                                                title="Documentation" [disabled]="!widget.repository" style="padding: 0;"><i
+                                                    c8yIcon="document-with-code" class="action-icon-button"
+                                                    (click)="openDocumentation(widget.repository)"></i></button>
+                                            <span *ngIf="userHasAdminRights"
+                                                [ngSwitch]="widget.actionCode">
+                                                <button class="action-icon text-info btn btn-clean btn-icon btn-md"  title="Refresh" *ngSwitchCase="'003'">
+                                                    <i c8yIcon="refresh" class="action-icon text-info"
+                                                        (click)="refresh()"></i>
+                                                </button>
+                                                <button class="action-icon btn btn-clean btn-icon btn-md text-danger" title="Uninstall Widget"
+                                                    *ngSwitchDefault><i c8yIcon="minus-circle"
+                                                        (click)="uninstallWidget(widget)"></i></button>
+                                            </span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
+<div *ngIf="!isBusy && displayListValue === '1'">
+    <div class="card-group interact-grid col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <!-- Search -->
+                    <div id="searchWidget" class="col-xs-12 col-sm-6 col-md-6 col-lg-6 input-group input-group-search">
+                        <input type="search" class="form-control" placeholder="Search widget..."
+                            [(ngModel)]="searchWidget" (keyup)="applyFilter()" />
+                        <span class="input-group-addon">
+                            <i c8yIcon="search" *ngIf="!searchString || searchString.length === 0"></i>
+                            <i c8yIcon="times" class="text-muted" *ngIf="searchWidget && searchWidget.length > 0"
+                                (click)="searchWidget = '';applyFilter() "></i>
+                        </span>
+                    </div>
+                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+                        <button class="btn btn-link pull-right" id="refresh-widget" (click)="reload()">
+                            <i c8yIcon="refresh"></i> Reload
+                        </button>
+                        <button *ngIf="userHasAdminRights && filterWidgets?.length" class="btn btn-link pull-right"
+                            id="uninstall-widget" (click)="unInstallAllWidgets()">
+                            <i c8yIcon="uninstall-programs" style="font-size: 16px;"></i> Uninstall all
+                        </button>
+                        <button *ngIf="userHasAdminRights && isUpdateRequired" class="btn btn-link pull-right"
+                            id="update-widget" (click)="updateAll()">
+                            <i c8yIcon="cloud-upload" style="font-size: 16px;"></i> Update all
+                        </button>
+                        <!--  <label class="c8y-switch pull-right" title="Select Multiple">
+                                    <input type="checkbox" />
+                                    <span></span> Select multiple
+                                  </label> -->
+                    </div>
+
+                </div>
+                <hr />
+                <div class="card-block" *ngIf="!widgetCatalog?.widgets?.length">
+                    <div class="c8y-empty-state text-center" style="flex-direction: column; align-items: center;">
+                        <h1 c8yIcon="package" class="c8y-icon-duocolor" style="font-size: 90px;"></h1>
+                        <h3>No Widget to list.</h3>
+                        <p>Please Install widgets.</p>
+                    </div>
+                    <div class="c8y-empty-state text-center" style="flex-direction: column; align-items: center;"
+                        *ngIf="widgetCatalog?.widgets?.length && !filterWidgets?.length">
+                        <h3>No Widget to list.</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-group interact-grid col-xs-12 col-sm-12 col-md-12 col-lg-12" *ngIf="filterWidgets?.length > 0">
+        <div class="col-xs-12 col-sm-4 col-md-3" *ngFor="let widget of filterWidgets">
+            <div class="card">
+                <div class="dropdown card-actions " dropdown (click)="$event.stopPropagation()"
+                    style="z-index: 1;cursor: pointer;">
+                    <button type="button" title="Settings" id="appSettings-{{widget.name}}"
+                        class="dropdown-toggle c8y-dropdown cursor-pointer" dropdownToggle>
+                        <i c8yIcon="ellipsis-v"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-right" *dropdownMenu role="menu">
+                        <li role="menuitem" [ngStyle]="widget.repository ? {'cursor': 'pointer'} : {'cursor': 'not-allowed'}">
+                            <a (click)="openDocumentation(widget.repository)" [class.disabled]="!widget.repository" class="dropdown-item clickable fs-12">
+                                <i c8yIcon="external-link"></i> Documentation
+                            </a>
+                        </li>
+                        <li role="menuitem">
+                            <a (click)="uninstallWidget(widget)" class="dropdown-item clickable fs-12">
+                                <i c8yIcon="minus-circle"></i> Uninstall
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-actions" style="left: 0px !important; top: 10px !important">
+                    <div class="text-warning" [ngSwitch]="widget.actionCode">
+                        <button class="btn btn-clean btn-icon btn-md"
+                            title="Update - Latest version available - {{widget.version}}" *ngSwitchCase="'001'">
+                            <i c8yIcon="cloud-upload" class="action-icon" (click)="updateWidget(widget, false)"></i>
+                        </button>
+                        <button class="btn btn-clean btn-icon btn-md" title="Update (Not Compatible)"
+                            *ngSwitchCase="'002'">
+                            <i c8yIcon="level-up" class="action-icon" (click)="updateWidget(widget, false)"></i>
+                        </button>
+                        <button class="btn btn-clean btn-icon btn-md" title="Refresh" *ngSwitchCase="'003'">
+                            <i c8yIcon="refresh" class="action-icon text-info" (click)="refresh()"></i>
+                        </button>
+                    </div>
+                    <i *ngIf="!widget.isCompatible || widget.isDeprecated"
+                        title="This widget may not compatible or deprecated!" c8yIcon="warning"
+                        class="warning-icon-grid text-warning"></i>
+                </div>
+                <div class="card-block text-center card-column-30">
+                    <div style="display:block; width:95%;">
+                        <i [c8yIcon]="widget.icon" style="margin-right: 5px;"></i>
+                        <span title="{{widget.title}}" class="text-medium">{{widget.title}} </span>
+                    </div>
+                    <div style="margin-bottom:5px">
+                        <span class="label label-primary"
+                            *ngIf="widget.installedVersion">{{widget.installedVersion}}</span>
+                        <span class="label label-primary" *ngIf="!widget.installedVersion">Not Available</span>
+                    </div>
+                    <div>
+                        <a (click)="preview(widget.preview)" class="cursor-pointer">
+                            <img class="preview-img" [src]="widget.preview && widget.preview !== '' ? widget.preview : './img/no-image.png'" />
+                        </a>
+                    </div>
+                    <button class="btn btn-xs btn-default margin-10" (click)="navigateToDetailPage(widget)">
+                        <i c8yicon="more-details" title="Details" class="dlt-c8y-icon-more-details"></i> Details
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

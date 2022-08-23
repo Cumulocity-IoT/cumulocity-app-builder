@@ -17,7 +17,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { ApplicationService, InventoryService, ICurrentTenant, IApplication } from '@c8y/client';
+import { ApplicationService, InventoryService, ICurrentTenant, IApplication, UserGroupService } from '@c8y/client';
 import { AlertService, AppStateService } from '@c8y/ngx-components';
 import { AppBuilderExternalAssetsService } from 'app-builder-external-assets';
 import { AppIdService } from '../app-id.service';
@@ -53,11 +53,8 @@ export class SettingsService {
             this.analyticsProvider = providerList.find( provider => provider.key === 'gainsight');
             this.analyticsProvider.providerURL = this.externalAssetService.getURL('ANALYTICS','gainsight');
             appIdService.appIdDelayedUntilAfterLogin$.pipe(switchMap(appId => {
-                if (appId != undefined) {
-                    return from(this.getAppBuilderConfig());
-                } else {
-                    return of(undefined);
-                }
+                return from(this.getAppBuilderConfig());
+              
             }))
                 .subscribe(async app => {
                    // TODO
@@ -203,4 +200,5 @@ export class SettingsService {
         const customProp = await this.getCustomProperties();
         return (!customProp || (customProp  && ( !customProp.appUpgradeNotification || customProp.appUpgradeNotification === "true")));
     }
+
 }

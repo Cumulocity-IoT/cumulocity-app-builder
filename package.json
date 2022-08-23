@@ -9,7 +9,9 @@
     "build-dev": "set NODE_OPTIONS=--max_old_space_size=4096 && c8ycli build --env.extraWebpackConfig=./extra-webpack.config.js --env.mode=development",
     "deploy-ci": "c8ycli deploy  -u $npm_config_param1 -T $npm_config_param2 -U $npm_config_param3 -P $npm_config_param4",
     "deploy": "c8ycli deploy ",
-    "postinstall": "ngcc && patch-package && patch-package --patch-dir node_modules/cumulocity-runtime-widget-loader/patches"
+    "postinstall": "ngcc && patch-package && patch-package --patch-dir node_modules/cumulocity-runtime-widget-loader/patches",
+    "prebuild": " gulp clean",
+    "postbuild": " gulp bundle"
   },
   "keywords": [],
   "author": "Darpankumar Lalani - Software AG, Global Presales",
@@ -70,7 +72,9 @@
     "patch-package": "^6.4.7",
     "raw-loader": "^4.0.2",
     "ts-loader": "^9.2.9",
-    "typescript": "4.2.4"
+    "typescript": "4.2.4",
+    "gulp": "^4.0.2",
+    "gulp-zip": "^5.0.1"
   },
   "c8y": {
     "application": {

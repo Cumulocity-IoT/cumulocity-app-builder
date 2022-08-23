@@ -37,6 +37,7 @@ import {smartRulesAvailabilityProvider} from "./smartrules/smart-rules-availabil
 import {ApplicationService, InventoryService} from "@c8y/client";
 import {IApplicationBuilderApplication} from "../iapplication-builder-application";
 import {GroupTemplateDashboardModule} from "./group-template-dashboard/group-template-dashboard.module";
+import { AccessRightsService } from "../../builder/access-rights.service";
 
 @Injectable({
     providedIn: 'root',
@@ -71,7 +72,8 @@ export class DeviceContextDataResolverService implements Resolve<{context: strin
 
 @Injectable({ providedIn: 'root' })
 export class RedirectToFirstDashboardOrConfig implements CanActivate {
-    constructor(private appService: ApplicationService, private router: Router, private inventoryService: InventoryService) {}
+    constructor(private appService: ApplicationService, private router: Router, 
+        private accessRightsService: AccessRightsService, private inventoryService: InventoryService) {}
 
     async canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise<boolean | UrlTree> {
         const appId = route.paramMap.get('applicationId');
@@ -79,7 +81,7 @@ export class RedirectToFirstDashboardOrConfig implements CanActivate {
         if (application && application.applicationBuilder) {
             if (application.applicationBuilder.dashboards && application.applicationBuilder.dashboards.length > 0) {
               //  console.debug('Redirecting to first dashboard');
-                const firstDashboard = application.applicationBuilder.dashboards[0];
+                const firstDashboard = this.findFirstDashboard(application.applicationBuilder.dashboards);
                 let url = `/application/${appId}`;
                 if (firstDashboard.tabGroup) {
                     url += `/tabgroup/${firstDashboard.tabGroup}`
@@ -107,6 +109,20 @@ export class RedirectToFirstDashboardOrConfig implements CanActivate {
             console.error(`Application ${appId} isn't an application-builder application`);
             return this.router.parseUrl('');
         }
+    }
+
+    private findFirstDashboard(appDashboards: any){
+        if(appDashboards && appDashboards.length > 0) {
+            for(let dashboard of appDashboards) {
+                if (['no-nav', 'hidden'].includes(dashboard.visibility)) {
+                    continue;
+                }
+                if(this.accessRightsService.userHasAccess(dashboard.roles)) { 
+                    return dashboard;
+                }
+            }
+        }   
+        return null;
     }
 }
 

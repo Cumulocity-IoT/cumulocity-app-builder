@@ -62,6 +62,7 @@ import { AlertMessageModalModule } from "./utils/alert-message-modal/alert-messa
 import { AppBuilderUpgradeService } from "./app-builder-upgrade/app-builder-upgrade.service";
 import { SimulatorWorkerAPI } from "./simulator/mainthread/simulator-worker-api.service";
 import { SimulatorManagerService } from "./simulator/mainthread/simulator-manager.service";
+import { NgSelectModule } from "@ng-select/ng-select";
 @NgModule({
     imports: [
         ApplicationModule,
@@ -111,7 +112,8 @@ import { SimulatorManagerService } from "./simulator/mainthread/simulator-manage
         MarkdownModule.forRoot(),
         SettingsModule,
         WidgetCatalogModule,
-        AlertMessageModalModule
+        AlertMessageModalModule,
+        NgSelectModule
     ],
     declarations: [
         DashboardConfigComponent,

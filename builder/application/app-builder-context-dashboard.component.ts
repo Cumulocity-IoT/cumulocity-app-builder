@@ -15,17 +15,21 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
  */
-import {Component, Inject, OnDestroy} from "@angular/core";
-import {ActivatedRoute} from "@angular/router";
-import {interval, Subscription} from "rxjs";
+import {Component, Inject, OnDestroy, Renderer2} from "@angular/core";
+import {ActivatedRoute, Router} from "@angular/router";
+import { from, interval, Observable, Subscription } from "rxjs";
 import {ContextDashboardType} from "@c8y/ngx-components/context-dashboard";
-import { InventoryService, ApplicationService, UserService } from "@c8y/client";
+import { InventoryService, ApplicationService, UserService, IApplication } from "@c8y/client";
 import {last} from "lodash-es";
 import {SMART_RULES_AVAILABILITY_TOKEN} from "./smartrules/smart-rules-availability.upgraded-provider";
 import {IApplicationBuilderApplication} from "../iapplication-builder-application";
 import {AppStateService} from "@c8y/ngx-components";
 import {RuntimeWidgetInstallerModalService} from "cumulocity-runtime-widget-loader";
 import { SettingsService } from "../../builder/settings/settings.service";
+import { AccessRightsService } from "../../builder/access-rights.service";
+import { switchMap, tap } from "rxjs/operators";
+import { AppIdService } from "../../builder/app-id.service";
+import { DOCUMENT } from "@angular/common";
 
 @Component({
     selector: 'app-builder-context-dashboard',
@@ -46,7 +50,7 @@ import { SettingsService } from "../../builder/settings/settings.service";
                 </c8y-action-bar-item>
                 <ng-container [ngSwitch]="isGroupTemplate">
                     <dashboard-by-id *ngSwitchCase="false" [dashboardId]="dashboardId" [context]="context"
-                                     [disabled]="disabled" style="display:block;"></dashboard-by-id>
+                                     [disabled]="disabled" style="display:block;" [ngStyle]="tabGroup? '':{'min-height': 'calc(100vh - 100px)'}"></dashboard-by-id>
                     <group-template-dashboard *ngSwitchCase="true" style="display:block;" [dashboardId]="dashboardId" [deviceId]="this.deviceId" [context]="context"
                                      [disabled]="disabled"></group-template-dashboard>
                     <ng-container *ngSwitchCase="undefined"><!--Loading--></ng-container>
@@ -64,7 +68,7 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
     dashboardSmartRulesAlarmsExplorerVisibility = true;
 
     isGroupTemplate?: boolean;
-
+    app: Observable<any>;
     context: Partial<{
         id: string,
         name: string,
@@ -83,15 +87,24 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
     subscriptions = new Subscription();
 
     constructor(
-        private activatedRoute: ActivatedRoute,
+        private activatedRoute: ActivatedRoute, private router:Router,
         private inventoryService: InventoryService,
         private applicationService: ApplicationService,
         @Inject(SMART_RULES_AVAILABILITY_TOKEN) private c8ySmartRulesAvailability: any,
         private userService: UserService,
         private appStateService: AppStateService,
         private runtimeWidgetInstallerModalService: RuntimeWidgetInstallerModalService,
-        private settingsService: SettingsService
+        private settingsService: SettingsService,
+        private accessRightsService: AccessRightsService,
+        private appIdService: AppIdService,
+        @Inject(DOCUMENT) private document: Document, private renderer: Renderer2
     ) {
+        this.app = this.appIdService.appIdDelayedUntilAfterLogin$.pipe(
+            switchMap(appId => from(
+                applicationService.detail(appId).then(res => res.data as any)
+            ))
+        );
+
         this.subscriptions.add(this.activatedRoute.paramMap.subscribe(async paramMap => {
             // Always defined
             this.applicationId = paramMap.get('applicationId');
@@ -108,7 +121,7 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
             // The user may have simulator access (INVENTORY_ADMIN)
             // but we don't necessarily want them messing with the dashboards unless they have app edit permissions
             // A security hole but not a major one
-            this.disabled = !userService.hasAllRoles(appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN","ROLE_APPLICATION_MANAGEMENT_ADMIN"]);
+            this.disabled = !userService.hasAllRoles(appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN", "ROLE_APPLICATION_MANAGEMENT_ADMIN"]);
 
             // TODO: check to see if applicationId + dashboardId/tabGroup has changed we don't need to reset the tabs if they haven't - it'll stop the flashing
 
@@ -138,7 +151,7 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
 
             const app = (await this.applicationService.detail(this.applicationId)).data as IApplicationBuilderApplication;
             const dashboard = app.applicationBuilder.dashboards
-                .find(dashboard => dashboard.id === this.dashboardId);
+                .find(dashboard => dashboard.id === this.dashboardId && this.accessRightsService.userHasAccess(dashboard.roles));
 
             this.isGroupTemplate = (dashboard && dashboard.groupTemplate) || false;
 
@@ -149,18 +162,20 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
                     name: (deviceMO ? deviceMO.name: '')
                 }
             }
-            if (!dashboard) {
+            if (!dashboard && !this.deviceDetail) {
                 console.warn(`Dashboard: ${this.dashboardId} isn't part of application: ${this.applicationId}`);
+                this.router.navigateByUrl(`/home`);
             }
 
             if (this.tabGroup) {
                 const dashboardsInTabgroup = app.applicationBuilder.dashboards
-                    .filter(dashboard => (dashboard.tabGroup === this.tabGroup || (dashboard && dashboard.groupTemplate && dashboard.tabGroup === 'deviceId')) && dashboard.visibility !== 'hidden')
+                    .filter(dashboard => (dashboard.tabGroup === this.tabGroup || (dashboard && dashboard.groupTemplate && dashboard.tabGroup === 'deviceId'))
+                     && dashboard.visibility !== 'hidden' && this.accessRightsService.userHasAccess(dashboard.roles))
                 tabs.push(...await Promise.all(dashboardsInTabgroup.map(async (dashboard, i) => {
                     const isGroupTemplate = (dashboard && dashboard.groupTemplate) || false;
                     if (isGroupTemplate) {
                         //  const childAssets = (await this.inventoryService.childAssetsList(dashboard.deviceId, {pageSize: 2000, query: 'has(c8y_IsDevice)'})).data;
-                        const childAssets = (await this.inventoryService.childAssetsList(dashboard.deviceId, {pageSize: 2000, query: `$filter=(has(c8y_IsDevice) and (id eq '${this.tabGroup}')) `})).data;
+                        const childAssets = (await this.inventoryService.childAssetsList(dashboard.deviceId, { pageSize: 2000, query: `$filter=(has(c8y_IsDevice) and (id eq '${this.tabGroup}')) ` })).data;
                         const matchingDevice = (childAssets && childAssets.length > 0 ? childAssets[0] : null);
                         if (matchingDevice) {
                             return {
@@ -200,23 +215,50 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
             }
 
             // Removing undefined tab for group template
-            this.tabs = this.tabs.filter( tab => tab !== undefined);
+            this.tabs = this.tabs.filter(tab => tab !== undefined);
 
             // Bug ? mutliple active tabs while routing. Hack by hijacking DOM
             const tabOutletInt = interval(50);
             const tabOutletSub = tabOutletInt.subscribe(async val => {
                 const activeTabs = document.querySelectorAll('c8y-tabs-outlet li.active') as any;
-                if(activeTabs.length > 1) {
+                if (activeTabs.length > 1) {
                     activeTabs.forEach(tab => {
-                        if(tab.textContent !== 'Smart rules' && tab.textContent !== 'Alarms' && tab.textContent !== 'Data explorer') {
+                        if (tab.textContent !== 'Smart rules' && tab.textContent !== 'Alarms' && tab.textContent !== 'Data explorer') {
                             tab.classList.remove('active');
                         }
+                        if (tab.textContent === 'Smart rules' || tab.textContent === 'Alarms' || tab.textContent === 'Data explorer') {
+                            this.app.subscribe((app) => {
+                                if (app.applicationBuilder.branding.enabled && (app.applicationBuilder.selectedTheme && app.applicationBuilder.selectedTheme !== 'Default')) {
+                                    this.renderer.addClass(this.document.body, 'dashboard-body-theme');
+                                } else {
+                                    this.renderer.removeClass(this.document.body, 'dashboard-body-theme');
+                                }
+                            });
+                        } else {
+                            this.renderer.removeClass(this.document.body, 'dashboard-body-theme');
+                        }
                     });
+                } else {
+                    activeTabs.forEach(tab => {
+                        if (tab.textContent === 'Smart rules' || tab.textContent === 'Alarms' || tab.textContent === 'Data explorer') {
+                            this.app.subscribe((app) => {
+                                if (app.applicationBuilder.branding.enabled && (app.applicationBuilder.selectedTheme && app.applicationBuilder.selectedTheme !== 'Default')) {
+                                    this.renderer.addClass(this.document.body, 'dashboard-body-theme');
+                                } else {
+                                    this.renderer.removeClass(this.document.body, 'dashboard-body-theme');
+                                }
+                            });
+                        } else {
+                            this.renderer.removeClass(this.document.body, 'dashboard-body-theme');
+                        }
+                    }); 
                 }
                 tabOutletSub.unsubscribe();
             });
 
         }));
+
+
     }
     ngOnDestroy(): void {
         this.subscriptions.unsubscribe();
@@ -252,6 +294,6 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
     }
 
     hasAdminRights() {
-        return this.userService.hasAllRoles(this.appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN","ROLE_APPLICATION_MANAGEMENT_ADMIN"]);
+        return this.userService.hasAllRoles(this.appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN", "ROLE_APPLICATION_MANAGEMENT_ADMIN"]);
     }
 }

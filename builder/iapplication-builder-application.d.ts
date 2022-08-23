@@ -28,6 +28,7 @@ export type IApplicationBuilderApplication = IApplication & {
             icon: string,
             deviceId?: string,
             groupTemplate?: boolean
+            roles?: any
         }[],
         simulators?: SimulatorConfig[]
     }
