@@ -1,0 +1,95 @@
+<div class="data-point-explorer" style="clear: both">
+  <c8y-ui-action-bar-set>
+    <li title="{{ 'Aggregation' | translate }}" class="navbar-form">
+      <label translate>Aggregation</label>
+      <c8y-aggregation
+        title="{{ data.aggregation | translate }}"
+        date-from="data.dateFrom"
+        date-to="data.dateTo"
+        realtime="data.realtime"
+        aggregation="data.aggregation"
+        auto="true"
+      >
+      </c8y-aggregation>
+    </li>
+    <li class="navbar-form">
+      <c8y-interval
+        title="{{ data.interval | translate }}"
+        date-from="data.dateFrom"
+        date-to="data.dateTo"
+        interval="data.interval"
+        realtime="data.realtime"
+      >
+      </c8y-interval>
+    </li>
+    <li>
+      <c8y-realtime-button
+        title="{{ 'Toggle realtime' | translate }}"
+        channel="{{ channel }}"
+        state="data.realtime"
+        on-data="onData($data)"
+      >
+      </c8y-realtime-button>
+      <c8y-realtime-button
+        title="{{ 'Toggle realtime' | translate }}"
+        ng-show="false"
+        channel="{{ alarmsChannel }}"
+        state="data.realtime"
+        on-data="onAlarm($data)"
+        on-data-update="onAlarm($data)"
+      >
+      </c8y-realtime-button>
+      <c8y-realtime-button
+        ng-show="false"
+        channel="{{ eventsChannel }}"
+        state="data.realtime"
+        on-data="onEvent($data)"
+      >
+      </c8y-realtime-button>
+    </li>
+  </c8y-ui-action-bar-set>
+
+  <c8y-help src="/users-guide/cockpit/#data-explorer"></c8y-help>
+
+  <div class="card content-fullpage card--grid grid__col--8-4--md">
+    <div class="card-block d-flex d-col p-t-8">
+      <div class="c8yGraphFill flex-grow">
+        <c8y-chart
+          datapoints="data.graphDataPoints"
+          date-from="data.dateFrom"
+          date-to="data.dateTo"
+          realtime="data.realtime"
+          aggregation="data.aggregation"
+          show-time="true"
+          on-data="(onData)"
+          on-update-dates="onUpdateDates($dateFrom, $dateTo)"
+          on-update-displayed-dates="onUpdateDisplayedDates($dateFrom, $dateTo)"
+          on-box-changed="onBoxChanged(box)"
+        >
+        </c8y-chart>
+      </div>
+      <c8y-alarms-events-timelines-chart
+        ng-if="data.graphAlarmsEventsConfigs.length"
+        alarms-events-configs="data.graphAlarmsEventsConfigs"
+        date-from="data.displayedDateFrom"
+        date-to="data.displayedDateTo"
+        on-update-dates="onUpdateDates($dateFrom, $dateTo)"
+        realtime="data.realtime"
+        on-realtime-alarm-fn="onRealtimeAlarmFn(onRealtimeAlarm)"
+        on-realtime-event-fn="onRealtimeEventFn(onRealtimeEvent)"
+        chart-box="chartBox"
+      >
+      </c8y-alarms-events-timelines-chart>
+    </div>
+
+    <div class="content-fullpage bg-gray-white">
+      <div class="inner-scroll bg-inherit">
+        <c8y-data-point-list datapoints="data.datapoints" class="bg-inherit"></c8y-data-point-list>
+        <c8y-alarms-events-timelines-config
+          class="card--grid__separator-top--white d-block bg-inherit"
+          configs="data.alarmsEventsConfigs"
+        ></c8y-alarms-events-timelines-config>
+      </div>
+    </div>
+  </div>
+</div>

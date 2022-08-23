@@ -101,10 +101,7 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
             this.deviceId = paramMap.get('deviceId');
             this.deviceDetail = paramMap.get('deviceDetail');
 
-            this.context = {
-                id: this.deviceId
-            }
-
+            
             this.isGroupTemplate = undefined;
             this.dashboardSmartRulesAlarmsExplorerVisibility = await this.settingsService.isDashboardVisibilitySmartRulesAlarmsExplorer();
 
@@ -145,6 +142,13 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
 
             this.isGroupTemplate = (dashboard && dashboard.groupTemplate) || false;
 
+            if(this.deviceId) {
+                const deviceMO = await (await this.inventoryService.detail(this.deviceId)).data;
+                this.context = {
+                    id: this.deviceId,
+                    name: (deviceMO ? deviceMO.name: '')
+                }
+            }
             if (!dashboard) {
                 console.warn(`Dashboard: ${this.dashboardId} isn't part of application: ${this.applicationId}`);
             }
@@ -214,7 +218,6 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
 
         }));
     }
-
     ngOnDestroy(): void {
         this.subscriptions.unsubscribe();
     }

@@ -1,0 +1,325 @@
+<div ng-controller="SmartRulesListCtrl as vm">
+  <div ng-if="canSeeSection()">
+    <c8y-ui-action-bar-set>
+      <li class="navbar-form hidden-xs" action-bar-position="left">
+        <c8y-list-display-control
+          list-length="rules.length"
+          on-list-class-change="vm.listClass = listClass"
+        >
+        </c8y-list-display-control>
+      </li>
+      <li>
+        <c8y-if-allowed cfg="smartRulesSvc.permissionsCfgs.create">
+          <button class="btn btn-link" title="{{ 'Add smart rule' | translate }}" ng-click="add()">
+            <i c8y-icon="plus-circle"></i>
+            {{ 'Add smart rule' | translate }}
+          </button>
+        </c8y-if-allowed>
+      </li>
+      <li ng-if="getLinkToDM()">
+        <c8y-if-allowed any-app="['devicemanagement']">
+          <a
+            class="btn btn-link"
+            title="{{ 'Open in Device management' | translate }}"
+            target="_blank"
+            rel="noopener noreferrer"
+            ng-href="{{ getLinkToDM() }}"
+          >
+            <i c8y-icon="external-link"></i>
+            {{ 'Device management' | translate }}
+          </a>
+        </c8y-if-allowed>
+      </li>
+      <li>
+        <c8y-refresh-btn></c8y-refresh-btn>
+      </li>
+    </c8y-ui-action-bar-set>
+
+    <c8y-help src="/users-guide/cockpit/#smart-rules"></c8y-help>
+
+    <div ng-if="loadingStatus.inProgress">
+      <c8y-rectangle-spinner
+        message="'Retrieving smart rules…' | translate"
+      ></c8y-rectangle-spinner>
+    </div>
+
+    <div ng-if="!loadingStatus.inProgress && loadingStatus.done && loadingStatus.error">
+      <div class="alert alert-warning" translate>Could not load smart rules list.</div>
+    </div>
+
+    <div ng-if="!loadingStatus.inProgress && loadingStatus.done && !loadingStatus.error">
+      <!-- empty state -->
+      <c8y-ui-empty-state
+        ng-if="rules.length === 0"
+        [icon]="'c8y-smart-rules'"
+        [title]="'No smart rules to display.' | translate"
+        [subtitle]="'Click below to add your first smart rule.' | translate"
+      >
+        <button class="btn btn-primary" ng-click="add()" title="{{ 'Add smart rule' | translate }}">
+          {{ 'Add smart rule' | translate }}
+        </button>
+        <p c8y-guide-docs>
+          <small translate>
+            Find out more in the
+            <a c8y-guide-href="users-guide/cockpit/#smart-rules"> User guide`KEEP_ORIGINAL` </a>.
+          </small>
+        </p>
+      </c8y-ui-empty-state>
+
+      <div class="smart-rules-list" ng-if="rules.length > 0">
+        <div class="card-group" ng-class="vm.listClass">
+          <div class="smart-rules-list-head page-sticky-header p-t-8">
+            <label class="smart-rule-group text-center p-t-4" translate> Status </label>
+            <label class="smart-rule-children p-t-4" ng-if="children.length > 0" translate>
+              Children
+            </label>
+            <label class="smart-rule-description p-t-4" translate> Smart rule </label>
+          </div>
+
+          <div class="col-xs-12 col-sm-6 col-md-4" ng-repeat="rule in rules | orderBy:'name'">
+            <div class="card-flip-container" ng-class="{ flipping: isFlipped }">
+              <div
+                class="card-flip smart-rule-list-card"
+                ng-class="{ flipped: isFlipped, active: isOpen[rule.id] }"
+              >
+                <div class="card card-front">
+                  <div
+                    class="card-actions collapsible"
+                    ng-class="{ expanded: isOpen[rule.id] }"
+                    ng-show="canAddRules() || canModify(rule) || canInspect()"
+                  >
+                    <button
+                      class="btn btn-link btn-collapse"
+                      title="{{ 'Details' | translate }}"
+                      ng-class="{ active: isOpen[rule.id] }"
+                      ng-click="isOpen[rule.id] = !isOpen[rule.id]"
+                    >
+                      <i c8y-icon="chevron-down"></i>
+                    </button>
+                    <div
+                      class="btn-group"
+                      ng-class="{ open: ctrl.open }"
+                      is-open="ctrl.open"
+                      uib-dropdown
+                    >
+                      <button
+                        class="dropdown-toggle c8y-dropdown"
+                        title="{{ 'Actions' | translate }}"
+                        type="button"
+                        data-toggle="dropdown"
+                        aria-haspopup="true"
+                        aria-expanded="false"
+                        uib-dropdown-toggle
+                      >
+                        <i c8y-icon="ellipsis-v"></i>
+                      </button>
+                      <ul class="dropdown-menu dropdown-menu-right" uib-dropdown-menu>
+                        <li ng-if="canModify(rule)">
+                          <button title="{{ 'Edit smart rule' | translate }}" ng-click="edit(rule)">
+                            <i c8y-icon="pencil"></i>
+                            {{ 'Edit' | translate }}
+                          </button>
+                        </li>
+                        <li ng-if="canAddRules(rule)">
+                          <button
+                            title="{{ 'Duplicate smart rule' | translate }}"
+                            ng-click="clone(rule)"
+                          >
+                            <i c8y-icon="copy"></i>
+                            {{ 'Duplicate' | translate }}
+                          </button>
+                        </li>
+                        <li ng-if="canModify(rule)">
+                          <button
+                            title="{{ 'Delete smart rule' | translate }}"
+                            ng-click="remove(rule)"
+                          >
+                            <i c8y-icon="trash"></i>
+                            {{ 'Delete' | translate }}
+                          </button>
+                        </li>
+                        <li class="divider" role="separator" ng-if="canInspect()"></li>
+                        <li ng-if="canInspect()">
+                          <a
+                            ng-href="/apps/administration#/eventprocessing/{{ rule.cepModuleId }}"
+                            title="{{ 'Inspect smart rule' | translate }}"
+                          >
+                            <i c8y-icon="c8y-smart-rules c8y-icon-mono"></i>
+                            {{ 'Inspect' | translate }}
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div class="card-header">
+                    <label class="text-center text-muted m-b-16">
+                      <i c8y-icon="c8y-smart-rules"></i>
+                      {{ 'Smart rule' | translate }}
+                    </label>
+                    <h4 class="smart-rule-name card-title">
+                      {{ rule.name }}
+                    </h4>
+                  </div>
+                  <div class="card-block">
+                    <div
+                      class="smart-rule-group smart-rule-group-switch"
+                      ng-if="context.context === 'group' || context.context === 'device'"
+                    >
+                      <label class="c8y-switch" uib-tooltip="{{ tooltip(rule) | translate }}">
+                        <input
+                          type="checkbox"
+                          ng-disabled="!canModify(rule) || $scope.ruleTemplates[rule.ruleTemplateName].noTarget"
+                          ng-checked="hasSource(rule)"
+                          ng-click="toggleRuleActivationForContextMO(rule)"
+                        />
+                        <span></span>
+                      </label>
+
+                      <button
+                        class="btn c8y-btn-checkbox m-r-0"
+                        type="button"
+                        ng-class="{ active: hasSource(rule) }"
+                        ng-click="toggleRuleActivationForContextMO(rule)"
+                      >
+                        <i
+                          ng-class="{
+                            'dlt-c8y-icon-check-circle text-success': hasSource(rule),
+                            'dlt-c8y-icon-ban text-danger': !hasSource(rule)
+                          }"
+                        ></i>
+                        <span translate ng-if="hasSource(rule)"> Active`rule` </span>
+                        <span translate ng-if="!hasSource(rule)"> Inactive`rule` </span>
+                      </button>
+                    </div>
+
+                    <div
+                      class="smart-rule-state"
+                      ng-if="context.context !== 'group' && context.context !== 'device'"
+                    >
+                      <div class="list-icon">
+                        <i
+                          c8y-icon="{{ statusIcon(rule) }}"
+                          uib-tooltip="{{ status(rule) | translate }}"
+                          ng-class="statusClass(rule)"
+                        ></i>
+                      </div>
+                      <div class="card-icon" ng-class="statusClass(rule)">
+                        <i c8y-icon="{{ statusIcon(rule) }}"></i>
+                        <span class="text-default">
+                          {{ status(rule) | translate }}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div class="smart-rule-children" ng-if="children.length > 0">
+                      <label translate> Children </label>
+                      <c8y-child-assets-selector
+                        ng-if="::canApplyOnChildren(rule)"
+                        parent-mo="moId"
+                        selected-child-assets="ruleChildren[rule.id]"
+                        on-selection-confirmed="toggleRuleActivationForChildrenMOs(rule, selection)"
+                        disable-selection="!canModify(rule)"
+                      >
+                      </c8y-child-assets-selector>
+                    </div>
+
+                    <div class="smart-list-icon-label">
+                      <span class="dot">
+                        <i c8y-icon="{{ inputIcon(rule) }}"></i>
+                      </span>
+                      <i c8y-icon="arrow-right"></i>
+                      <span class="dot">
+                        <i c8y-icon="{{ outputIcon(rule) }}"></i>
+                      </span>
+                    </div>
+
+                    <div
+                      class="smart-rule-description interact"
+                      ng-click="isOpen[rule.id] = !isOpen[rule.id]"
+                    >
+                      <div class="smart-rule-name">
+                        {{ rule.name }}
+                      </div>
+                      <small
+                        class="smart-rule-information text-muted"
+                        title="{{ type(rule) }}"
+                        ng-if="type(rule)"
+                      >
+                        {{ type(rule) }}
+                      </small>
+                    </div>
+                  </div>
+                  <div class="card-actions-group separator">
+                    <button
+                      class="btn-flip"
+                      title="{{ 'Details' | translate }}"
+                      ng-click="isFlipped = !isFlipped"
+                    >
+                      <i c8y-icon="reply"></i>
+                      {{ 'Details' | translate }}
+                    </button>
+                  </div>
+                </div>
+                <div class="card card-back" uib-collapse="!isOpen[rule.id]">
+                  <div class="card-header-actions">
+                    <div class="smart-list-icon-label">
+                      <span class="dot">
+                        <i c8y-icon="{{ inputIcon(rule) }}"></i>
+                      </span>
+                      <i c8y-icon="arrow-right"></i>
+                      <span class="dot">
+                        <i c8y-icon="{{ outputIcon(rule) }}"></i>
+                      </span>
+                    </div>
+                    <div class="title text-truncate">
+                      {{ rule.name }}
+                    </div>
+                  </div>
+                  <div class="smart-rule-details card-inner-scroll">
+                    <div class="row">
+                      <div class="col-sm-3">
+                        <div class="legend form-block">
+                          {{ 'Details' | translate }}
+                        </div>
+                        <dl class="dl-inline small text-muted">
+                          <dt translate>Creation time</dt>
+                          <dd>
+                            {{ rule.creationTime | absoluteDate }}
+                          </dd>
+                          <dt translate>Last updated</dt>
+                          <dd>
+                            {{ rule.lastUpdated | absoluteDate }}
+                          </dd>
+                        </dl>
+                      </div>
+
+                      <div class="col-sm-9" ng-if="isOpen[rule.id] || isFlipped">
+                        <div class="legend form-block">
+                          {{ 'History of changes' | translate }}
+                        </div>
+                        <div class="m-b-16" c8y-audit-list filter="{source: rule.id}"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="card-actions-group separator">
+                    <button
+                      class="btn-flip"
+                      title="{{ 'Back' | translate }}"
+                      type="button"
+                      ng-click="isFlipped = !isFlipped"
+                    >
+                      <i c8y-icon="reply"></i>
+                      {{ 'Back' | translate }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

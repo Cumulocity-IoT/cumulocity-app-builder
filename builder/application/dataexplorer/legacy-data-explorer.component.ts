@@ -24,7 +24,7 @@ import './cumulocity.json';
 
 angular.module("c8y.cockpit.dataPointExplorerUI", ["c8y.cockpit.dataPointExplorer"])
     .component('legacyDataExplorer', {
-        template: require("@c8y/ng1-modules/dataPointExplorer/views/explorer.html").default,
+        template: require("./explorer.html").default,
         controller: "c8yDataPointExplorerCtrl"
     });
 

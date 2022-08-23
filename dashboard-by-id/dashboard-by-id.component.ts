@@ -17,7 +17,7 @@
  */
 import {Component, Inject, Input, OnChanges, OnInit, Renderer2, SimpleChanges} from "@angular/core";
 import {InventoryService} from "@c8y/client";
-import {AlertService, DashboardChange, DashboardChildChange, GainsightService} from "@c8y/ngx-components";
+import {ActionBarService, AlertService, DashboardChange, DashboardChildChange, GainsightService, ModalService} from "@c8y/ngx-components";
 import {BsModalService} from "ngx-bootstrap/modal";
 // import {ContextDashboardComponent} from "./context-dashboard.component";
 // import {WidgetService} from "./widget.service";
@@ -30,6 +30,7 @@ import {
 } from "@c8y/ngx-components/context-dashboard";
 import {ActivatedRoute, Router} from "@angular/router";
 import {Subscription} from "rxjs";
+import { TranslateService } from "@ngx-translate/core";
 
 /**
  * Cumulocity don't provide the ability to show a dashboard just based on the dashboard's Id so this component implements that.
@@ -83,9 +84,13 @@ export class DashboardByIdComponent extends ContextDashboardComponent implements
         widgetService: WidgetService,
         bsModal: BsModalService,
         private inventoryService: InventoryService,
-        gainsightService: GainsightService
+        gainsightService: GainsightService,
+        actionBarService: ActionBarService,
+        translateService: TranslateService,
+        modalService: ModalService
     ) {
-        super(route, router, contextDashboardService, alert, renderer, moduleConfig, widgetService, bsModal, inventoryService, gainsightService);
+        super(route, router, contextDashboardService, alert, renderer, moduleConfig, widgetService, bsModal, inventoryService, 
+            gainsightService, actionBarService, translateService);
         // @ts-ignore
         this.dataSub = new Subscription();
     }

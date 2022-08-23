@@ -18,10 +18,12 @@
 import {Component, Inject, Input, OnChanges, OnInit, Renderer2, SimpleChanges} from "@angular/core";
 import {InventoryService} from "@c8y/client";
 import {
+    ActionBarService,
     AlertService,
     DashboardChange,
     DashboardChildChange,
-    GainsightService
+    GainsightService,
+    ModalService
 } from "@c8y/ngx-components";
 import {BsModalService} from "ngx-bootstrap/modal";
 import {
@@ -33,6 +35,7 @@ import {
 } from "@c8y/ngx-components/context-dashboard";
 import {ActivatedRoute, Router} from "@angular/router";
 import {Subscription} from "rxjs";
+import { TranslateService } from "@ngx-translate/core";
 //import {ContextDashboardComponent} from "../../../dashboard-by-id/context-dashboard.component";
 // import {WidgetService} from "../../../dashboard-by-id/widget.service";
 
@@ -89,9 +92,13 @@ export class GroupTemplateComponent extends ContextDashboardComponent implements
         widgetService: WidgetService,
         bsModal: BsModalService,
         private inventoryService: InventoryService,
-        gainsightService: GainsightService
+        gainsightService: GainsightService,
+        actionBarService: ActionBarService,
+        translateService: TranslateService,
+        modalService: ModalService
     ) {
-        super(route, router, contextDashboardService, alert, renderer, moduleConfig, widgetService, bsModal, inventoryService, gainsightService);
+        super(route, router, contextDashboardService, alert, renderer, moduleConfig, widgetService, bsModal, inventoryService, 
+            gainsightService, actionBarService, translateService);
         // @ts-ignore
         this.dataSub = new Subscription();
     }
