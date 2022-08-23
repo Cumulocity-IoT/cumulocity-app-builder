@@ -56,9 +56,9 @@ export class MyWidgetsComponent implements OnInit{
         private alertService: AlertService, private componentService: DynamicComponentService, 
         private runtimeWidgetLoaderService: RuntimeWidgetLoaderService, private appService: ApplicationService) {
         this.userHasAdminRights = userService.hasAllRoles(appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN","ROLE_APPLICATION_MANAGEMENT_ADMIN"]);
-        this.runtimeWidgetLoaderService.isLoaded$.subscribe( isLoaded => {
+        /* this.runtimeWidgetLoaderService.isLoaded$.subscribe( isLoaded => {
             this.widgetCatalogService.runtimeLoadingCompleted = isLoaded;
-        })   
+        })    */
     }
                         
 

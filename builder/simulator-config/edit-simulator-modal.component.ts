@@ -33,6 +33,7 @@ import {SimulationStrategiesService} from "../simulator/simulation-strategies.se
 import {SimulatorCommunicationService} from "../simulator/mainthread/simulator-communication.service";
 import * as _ from 'lodash';
 import { SimulatorNotificationService } from './simulatorNotification.service';
+import { SimulatorWorkerAPI } from '../simulator/mainthread/simulator-worker-api.service';
 
 @Component({
     templateUrl: './edit-simulator-modal.component.html'
@@ -46,7 +47,7 @@ export class EditSimulatorModalComponent implements OnInit {
     isMSCheckSpin: boolean = false;
 
     constructor(
-        private simSvc: SimulatorCommunicationService,
+        private simSvc: SimulatorWorkerAPI,
         public bsModalRef: BsModalRef, private simulationStrategiesService: SimulationStrategiesService,
         private resolver: ComponentFactoryResolver, private injector: Injector,
         private appService: ApplicationService, private appIdService: AppIdService, private fetchClient: FetchClient,
@@ -162,7 +163,7 @@ export class EditSimulatorModalComponent implements OnInit {
             simulator: this.simulatorConfig
         });
         // We could just wait for them to refresh, but it's nicer to instantly refresh
-        await this.simSvc.simulator.checkForSimulatorConfigChanges();
+        await this.simSvc.checkForSimulatorConfigChanges();
 
         this.bsModalRef.hide();
     }

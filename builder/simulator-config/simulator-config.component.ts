@@ -32,6 +32,7 @@ import {SimulationStrategiesService} from "../simulator/simulation-strategies.se
 import { AppStateService } from '@c8y/ngx-components';
 import * as cloneDeep from "clone-deep";
 import { SimulatorNotificationService } from './simulatorNotification.service';
+import { SimulatorWorkerAPI } from '../simulator/mainthread/simulator-worker-api.service';
 @Component({
     templateUrl: './simulator-config.component.html'
 })
@@ -42,19 +43,19 @@ export class SimulatorConfigComponent implements OnDestroy {
     simulatorConfigById$ = new BehaviorSubject<Map<number, SimulatorConfig>>(new Map());
 
     isUnlocking = false;
-    private _lockStatusListener: Promise<number>;
-    private _simulatorConfigListener: Promise<number>;
+    private _lockStatusListener: number;
+    private _simulatorConfigListener: number;
     userHasAdminRights: boolean;
     constructor(
-        private simSvc: SimulatorCommunicationService, private modalService: BsModalService,
+        private simSvc: SimulatorWorkerAPI, private modalService: BsModalService,
         private appIdService: AppIdService, private appService: ApplicationService,
         public simulationStrategiesService: SimulationStrategiesService,
         private appStateService: AppStateService, private userService: UserService,
         private simulatorNotificationService: SimulatorNotificationService
     ) {
-        this._lockStatusListener = simSvc.simulator.addLockStatusListener(Comlink.proxy(lockStatus => this.lockStatus$.next(lockStatus)));
-        this._simulatorConfigListener = simSvc.simulator.addSimulatorConfigListener(Comlink.proxy(simulatorConfigById =>
-            this.simulatorConfigById$.next(simulatorConfigById)));
+        this._lockStatusListener = simSvc.addLockStatusListener(lockStatus => this.lockStatus$.next(lockStatus));
+        this._simulatorConfigListener = simSvc.addSimulatorConfigListener(simulatorConfigById =>
+            this.simulatorConfigById$.next(simulatorConfigById));
         this.userHasAdminRights = userService.hasAllRoles(appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN","ROLE_APPLICATION_MANAGEMENT_ADMIN"])
 
     }
@@ -85,7 +86,7 @@ export class SimulatorConfigComponent implements OnDestroy {
 
     async forceUnlock() {
         this.isUnlocking = true;
-        await this.simSvc.simulator.forceTakeLock();
+        await this.simSvc.forceTakeLock();
         // Wait a bit extra to allow the UI to realise that we now own the lock
         await delay(LOCK_TIMEOUT/2);
         this.isUnlocking = false;
@@ -115,7 +116,7 @@ export class SimulatorConfigComponent implements OnDestroy {
             simulator: simulatorConfig
         });
         // We could just wait for them to refresh, but it's nicer to instantly refresh
-        await this.simSvc.simulator.checkForSimulatorConfigChanges();
+        await this.simSvc.checkForSimulatorConfigChanges();
     }
 
     async deleteSimulator(simulatorConfig: SimulatorConfig) {
@@ -137,12 +138,12 @@ export class SimulatorConfigComponent implements OnDestroy {
             simulator: simulatorConfig
         });
         // We could just wait for them to refresh, but it's nicer to instantly refresh
-        await this.simSvc.simulator.checkForSimulatorConfigChanges();
+       // await this.simSvc.checkForSimulatorConfigChanges();
     }
 
     ngOnDestroy(): void {
-        this._lockStatusListener.then(id => this.simSvc.simulator.removeListener(id));
-        this._simulatorConfigListener.then(id => this.simSvc.simulator.removeListener(id));
+        this.simSvc.removeListener(this._lockStatusListener);
+        this.simSvc.removeListener(this._simulatorConfigListener);
     }
 
     // for keyValue pipe

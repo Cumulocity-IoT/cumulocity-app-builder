@@ -32,7 +32,7 @@ const c8yVersion = require('./../../package.json')["@c8y/ngx-components"];
 @Injectable()
 export class WidgetCatalogService {
 
-    C8Y_VERSION = '1011.0.0';
+    C8Y_VERSION = '1014.0.0';
     private WidgetCatalogPath = '/widgetCatalog/widget-catalog.json';
     private DemoCatalogWidgetsPath = '/demoCatalogWidgets/demo-catalog-widgets.json';
     private devBranchPath = "?ref=development";
@@ -43,7 +43,7 @@ export class WidgetCatalogService {
     private GATEWAY_URL_Labcase = '';
     private GATEWAY_URL_Labcase_FallBack = '';
     private CATALOG_LABCASE_ID = '';
-    runtimeLoadingCompleted = false;
+    runtimeLoadingCompleted = true;
     private readonly HTTP_HEADERS = {
         headers: new HttpHeaders({
           'Content-Type': 'application/json',

@@ -43,7 +43,7 @@ import { BrandingDirtyGuardService } from "./branding/branding-dirty-guard.servi
 import { AppListComponent } from "./app-list/app-list.component";
 import { LockStatus } from "./simulator/worker/simulation-lock.service";
 import { fromEvent, Observable } from "rxjs";
-import { withLatestFrom } from "rxjs/operators";
+import { distinctUntilChanged, filter, withLatestFrom } from "rxjs/operators";
 import { proxy } from "comlink";
 import { Client , BasicAuth, CookieAuth, TenantService } from '@c8y/client';
 import { TemplateCatalogModule } from "./template-catalog/template-catalog.module";
@@ -60,6 +60,8 @@ import { HomeComponent } from './home/home.component';
 import { WidgetCatalogModule } from './widget-catalog/widget-catalog.module';
 import { AlertMessageModalModule } from "./utils/alert-message-modal/alert-message-modal.module";
 import { AppBuilderUpgradeService } from "./app-builder-upgrade/app-builder-upgrade.service";
+import { SimulatorWorkerAPI } from "./simulator/mainthread/simulator-worker-api.service";
+import { SimulatorManagerService } from "./simulator/mainthread/simulator-manager.service";
 @NgModule({
     imports: [
         ApplicationModule,
@@ -84,7 +86,7 @@ import { AppBuilderUpgradeService } from "./app-builder-upgrade/app-builder-upgr
             }, {
                 path: 'application/:applicationId/simulator-config',
                 component: SimulatorConfigComponent
-            }, 
+            },
             {
                 path: 'settings-properties',
                 component: CustomPropertiesComponent
@@ -133,11 +135,15 @@ import { AppBuilderUpgradeService } from "./app-builder-upgrade/app-builder-upgr
 })
 export class BuilderModule {
     private renderer: Renderer2;
-    constructor(appStateService: AppStateService, loginService: LoginService, simSvc: SimulatorCommunicationService, 
+    constructor(appStateService: AppStateService, loginService: LoginService, 
+        simSvc: SimulatorWorkerAPI, simulatorManagerService: SimulatorManagerService,
         appIdService: AppIdService, private settingService: SettingsService, private appBuilderUpgradeService: AppBuilderUpgradeService,
         rendererFactory: RendererFactory2, @Inject(DOCUMENT) private _document: Document, private tenantService: TenantService) {
         // Pass the app state to the worker from the main thread (Initially and every time it changes)
-        appStateService.currentUser.subscribe(async (user) => {
+        appStateService.currentUser
+        .pipe(filter(user => !!user))
+        .pipe(distinctUntilChanged())
+        .subscribe(async (user) => {
             let isCookieAuth = false;
             let cookieAuth = null;
             let xsrfToken = null;
@@ -151,18 +157,19 @@ export class BuilderModule {
             if (user != null) {
                 const tfa = localStorage.getItem(loginService.TFATOKEN_KEY) || sessionStorage.getItem(loginService.TFATOKEN_KEY);
                 if (token !== undefined && token) {
-                    return await simSvc.simulator.setUserAndCredentials(user, { token, tfa }, isCookieAuth, null);
+                    return await simSvc.setUserAndCredentials(user, { token, tfa }, isCookieAuth, null);
                 } else {
-                    return await simSvc.simulator.setUserAndCredentials(user, { token, tfa }, isCookieAuth, xsrfToken);
+                    return await simSvc.setUserAndCredentials(user, { token, tfa }, isCookieAuth, xsrfToken);
                 }
             }
-            return await simSvc.simulator.setUserAndCredentials(user, {}, isCookieAuth, xsrfToken);
+            return await simSvc.setUserAndCredentials(user, {}, isCookieAuth, xsrfToken);
         });
-
+        
+        simulatorManagerService.initialize();
         const lockStatus$ = new Observable<{ isLocked: boolean, isLockOwned: boolean, lockStatus?: LockStatus }>(subscriber => {
-            simSvc.simulator
-                .addLockStatusListener(proxy(lockStatus => subscriber.next(lockStatus)))
-                .then(listenerId => subscriber.add(() => simSvc.simulator.removeListener(listenerId)));
+            const listenerId = simSvc
+                .addLockStatusListener(lockStatus => subscriber.next(lockStatus));
+            subscriber.add(() => simSvc.removeListener(listenerId));
         });
 
         // If the user leaves the page then unlock the simulators
@@ -170,13 +177,16 @@ export class BuilderModule {
             .pipe(withLatestFrom(lockStatus$))
             .subscribe(([event, lockStatus]) => {
                 if (lockStatus.isLockOwned) {
-                    simSvc.simulator.unlock();
+                    simSvc.unlock();
                 }
             });
-        appStateService.currentTenant.subscribe(async (tenant) => {
-            await simSvc.simulator.setTenant(tenant)
-            this.settingService.setTenant(tenant);
+        appStateService.currentTenant
+        .pipe(filter(tenant => !!tenant))
+        .pipe(distinctUntilChanged())
+        .subscribe(async (tenant) => {
             if(tenant) {
+                await simSvc.setTenant(tenant)
+                this.settingService.setTenant(tenant);
                 const validAnalyticsProvider = await this.settingService.loadAnalyticsProvider();
                 if(validAnalyticsProvider) {
                     this.renderer = rendererFactory.createRenderer(null, null);
@@ -186,9 +196,12 @@ export class BuilderModule {
             }
         });
        
-        appIdService.appId$.subscribe(async (appId) => 
+        appIdService.appId$
+        .pipe(filter(appId => !!appId))
+        .pipe(distinctUntilChanged())
+        .subscribe(async (appId) => 
         {
-            await simSvc.simulator.setAppId(appId)
+            if(appId) {   await simSvc.setAppId(appId) }
             this.registerAndTrackAnalyticsProvider(false, appId);
         });
     }

@@ -19,8 +19,8 @@ import {Injector, NgModule} from '@angular/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {NavigationError, Router, RouterModule as NgRouterModule} from '@angular/router';
 import { UpgradeModule as NgUpgradeModule } from '@angular/upgrade/static';
-import {AppStateService, CoreModule, RouterModule, PluginsModule} from '@c8y/ngx-components';
-import {DashboardUpgradeModule, UpgradeModule, HybridAppModule} from '@c8y/ngx-components/upgrade';
+import {AppStateService, CoreModule, RouterModule, PluginsModule, SearchModule} from '@c8y/ngx-components';
+import {DashboardUpgradeModule, UpgradeModule, HybridAppModule, UPGRADE_ROUTES} from '@c8y/ngx-components/upgrade';
 import {BuilderModule} from "./builder/builder.module";
 import {filter, first, map, startWith, tap, withLatestFrom} from "rxjs/operators";
 import { IUser } from '@c8y/client';
@@ -29,8 +29,6 @@ import {CustomWidgetsModule} from "./custom-widgets/custom-widgets.module";
 import {RuntimeWidgetInstallerModule, RuntimeWidgetLoaderService} from "cumulocity-runtime-widget-loader";
 import { interval } from 'rxjs';
 import { SettingsService } from './builder/settings/settings.service';
-
-import { BinaryFileDownloadModule } from '@c8y/ngx-components/binary-file-download';
 @NgModule({
   imports: [
     // Upgrade module must be the first
@@ -39,19 +37,16 @@ import { BinaryFileDownloadModule } from '@c8y/ngx-components/binary-file-downlo
     RouterModule.forRoot(),
     NgRouterModule.forRoot([], { enableTracing: false, useHash: true }),
     CoreModule.forRoot(),
-    PluginsModule,
     NgUpgradeModule,
     DashboardUpgradeModule,
-    BinaryFileDownloadModule,
     BuilderModule,
     SimulationStrategiesModule,
     CustomWidgetsModule,
-    RuntimeWidgetInstallerModule
+   // RuntimeWidgetInstallerModule
   ]
 })
 export class AppModule extends HybridAppModule {
     constructor(protected upgrade: NgUpgradeModule, appStateService: AppStateService, private router: Router, 
-        private runtimeWidgetLoaderService: RuntimeWidgetLoaderService, 
         private injector: Injector,
         private settingsService: SettingsService) {
         super();
@@ -81,7 +76,7 @@ export class AppModule extends HybridAppModule {
     ngDoBootstrap(): void {
         super.ngDoBootstrap();
         // Only do this after bootstrapping so that angularJs is loaded
-        this.runtimeWidgetLoaderService.loadRuntimeWidgets();
+      //  this.runtimeWidgetLoaderService.loadRuntimeWidgets();
         // A hack to get href hash changes to always trigger an Angular Router update... There seems to be an AngularUpgrade/AngularJS/Cumulocity bug somewhere that stops the hashchange event firing.
         // This bug is apparent when trying to use the AppSwitcher to change to another AppBuilder App, sometimes it works, sometimes it doesn't
         const $injector = this.injector.get('$injector');

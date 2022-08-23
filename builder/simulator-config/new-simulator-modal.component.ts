@@ -33,6 +33,7 @@ import { SimulationStrategiesService } from "../simulator/simulation-strategies.
 import { SimulatorCommunicationService } from "../simulator/mainthread/simulator-communication.service";
 import { throwError } from 'rxjs';
 import { SimulatorNotificationService } from './simulatorNotification.service';
+import { SimulatorWorkerAPI } from '../simulator/mainthread/simulator-worker-api.service';
 
 @Component({
     templateUrl: './new-simulator-modal.component.html'
@@ -60,7 +61,7 @@ export class NewSimulatorModalComponent {
     isMSCheckSpin: boolean = false;
 
     constructor(
-        private simSvc: SimulatorCommunicationService,
+        private simSvc: SimulatorWorkerAPI,
         public bsModalRef: BsModalRef, public simulationStrategiesService: SimulationStrategiesService,
         private resolver: ComponentFactoryResolver, private injector: Injector, private inventoryService: InventoryService,
         private appService: ApplicationService, private appIdService: AppIdService, private fetchClient: FetchClient,
@@ -182,7 +183,7 @@ export class NewSimulatorModalComponent {
             simulator: newSimulatorObject
         });
         // We could just wait for them to refresh, but it's nicer to instantly refresh
-        await this.simSvc.simulator.checkForSimulatorConfigChanges();
+        await this.simSvc.checkForSimulatorConfigChanges();
 
         this.bsModalRef.hide();
     }
