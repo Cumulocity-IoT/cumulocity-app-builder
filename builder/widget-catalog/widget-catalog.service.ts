@@ -24,7 +24,7 @@ import { RuntimeWidgetInstallerService } from 'cumulocity-runtime-widget-loader'
 import { BehaviorSubject, Observable } from 'rxjs';
 import { WidgetCatalog, WidgetModel } from './widget-catalog.model';
 import * as semver from "semver";
-// import * as packageJson from "./../../package.json";
+import * as packageJson from "./../../package.json";
 import { catchError } from 'rxjs/operators';
 import { AlertService } from '@c8y/ngx-components';
 

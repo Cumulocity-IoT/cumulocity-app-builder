@@ -1,6 +1,5 @@
 const webpack = require("webpack");
 const path = require('path');
-const WorkerPlugin = require('worker-plugin');
 
 module.exports =  {
    
@@ -25,8 +24,7 @@ module.exports =  {
         plugins: [
            new webpack.DefinePlugin({
                 __VERSION__: JSON.stringify(require('./package').version),
-            }),
-            new WorkerPlugin()
+            })
         ]
     }
 ;
