@@ -30,10 +30,11 @@ import {
     withLatestFrom,
     debounceTime
 } from "rxjs/operators";
-import { interval, merge, Observable, of, Subscription } from "rxjs";
+import { from, interval, merge, Observable, of, Subscription } from "rxjs";
 import * as deepEqual from "fast-deep-equal";
 import { SimulationStrategiesService } from "../simulation-strategies.service";
 import { Injectable } from "@angular/core";
+import { AppDataService } from "./../../app-data.service";
 
 export interface DeviceSimulatorInstance {
     id: number,
@@ -57,6 +58,7 @@ export class SimulatorManagerService {
         private simulatorWorkerAPI: SimulatorWorkerAPI, private appService: ApplicationService,
         private appIdService: AppIdService, private lockService: SimulationLockService,
         private simulationStrategiesService: SimulationStrategiesService,
+        private appDataService: AppDataService
     ) { }
 
     initialize() {
@@ -71,8 +73,8 @@ export class SimulatorManagerService {
                         this.simulatorWorkerAPI._checkForSimulatorConfigChanges // Check if asked to
                     ).pipe(
                         debounceTime(100),
-                        switchMap(() => this.appService.detail(appId)),
-                        map(res => res.data),
+                        switchMap(() => from(this.appDataService.getAppDetails(appId))),
+                       // map(res => res.data),
                         map((application: IApplication & { applicationBuilder: any; }) => application.applicationBuilder.simulators || []),
                         // Check to see if the simulator config has changed
                         distinctUntilChanged((prev, curr) => deepEqual(prev, curr))

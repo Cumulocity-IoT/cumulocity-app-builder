@@ -28,6 +28,7 @@ import {CoreModule} from "@c8y/ngx-components";
 import {BrandingDirtyGuardService} from "./branding-dirty-guard.service";
 import { ButtonsModule } from 'ngx-bootstrap/buttons';
 import {AppIdService} from "../app-id.service";
+import { AppDataService } from "./../../builder/app-data.service";
 @NgModule({
     imports: [
         CommonModule,
@@ -39,10 +40,11 @@ import {AppIdService} from "../app-id.service";
     ]
 })
 export class BrandingModule {
-    constructor(appIdService: AppIdService, appService: ApplicationService, brandingService: BrandingService) {
+    constructor(appIdService: AppIdService, appService: ApplicationService, 
+        appDataService: AppDataService, brandingService: BrandingService) {
         appIdService.appIdDelayedUntilAfterLogin$.pipe(switchMap(appId => {
             if (appId != undefined) {
-                return from(appService.detail(appId).then(res => res.data as any));
+                return from(appDataService.getAppDetails(appId));
             } else {
                 return of(undefined);
             }

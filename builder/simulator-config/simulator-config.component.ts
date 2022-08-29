@@ -21,10 +21,9 @@ import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import { NewSimulatorModalComponent } from "./new-simulator-modal.component";
 import { EditSimulatorModalComponent } from "./edit-simulator-modal.component";
 import { LOCK_TIMEOUT, LockStatus } from "../simulator/worker/simulation-lock.service";
-import { BehaviorSubject, from } from "rxjs";
-import { switchMap } from "rxjs/operators";
+import { BehaviorSubject, from, of } from "rxjs";
+import { switchMap} from "rxjs/operators";
 import * as delay from "delay";
-import * as Comlink from "comlink";
 import { IApplication, ApplicationService, UserService } from "@c8y/client";
 import { AppIdService } from "../app-id.service";
 import { SimulatorConfig } from "../simulator/simulator-config";
@@ -36,6 +35,7 @@ import { SimulatorNotificationService } from './simulatorNotification.service';
 import { DOCUMENT } from '@angular/common';
 import { FileSimulatorNotificationService } from './file-simulator.service';
 import { SimulatorWorkerAPI } from '../simulator/mainthread/simulator-worker-api.service';
+import { AppDataService } from './../../builder/app-data.service';
 @Component({
     templateUrl: './simulator-config.component.html',
     styleUrls: ['./simulator-config.component.less']
@@ -58,19 +58,24 @@ export class SimulatorConfigComponent implements OnDestroy {
         private appStateService: AppStateService, private userService: UserService,
         private simulatorNotificationService: SimulatorNotificationService,
         @Inject(DOCUMENT) private document: Document, private renderer: Renderer2,
-        private fileSimulatorNotificationService: FileSimulatorNotificationService
+        private fileSimulatorNotificationService: FileSimulatorNotificationService,
+        private appDataService: AppDataService
     ) {
         this._lockStatusListener = simSvc.addLockStatusListener(lockStatus => this.lockStatus$.next(lockStatus));
         this._simulatorConfigListener = simSvc.addSimulatorConfigListener(simulatorConfigById =>
             this.simulatorConfigById$.next(simulatorConfigById));
         this.userHasAdminRights = userService.hasAllRoles(appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN", "ROLE_APPLICATION_MANAGEMENT_ADMIN"]);
         const app = this.appIdService.appIdDelayedUntilAfterLogin$.pipe(
-            switchMap(appId => from(
-                appService.detail(appId).then(res => res.data as any)
-            ))
+            switchMap(appId =>  {
+                if (appId) {
+                return from(this.appDataService.getAppDetails(appId));
+                } else {
+                return of(null);
+                }
+            })
         );
         app.subscribe((app) => {
-            if (app.applicationBuilder.branding.enabled && (app.applicationBuilder.selectedTheme && app.applicationBuilder.selectedTheme !== 'Default')) {
+            if (app && app.applicationBuilder.branding.enabled && (app.applicationBuilder.selectedTheme && app.applicationBuilder.selectedTheme !== 'Default')) {
                 this.applyTheme = true;
                 this.renderer.addClass(this.document.body, 'simulator-body-theme');
             } else {
