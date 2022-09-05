@@ -98,7 +98,7 @@ export class GroupTemplateComponent extends ContextDashboardComponent implements
         modalService: ModalService
     ) {
         super(route, router, contextDashboardService, alert, renderer, moduleConfig, widgetService, bsModal, inventoryService, 
-            gainsightService, actionBarService, translateService);
+            gainsightService, actionBarService, translateService, modalService);
         // @ts-ignore
         this.dataSub = new Subscription();
     }
