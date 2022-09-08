@@ -287,16 +287,20 @@ export class MyWidgetsComponent implements OnInit {
             return;
         }
 
-        await this.widgetCatalog.widgets.forEach(async widget => {
+        const currentApp: IApplication =  (await this.widgetCatalogService.getCurrentApp());
+        const installedPlugins = currentApp?.manifest?.remotes;
+        for(let widget of this.widgetCatalog.widgets) {
             widget.isCompatible = this.widgetCatalogService.isCompatiblieVersion(widget);
             const appObj = this.appList.find(app => app.contextPath === widget.contextPath);
-            widget.installedVersion = (appObj && appObj.manifest && appObj.manifest.version ? appObj.manifest.version : '');
-            widget.installed = appObj && this.findInstalledWidget(widget); //(widgetObj != undefined);
+            const widgetObj = (installedPlugins  && installedPlugins[widget.contextPath] && installedPlugins[widget.contextPath].length> 0);
+
+            widget.installedVersion = (widgetObj && appObj && appObj.manifest && appObj.manifest.version ? appObj.manifest.version : '');
+            widget.installed = widgetObj && this.findInstalledWidget(widget); //(widgetObj != undefined);
             if (widget.installed && !widget.isReloadRequired && this.isUpdateAvailable(widget)) {
                 this.isUpdateRequired = true;
             }
             this.actionFlag(widget);
-        });
+        }
         this.widgetCatalog.widgets = this.widgetCatalog.widgets.filter(widget => widget.installed);
     }
 
@@ -354,7 +358,8 @@ export class MyWidgetsComponent implements OnInit {
                 if (data && data.isConfirm) {
                     const widgetAppObj = this.appList.find(app => app.contextPath === widget.contextPath)
                     if (widgetAppObj) {
-                        await this.appService.delete(widgetAppObj.id);
+                        await this.widgetCatalogService.removePlugin(widgetAppObj);
+                        // await this.appService.delete(widgetAppObj.id);
                         widget.actionCode = '003';
                     }
                 }

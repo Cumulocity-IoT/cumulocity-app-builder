@@ -19,6 +19,7 @@
 import { Component, isDevMode, OnDestroy, OnInit } from "@angular/core";
 import {
     ApplicationService,
+    IApplication,
     UserService
 } from "@c8y/client";
 import { AlertService, AppStateService, DynamicComponentService } from "@c8y/ngx-components";
@@ -74,7 +75,7 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
     }
 
 
-    ngOnInit() {
+    async ngOnInit() {
         if (this.widgetCatalogService.runtimeLoadingCompleted) {
             this.loadWidgetsFromCatalog();
         } else {
@@ -122,6 +123,7 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
     }
 
     applyFilter() {
+        this.filterWidgets = [];
         if (this.widgetCatalog && this.widgetCatalog.widgets.length > 0) {
             if (!this.showAllWidgets) {
                 this.filterWidgets = this.widgetCatalog.widgets.filter((widget => widget.title.toLowerCase().includes(this.searchWidget.toLowerCase()) && widget.isCompatible));
@@ -142,17 +144,17 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
     }
     async installWidget(widget: WidgetModel): Promise<void> {
         const currentHost = window.location.host.split(':')[0];
-        if (currentHost === 'localhost' || currentHost === '127.0.0.1' || isDevMode()) {
+       /*  if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
             this.alertService.warning("Runtime widget installation isn't supported when running Application Builder on localhost or in development mode.");
             return;
-        }
+        } */
 
-        const appFound = this.appList.find(app => app.name.toLowerCase() === widget.title?.toLowerCase() ||
-            (app.contextPath && app.contextPath?.toLowerCase() === widget.contextPath.toLowerCase()))
-        if (appFound) {
+        const widgetBinaryFound = this.appList.find(app => app.manifest?.isPackage && (app.name.toLowerCase() === widget.title?.toLowerCase() ||
+            (app.contextPath && app.contextPath?.toLowerCase() === widget.contextPath.toLowerCase())))
+       /*  if (appFound) {
             this.alertService.danger(" Widget name or context path already exists!");
             return;
-        }
+        } */
 
         if (widget.actionCode === '002' || widget.isDeprecated) {
             let alertMessage = {};
@@ -179,11 +181,11 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
             const installDemoDialogRef = this.alertModalDialog(alertMessage);
             await installDemoDialogRef.content.event.subscribe(async data => {
                 if (data && data.isConfirm) {
-                    await this.initiateInstallWidgetProcess(widget);
+                    await this.initiateInstallWidgetProcess(widget, widgetBinaryFound);
                 }
             });
 
-        } else { await this.initiateInstallWidgetProcess(widget); }
+        } else { await this.initiateInstallWidgetProcess(widget, widgetBinaryFound); }
 
     }
 
@@ -191,10 +193,21 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
         return this.modalService.show(AlertMessageModalComponent, { class: 'c8y-wizard', initialState: { message } });
     }
 
-    private async initiateInstallWidgetProcess(widget: WidgetModel) {
+    private async initiateInstallWidgetProcess(widget: WidgetModel, widgetBinary: any) {
         this.showProgressModalDialog(`Installing ${widget.title}`)
 
-        this.widgetCatalogService.downloadBinary(widget.binaryLink)
+        if(widgetBinary) {
+            this.widgetCatalogService.updateRemotesInCumulocityJson(widgetBinary).then(() => {
+                widget.installed = true;
+                widget.isReloadRequired = true;
+                this.actionFlag(widget);
+                this.hideProgressModalDialog();
+            }, error => {
+                this.alertService.danger("There is some technical error! Please try after sometime.");
+                console.error(error);
+            });
+        } else {
+            this.widgetCatalogService.downloadBinary(widget.binaryLink)
             .subscribe(data => {
 
                 const blob = new Blob([data], {
@@ -202,13 +215,18 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
                 });
                 const fileName = widget.binaryLink.replace(/^.*[\\\/]/, '');
                 const fileOfBlob = new File([blob], fileName);
-                this.widgetCatalogService.installWidget(fileOfBlob, widget).then(() => {
+                this.widgetCatalogService.installPackage(fileOfBlob).then(() => {
                     widget.installed = true;
                     widget.isReloadRequired = true;
                     this.actionFlag(widget);
                     this.hideProgressModalDialog();
+                }, error => {
+                    this.alertService.danger("There is some technical error! Please try after sometime.");
+                    console.error(error);
                 });
             });
+        } 
+        
     }
 
     // TODO: For phase II of widget catalog
@@ -221,16 +239,17 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
             return;
         }
 
-        await this.widgetCatalog.widgets.forEach(async widget => {
-            const widgetObj = await new Promise<any>((resolve) => {
-                this.componentService.getById(widget.id).then(widgetObj => {
-                    resolve(widgetObj);
-                });
-            });
+        const currentApp: IApplication =  (await this.widgetCatalogService.getCurrentApp());
+        console.log(currentApp);
+        const installedPlugins = currentApp?.manifest?.remotes;
+        for(let widget of this.widgetCatalog.widgets) {
+            const widgetObj = (installedPlugins  && installedPlugins[widget.contextPath] && installedPlugins[widget.contextPath].length> 0);
+            console.log(widget.contextPath, widgetObj);
             widget.installed = (widgetObj != undefined);
             widget.isCompatible = this.widgetCatalogService.isCompatiblieVersion(widget);
             this.actionFlag(widget);
-        });
+        }
+       
         this.widgetCatalog.widgets = this.widgetCatalog.widgets.filter(widget => !widget.installed);
     }
 
