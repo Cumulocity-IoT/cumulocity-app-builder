@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2019 Software AG, Darmstadt, Germany and/or its licensors
+* Copyright (c) 2022 Software AG, Darmstadt, Germany and/or its licensors
 *
 * SPDX-License-Identifier: Apache-2.0
 *
@@ -18,7 +18,7 @@
 
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, isDevMode } from '@angular/core';
-import { ApplicationRemotePlugins, ApplicationService, IApplication, IManifest, InventoryBinaryService, InventoryService } from '@c8y/client';
+import { ApplicationService, IApplication, IManifest } from '@c8y/client';
 import { AppBuilderExternalAssetsService } from 'app-builder-external-assets';
 import { RuntimeWidgetInstallerService } from 'cumulocity-runtime-widget-loader';
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -26,7 +26,7 @@ import { WidgetCatalog, WidgetModel } from './widget-catalog.model';
 import * as semver from "semver";
 import * as packageJson from "./../../package.json";
 import { catchError, delay } from 'rxjs/operators';
-import { AlertService, AppStateService, ZipService } from '@c8y/ngx-components';
+import { AppStateService, ZipService } from '@c8y/ngx-components';
 
 const c8yVersion = require('./../../package.json')["@c8y/ngx-components"];
 @Injectable()
@@ -63,9 +63,8 @@ export class WidgetCatalogService {
     })
   };
 
-  constructor(private http: HttpClient, private inventoryService: InventoryService,
+  constructor(private http: HttpClient,
     private appService: ApplicationService, private appStateService: AppStateService,
-    private binaryService: InventoryBinaryService, private alertService: AlertService,
     private runtimeWidgetInstallerService: RuntimeWidgetInstallerService,
     private externalService: AppBuilderExternalAssetsService, private zipService: ZipService) {
     this.GATEWAY_URL_GitHubAPI = this.externalService.getURL('GITHUB', 'gatewayURL_Github');
@@ -150,6 +149,10 @@ export class WidgetCatalogService {
 
   checkInstalledVersion(widget: WidgetModel) {
     if (!widget.installedVersion) return true;
+
+    if (widget.installedVersion?.toLocaleLowerCase().includes('beta') || 
+    widget.installedVersion?.toLocaleLowerCase().includes('rc')) return true;
+
     const major = '>=' + semver.major(widget.installedVersion) + '.0.0';
     return semver.satisfies(widget.version, major);
   }
@@ -193,12 +196,12 @@ export class WidgetCatalogService {
 
   async updateRemotesInCumulocityJson( pluginBinary: any) {
     const remoteModules = pluginBinary?.manifest?.exports;
-    let remotes = {};
+    const currentApp: IApplication =  (await this.getCurrentApp());
+    const c8yJson = await this.getCumulocityJsonFile(currentApp);
+    let remotes = (c8yJson?.remotes ? c8yJson?.remotes : {});
     remoteModules.forEach((remote: any) => {
         (remotes[pluginBinary.contextPath]  = remotes[pluginBinary.contextPath]  || []).push(remote.module);
     }); 
-    const currentApp: IApplication =  (await this.getCurrentApp());
-    const c8yJson = await this.getCumulocityJsonFile(currentApp);
     return this.appService.storeAppManifest(this.currentApp, { ...c8yJson, remotes });
   }
 
@@ -229,7 +232,6 @@ export class WidgetCatalogService {
           try {
               widgetC8yJson = await this.getCumulocityJson(packageFile).toPromise().then(data =>data);
               if (widgetC8yJson.contextPath === undefined) {
-                  // noinspection ExceptionCaughtLocallyJS
                   throw Error("Plugin Package has no context path");
               }
           } catch (e) {
@@ -288,12 +290,7 @@ export class WidgetCatalogService {
     }
   }
 
-  async removePlugin(plugin: any) {
-    const remoteModules = plugin?.manifest?.exports;
-    let remotes = this.currentApp?.manifest?.remotes;
-    remoteModules.forEach((remote: any) => {
-        (remotes[plugin.contextPath]  = remotes[plugin.contextPath].filter((p) => p !== remote.module));
-    }); 
+  async removePlugin(remotes: any) {
     const c8yJson = await this.getCumulocityJsonFile(this.currentApp);
     return this.appService.storeAppManifest(this.currentApp, { ...c8yJson, remotes });
   }

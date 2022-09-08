@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2019 Software AG, Darmstadt, Germany and/or its licensors
+* Copyright (c) 2022 Software AG, Darmstadt, Germany and/or its licensors
 *
 * SPDX-License-Identifier: Apache-2.0
 *
@@ -20,8 +20,7 @@ import { Component, isDevMode, OnDestroy, OnInit } from "@angular/core";
 import {
     ApplicationService,
     UserService,
-    IApplication,
-    InventoryService
+    IApplication
 } from "@c8y/client";
 import { AlertService, AppStateService, DynamicComponentService } from "@c8y/ngx-components";
 import { ProgressIndicatorModalComponent } from '../../utils/progress-indicator-modal/progress-indicator-modal.component';
@@ -195,9 +194,25 @@ export class MyWidgetsComponent implements OnInit {
         await unInstallDemoDialogRef.content.event.subscribe(async data => {
             if (data && data.isConfirm) {
                 this.showProgressModalDialog(`Uninstalling widgets...`)
-                for (const widget of this.widgetCatalog.widgets) {
-                    await this.uninstallWidget(widget, true);
+                const currentApp: IApplication =  (await this.widgetCatalogService.getCurrentApp());
+                let remotes = currentApp?.manifest?.remotes;
+                let isWidgetFound = false;
+                 for (const widget of this.widgetCatalog.widgets) {
+                    const widgetAppObj = this.appList.find(app => app.contextPath === widget.contextPath)
+                    if(widgetAppObj) {
+                        isWidgetFound = true;
+                        const remoteModules = widgetAppObj?.manifest?.exports;
+                        remoteModules.forEach((remote: any) => {
+                            (remotes[widget.contextPath]  = remotes[widget.contextPath].filter((p) => p !== remote.module));
+                        }); 
+                    }
                 };
+                if(isWidgetFound) {
+                    await this.widgetCatalogService.removePlugin(remotes);
+                    for (const widget of this.widgetCatalog.widgets) {
+                        widget.actionCode = '003';
+                    }
+                }
                 this.hideProgressModalDialog();
                 this.refresh();
             }
@@ -213,7 +228,7 @@ export class MyWidgetsComponent implements OnInit {
     }
     async updateWidget(widget: WidgetModel, bulkUpdate: boolean): Promise<void> {
         const currentHost = window.location.host.split(':')[0];
-        if (currentHost === 'localhost' || currentHost === '127.0.0.1' || isDevMode()) {
+        if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
             this.alertService.warning("Runtime widget installation isn't supported when running Application Builder on localhost or in development mode.");
             return;
         }
@@ -271,7 +286,7 @@ export class MyWidgetsComponent implements OnInit {
 
         const fileOfBlob = new File([blob], fileName);
         await new Promise<any>((resolve) => {
-            this.widgetCatalogService.installWidget(fileOfBlob, widget).then(() => {
+            this.widgetCatalogService.installPackage(fileOfBlob).then(() => {
                 widget.isReloadRequired = true;
                 widget.installedVersion = widget.version;
                 this.actionFlag(widget);
@@ -293,7 +308,6 @@ export class MyWidgetsComponent implements OnInit {
             widget.isCompatible = this.widgetCatalogService.isCompatiblieVersion(widget);
             const appObj = this.appList.find(app => app.contextPath === widget.contextPath);
             const widgetObj = (installedPlugins  && installedPlugins[widget.contextPath] && installedPlugins[widget.contextPath].length> 0);
-
             widget.installedVersion = (widgetObj && appObj && appObj.manifest && appObj.manifest.version ? appObj.manifest.version : '');
             widget.installed = widgetObj && this.findInstalledWidget(widget); //(widgetObj != undefined);
             if (widget.installed && !widget.isReloadRequired && this.isUpdateAvailable(widget)) {
@@ -343,35 +357,31 @@ export class MyWidgetsComponent implements OnInit {
         }
     }
 
-    async uninstallWidget(widget: WidgetModel, bulkDelete: boolean) {
-        if (!bulkDelete) {
-            const alertMessage = {
-                title: 'Uninstall widget',
-                description: `You are about to uninstall ${widget.title}.
+    async uninstallWidget(widget: WidgetModel) {
+        const alertMessage = {
+            title: 'Uninstall widget',
+            description: `You are about to uninstall ${widget.title}.
                 Do you want to proceed?`,
-                type: 'danger',
-                alertType: 'confirm', //info|confirm
-                confirmPrimary: true //confirm Button is primary
-            }
-            const installDemoDialogRef = this.alertModalDialog(alertMessage);
-            await installDemoDialogRef.content.event.subscribe(async data => {
-                if (data && data.isConfirm) {
-                    const widgetAppObj = this.appList.find(app => app.contextPath === widget.contextPath)
-                    if (widgetAppObj) {
-                        await this.widgetCatalogService.removePlugin(widgetAppObj);
-                        // await this.appService.delete(widgetAppObj.id);
-                        widget.actionCode = '003';
-                    }
-                }
-            });
-        } else {
-            const widgetAppObj = this.appList.find(app => app.contextPath === widget.contextPath)
-            if (widgetAppObj) {
-                await this.appService.delete(widgetAppObj.id);
-                widget.actionCode = '003';
-            }
+            type: 'danger',
+            alertType: 'confirm', //info|confirm
+            confirmPrimary: true //confirm Button is primary
         }
-
+        const installDemoDialogRef = this.alertModalDialog(alertMessage);
+        await installDemoDialogRef.content.event.subscribe(async data => {
+            if (data && data.isConfirm) {
+                const currentApp: IApplication = (await this.widgetCatalogService.getCurrentApp());
+                let remotes = currentApp?.manifest?.remotes;
+                const widgetAppObj = this.appList.find(app => app.contextPath === widget.contextPath)
+                if (widgetAppObj) {
+                    const remoteModules = widgetAppObj?.manifest?.exports;
+                    remoteModules.forEach((remote: any) => {
+                        (remotes[widget.contextPath] = remotes[widget.contextPath].filter((p) => p !== remote.module));
+                    });
+                    await this.widgetCatalogService.removePlugin(remotes);
+                    widget.actionCode = '003';
+                }
+            }
+        });
     }
 
     // Tile List View

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2019 Software AG, Darmstadt, Germany and/or its licensors
+* Copyright (c) 2022 Software AG, Darmstadt, Germany and/or its licensors
 *
 * SPDX-License-Identifier: Apache-2.0
 *
@@ -61,9 +61,6 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
         private alertService: AlertService, private componentService: DynamicComponentService, private appService: ApplicationService,
         private runtimeWidgetLoaderService: RuntimeWidgetLoaderService,private router: Router, private route: ActivatedRoute) {
         this.userHasAdminRights = userService.hasAllRoles(appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN", "ROLE_APPLICATION_MANAGEMENT_ADMIN"]);
-       /*  this.runtimeWidgetLoaderService.isLoaded$.subscribe(isLoaded => {
-            this.widgetCatalogService.runtimeLoadingCompleted = isLoaded;
-        }); */
 
         this.widgetCatalogService.displayListValueMoreWidgets$.subscribe((value) => {
             if (value) {
@@ -105,7 +102,6 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
             .subscribe(async (widgetCatalog: WidgetCatalog) => {
                 this.widgetCatalog = widgetCatalog;
                 await this.filterInstalledWidgets();
-                // this.filterWidgets = (this.widgetCatalog ? this.widgetCatalog.widgets : []);
                 this.applyFilter();
                 this.isBusy = false;
             }, error => {
@@ -144,18 +140,14 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
     }
     async installWidget(widget: WidgetModel): Promise<void> {
         const currentHost = window.location.host.split(':')[0];
-       /*  if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
+        if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
             this.alertService.warning("Runtime widget installation isn't supported when running Application Builder on localhost or in development mode.");
             return;
-        } */
+        }
 
         const widgetBinaryFound = this.appList.find(app => app.manifest?.isPackage && (app.name.toLowerCase() === widget.title?.toLowerCase() ||
             (app.contextPath && app.contextPath?.toLowerCase() === widget.contextPath.toLowerCase())))
-       /*  if (appFound) {
-            this.alertService.danger(" Widget name or context path already exists!");
-            return;
-        } */
-
+      
         if (widget.actionCode === '002' || widget.isDeprecated) {
             let alertMessage = {};
             if (widget.actionCode === '002') {
@@ -240,12 +232,10 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
         }
 
         const currentApp: IApplication =  (await this.widgetCatalogService.getCurrentApp());
-        console.log(currentApp);
         const installedPlugins = currentApp?.manifest?.remotes;
         for(let widget of this.widgetCatalog.widgets) {
             const widgetObj = (installedPlugins  && installedPlugins[widget.contextPath] && installedPlugins[widget.contextPath].length> 0);
-            console.log(widget.contextPath, widgetObj);
-            widget.installed = (widgetObj != undefined);
+            widget.installed = (widgetObj != undefined && widgetObj);
             widget.isCompatible = this.widgetCatalogService.isCompatiblieVersion(widget);
             this.actionFlag(widget);
         }
