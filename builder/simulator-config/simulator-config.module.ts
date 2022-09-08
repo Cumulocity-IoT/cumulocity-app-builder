@@ -27,6 +27,7 @@ import {BsDropdownModule} from "ngx-bootstrap/dropdown";
 import { ButtonsModule } from 'ngx-bootstrap/buttons';
 import {EditSimulatorModalComponent} from "./edit-simulator-modal.component";
 import { DeviceSelectorModule } from '../../device-selector/device-selector.module';
+import { SimulatorConfigService } from "./simulator-config.service";
 
 @Injectable()
 class DeviceSimulatorConfigNavigation implements NavigatorNodeFactory {
@@ -69,6 +70,7 @@ class DeviceSimulatorConfigNavigation implements NavigatorNodeFactory {
         EditSimulatorModalComponent
     ],
     providers: [
+        SimulatorConfigService
     ]
 })
 export class SimulatorConfigModule {

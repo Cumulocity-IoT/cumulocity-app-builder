@@ -98,7 +98,8 @@ export interface DtdlSimulationModel {
     fragmentColumns?: any;
     csvJsonFile?: any;
     eventTypeColumns?: any;
-
+    serverSide?: any;
+    intervalInvalid?: any;
 }
 
 /**

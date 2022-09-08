@@ -20,7 +20,8 @@ import { Component } from "@angular/core";
 import { SimulationStrategyConfigComponent } from "../../builder/simulator/simulation-strategy";
 import * as _ from 'lodash';
 import { DtdlSimulationModel } from '../../builder/simulator/simulator-config';
-
+import { SimulatorConfigService } from "../../builder/simulator-config/simulator-config.service";
+import { ControlContainer, NgForm } from "@angular/forms";
 
 @Component({
     template: `
@@ -29,21 +30,29 @@ import { DtdlSimulationModel } from '../../builder/simulator/simulator-config';
             <input type="text" class="form-control" id="latitude" name="latitude" placeholder="e.g. 40.66, 50.40 (required)" required [(ngModel)]="config.latitude" (ngModelChange)="applyValuetoOperations(config)">
         </div> 
         <div class="form-group">
-        <label for="value"><span>Altitude value</span></label>
-        <input type="text" class="form-control" id="altitude" name="altitude" placeholder="e.g. 0, 1 (required)" required [(ngModel)]="config.altitude" (ngModelChange)="applyValuetoOperations(config)">
-    </div> 
+            <label for="value"><span>Altitude value</span></label>
+            <input type="text" class="form-control" id="altitude" name="altitude" placeholder="e.g. 0, 1 (required)" required [(ngModel)]="config.altitude" (ngModelChange)="applyValuetoOperations(config)">
+        </div> 
         <div class="form-group">
             <label for="value"><span>Longitude Value</span></label>
             <input type="text" class="form-control" id="longitude" name="longitude" placeholder="e.g. -74.20, -75.20 (required)" required [(ngModel)]="config.longitude" (ngModelChange)="applyValuetoOperations(config)">
         </div> 
-         <div class="form-group">
+        <div class="form-group">
             <label for="interval"><span>Interval (seconds)</span></label>
-            <input type="number" class="form-control" id="interval" name="interval" placeholder="e.g. 10 (required)" required [(ngModel)]="config.interval" (ngModelChange)="changeInterval(config)">
+            <input type="number" *ngIf="!config.serverSide" class="form-control" id="interval" name="interval" min="30" placeholder="e.g. 5 (required)" required [(ngModel)]="config.interval" 
+            (ngModelChange)="checkIntervalValidation();changeInterval(config);">
+            <input type="number" *ngIf="config.serverSide" class="form-control" id="interval" name="interval" placeholder="e.g. 5 (required)" required [(ngModel)]="config.interval" 
+            (ngModelChange)="checkIntervalValidation();changeInterval(config);">
+            <label><span *ngIf="config.intervalInvalid" style="color:red;font-size:12px;"> Minimum 30 seconds interval required !</span></label>
         </div>  
-    `
+    `,
+    viewProviders: [{ provide: ControlContainer, useExisting: NgForm }]
 })
 export class PositionUpdateSimulationStrategyConfigComponent extends SimulationStrategyConfigComponent {
 
+    constructor(private simConfigService: SimulatorConfigService) {
+        super();
+    }
     config: DtdlSimulationModel;
 
     initializeConfig(existingConfig?: DtdlSimulationModel) {
@@ -75,6 +84,7 @@ export class PositionUpdateSimulationStrategyConfigComponent extends SimulationS
             c.alternateConfigs.operations.push(copy);
         }
         this.config = c;
+        this.checkIntervalValidation();
     }
 
      // Patch fix for server side simulators
@@ -85,5 +95,17 @@ export class PositionUpdateSimulationStrategyConfigComponent extends SimulationS
     }
     changeInterval(model:any) {
         model.alternateConfigs.operations[0].interval = model.interval;
+    }
+
+    checkIntervalValidation() {
+        let serverSide;
+        this.simConfigService.runOnServer$.subscribe((val) => {
+            serverSide = val;
+            if (!serverSide && this.config.interval < 30) {
+                this.config.intervalInvalid = true;
+            } else {
+                this.config.intervalInvalid = false;
+            }
+        });
     }
 }
