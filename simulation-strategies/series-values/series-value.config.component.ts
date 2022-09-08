@@ -21,6 +21,7 @@ import { ControlContainer, NgForm } from '@angular/forms';
 import { DtdlSimulationModel } from "builder/simulator/simulator-config";
 import { SimulationStrategyConfigComponent } from "../../builder/simulator/simulation-strategy";
 import * as _ from "lodash";
+import { SimulatorConfigService } from "../../builder/simulator-config/simulator-config.service";
 
 @Component({
     template: `
@@ -118,10 +119,14 @@ import * as _ from "lodash";
             <label for="unit"><span>Unit</span></label>
             <input type="text" class="form-control" id="unit" name="unit" placeholder="e.g. C (optional)" [(ngModel)]="config.unit" (ngModelChange)="changeUnit(config)">
         </div> 
-         <div class="form-group">
+        <div class="form-group">
             <label for="interval"><span>Interval (seconds)</span></label>
-            <input type="number" class="form-control" id="interval" name="interval" placeholder="e.g. 5 (required)" required [(ngModel)]="config.interval" (ngModelChange)="changeInterval(config)">
-        </div>  
+            <input type="number" *ngIf="!config.serverSide" class="form-control" id="interval" name="interval" min="30" placeholder="e.g. 5 (required)" required [(ngModel)]="config.interval" 
+            (ngModelChange)="checkIntervalValidation();changeInterval(config);">
+            <input type="number" *ngIf="config.serverSide" class="form-control" id="interval" name="interval" placeholder="e.g. 5 (required)" required [(ngModel)]="config.interval" 
+            (ngModelChange)="checkIntervalValidation();changeInterval(config);">
+            <label><span *ngIf="config.intervalInvalid" style="color:red;font-size:12px;"> Minimum 30 seconds interval required !</span></label>
+        </div> 
     `,
     styles: [`
     :host >>> .panel.op-simulator-panel .panel-title {
@@ -136,7 +141,9 @@ import * as _ from "lodash";
 export class SeriesValueSimulationStrategyConfigComponent extends SimulationStrategyConfigComponent {
 
 
-
+    constructor(private simConfigService: SimulatorConfigService) {
+        super();
+    }
 
     config: DtdlSimulationModel;
 
@@ -222,5 +229,16 @@ export class SeriesValueSimulationStrategyConfigComponent extends SimulationStra
                 ops.interval = model.interval;
             });
         }
+    }
+    checkIntervalValidation() {
+        let serverSide;
+        this.simConfigService.runOnServer$.subscribe((val) => {
+            serverSide = val;
+            if (!serverSide && this.config.interval < 30) {
+                this.config.intervalInvalid = true;
+            } else {
+                this.config.intervalInvalid = false;
+            }
+        });
     }
 }

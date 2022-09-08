@@ -24,19 +24,21 @@ import {
     ViewChild,
     ViewContainerRef
 } from '@angular/core';
-import { BsModalRef } from 'ngx-bootstrap/modal';
+import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { WizardComponent } from "../../wizard/wizard.component";
 import { InventoryService, ApplicationService, IManagedObject, FetchClient } from '@c8y/client';
 import { AppIdService } from "../app-id.service";
 import { SimulationStrategyConfigComponent, SimulationStrategyFactory } from "../simulator/simulation-strategy";
 import { SimulationStrategiesService } from "../simulator/simulation-strategies.service";
 import { SimulatorCommunicationService } from "../simulator/mainthread/simulator-communication.service";
-import { throwError } from 'rxjs';
+import { BehaviorSubject, throwError } from 'rxjs';
 import { SimulatorNotificationService } from './simulatorNotification.service';
 import { FileSimulatorNotificationService } from './file-simulator.service';
 import { AlertService } from '@c8y/ngx-components';
 import { UpdateableAlert } from '../../builder/utils/UpdateableAlert';
 import { SimulatorWorkerAPI } from '../simulator/mainthread/simulator-worker-api.service';
+import { SimulatorConfigService } from './simulator-config.service';
+import { AlertMessageModalComponent } from '../../builder/utils/alert-message-modal/alert-message-modal.component';
 
 @Component({
     templateUrl: './new-simulator-modal.component.html'
@@ -63,26 +65,29 @@ export class NewSimulatorModalComponent {
     isMSExist: boolean = false;
     isMSCheckSpin: boolean = false;
     isCSVSimulator: boolean = false;
+    showWarning: boolean;
 
     constructor(
         private simSvc: SimulatorWorkerAPI, private alertService: AlertService,
         public bsModalRef: BsModalRef, public simulationStrategiesService: SimulationStrategiesService,
         private resolver: ComponentFactoryResolver, private injector: Injector, private inventoryService: InventoryService,
         private appService: ApplicationService, private appIdService: AppIdService, private fetchClient: FetchClient,
-        private simulatorNotificationService: SimulatorNotificationService, private fileSimulatorNotificationService: FileSimulatorNotificationService
-    ) {}
+        private simulatorNotificationService: SimulatorNotificationService, private fileSimulatorNotificationService: FileSimulatorNotificationService,
+        private simulatorConfigService: SimulatorConfigService,private modalService: BsModalService
+    ) { }
 
     async openSimulatorConfig() {
         this.wizard.selectStep('config');
 
         const metadata = this.selectedStrategyFactory.getSimulatorMetadata();
-        if(metadata && metadata.name.includes('File (CSV/JSON)')) {
+        if (metadata && metadata.name.includes('File (CSV/JSON)')) {
             this.isCSVSimulator = true;
             this.isMSCheckSpin = true;
             this.isMSExist = await this.fileSimulatorNotificationService.verifyCSVSimulatorMicroServiceStatus();
             this.isMSCheckSpin = false;
+            this.simulatorConfigService.setRunOnServer(true);
             this.runOnServer = true;
-        } else { this.verifySimulatorMicroServiceStatus(); }
+        } else { await this.verifySimulatorMicroServiceStatus(); }
 
         this.configWrapper.clear();
 
@@ -105,6 +110,10 @@ export class NewSimulatorModalComponent {
             }
             this.newConfig.metadata = metadata;
             componentRef.instance.config.isGroup = this.isGroup;
+            this.simulatorConfigService.runOnServer$.subscribe((val) => {
+                componentRef.instance.config.serverSide = val;
+                this.checkIntervalValidation();
+            });
 
         }
     }
@@ -124,15 +133,15 @@ export class NewSimulatorModalComponent {
         this.busy = true;
 
         const metadata = this.selectedStrategyFactory.getSimulatorMetadata();
-        
+
         // If Flie CSV/JSON simulator then upload binary
         let fileId = '';
-        if(this.isCSVSimulator) {
+        if (this.isCSVSimulator) {
             const uploadAlert = new UpdateableAlert(this.alertService);
             uploadAlert.update("Uploading file...");
-            fileId =  await(await this.fileSimulatorNotificationService.createBinary(this.newConfig.csvJsonFile)).data.id;
+            fileId = await (await this.fileSimulatorNotificationService.createBinary(this.newConfig.csvJsonFile)).data.id;
             uploadAlert.close();
-            if(!fileId) {
+            if (!fileId) {
                 this.alertService.danger('Unable to upload File!');
                 this.busy = false;
                 return;
@@ -177,21 +186,25 @@ export class NewSimulatorModalComponent {
         const simulatorId = Math.floor(Math.random() * 1000000);
         this.newConfig.deviceId = this.deviceId;
         // Added by darpan to sync device id in alternateConfigs
-        if(this.newConfig.alternateConfigs && this.newConfig.alternateConfigs.operations && 
+        if (this.newConfig.alternateConfigs && this.newConfig.alternateConfigs.operations &&
             this.newConfig.alternateConfigs.operations.length > 0) {
-                this.newConfig.alternateConfigs.operations.forEach( ops => {
-                    ops.deviceId = this.deviceId;
-                });
+            this.newConfig.alternateConfigs.operations.forEach(ops => {
+                ops.deviceId = this.deviceId;
+            });
         }
         this.newConfig.deviceName = this.deviceName;
         this.newConfig.isGroup = this.isGroup;
+        let runOnServer;
+        this.simulatorConfigService.runOnServer$.subscribe((val) => {
+            runOnServer = val;
+        });
         const newSimulatorObject = {
             id: simulatorId,
             name: this.simulatorName,
             type: metadata.name,
             config: this.newConfig,
             lastUpdated: new Date().toISOString(),
-            serverSide: (this.runOnServer ? true: false)
+            serverSide: (runOnServer ? true : false)
         };
         simulators.push(newSimulatorObject);
         appServiceData.applicationBuilder.simulators = simulators;
@@ -200,8 +213,7 @@ export class NewSimulatorModalComponent {
             id: appId,
             applicationBuilder: appServiceData.applicationBuilder
         } as any);
-
-        if(this.isCSVSimulator) {
+        if (this.isCSVSimulator) {
             this.fileSimulatorNotificationService.post({
                 id: appId,
                 name: appServiceData.name,
@@ -209,7 +221,7 @@ export class NewSimulatorModalComponent {
                 type: appServiceData.type,
                 simulator: newSimulatorObject
             });
-        } else if (this.runOnServer) {
+        } else if (runOnServer) {
             this.simulatorNotificationService.post({
                 id: appId,
                 name: appServiceData.name,
@@ -295,10 +307,55 @@ export class NewSimulatorModalComponent {
 
     private async verifySimulatorMicroServiceStatus() {
         this.isMSCheckSpin = true;
-        const response = await this.fetchClient.fetch('service/simulator-app-builder/health'); 
+        const response = await this.fetchClient.fetch('service/simulator-app-builder/health');
         const data = await response.json()
-        if(data && data.status && data.status === "UP") { this.isMSExist = true;}
-        else { this.isMSExist = false;}
+        if (data && data.status && data.status === "UP") {
+            this.isMSExist = true;
+            this.simulatorConfigService.setRunOnServer(true);
+            this.runOnServer = true;
+        }
+        else { this.isMSExist = false; }
         this.isMSCheckSpin = false;
+    }
+
+    async toggleRunOnServer() {
+        if (!this.runOnServer) {
+            const alertMessage = {
+                title: 'Confirmation',
+                description: `You are about to switch simulator as browser based. Browser based simulator will run till your browser is active and may impact on application performance in a long run.
+                Do you want to proceed ?`,
+                type: 'warning',
+                alertType: 'confirm', //info|confirm
+                confirmPrimary: false //confirm Button is primary
+            }
+            const confirmDialog = this.alertModalDialog(alertMessage);
+            await confirmDialog.content.event.subscribe(async data => {
+                if (data && data.isConfirm) {
+                    this.simulatorConfigService.setRunOnServer(this.runOnServer);
+                    this.checkIntervalValidation();
+                } else {
+                    this.runOnServer = true;
+                    this.simulatorConfigService.setRunOnServer(true);
+                }
+            });
+        } else {
+            this.simulatorConfigService.setRunOnServer(this.runOnServer);
+        }
+    }
+
+    private alertModalDialog(message: any): BsModalRef {
+        return this.modalService.show(AlertMessageModalComponent, { class: 'c8y-wizard', initialState: { message } });
+    }
+
+    checkIntervalValidation() {
+        let serverSide;
+        this.simulatorConfigService.runOnServer$.subscribe((val) => {
+            serverSide = val;
+            if (!serverSide && this.newConfig.interval < 30) {
+                this.newConfig.intervalInvalid = true;
+            } else {
+                this.newConfig.intervalInvalid = false;
+            }
+        });
     }
 }

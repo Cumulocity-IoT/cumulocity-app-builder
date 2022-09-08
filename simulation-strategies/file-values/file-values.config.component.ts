@@ -22,7 +22,7 @@ import * as _ from 'lodash';
 import { DtdlSimulationModel } from '../../builder/simulator/simulator-config';
 import { ControlContainer, NgForm } from "@angular/forms";
 import { AlertService } from "@c8y/ngx-components";
-
+import { SimulatorConfigService } from "../../builder/simulator-config/simulator-config.service";
 
 @Component({
     template: `
@@ -139,7 +139,11 @@ import { AlertService } from "@c8y/ngx-components";
             <div class="col-xs-12 col-sm-4 col-md-4" >
                 <div class="form-group">
                     <label for="interval"><span>Interval (seconds)</span></label>
-                    <input type="number" class="form-control" id="interval" name="interval" placeholder="e.g. 10 (required)" required [(ngModel)]="config.interval" (ngModelChange)="changeInterval(config)">
+                    <input type="number" *ngIf="!config.serverSide" class="form-control" id="interval" name="interval" min="30" placeholder="e.g. 5 (required)" required [(ngModel)]="config.interval" 
+                    (ngModelChange)="checkIntervalValidation();changeInterval(config);">
+                    <input type="number" *ngIf="config.serverSide" class="form-control" id="interval" name="interval" placeholder="e.g. 5 (required)" required [(ngModel)]="config.interval" 
+                    (ngModelChange)="checkIntervalValidation();changeInterval(config);">
+                    <label><span *ngIf="config.intervalInvalid" style="color:red;font-size:12px;"> Minimum 30 seconds interval required !</span></label>
                 </div> 
             </div>
          </div>
@@ -181,7 +185,7 @@ import { AlertService } from "@c8y/ngx-components";
             </div>
         </div>  
     `,
-    viewProviders: [ { provide: ControlContainer, useExisting: NgForm } ]
+    viewProviders: [{ provide: ControlContainer, useExisting: NgForm }]
 })
 export class FileValuesSimulationStrategyConfigComponent extends SimulationStrategyConfigComponent {
 
@@ -190,28 +194,29 @@ export class FileValuesSimulationStrategyConfigComponent extends SimulationStrat
     isError = false;
     firstLine = '';
     jsonData = null;
-    constructor(private alertService: AlertService) {
+
+    constructor(private alertService: AlertService, private simConfigService: SimulatorConfigService) {
         super();
     }
     addCustomType = (term: string) => this.addCustomTypeField(term);
     addCustomFragment = (term: string) => this.addCustomFragmentField(term);
     addCustomEventType = (term: string) => this.addCustomEventTypeField(term);
-    
+
     addCustomTypeField(term: string) {
-        const newField = { 'displayName' : term, 'value' : term, 'tag' : 'type'};
+        const newField = { 'displayName': term, 'value': term, 'tag': 'type' };
         this.config.typeColumns.push(newField);
         return newField;
 
     };
-    
+
     addCustomFragmentField(term: string) {
-        const newField = { 'displayName' : term, 'value' : term, 'tag' : 'fragment'};
+        const newField = { 'displayName': term, 'value': term, 'tag': 'fragment' };
         this.config.fragmentColumns.push(newField);
         return newField;
     };
 
-    addCustomEventTypeField(term:string) {
-        const newField = { 'displayName' : term, 'value' : term, 'tag' : 'eventType'};
+    addCustomEventTypeField(term: string) {
+        const newField = { 'displayName': term, 'value': term, 'tag': 'eventType' };
         this.config.eventTypeColumns.push(newField);
         return newField;
 
@@ -226,10 +231,10 @@ export class FileValuesSimulationStrategyConfigComponent extends SimulationStrat
 
         this.checkAlternateConfigs(c);
 
-        if( existingConfig ) {
+        if (existingConfig) {
             c.alternateConfigs = _.cloneDeep(existingConfig.alternateConfigs);
         } else {
-            let copy : DtdlSimulationModel = _.cloneDeep(c);
+            let copy: DtdlSimulationModel = _.cloneDeep(c);
             copy.alternateConfigs = undefined;
             c.alternateConfigs.operations.push(copy);
         }
@@ -237,21 +242,22 @@ export class FileValuesSimulationStrategyConfigComponent extends SimulationStrat
         this.config.modalSize = "modal-md";
         this.config.generationType = 'measurement'
         this.config.headerPresent = false;
+        this.checkIntervalValidation();
     }
 
-    fileUploaded(events){
+    fileUploaded(events) {
         this.isError = false;
         this.isUploading = true;
         this.config.csvJsonFile = events.target.files[0];
-        if(this.config.csvJsonFile) {
+        if (this.config.csvJsonFile) {
             const filesize = parseFloat((Math.round((this.config.csvJsonFile.size / 1024 / 1024) * 100) / 100).toFixed(2));
-            if(this.config.csvJsonFile && filesize > 500) {
+            if (this.config.csvJsonFile && filesize > 500) {
                 this.alertService.danger("File size shoud be less than 500mb!", `Current file size  ${filesize} mb`);
                 this.config.csvJsonFile = null;
                 this.isUploading = false;
                 return;
             }
-           
+
             const reader = new FileReader();
             let input = null;
             reader.addEventListener('load', () => {
@@ -260,69 +266,69 @@ export class FileValuesSimulationStrategyConfigComponent extends SimulationStrat
                 this.config.typeColumns = [];
                 this.firstLine = '';
                 input = reader.result; // event.target.result;
-                if(this.config.csvJsonFile && this.config.csvJsonFile.type && this.config.csvJsonFile.type.toLowerCase().includes('csv')) {
-                    this.firstLine = (input.toString().replace(/\r\n/g,'\n').split('\n'))[0];
+                if (this.config.csvJsonFile && this.config.csvJsonFile.type && this.config.csvJsonFile.type.toLowerCase().includes('csv')) {
+                    this.firstLine = (input.toString().replace(/\r\n/g, '\n').split('\n'))[0];
                     this.config.type = 'CSV';
                     this.loadFieldColumns();
-                } else  {
+                } else {
                     this.config.type = 'JSON';
                     this.jsonData = this.isValidJson(input);
-                    if ( this.jsonData) {
-                       this.processJSON();
+                    if (this.jsonData) {
+                        this.processJSON();
                     } else {
                         this.isError = true;
                         events.srcElement.value = "";
-                    } 
+                    }
                 }
-             
+
                 this.isUploading = false;
             }, false);
-            if(this.config.csvJsonFile) { 
+            if (this.config.csvJsonFile) {
                 reader.readAsText(this.config.csvJsonFile);
             } else {
                 this.isUploading = false;
             }
-        } else { this.isUploading = false;}
-        
+        } else { this.isUploading = false; }
+
     }
 
     private loadFieldColumns() {
         this.config.fileColumns = [];
         this.config.typeColumns = [];
         this.config.fragmentColumns = []
-        if(this.firstLine) {
-            if(this.config && this.config.headerPresent) {
+        if (this.firstLine) {
+            if (this.config && this.config.headerPresent) {
                 const fieldList = this.firstLine.split(",");
-                if(fieldList && fieldList.length > 0) {
-                    fieldList.forEach( (field, index) => {
-                        this.config.fileColumns.push( {
+                if (fieldList && fieldList.length > 0) {
+                    fieldList.forEach((field, index) => {
+                        this.config.fileColumns.push({
                             "displayName": field,
                             "value": 'column' + index
-                        }); 
+                        });
                     });
                 }
             } else {
                 const colList = this.firstLine.split(",");
-                if(colList && colList.length > 0) {
-                    colList.forEach( (col, index) => {
-                        this.config.fileColumns.push( {
+                if (colList && colList.length > 0) {
+                    colList.forEach((col, index) => {
+                        this.config.fileColumns.push({
                             "displayName": 'column-' + index,
                             "value": 'column' + index
-                        }); 
+                        });
                     });
                 }
             }
         }
         this.config.typeColumns = _.cloneDeep(this.config.fileColumns);
         this.config.fragmentColumns = _.cloneDeep(this.config.fileColumns);
-        if(this.config.generationType === 'event') {
+        if (this.config.generationType === 'event') {
             this.config.eventTypeColumns = [];
             this.config.eventTypeColumns = _.cloneDeep(this.config.fileColumns);
         }
     }
 
     headerPresentChange() {
-        if(this.config && this.config?.alternateConfigs?.operations[0]) {
+        if (this.config && this.config?.alternateConfigs?.operations[0]) {
             this.config.alternateConfigs.operations[0].type = '';
             this.config.alternateConfigs.operations[0].fragment = '';
             this.config.alternateConfigs.operations[0].series = [];
@@ -335,18 +341,18 @@ export class FileValuesSimulationStrategyConfigComponent extends SimulationStrat
     }
 
     generationTypeChange() {
-        if(this.config.type === 'CSV') { this.loadFieldColumns()}
-        else { this.processJSON();}
+        if (this.config.type === 'CSV') { this.loadFieldColumns() }
+        else { this.processJSON(); }
     }
     changeIntervalType() {
-        if(this.config.intervalType === 'fixed'){
+        if (this.config.intervalType === 'fixed') {
             this.config.alternateConfigs.operations[0].dateTime = '';
         }
     }
-    private processJSON(){
-        if(this.jsonData && this.jsonData.constructor === Object) {
-           this.processKeys(this.jsonData);
-        } else if (this.jsonData && this.jsonData.length > 0 ){
+    private processJSON() {
+        if (this.jsonData && this.jsonData.constructor === Object) {
+            this.processKeys(this.jsonData);
+        } else if (this.jsonData && this.jsonData.length > 0) {
             this.processKeys(this.jsonData[0]);
         }
     }
@@ -356,16 +362,16 @@ export class FileValuesSimulationStrategyConfigComponent extends SimulationStrat
         this.config.typeColumns = [];
         this.config.fragmentColumns = []
         const keys = Object.keys(jsonObject);
-        if(keys && keys.length > 0) {
-            keys.forEach( key => {
+        if (keys && keys.length > 0) {
+            keys.forEach(key => {
                 this.config.fileColumns.push(key);
-                if(jsonObject[key].constructor === Object) {
+                if (jsonObject[key].constructor === Object) {
                     this.config.fileColumns.push.apply(this.config.fileColumns, Object.keys(jsonObject[key]));
                 }
             })
             this.config.typeColumns = _.cloneDeep(this.config.fileColumns);
             this.config.fragmentColumns = _.cloneDeep(this.config.fileColumns);
-            if(this.config.generationType === 'event') {
+            if (this.config.generationType === 'event') {
                 this.config.eventTypeColumns = [];
                 this.config.eventTypeColumns = _.cloneDeep(this.config.fileColumns);
             }
@@ -376,7 +382,7 @@ export class FileValuesSimulationStrategyConfigComponent extends SimulationStrat
      *
      * @param input Validate JSON Input
      */
-     private isValidJson(input: any) {
+    private isValidJson(input: any) {
         try {
             if (input) {
                 const o = JSON.parse(input);
@@ -389,8 +395,20 @@ export class FileValuesSimulationStrategyConfigComponent extends SimulationStrat
     }
 
 
-     // Patch fix for server side simulators
-    changeInterval(model:any) {
+    // Patch fix for server side simulators
+    changeInterval(model: any) {
         model.alternateConfigs.operations[0].interval = model.interval;
+    }
+
+    checkIntervalValidation() {
+        let serverSide;
+        this.simConfigService.runOnServer$.subscribe((val) => {
+            serverSide = val;
+            if (!serverSide && this.config.interval < 30) {
+                this.config.intervalInvalid = true;
+            } else {
+                this.config.intervalInvalid = false;
+            }
+        });
     }
 }
