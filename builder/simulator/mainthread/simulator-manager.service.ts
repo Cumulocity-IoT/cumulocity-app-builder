@@ -73,8 +73,9 @@ export class SimulatorManagerService {
                         this.simulatorWorkerAPI._checkForSimulatorConfigChanges // Check if asked to
                     ).pipe(
                         debounceTime(100),
-                        switchMap(() => from(this.appDataService.getAppDetails(appId))),
-                       // map(res => res.data),
+                        //switchMap(() => from(this.appDataService.getAppDetails(appId))),
+                        switchMap(() => this.appService.detail(appId)),
+                        map(res => res.data),
                         map((application: IApplication & { applicationBuilder: any; }) => application.applicationBuilder.simulators || []),
                         // Check to see if the simulator config has changed
                         distinctUntilChanged((prev, curr) => deepEqual(prev, curr))
