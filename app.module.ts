@@ -29,6 +29,8 @@ import { CustomWidgetsModule } from "./custom-widgets/custom-widgets.module";
 import { RuntimeWidgetInstallerModule, RuntimeWidgetLoaderService } from "cumulocity-runtime-widget-loader";
 import { interval } from 'rxjs';
 import { SettingsService } from './builder/settings/settings.service';
+import { NgxEchartsModule } from 'ngx-echarts';
+import * as echarts from 'echarts';
 @NgModule({
   imports: [
     // Upgrade module must be the first
@@ -42,6 +44,11 @@ import { SettingsService } from './builder/settings/settings.service';
     BuilderModule,
     SimulationStrategiesModule,
     CustomWidgetsModule,
+
+    // Workaround for echart widgets plugins
+    NgxEchartsModule.forRoot({
+        echarts
+    })
    // RuntimeWidgetInstallerModule
   ]
 })
