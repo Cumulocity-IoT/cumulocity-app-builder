@@ -21,10 +21,10 @@ import { ApplicationService, InventoryService, ICurrentTenant, IApplication, Use
 import { AlertService, AppStateService } from '@c8y/ngx-components';
 import { AppBuilderExternalAssetsService } from 'app-builder-external-assets';
 import { AppIdService } from '../app-id.service';
-import { from, of, Subject } from 'rxjs';
+import { from, Subject } from 'rxjs';
 import { contextPathFromURL } from '../utils/contextPathFromURL';
 import {UpdateableAlert} from "../utils/UpdateableAlert";
-import { switchMap } from 'rxjs/operators';
+import { switchMap, take } from 'rxjs/operators';
 import * as delay from "delay";
 
 @Injectable({providedIn: 'root'})
@@ -52,7 +52,7 @@ export class SettingsService {
             const providerList = this.externalAssetService.getAssetsList('ANALYTICS')
             this.analyticsProvider = providerList.find( provider => provider.key === 'gainsight');
             this.analyticsProvider.providerURL = this.externalAssetService.getURL('ANALYTICS','gainsight');
-            appIdService.appIdDelayedUntilAfterLogin$.pipe(switchMap(appId => {
+            appIdService.appIdDelayedUntilAfterLogin$.pipe(take(1)).pipe(switchMap(appId => {
                 return from(this.getAppBuilderConfig());
               
             }))
@@ -112,6 +112,7 @@ export class SettingsService {
         const creationAlert = new UpdateableAlert(this.alertService);
         creationAlert.update('Updating Custom Properties...');
         const appBuilderId = await this.getAPPBuilderId();
+        await delay(500);
         if(this.appBuilderConfig) {
             await this.inventoryService.update({
                 id: this.appBuilderConfig.id,
@@ -129,6 +130,25 @@ export class SettingsService {
         creationAlert.update(`Custom Properties Updated! Refreshing...`, "success");
         await creationAlert.close(3000);
         location.reload();
+    }
+
+    async updateAppConfigurationForPlugin(remotes: any, appBuilderId: string | number, appBuilderVersion: string){
+        if(this.appBuilderConfig) {
+            return await this.inventoryService.update({
+                id: this.appBuilderConfig.id,
+                configs: {remotes},
+                c8y_Global: {},
+                appBuilderVersion
+            })
+        } else  {
+            return await this.inventoryService.create({
+                    c8y_Global: {},
+                    type: "AppBuilder-Configuration",
+                    configs: {remotes},
+                    appBuilderId,
+                    appBuilderVersion
+            });
+        }
     }
 
     setTenant(tenant: ICurrentTenant | null) {
@@ -155,12 +175,8 @@ export class SettingsService {
             return (customProperties && customProperties.gainsightEnabled === 'true')
         }
         else {
-            await this.getAppBuilderConfig();
-            if(this.appBuilderConfig && this.appBuilderConfig.customProperties) {
-                const customProperties = this.appBuilderConfig.customProperties;
-                return (customProperties && customProperties.gainsightEnabled === 'true')
-            }
-            return false;
+            await delay(500);
+            return await this.isAnalyticsProviderActive();
         }  
     }
 
@@ -201,4 +217,15 @@ export class SettingsService {
         return (!customProp || (customProp  && ( !customProp.appUpgradeNotification || customProp.appUpgradeNotification === "true")));
     }
 
+    async getAppBuilderConfigs() {
+        if(this.appBuilderConfig) {
+            return this.appBuilderConfig;
+        } else if(this.isAppConfigNotFound) {
+            return null;
+        }
+        else {
+            await delay(500);
+            return await this.getAppBuilderConfigs();
+        }
+    }
 }

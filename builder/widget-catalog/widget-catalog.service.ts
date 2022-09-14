@@ -27,7 +27,9 @@ import * as semver from "semver";
 import * as packageJson from "./../../package.json";
 import { catchError, delay } from 'rxjs/operators';
 import { AppStateService, ZipService } from '@c8y/ngx-components';
+import { SettingsService } from './../settings/settings.service';
 import { ProgressIndicatorService } from '../utils/progress-indicator-modal/progress-indicator.service';
+
 
 const c8yVersion = require('./../../package.json')["@c8y/ngx-components"];
 @Injectable()
@@ -66,7 +68,7 @@ export class WidgetCatalogService {
 
   constructor(private http: HttpClient,
     private appService: ApplicationService, private appStateService: AppStateService,
-    private runtimeWidgetInstallerService: RuntimeWidgetInstallerService,
+    private runtimeWidgetInstallerService: RuntimeWidgetInstallerService, private settingsService: SettingsService,
     private externalService: AppBuilderExternalAssetsService, private zipService: ZipService,
     private progressIndicatorService: ProgressIndicatorService) {
     this.GATEWAY_URL_GitHubAPI = this.externalService.getURL('GITHUB', 'gatewayURL_Github');
@@ -210,6 +212,15 @@ export class WidgetCatalogService {
     });
     await new Promise(resolve => setTimeout(resolve, 10000));
     this.progressIndicatorService.setProgress(95);
+    // updating config MO to retain widget status
+    await this.settingsService.updateAppConfigurationForPlugin(remotes, currentApp.id, currentApp.manifest.version)
+    return this.appService.storeAppManifest(this.currentApp, { ...c8yJson, remotes });
+  }
+
+  async updateRemotesFromAppBuilderConfig( remotes: any) {
+    const currentApp: IApplication =  (await this.getCurrentApp());
+    const c8yJson = await this.getCumulocityJsonFile(currentApp);
+    await this.settingsService.updateAppConfigurationForPlugin(remotes, this.currentApp.id, this.currentApp.manifest.version);
     return this.appService.storeAppManifest(this.currentApp, { ...c8yJson, remotes });
   }
 
@@ -305,6 +316,8 @@ export class WidgetCatalogService {
     const c8yJson = await this.getCumulocityJsonFile(this.currentApp);
     this.progressIndicatorService.setProgress(95);
     await new Promise(resolve => setTimeout(resolve, 10000)); 
+      // updating config MO to retain widget status
+    await this.settingsService.updateAppConfigurationForPlugin(remotes, this.currentApp.id, this.currentApp.manifest.version)
     return this.appService.storeAppManifest(this.currentApp, { ...c8yJson, remotes });
   }
 }

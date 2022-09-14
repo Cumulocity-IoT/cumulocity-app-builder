@@ -1,17 +1,19 @@
 {
   "name": "app-builder",
-  "version": "1.4.0-dev-05",
+  "version": "1.4.0-dev-06",
   "description": "Application builder for Cumulocity (written by Software AG Global Presales)",
   "main": "index.ts",
   "scripts": {
-    "start": "c8ycli server --env.extraWebpackConfig=./extra-webpack.config.js ",
+    "start": "c8ycli server --env.extraWebpackConfig=./extra-webpack.config.js",
     "build": "set NODE_OPTIONS=--max_old_space_size=4096 && c8ycli build --env.extraWebpackConfig=./extra-webpack.config.js",
     "build-dev": "set NODE_OPTIONS=--max_old_space_size=4096 && c8ycli build --env.extraWebpackConfig=./extra-webpack.config.js --env.mode=development",
     "deploy-ci": "c8ycli deploy  -u $npm_config_param1 -T $npm_config_param2 -U $npm_config_param3 -P $npm_config_param4",
     "deploy": "c8ycli deploy ",
     "postinstall": "ngcc && patch-package && patch-package --patch-dir node_modules/cumulocity-runtime-widget-loader/patches",
     "prebuild": " gulp clean",
-    "postbuild": " gulp bundle"
+    "postbuild": " gulp bundle",
+    "prebuild-dev": " gulp clean",
+    "postbuild-dev": " gulp bundle"
   },
   "keywords": [],
   "author": "Darpankumar Lalani - Software AG, Global Presales",
@@ -68,15 +70,16 @@
     "@types/webpack": "^5.28.0",
     "copy-webpack-plugin": "9.0.1",
     "file-loader": "^6.2.0",
+    "gulp": "^4.0.2",
+    "gulp-json-editor": "^2.5.6",
+    "gulp-zip": "^5.0.1",
     "html-loader": "^3.1.0",
     "jest": "^27.4.5",
     "jest-preset-angular": "^11.0.1",
     "patch-package": "^6.4.7",
     "raw-loader": "^4.0.2",
     "ts-loader": "^9.2.9",
-    "typescript": "4.2.4",
-    "gulp": "^4.0.2",
-    "gulp-zip": "^5.0.1"
+    "typescript": "4.2.4"
   },
   "c8y": {
     "application": {
@@ -88,7 +91,7 @@
       "upgrade": true,
       "rightDrawer": true,
       "sensorAppOneLink": "http://onelink.to/pca6qe",
-      "version": "1.4.0",
+      "version": "1.4.0-dev-06",
       "contentSecurityPolicy": "base-uri 'none'; default-src 'self' 'unsafe-inline' http: https: ws: wss: blob:; connect-src 'self' *.webmethodscloud.com *.aptrinsic.com *.billwerk.com http: https: ws: wss: blob:;  script-src 'self' open.mapquestapi.com *.twitter.com *.twimg.com *.aptrinsic.com 'unsafe-inline' 'unsafe-eval' data:; style-src * 'unsafe-inline' blob:; img-src * data: blob:; font-src * data:; frame-src *; worker-src 'self' blob:;",
       "icon": {
         "class": "fa fa-magic"
@@ -102,20 +105,17 @@
         "required": true,
         "functional": "These cookies are used to support you during your first steps in the product, to deliver content tailored to your needs, and to collect usage statistics."
       },
-      "copy": [
-        {
-          "from": "./ui-assets/fonts",
-          "to": "./fonts/"
-        },
-        {
-          "from": "./ui-assets/img",
-          "to": "./img/"
-        }
-      ]
+      "copy": [{
+        "from": "./ui-assets/fonts",
+        "to": "./fonts/"
+      }, {
+        "from": "./ui-assets/img",
+        "to": "./img/"
+      }]
     },
     "cli": {}
   },
-  "browserslist": [
-    "last 2 major versions"
-  ]
+  "browserslist": ["last 2 major versions"],
+  "c8y.application.version": "1.4.0-dev-06",
+  "main:": "1.4.0-dev-06"
 }

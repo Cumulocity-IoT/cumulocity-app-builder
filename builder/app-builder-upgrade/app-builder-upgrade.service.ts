@@ -30,10 +30,12 @@ import * as JSZip from "jszip";
 import { BsModalRef, BsModalService } from "ngx-bootstrap/modal";
 import { Observable } from "rxjs";
 import { AppBuilderConfig } from "./app-builder-upgrade.model";
-//import * as packageInfo  from '../../package.json';
 import { AppIdService } from "../app-id.service";
-import { catchError } from "rxjs/operators";
+import { catchError,delay,first} from "rxjs/operators";
 import * as semver from "semver";
+import { IApplication } from "@c8y/client";
+import * as _ from 'lodash';
+import { WidgetCatalogService } from "./../widget-catalog/widget-catalog.service";
 
 const appVersion = require('../../package.json').version;
 @Injectable({ providedIn: 'root' })
@@ -50,6 +52,7 @@ export class AppBuilderUpgradeService {
     private devBranchPath = "?ref=development";
     private appBuilderConfigModel: AppBuilderConfig;
     private applicationsList = [];
+    private currentApp: IApplication;
     userHasAdminRights: boolean;
 
     public appVersion: string =  appVersion;
@@ -61,7 +64,7 @@ export class AppBuilderUpgradeService {
         private modalService: BsModalService, private progressIndicatorService: ProgressIndicatorService,
         private appService: ApplicationService, private externalService: AppBuilderExternalAssetsService,
         private settingService: SettingsService, private userService: UserService, private appStateService: AppStateService,
-        appIdService: AppIdService, private alertService: AlertService) {
+        appIdService: AppIdService, private alertService: AlertService, private widgetCatalogSerivice: WidgetCatalogService) {
         this.GATEWAY_URL_GitHubAsset = this.externalService.getURL('GITHUB', 'gatewayURL_GitHubAsset');
         this.GATEWAY_URL_GitHubAPI = this.externalService.getURL('GITHUB', 'gatewayURL_Github');
         this.GATEWAY_URL_Labcase = this.externalService.getURL('DBCATALOG', 'gatewayURL');
@@ -69,8 +72,14 @@ export class AppBuilderUpgradeService {
         this.GATEWAY_URL_GitHubAsset_FallBack =  this.externalService.getURL('GITHUB','gatewayURL_GitHubAsset_Fallback');
         this.GATEWAY_URL_Labcase_FallBack = this.externalService.getURL('DBCATALOG', 'gatewayURL_Fallback');
 
-        appIdService.appIdDelayedUntilAfterLogin$.subscribe(() => {
+        appIdService.appIdDelayedUntilAfterLogin$.pipe(first()).subscribe(() => {
             this.userHasAdminRights = userService.hasRole(appStateService.currentUser.value, "ROLE_APPLICATION_MANAGEMENT_ADMIN")
+            if(this.userHasAdminRights) {
+                this.appStateService.currentApplication.subscribe( app => {
+                    this.currentApp = app;
+                    this.verifyPlugins();
+                });
+            }
         });
     }
 
@@ -192,7 +201,6 @@ export class AppBuilderUpgradeService {
     alertModalDialog(message: any): BsModalRef {
         return this.modalService.show(AlertMessageModalComponent, { class: 'c8y-wizard', initialState: { message } });
     }
-
 
     async downloadAndInstall(binaryLocation: string, fileName: string, isGithub: boolean, installationType: 'INSTALL' | 'UPGRADE' | 'ANY') {
         this.errorReported = false;
@@ -339,5 +347,26 @@ export class AppBuilderUpgradeService {
         if(this.applicationsList && this.applicationsList.length > 0) { return this.applicationsList; }
         this.applicationsList = (await this.appService.list({ pageSize: 2000, withTotalPages: true }) as any).data ;
         return this.applicationsList;
+    }
+
+    private async verifyPlugins() {
+        const appVersion =  this.currentApp?.manifest?.version;
+        const appRemotes = this.currentApp?.manifest?.remotes;
+        console.log('verify plugin',appVersion, appRemotes);
+        const appBuilderConfig = (await this.settingService.getAppBuilderConfigs());
+        console.log('app builder config', appBuilderConfig);
+        if(appBuilderConfig?.configs?.remotes) {
+            if(appVersion === appBuilderConfig?.appBuilderVersion && _.isEqual(appRemotes, appBuilderConfig?.configs.remotes)) {
+                console.info('All Widgets are installed!');
+            } else {
+                this.showProgressModalDialog('Verifing widgets! Please wait...');
+                await this.widgetCatalogSerivice.updateRemotesFromAppBuilderConfig( appBuilderConfig?.configs.remotes);
+                this.progressModal.hide();
+                this.showProgressModalDialog('Refreshing...');
+                await delay(10000);
+                window.location.reload();
+            }
+        }
+        
     }
 }
