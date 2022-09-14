@@ -359,7 +359,7 @@ export class AppBuilderUpgradeService {
             if(appVersion === appBuilderConfig?.appBuilderVersion && _.isEqual(appRemotes, appBuilderConfig?.configs.remotes)) {
                 console.info('All Widgets are installed!');
             } else {
-                this.showProgressModalDialog('Verifing widgets! Please wait...');
+                this.showProgressModalDialog('Verifying widgets! Please wait...');
                 await this.widgetCatalogSerivice.updateRemotesFromAppBuilderConfig( appBuilderConfig?.configs.remotes);
                 this.progressModal.hide();
                 this.showProgressModalDialog('Refreshing...');

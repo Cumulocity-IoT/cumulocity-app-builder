@@ -220,6 +220,9 @@ export class WidgetCatalogService {
   async updateRemotesFromAppBuilderConfig( remotes: any) {
     const currentApp: IApplication =  (await this.getCurrentApp());
     const c8yJson = await this.getCumulocityJsonFile(currentApp);
+    if(c8yJson?.remotes) { 
+      remotes = {...remotes, ...c8yJson?.remotes};
+    }
     await this.settingsService.updateAppConfigurationForPlugin(remotes, this.currentApp.id, this.currentApp.manifest.version);
     return this.appService.storeAppManifest(this.currentApp, { ...c8yJson, remotes });
   }
