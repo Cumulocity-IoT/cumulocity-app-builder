@@ -352,9 +352,7 @@ export class AppBuilderUpgradeService {
     private async verifyPlugins() {
         const appVersion =  this.currentApp?.manifest?.version;
         const appRemotes = this.currentApp?.manifest?.remotes;
-        console.log('verify plugin',appVersion, appRemotes);
         const appBuilderConfig = (await this.settingService.getAppBuilderConfigs());
-        console.log('app builder config', appBuilderConfig);
         if(appBuilderConfig?.configs?.remotes) {
             if(appVersion === appBuilderConfig?.appBuilderVersion && _.isEqual(appRemotes, appBuilderConfig?.configs.remotes)) {
                 console.info('All Widgets are installed!');
