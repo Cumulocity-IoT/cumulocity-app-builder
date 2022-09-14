@@ -363,7 +363,7 @@ export class AppBuilderUpgradeService {
                 await this.widgetCatalogSerivice.updateRemotesFromAppBuilderConfig( appBuilderConfig?.configs.remotes);
                 this.progressModal.hide();
                 this.showProgressModalDialog('Refreshing...');
-                await new Promise(resolve => setTimeout(resolve, 10000));
+                await new Promise(resolve => setTimeout(resolve, 5000));
                 window.location.reload();
             }
         }
