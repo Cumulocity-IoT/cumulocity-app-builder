@@ -175,7 +175,7 @@ export class SettingsService {
             return (customProperties && customProperties.gainsightEnabled === 'true')
         }
         else {
-            await delay(500);
+            await new Promise(resolve => setTimeout(resolve, 500));
             return await this.isAnalyticsProviderActive();
         }  
     }
