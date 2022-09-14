@@ -212,22 +212,24 @@
                     </ul>
                 </div>
                 <div class="card-actions" style="left: 0px !important; top: 10px !important">
-                    <div class="text-warning" [ngSwitch]="widget.actionCode">
-                        <button class="btn btn-clean btn-icon btn-md"
+                    <div class="text-warning" [ngSwitch]="widget.actionCode" style="display:inline-block">
+                        <button class="btn btn-clean btn-icon btn-md" style="margin-top: -10px;margin-right: 5px;"
                             title="Update - Latest version available - {{widget.version}}" *ngSwitchCase="'001'">
                             <i c8yIcon="cloud-upload" class="action-icon" (click)="updateWidget(widget, false)"></i>
                         </button>
-                        <button class="btn btn-clean btn-icon btn-md" title="Update (Not Compatible)"
+                        <button class="btn btn-clean btn-icon btn-md" title="Update (Not Compatible)" style="margin-top: -10px;margin-right: 5px;"
                             *ngSwitchCase="'002'">
                             <i c8yIcon="level-up" class="action-icon" (click)="updateWidget(widget, false)"></i>
                         </button>
-                        <button class="btn btn-clean btn-icon btn-md" title="Refresh" *ngSwitchCase="'003'">
+                        <button class="btn btn-clean btn-icon btn-md" style="margin-top: -10px;margin-right: 5px;" title="Refresh" *ngSwitchCase="'003'">
                             <i c8yIcon="refresh" class="action-icon text-info" (click)="refresh()"></i>
                         </button>
                     </div>
-                    <i *ngIf="!widget.isCompatible || widget.isDeprecated"
+                    <div style="display: inline-block;">
+                        <i *ngIf="!widget.isCompatible || widget.isDeprecated"
                         title="This widget may not compatible or deprecated!" c8yIcon="warning"
                         class="warning-icon-grid text-warning"></i>
+                    </div>
                 </div>
                 <div class="card-block text-center card-column-30">
                     <div style="display:block; width:95%;">
