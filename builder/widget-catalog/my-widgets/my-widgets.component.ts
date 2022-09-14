@@ -32,6 +32,7 @@ import { concat, forkJoin, from, fromEvent, interval, Observable, of } from 'rxj
 import { RuntimeWidgetLoaderService } from 'cumulocity-runtime-widget-loader';
 import { AlertMessageModalComponent } from "../../utils/alert-message-modal/alert-message-modal.component";
 import { ActivatedRoute, Router } from "@angular/router";
+import { ProgressIndicatorService } from "../../utils/progress-indicator-modal/progress-indicator.service";
 
 
 @Component({
@@ -58,7 +59,7 @@ export class MyWidgetsComponent implements OnInit {
         private userService: UserService, private widgetCatalogService: WidgetCatalogService,
         private alertService: AlertService, private componentService: DynamicComponentService,
         private runtimeWidgetLoaderService: RuntimeWidgetLoaderService, private appService: ApplicationService,
-        private router: Router, private route: ActivatedRoute) {
+        private router: Router, private route: ActivatedRoute,private progressIndicatorService: ProgressIndicatorService) {
         this.userHasAdminRights = userService.hasAllRoles(appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN", "ROLE_APPLICATION_MANAGEMENT_ADMIN"]);
         /* this.runtimeWidgetLoaderService.isLoaded$.subscribe(isLoaded => {
             this.widgetCatalogService.runtimeLoadingCompleted = isLoaded;
@@ -245,11 +246,14 @@ export class MyWidgetsComponent implements OnInit {
             const installDemoDialogRef = this.alertModalDialog(alertMessage);
             await installDemoDialogRef.content.event.subscribe(async data => {
                 if (data && data.isConfirm) {
+                    this.progressIndicatorService.setProgress(5);
                     await this.initiateUpdateWidgetProcess(widget);
                 }
             });
 
-        } else { await this.initiateUpdateWidgetProcess(widget); }
+        } else { 
+            this.progressIndicatorService.setProgress(5);
+            await this.initiateUpdateWidgetProcess(widget); }
 
     }
 
@@ -257,10 +261,13 @@ export class MyWidgetsComponent implements OnInit {
         return this.modalService.show(AlertMessageModalComponent, { class: 'c8y-wizard', initialState: { message } });
     }
     private async initiateUpdateWidgetProcess(widget: WidgetModel) {
-        this.showProgressModalDialog(`Updating ${widget.title}`)
+        this.showProgressModalDialog(`Updating ${widget.title}`);
+        this.progressIndicatorService.setProgress(10);
         let blob: any;
         let fileName = "";
         if (widget.binaryLink && widget.binaryLink !== '') {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            this.progressIndicatorService.setProgress(15);
             blob = await new Promise<any>((resolve) => {
                 this.widgetCatalogService.downloadBinary(widget.binaryLink)
                     .subscribe(data => {
@@ -272,6 +279,8 @@ export class MyWidgetsComponent implements OnInit {
             });
             fileName = widget.binaryLink.replace(/^.*[\\\/]/, '');
         } else {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            this.progressIndicatorService.setProgress(15);
             blob = await new Promise<any>((resolve) => {
                 this.widgetCatalogService.downloadBinaryFromLabcase(widget.link)
                     .subscribe(data => {
@@ -285,6 +294,7 @@ export class MyWidgetsComponent implements OnInit {
         }
 
         const fileOfBlob = new File([blob], fileName);
+        this.progressIndicatorService.setProgress(30);
         await new Promise<any>((resolve) => {
             this.widgetCatalogService.installPackage(fileOfBlob).then(() => {
                 widget.isReloadRequired = true;
@@ -369,14 +379,21 @@ export class MyWidgetsComponent implements OnInit {
         const installDemoDialogRef = this.alertModalDialog(alertMessage);
         await installDemoDialogRef.content.event.subscribe(async data => {
             if (data && data.isConfirm) {
+                this.progressIndicatorService.setProgress(5);
+                await new Promise(resolve => setTimeout(resolve, 1000)); 
                 const currentApp: IApplication = (await this.widgetCatalogService.getCurrentApp());
+                this.progressIndicatorService.setProgress(15);
+                await new Promise(resolve => setTimeout(resolve, 1000)); 
                 let remotes = currentApp?.manifest?.remotes;
                 const widgetAppObj = this.appList.find(app => app.contextPath === widget.contextPath)
                 if (widgetAppObj) {
+                    this.progressIndicatorService.setProgress(30);
+                    await new Promise(resolve => setTimeout(resolve, 1000)); 
                     const remoteModules = widgetAppObj?.manifest?.exports;
                     remoteModules.forEach((remote: any) => {
                         (remotes[widget.contextPath] = remotes[widget.contextPath].filter((p) => p !== remote.module));
                     });
+                    this.progressIndicatorService.setProgress(50);
                     await this.widgetCatalogService.removePlugin(remotes);
                     widget.actionCode = '003';
                 }
