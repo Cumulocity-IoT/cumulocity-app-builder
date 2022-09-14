@@ -33,6 +33,7 @@ import { RuntimeWidgetLoaderService } from 'cumulocity-runtime-widget-loader';
 import { AlertMessageModalComponent } from "../utils/alert-message-modal/alert-message-modal.component";
 import { catchError } from "rxjs/operators";
 import { Router, ActivatedRoute } from "@angular/router";
+import { ProgressIndicatorService } from "../utils/progress-indicator-modal/progress-indicator.service";
 
 @Component({
     templateUrl: './widget-catalog.component.html',
@@ -59,7 +60,9 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
     constructor(private appStateService: AppStateService, private modalService: BsModalService,
         private userService: UserService, private widgetCatalogService: WidgetCatalogService,
         private alertService: AlertService, private componentService: DynamicComponentService, private appService: ApplicationService,
-        private runtimeWidgetLoaderService: RuntimeWidgetLoaderService,private router: Router, private route: ActivatedRoute) {
+        private runtimeWidgetLoaderService: RuntimeWidgetLoaderService,
+        private router: Router, private route: ActivatedRoute,
+        private progressIndicatorService: ProgressIndicatorService) {
         this.userHasAdminRights = userService.hasAllRoles(appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN", "ROLE_APPLICATION_MANAGEMENT_ADMIN"]);
 
         this.widgetCatalogService.displayListValueMoreWidgets$.subscribe((value) => {
@@ -173,11 +176,15 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
             const installDemoDialogRef = this.alertModalDialog(alertMessage);
             await installDemoDialogRef.content.event.subscribe(async data => {
                 if (data && data.isConfirm) {
+                    this.progressIndicatorService.setProgress(5);
                     await this.initiateInstallWidgetProcess(widget, widgetBinaryFound);
                 }
             });
 
-        } else { await this.initiateInstallWidgetProcess(widget, widgetBinaryFound); }
+        } else { 
+            this.progressIndicatorService.setProgress(5);
+            await this.initiateInstallWidgetProcess(widget, widgetBinaryFound); 
+        }
 
     }
 
@@ -187,8 +194,10 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
 
     private async initiateInstallWidgetProcess(widget: WidgetModel, widgetBinary: any) {
         this.showProgressModalDialog(`Installing ${widget.title}`)
-
+        this.progressIndicatorService.setProgress(10);
         if(widgetBinary) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            this.progressIndicatorService.setProgress(30);
             this.widgetCatalogService.updateRemotesInCumulocityJson(widgetBinary).then(() => {
                 widget.installed = true;
                 widget.isReloadRequired = true;
@@ -199,15 +208,18 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
                 console.error(error);
             });
         } else {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            this.progressIndicatorService.setProgress(15);
             this.widgetCatalogService.downloadBinary(widget.binaryLink)
             .subscribe(data => {
-
+                this.progressIndicatorService.setProgress(20);
                 const blob = new Blob([data], {
                     type: 'application/zip'
                 });
                 const fileName = widget.binaryLink.replace(/^.*[\\\/]/, '');
                 const fileOfBlob = new File([blob], fileName);
                 this.widgetCatalogService.installPackage(fileOfBlob).then(() => {
+                    this.progressIndicatorService.setProgress(25);
                     widget.installed = true;
                     widget.isReloadRequired = true;
                     this.actionFlag(widget);

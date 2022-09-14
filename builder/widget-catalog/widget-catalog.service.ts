@@ -28,6 +28,8 @@ import * as packageJson from "./../../package.json";
 import { catchError, delay } from 'rxjs/operators';
 import { AppStateService, ZipService } from '@c8y/ngx-components';
 import { SettingsService } from './../settings/settings.service';
+import { ProgressIndicatorService } from '../utils/progress-indicator-modal/progress-indicator.service';
+
 
 const c8yVersion = require('./../../package.json')["@c8y/ngx-components"];
 @Injectable()
@@ -53,7 +55,7 @@ export class WidgetCatalogService {
   widgetDetails$: Observable<any> = this.widgetDetailsSource.asObservable();
   displayListSource: BehaviorSubject<any> = new BehaviorSubject(null);
   displayListValue$: Observable<any> = this.displayListSource.asObservable();
-  
+
   displayListSourceMoreWidgets: BehaviorSubject<any> = new BehaviorSubject(null);
   displayListValueMoreWidgets$: Observable<any> = this.displayListSourceMoreWidgets.asObservable();
 
@@ -67,7 +69,8 @@ export class WidgetCatalogService {
   constructor(private http: HttpClient,
     private appService: ApplicationService, private appStateService: AppStateService,
     private runtimeWidgetInstallerService: RuntimeWidgetInstallerService, private settingsService: SettingsService,
-    private externalService: AppBuilderExternalAssetsService, private zipService: ZipService) {
+    private externalService: AppBuilderExternalAssetsService, private zipService: ZipService,
+    private progressIndicatorService: ProgressIndicatorService) {
     this.GATEWAY_URL_GitHubAPI = this.externalService.getURL('GITHUB', 'gatewayURL_Github');
     this.GATEWAY_URL_GitHubAsset = this.externalService.getURL('GITHUB', 'gatewayURL_GitHubAsset');
     this.GATEWAY_URL_GitHubAPI_FallBack = this.externalService.getURL('GITHUB', 'gatewayURL_Github_Fallback');
@@ -75,10 +78,10 @@ export class WidgetCatalogService {
     this.C8Y_VERSION = packageJson.dependencies['@c8y/ngx-components']
     this.GATEWAY_URL_Labcase = this.externalService.getURL('DBCATALOG', 'gatewayURL');
     this.GATEWAY_URL_Labcase_FallBack = this.externalService.getURL('DBCATALOG', 'gatewayURL_Fallback');
-    this.GATEWAY_URL_GitHub = this.externalService.getURL('GITHUB','gatewayURL_GithubAPI');
-    this.GATEWAY_URL_GitHub_FallBack = this.externalService.getURL('GITHUB','gatewayURL_GithubAPI_Fallback');
+    this.GATEWAY_URL_GitHub = this.externalService.getURL('GITHUB', 'gatewayURL_GithubAPI');
+    this.GATEWAY_URL_GitHub_FallBack = this.externalService.getURL('GITHUB', 'gatewayURL_GithubAPI_Fallback');
 
-    this.appStateService.currentApplication.subscribe( app => {
+    this.appStateService.currentApplication.subscribe(app => {
       this.currentApp = app;
     });
   }
@@ -151,8 +154,8 @@ export class WidgetCatalogService {
   checkInstalledVersion(widget: WidgetModel) {
     if (!widget.installedVersion) return true;
 
-    if (widget.installedVersion?.toLocaleLowerCase().includes('beta') || 
-    widget.installedVersion?.toLocaleLowerCase().includes('rc')) return true;
+    if (widget.installedVersion?.toLocaleLowerCase().includes('beta') ||
+      widget.installedVersion?.toLocaleLowerCase().includes('rc')) return true;
 
     const major = '>=' + semver.major(widget.installedVersion) + '.0.0';
     return semver.satisfies(widget.version, major);
@@ -182,7 +185,7 @@ export class WidgetCatalogService {
     this.displayListSourceMoreWidgets.next(value);
   }
   getWidgetDetailsFromRepo(widgetRepoPath): Observable<any> {
-    const url =  `${this.GATEWAY_URL_GitHub}${widgetRepoPath}/readme`;
+    const url = `${this.GATEWAY_URL_GitHub}${widgetRepoPath}/readme`;
     const urlFallBack = `${this.GATEWAY_URL_GitHub_FallBack}${widgetRepoPath}/readme`;
     return this.http.get(`${url}`, {
       responseType: 'text'
@@ -195,14 +198,20 @@ export class WidgetCatalogService {
   }
 
 
-  async updateRemotesInCumulocityJson( pluginBinary: any) {
+  async updateRemotesInCumulocityJson(pluginBinary: any) {
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    this.progressIndicatorService.setProgress(50);
     const remoteModules = pluginBinary?.manifest?.exports;
-    const currentApp: IApplication =  (await this.getCurrentApp());
+    const currentApp: IApplication = (await this.getCurrentApp());
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    this.progressIndicatorService.setProgress(75);
     const c8yJson = await this.getCumulocityJsonFile(currentApp);
     let remotes = (c8yJson?.remotes ? c8yJson?.remotes : {});
     remoteModules.forEach((remote: any) => {
-        (remotes[pluginBinary.contextPath]  = remotes[pluginBinary.contextPath]  || []).push(remote.module);
-    }); 
+      (remotes[pluginBinary.contextPath] = remotes[pluginBinary.contextPath] || []).push(remote.module);
+    });
+    await new Promise(resolve => setTimeout(resolve, 10000));
+    this.progressIndicatorService.setProgress(95);
     // updating config MO to retain widget status
     await this.settingsService.updateAppConfigurationForPlugin(remotes, currentApp.id, currentApp.manifest.version)
     return this.appService.storeAppManifest(this.currentApp, { ...c8yJson, remotes });
@@ -240,71 +249,76 @@ export class WidgetCatalogService {
     return this.currentApp;
   }
 
-  async installPackage(packageFile: File, onUpdate: (msg: string, type?: any) => void = ()=>{}) {
-      let widgetC8yJson;
-          try {
-              widgetC8yJson = await this.getCumulocityJson(packageFile).toPromise().then(data =>data);
-              if (widgetC8yJson.contextPath === undefined) {
-                  throw Error("Plugin Package has no context path");
-              }
-          } catch (e) {
-              console.log(e);
-              throw Error("Not a valid Plugin Package");
-          }
-      
-      const appList = (await this.appService.list({pageSize: 2000})).data;
-      if (appList.some(app => app.contextPath === widgetC8yJson.contextPath)) {
-        onUpdate("Widget already deployed! Updating widget...");
-        const packageApp = appList.find(app => app.contextPath === widgetC8yJson.contextPath);
+  async installPackage(packageFile: File, onUpdate: (msg: string, type?: any) => void = () => { }) {
+    this.progressIndicatorService.setProgress(30);
+    let widgetC8yJson;
+    try {
+      widgetC8yJson = await this.getCumulocityJson(packageFile).toPromise().then(data => data);
+      if (widgetC8yJson.contextPath === undefined) {
+        throw Error("Plugin Package has no context path");
+      }
+    } catch (e) {
+      console.log(e);
+      throw Error("Not a valid Plugin Package");
+    }
+    const appList = (await this.appService.list({ pageSize: 2000 })).data;
+    if (appList.some(app => app.contextPath === widgetC8yJson.contextPath)) {
+      this.progressIndicatorService.setProgress(35);
+      onUpdate("Widget already deployed! Updating widget...");
+      const packageApp = appList.find(app => app.contextPath === widgetC8yJson.contextPath);
 
-        // Upload the binary
-        const appBinary = (await this.appService.binary(packageApp).upload(packageFile)).data;
-        // Update the app
-        await this.appService.update({
-            ...widgetC8yJson,
-            id: packageApp.id,
-            activeVersionId: appBinary.id.toString()
+      // Upload the binary
+      const appBinary = (await this.appService.binary(packageApp).upload(packageFile)).data;
+      // Update the app
+      this.progressIndicatorService.setProgress(40);
+      await this.appService.update({
+        ...widgetC8yJson,
+        id: packageApp.id,
+        activeVersionId: appBinary.id.toString()
+      });
+      if (window && window['aptrinsic']) {
+        window['aptrinsic']('track', 'gp_runtime_widget_updated', {
+          "widgetName": packageApp.name
         });
-        if(window && window['aptrinsic'] ){
-            window['aptrinsic']('track', 'gp_runtime_widget_updated', {
-                "widgetName": packageApp.name
-            });
-        }
-        onUpdate("Plugin updated! Adding to application...");
-        return this.updateRemotesInCumulocityJson(packageApp)
+      }
+      onUpdate("Plugin updated! Adding to application...");
+      return this.updateRemotesInCumulocityJson(packageApp)
     } else {
-        
-        // Create the pluginPackage's app
-        let packageApp = (await this.appService.create({
-            name: widgetC8yJson.name,
-            key: widgetC8yJson.key,
-            contextPath: widgetC8yJson.contextPath,
-            manifest: { isPackage : true } as unknown as IManifest,
-            resourcesUrl: "/",
-            type: "HOSTED"
-        } as any)).data;
+      this.progressIndicatorService.setProgress(35);
+      // Create the pluginPackage's app
+      let packageApp = (await this.appService.create({
+        name: widgetC8yJson.name,
+        key: widgetC8yJson.key,
+        contextPath: widgetC8yJson.contextPath,
+        manifest: { isPackage: true } as unknown as IManifest,
+        resourcesUrl: "/",
+        type: "HOSTED"
+      } as any)).data;
 
-        // Upload the binary
-        const appBinary = (await this.appService.binary(packageApp).upload(packageFile)).data;
+      // Upload the binary
+      const appBinary = (await this.appService.binary(packageApp).upload(packageFile)).data;
 
-        // Update the app
-        packageApp = (await this.appService.update({
-            id: packageApp.id,
-            activeVersionId: appBinary.id.toString()
-        } as any)).data;
+      // Update the app
+      this.progressIndicatorService.setProgress(40);
+      packageApp = (await this.appService.update({
+        id: packageApp.id,
+        activeVersionId: appBinary.id.toString()
+      } as any)).data;
 
-        if(window && window['aptrinsic'] ){
-            window['aptrinsic']('track', 'gp_runtime_widget_installed', {
-                "widgetName": packageApp.name
-            });
-        }
-        onUpdate("Plugin deployed! Adding to application...");
-        return this.updateRemotesInCumulocityJson(packageApp)
+      if (window && window['aptrinsic']) {
+        window['aptrinsic']('track', 'gp_runtime_widget_installed', {
+          "widgetName": packageApp.name
+        });
+      }
+      onUpdate("Plugin deployed! Adding to application...");
+      return this.updateRemotesInCumulocityJson(packageApp)
     }
   }
 
   async removePlugin(remotes: any) {
     const c8yJson = await this.getCumulocityJsonFile(this.currentApp);
+    this.progressIndicatorService.setProgress(95);
+    await new Promise(resolve => setTimeout(resolve, 10000)); 
       // updating config MO to retain widget status
     await this.settingsService.updateAppConfigurationForPlugin(remotes, this.currentApp.id, this.currentApp.manifest.version)
     return this.appService.storeAppManifest(this.currentApp, { ...c8yJson, remotes });

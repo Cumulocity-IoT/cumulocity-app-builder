@@ -13,12 +13,12 @@
                         <button class="btn btn-clean btn-icon btn-md"
                             title="Update - Latest version available - {{widgetDetails.version}}" *ngSwitchCase="'001'">
                             <i c8yIcon="cloud-upload" class="widget-action-icon blink_me_update"
-                                (click)="updateWidget(widgetDetails, false)"></i>
+                                (click)="updateWidget(widgetDetails)"></i>
                         </button>
                         <button class="btn btn-clean btn-icon btn-md" title="Update (Not Compatible)"
                             *ngSwitchCase="'002'">
                             <i c8yIcon="level-up" class="widget-action-icon blink_me_update"
-                                (click)="updateWidget(widgetDetails, false)"></i>
+                                (click)="updateWidget(widgetDetails)"></i>
                         </button>
                         <button class="btn btn-clean btn-icon btn-md" title="Refresh" *ngSwitchCase="'003'">
                             <i c8yIcon="refresh" class="widget-action-icon text-info" (click)="refresh()"></i>
