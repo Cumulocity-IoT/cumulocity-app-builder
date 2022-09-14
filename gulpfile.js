@@ -2,9 +2,21 @@ const {src, dest, series} = require('gulp');
 const zip = require('gulp-zip');
 const del = require('del');
 const pkgJson = require('./package.json');
+const jeditor = require("gulp-json-editor");
 
 function clean() {
-    return del(['dist']);
+    del(['dist']);
+    return updateManifest();
+}
+
+
+function updateManifest() {
+    return src('./package.json')
+            .pipe(jeditor(function(json){
+                json.c8y.application.version =  pkgJson.version;
+                return json;
+            }))
+           .pipe(dest('./'));
 }
 
 const bundle = series(

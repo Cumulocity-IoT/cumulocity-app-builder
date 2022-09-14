@@ -27,6 +27,7 @@ import * as semver from "semver";
 import * as packageJson from "./../../package.json";
 import { catchError, delay } from 'rxjs/operators';
 import { AppStateService, ZipService } from '@c8y/ngx-components';
+import { SettingsService } from './../settings/settings.service';
 
 const c8yVersion = require('./../../package.json')["@c8y/ngx-components"];
 @Injectable()
@@ -65,7 +66,7 @@ export class WidgetCatalogService {
 
   constructor(private http: HttpClient,
     private appService: ApplicationService, private appStateService: AppStateService,
-    private runtimeWidgetInstallerService: RuntimeWidgetInstallerService,
+    private runtimeWidgetInstallerService: RuntimeWidgetInstallerService, private settingsService: SettingsService,
     private externalService: AppBuilderExternalAssetsService, private zipService: ZipService) {
     this.GATEWAY_URL_GitHubAPI = this.externalService.getURL('GITHUB', 'gatewayURL_Github');
     this.GATEWAY_URL_GitHubAsset = this.externalService.getURL('GITHUB', 'gatewayURL_GitHubAsset');
@@ -202,6 +203,15 @@ export class WidgetCatalogService {
     remoteModules.forEach((remote: any) => {
         (remotes[pluginBinary.contextPath]  = remotes[pluginBinary.contextPath]  || []).push(remote.module);
     }); 
+    // updating config MO to retain widget status
+    await this.settingsService.updateAppConfigurationForPlugin(remotes, currentApp.id, currentApp.manifest.version)
+    return this.appService.storeAppManifest(this.currentApp, { ...c8yJson, remotes });
+  }
+
+  async updateRemotesFromAppBuilderConfig( remotes: any) {
+    const currentApp: IApplication =  (await this.getCurrentApp());
+    const c8yJson = await this.getCumulocityJsonFile(currentApp);
+    await this.settingsService.updateAppConfigurationForPlugin(remotes, this.currentApp.id, this.currentApp.manifest.version);
     return this.appService.storeAppManifest(this.currentApp, { ...c8yJson, remotes });
   }
 
@@ -292,6 +302,8 @@ export class WidgetCatalogService {
 
   async removePlugin(remotes: any) {
     const c8yJson = await this.getCumulocityJsonFile(this.currentApp);
+      // updating config MO to retain widget status
+    await this.settingsService.updateAppConfigurationForPlugin(remotes, this.currentApp.id, this.currentApp.manifest.version)
     return this.appService.storeAppManifest(this.currentApp, { ...c8yJson, remotes });
   }
 }
