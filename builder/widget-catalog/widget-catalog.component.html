@@ -80,6 +80,7 @@
                                     <th class="cursor-pointer" style="text-transform: capitalize;" (click)="sortColumn('requiredPlatformVersion')" [ngClass]="sortClass('requiredPlatformVersion')">Supported C8Y Platforms</th>
                                     <th class="cursor-pointer" style="text-transform: capitalize;" (click)="sortColumn('license')" [ngClass]="sortClass('license')">License</th>
                                     <th class="cursor-pointer" style="text-transform: capitalize;" (click)="sortColumn('releaseDate')" [ngClass]="sortClass('releaseDate')">Release Date</th>
+                                    <th class="cursor-pointer" style="text-transform: capitalize;" (click)="sortColumn('pluginType')" [ngClass]="sortClass('pluginType')">Type</th>
                                     <th class="cursor-pointer" style="text-transform: capitalize;" (click)="sortColumn('author')" [ngClass]="sortClass('author')">Author</th>
                                     <th></th>
                                 </tr>
@@ -120,6 +121,7 @@
                                     <td style="font-size: 12px;">{{widget.requiredPlatformVersion}}</td>
                                     <td style="font-size: 12px;">{{widget.license}}</td>
                                     <td style="font-size: 12px;">{{widget.releaseDate | date : "dd-MM-yyyy"}}</td>
+                                    <td style="font-size: 12px;text-transform:capitalize;" *ngIf="widget.pluginType"><span class="label label-info">{{widget.pluginType}}</span></td>
                                     <td style="font-size: 12px;">{{widget.author}}</td>
                                     <td>
                                         <div>
@@ -245,7 +247,10 @@
                             <img class="preview-img" [src]="widget.preview && widget.preview !== '' ? widget.preview : './img/no-image.png'" />
                         </a>
                     </div>
-                    <button class="btn btn-xs btn-default margin-10" (click)="navigateToDetailPage(widget)">
+                    <div style="float:left" class="margin-10">
+                        <span class="label label-info" *ngIf="widget.pluginType" style="text-transform:capitalize;">{{widget.pluginType}}</span>
+                    </div>
+                    <button class="btn btn-xs btn-default margin-10" style="float:right" (click)="navigateToDetailPage(widget)">
                         <i c8yicon="more-details" title="Details" class="dlt-c8y-icon-more-details"></i> Details
                     </button>
                 </div>

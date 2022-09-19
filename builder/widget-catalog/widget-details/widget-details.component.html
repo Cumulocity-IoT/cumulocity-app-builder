@@ -103,10 +103,12 @@
                     <div class="card-title" style="color: #0B385B">
                         About
                     </div>
+                    <div style="color: #0B385B;position: absolute;right: 15px"  class="card-title">
+                        <span class="label label-info" style="text-transform:capitalize;font-size: 12px;">{{widgetDetails.pluginType}}</span>
+                    </div>
                 </div>
                 <div class="card-block bg-white">
                     <markdown ngPreserveWhitespaces class="variable-binding" name="description" [data]="description"></markdown>
-                   
                 </div>
                 <div class="card-block bg-white">
                     <button class="btn btn-primary" style="position: absolute;bottom: 20px"

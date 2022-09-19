@@ -213,12 +213,15 @@ export class EditSimulatorModalComponent implements OnInit {
         const data = await response.json()
         if(data && data.status && data.status === "UP") {
             this.isMSExist = true;
-            this.simConfigService.setRunOnServer(true);
-            this.simulatorConfig.serverSide = true;
+            if (this.simulatorConfig.serverSide) {
+                this.simConfigService.setRunOnServer(this.simulatorConfig.serverSide);
+            }
         }
         else { 
             this.isMSExist = false;
-            this.simConfigService.setRunOnServer(false);
+            if (this.simulatorConfig.serverSide) {
+                this.simConfigService.setRunOnServer(this.simulatorConfig.serverSide);
+            }
         }
         this.isMSCheckSpin = false;
     }
