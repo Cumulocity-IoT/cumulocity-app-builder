@@ -17,7 +17,7 @@
  */
 
 import { Component, OnInit, ViewEncapsulation } from "@angular/core";
-import { IManagedObject } from '@c8y/client';
+import { ApplicationService, IManagedObject } from '@c8y/client';
 import { DeviceSelectorModalComponent } from "../utils/device-selector-modal/device-selector.component";
 import { BsModalRef, BsModalService } from "ngx-bootstrap/modal";
 import { DependencyDescription, TemplateCatalogEntry, TemplateDetails } from "./template-catalog.model";
@@ -28,8 +28,10 @@ import { ProgressIndicatorModalComponent } from "../utils/progress-indicator-mod
 
 import './cumulocity.json';
 import { WidgetCatalogService } from "../../builder/widget-catalog/widget-catalog.service";
-import { catchError } from "rxjs/operators";
+import { catchError, delay } from "rxjs/operators";
 import { AccessRightsService } from "../../builder/access-rights.service";
+import { ProgressIndicatorService } from "../../builder/utils/progress-indicator-modal/progress-indicator.service";
+
 
 enum TemplateCatalogStep {
     CATALOG,
@@ -61,6 +63,8 @@ export class TemplateCatalogModalComponent implements OnInit {
 
     public searchTemplate = '';
 
+    private appList = [];
+
     public dashboardConfiguration = {
         dashboardId: '12598412',
         dashboardName: '',
@@ -81,38 +85,38 @@ export class TemplateCatalogModalComponent implements OnInit {
 
     globalRoles: any;
 
-    constructor(private modalService: BsModalService, private modalRef: BsModalRef,
+    constructor(private modalService: BsModalService, private modalRef: BsModalRef, private appService: ApplicationService,
         private catalogService: TemplateCatalogService, private componentService: DynamicComponentService,
         private alertService: AlertService, private widgetCatalogService: WidgetCatalogService,
-        private accessRightsService: AccessRightsService) {
+        private accessRightsService: AccessRightsService, private progressIndicatorService: ProgressIndicatorService) {
         this.onSave = new Subject();
     }
 
     async ngOnInit() {
         this.loadTemplateCatalog();
-        this.globalRoles = await this.accessRightsService.getAllGlobalRoles();  
+        this.globalRoles = await this.accessRightsService.getAllGlobalRoles();
     }
 
     loadTemplateCatalog(): void {
         this.showLoadingIndicator();
         this.catalogService.getTemplateCatalog()
-        .pipe(catchError(err => {
-            console.log('Dashboard Catalog: Error in primary endpoint! using fallback...');
-            return this.catalogService.getTemplateCatalogFallBack()
-        }))
-        .subscribe((catalog: Array<TemplateCatalogEntry>) => {
-            this.hideLoadingIndicator();
-            this.templates = catalog;
-            this.filterTemplates =  (this.templates ? this.templates : []);
-            this.filterTemplates.forEach( template => {
-                if(template.thumbnail && template?.thumbnail != '') {
-                    template.thumbnail = this.catalogService.getGithubURL(template.thumbnail);
-                }
-            })
-        }, error => {
-            this.alertService.danger("There is some technical error! Please try after sometime.");
-            this.hideLoadingIndicator();
-        });
+            .pipe(catchError(err => {
+                console.log('Dashboard Catalog: Error in primary endpoint! using fallback...');
+                return this.catalogService.getTemplateCatalogFallBack()
+            }))
+            .subscribe((catalog: Array<TemplateCatalogEntry>) => {
+                this.hideLoadingIndicator();
+                this.templates = catalog;
+                this.filterTemplates = (this.templates ? this.templates : []);
+                this.filterTemplates.forEach(template => {
+                    if (template.thumbnail && template?.thumbnail != '') {
+                        template.thumbnail = this.catalogService.getGithubURL(template.thumbnail);
+                    }
+                })
+            }, error => {
+                this.alertService.danger("There is some technical error! Please try after sometime.");
+                this.hideLoadingIndicator();
+            });
     }
 
     onTemplateClicked(template: TemplateCatalogEntry): void {
@@ -121,21 +125,22 @@ export class TemplateCatalogModalComponent implements OnInit {
         this.loadTemplateDetails(template);
     }
 
-    loadTemplateDetails(template: TemplateCatalogEntry): void {
+    async loadTemplateDetails(template: TemplateCatalogEntry): Promise<void> {
         this.showLoadingIndicator();
+        this.appList = (await this.appService.list({ pageSize: 2000 })).data;
         this.catalogService.getTemplateDetails(template.dashboard)
-        .pipe(catchError(err => {
-            console.log('Dashboard Catalog Details: Error in primary endpoint! using fallback...');
-            return this.catalogService.getTemplateDetailsFallBack(template.dashboard)
-        }))
-        .subscribe(templateDetails => {
-            this.hideLoadingIndicator();
-            this.templateDetails = templateDetails;
-            if(this.templateDetails.preview) {
-                this.templateDetails.preview = this.catalogService.getGithubURL(this.templateDetails.preview);
-            }
-            this.updateDepedencies();
-        });
+            .pipe(catchError(err => {
+                console.log('Dashboard Catalog Details: Error in primary endpoint! using fallback...');
+                return this.catalogService.getTemplateDetailsFallBack(template.dashboard);
+            }))
+            .subscribe(templateDetails => {
+                this.hideLoadingIndicator();
+                this.templateDetails = templateDetails;
+                if (this.templateDetails.preview) {
+                    this.templateDetails.preview = this.catalogService.getGithubURL(this.templateDetails.preview);
+                }
+                this.updateDepedencies();
+            });
     }
 
     updateDepedencies() {
@@ -240,21 +245,40 @@ export class TemplateCatalogModalComponent implements OnInit {
             this.alertService.warning("Runtime widget installation isn't supported when running Application Builder on localhost.");
             return;
         }
-
-        this.showProgressModalDialog(`Install ${dependency.title}`)
-        this.catalogService.downloadBinary(dependency.link)
-        .subscribe(data => {
-            const blob = new Blob([data], {
-                type: 'application/zip'
-            });
-            const fileName = dependency.link.replace(/^.*[\\\/]/, '');
-            const fileOfBlob = new File([blob], fileName);
-            this.catalogService.installWidget(fileOfBlob).then(() => {
+        const widgetBinaryFound = this.appList.find(app => app.manifest?.isPackage && (app.name.toLowerCase() === dependency.title?.toLowerCase() ||
+            (app.contextPath && app.contextPath?.toLowerCase() === dependency.contextPath.toLowerCase())));
+        this.showProgressModalDialog(`Installing ${dependency.title}`);
+        if (widgetBinaryFound) {
+            await delay(1000);
+            this.progressIndicatorService.setProgress(30);
+            this.widgetCatalogService.updateRemotesInCumulocityJson(widgetBinaryFound).then(() => {
                 dependency.isInstalled = true;
                 this.isReloadRequired = true;
                 this.hideProgressModalDialog();
+            }, error => {
+                this.alertService.danger("There is some technical error! Please try after sometime.");
+                console.error(error);
             });
-        });
+        } else {
+            this.progressIndicatorService.setProgress(10);
+            this.catalogService.downloadBinary(dependency.link)
+                .subscribe(data => {
+                    this.progressIndicatorService.setProgress(20);
+                    const blob = new Blob([data], {
+                        type: 'application/zip'
+                    });
+                    const fileName = dependency.link.replace(/^.*[\\\/]/, '');
+                    const fileOfBlob = new File([blob], fileName);
+                    this.widgetCatalogService.installPackage(fileOfBlob).then(() => {
+                        dependency.isInstalled = true;
+                        this.isReloadRequired = true;
+                        this.hideProgressModalDialog();
+                    }, error => {
+                        this.alertService.danger("There is some technical error! Please try after sometime.");
+                        console.error(error);
+                    });
+                });
+        }
     }
 
     private isDevicesSelected(): boolean {
@@ -290,15 +314,15 @@ export class TemplateCatalogModalComponent implements OnInit {
     }
 
     private verifyWidgetCompatibility(dependency: DependencyDescription) {
-        if(this.widgetCatalogService.isCompatiblieVersion(dependency)) {
+        if (this.widgetCatalogService.isCompatiblieVersion(dependency)) {
             dependency.isSupported = true;
             dependency.visible = true;
         } else {
-            const differentDependencyVersion = this.templateDetails.input.dependencies.find( widget => widget.id === dependency.id && widget.link !== dependency.link);
+            const differentDependencyVersion = this.templateDetails.input.dependencies.find(widget => widget.id === dependency.id && widget.link !== dependency.link);
             dependency.isSupported = false;
-            if(differentDependencyVersion) {
+            if (differentDependencyVersion) {
                 dependency.visible = false;
-            } else { dependency.visible = true;}
+            } else { dependency.visible = true; }
         }
     }
 
@@ -308,13 +332,13 @@ export class TemplateCatalogModalComponent implements OnInit {
         document.body.appendChild(dtdlLink);
         dtdlLink.click();
         document.body.removeChild(dtdlLink);
-      }
+    }
 
     applyFilter() {
-        if(this.templates && this.templates.length > 0) {
+        if (this.templates && this.templates.length > 0) {
             this.filterTemplates = this.templates.filter((template => template.title.toLowerCase().includes(this.searchTemplate.toLowerCase())));
             this.filterTemplates = [...this.filterTemplates];
-        } 
+        }
 
     }
 }

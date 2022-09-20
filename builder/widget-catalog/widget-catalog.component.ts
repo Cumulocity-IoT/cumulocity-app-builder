@@ -219,7 +219,6 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
                 const fileName = widget.binaryLink.replace(/^.*[\\\/]/, '');
                 const fileOfBlob = new File([blob], fileName);
                 this.widgetCatalogService.installPackage(fileOfBlob).then(() => {
-                    this.progressIndicatorService.setProgress(25);
                     widget.installed = true;
                     widget.isReloadRequired = true;
                     this.actionFlag(widget);
