@@ -16,7 +16,12 @@
 }
 
 .navigator {
+  --appthemecolor: #A32EFF;
+  --appthemecolordark: #25083b;
+  --appbgcolor: #F2F4FB;
   padding-bottom: 100px;
+  background: var(--appbgcolor);
+  color: #333;
 
   .navigator-slot-bottom::before {
     content: "";
@@ -28,6 +33,32 @@
     width: 100%;
     height: 40px;
     display: block;
+  }
+  .title, .title:after {
+    background-color: var(--appbgcolor) !important;
+  }
+  .title {
+    .c8y-app-icon::before, .c8y-app-icon::after, span {
+      color: var(--appthemecolor) !important;
+    }
+  }
+  .navigatorContent {
+    background: #F2F4FB !important;
+  }
+  .navigatorContent:before {
+    background-color: var(--appthemecolor) !important;
+  }
+  .navigatorContent .link.open.active {
+    background-color: var(--appthemecolor) !important;
+  }
+  .navigatorContent .link.active {
+    border-left-color: var(--appthemecolordark); 
+  }
+  .navigatorContent .link {
+    color: #333;
+  }
+  .navigatorContent .link.active {
+    color: white;
   }
 }
 .app-builder-upgrade-banner {
@@ -53,4 +84,22 @@
   50% {
       opacity: 0;
   }
+}
+
+// Forget Password link hiding
+c8y-credentials > form > div.text-center > .btn.btn-link {
+  display: none !important;
+}
+
+#apt-widget-controller {
+  display: none !important;
+}
+
+// Cookie policy section hiding
+// c8y-cookie-banner, .c8y-cookie-banner {
+//   display: none !important;
+// }
+
+.header-bar .dropdown.open .dropdown-menu .dropdown-header {
+  display: none !important;
 }
