@@ -210,7 +210,7 @@ export class WidgetCatalogService {
     remoteModules.forEach((remote: any) => {
       (remotes[pluginBinary.contextPath] = remotes[pluginBinary.contextPath] || []).push(remote.module);
     });
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    await new Promise(resolve => setTimeout(resolve, 2000));
     this.progressIndicatorService.setProgress(95);
     // updating config MO to retain widget status
     await this.settingsService.updateAppConfigurationForPlugin(remotes, currentApp.id, currentApp.manifest.version)
@@ -318,9 +318,8 @@ export class WidgetCatalogService {
   async removePlugin(remotes: any) {
     const c8yJson = await this.getCumulocityJsonFile(this.currentApp);
     this.progressIndicatorService.setProgress(95);
-    await new Promise(resolve => setTimeout(resolve, 5000)); 
       // updating config MO to retain widget status
-    await this.settingsService.updateAppConfigurationForPlugin(remotes, this.currentApp.id, this.currentApp.manifest.version)
+    await this.settingsService.updateAppConfigurationForPlugin(remotes, this.currentApp.id, this.currentApp.manifest.version);
     return this.appService.storeAppManifest(this.currentApp, { ...c8yJson, remotes });
   }
 }

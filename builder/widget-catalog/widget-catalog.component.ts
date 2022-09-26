@@ -31,7 +31,6 @@ import { WidgetCatalog, WidgetModel } from './widget-catalog.model';
 import { WidgetCatalogService } from './widget-catalog.service';
 import { RuntimeWidgetLoaderService } from 'cumulocity-runtime-widget-loader';
 import { AlertMessageModalComponent } from "../utils/alert-message-modal/alert-message-modal.component";
-import { catchError } from "rxjs/operators";
 import { Router, ActivatedRoute } from "@angular/router";
 import { ProgressIndicatorService } from "../utils/progress-indicator-modal/progress-indicator.service";
 
@@ -196,12 +195,13 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
         this.showProgressModalDialog(`Installing ${widget.title}`)
         this.progressIndicatorService.setProgress(10);
         if(widgetBinary) {
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, 2000));
             this.progressIndicatorService.setProgress(30);
-            this.widgetCatalogService.updateRemotesInCumulocityJson(widgetBinary).then(() => {
+            this.widgetCatalogService.updateRemotesInCumulocityJson(widgetBinary).then(async () => {
                 widget.installed = true;
                 widget.isReloadRequired = true;
                 this.actionFlag(widget);
+                await new Promise(resolve => setTimeout(resolve, 5000));
                 this.hideProgressModalDialog();
             }, error => {
                 this.alertService.danger("There is some technical error! Please try after sometime.");
@@ -218,10 +218,11 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
                 });
                 const fileName = widget.binaryLink.replace(/^.*[\\\/]/, '');
                 const fileOfBlob = new File([blob], fileName);
-                this.widgetCatalogService.installPackage(fileOfBlob).then(() => {
+                this.widgetCatalogService.installPackage(fileOfBlob).then(async () => {
                     widget.installed = true;
                     widget.isReloadRequired = true;
                     this.actionFlag(widget);
+                    await new Promise(resolve => setTimeout(resolve, 5000));
                     this.hideProgressModalDialog();
                 }, error => {
                     this.alertService.danger("There is some technical error! Please try after sometime.");

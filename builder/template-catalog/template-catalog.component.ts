@@ -28,7 +28,7 @@ import { ProgressIndicatorModalComponent } from "../utils/progress-indicator-mod
 
 import './cumulocity.json';
 import { WidgetCatalogService } from "../../builder/widget-catalog/widget-catalog.service";
-import { catchError, delay } from "rxjs/operators";
+import { catchError } from "rxjs/operators";
 import { AccessRightsService } from "../../builder/access-rights.service";
 import { ProgressIndicatorService } from "../../builder/utils/progress-indicator-modal/progress-indicator.service";
 
@@ -249,11 +249,13 @@ export class TemplateCatalogModalComponent implements OnInit {
             (app.contextPath && app.contextPath?.toLowerCase() === dependency.contextPath.toLowerCase())));
         this.showProgressModalDialog(`Installing ${dependency.title}`);
         if (widgetBinaryFound) {
-            await delay(1000);
+            this.progressIndicatorService.setProgress(10);
+            await new Promise(resolve => setTimeout(resolve, 1000));
             this.progressIndicatorService.setProgress(30);
-            this.widgetCatalogService.updateRemotesInCumulocityJson(widgetBinaryFound).then(() => {
+            this.widgetCatalogService.updateRemotesInCumulocityJson(widgetBinaryFound).then(async () => {
                 dependency.isInstalled = true;
                 this.isReloadRequired = true;
+                await new Promise(resolve => setTimeout(resolve, 5000));
                 this.hideProgressModalDialog();
             }, error => {
                 this.alertService.danger("There is some technical error! Please try after sometime.");
@@ -269,9 +271,10 @@ export class TemplateCatalogModalComponent implements OnInit {
                     });
                     const fileName = dependency.link.replace(/^.*[\\\/]/, '');
                     const fileOfBlob = new File([blob], fileName);
-                    this.widgetCatalogService.installPackage(fileOfBlob).then(() => {
+                    this.widgetCatalogService.installPackage(fileOfBlob).then(async () => {
                         dependency.isInstalled = true;
                         this.isReloadRequired = true;
+                        await new Promise(resolve => setTimeout(resolve, 5000));
                         this.hideProgressModalDialog();
                     }, error => {
                         this.alertService.danger("There is some technical error! Please try after sometime.");

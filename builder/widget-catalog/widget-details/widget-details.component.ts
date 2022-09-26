@@ -237,21 +237,22 @@ export class WidgetDetailsComponent implements OnInit {
             if (data && data.isConfirm) {
                 this.showProgressModalDialog(`Uninstalling ${widget.title}`);
                 this.progressIndicatorService.setProgress(5);
-                await new Promise(resolve => setTimeout(resolve, 1000)); 
+                await new Promise(resolve => setTimeout(resolve, 1000));
                 const currentApp: IApplication = (await this.widgetCatalogService.getCurrentApp());
                 this.progressIndicatorService.setProgress(15);
-                await new Promise(resolve => setTimeout(resolve, 1000)); 
+                await new Promise(resolve => setTimeout(resolve, 1000));
                 let remotes = currentApp?.manifest?.remotes;
                 const widgetAppObj = this.appList.find(app => app.contextPath === widget.contextPath)
                 if (widgetAppObj) {
                     this.progressIndicatorService.setProgress(30);
-                    await new Promise(resolve => setTimeout(resolve, 1000)); 
+                    await new Promise(resolve => setTimeout(resolve, 1000));
                     const remoteModules = widgetAppObj?.manifest?.exports;
                     remoteModules.forEach((remote: any) => {
                         (remotes[widget.contextPath] = remotes[widget.contextPath].filter((p) => p !== remote.module));
                     });
                     this.progressIndicatorService.setProgress(50);
                     await this.widgetCatalogService.removePlugin(remotes);
+                    await new Promise(resolve => setTimeout(resolve, 5000));
                     this.hideProgressModalDialog();
                     widget.actionCode = '003';
                 }
@@ -328,10 +329,11 @@ export class WidgetDetailsComponent implements OnInit {
         const fileOfBlob = new File([blob], fileName);
         this.progressIndicatorService.setProgress(30);
         await new Promise<any>((resolve) => {
-            this.widgetCatalogService.installPackage(fileOfBlob).then(() => {
+            this.widgetCatalogService.installPackage(fileOfBlob).then(async () => {
                 widget.isReloadRequired = true;
                 widget.installedVersion = widget.version;
                 this.actionFlag(widget);
+                await new Promise(resolve => setTimeout(resolve, 5000));
                 this.hideProgressModalDialog();
                 resolve(true);
             });
@@ -425,10 +427,11 @@ export class WidgetDetailsComponent implements OnInit {
         if (widgetBinary) {
             await new Promise(resolve => setTimeout(resolve, 1000));
             this.progressIndicatorService.setProgress(30);
-            this.widgetCatalogService.updateRemotesInCumulocityJson(widgetBinary).then(() => {
+            this.widgetCatalogService.updateRemotesInCumulocityJson(widgetBinary).then(async () => {
                 widget.installed = true;
                 widget.isReloadRequired = true;
                 this.actionFlag(widget);
+                await new Promise(resolve => setTimeout(resolve, 5000));
                 this.hideProgressModalDialog();
             }, error => {
                 this.alertService.danger("There is some technical error! Please try after sometime.");
@@ -445,11 +448,12 @@ export class WidgetDetailsComponent implements OnInit {
                     });
                     const fileName = widget.binaryLink.replace(/^.*[\\\/]/, '');
                     const fileOfBlob = new File([blob], fileName);
-                    this.widgetCatalogService.installPackage(fileOfBlob).then(() => {
+                    this.widgetCatalogService.installPackage(fileOfBlob).then(async () => {
                         this.progressIndicatorService.setProgress(25);
                         widget.installed = true;
                         widget.isReloadRequired = true;
                         this.actionFlag(widget);
+                        await new Promise(resolve => setTimeout(resolve, 5000));
                         this.hideProgressModalDialog();
                     });
                 });

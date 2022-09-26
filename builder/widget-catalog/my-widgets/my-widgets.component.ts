@@ -34,7 +34,6 @@ import { AlertMessageModalComponent } from "../../utils/alert-message-modal/aler
 import { ActivatedRoute, Router } from "@angular/router";
 import { ProgressIndicatorService } from "../../utils/progress-indicator-modal/progress-indicator.service";
 
-
 @Component({
     templateUrl: './my-widgets.component.html',
     styleUrls: ['./my-widgets.component.less']
@@ -296,10 +295,11 @@ export class MyWidgetsComponent implements OnInit {
         const fileOfBlob = new File([blob], fileName);
         this.progressIndicatorService.setProgress(30);
         await new Promise<any>((resolve) => {
-            this.widgetCatalogService.installPackage(fileOfBlob).then(() => {
+            this.widgetCatalogService.installPackage(fileOfBlob).then(async () => {
                 widget.isReloadRequired = true;
                 widget.installedVersion = widget.version;
                 this.actionFlag(widget);
+                await new Promise(resolve => setTimeout(resolve, 5000));
                 this.hideProgressModalDialog();
                 resolve(true);
             });
@@ -396,6 +396,7 @@ export class MyWidgetsComponent implements OnInit {
                     });
                     this.progressIndicatorService.setProgress(50);
                     await this.widgetCatalogService.removePlugin(remotes);
+                    await new Promise(resolve => setTimeout(resolve, 5000));
                     this.hideProgressModalDialog();
                     widget.actionCode = '003';
                 }
