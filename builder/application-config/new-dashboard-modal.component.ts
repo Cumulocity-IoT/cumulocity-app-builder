@@ -23,6 +23,7 @@ import {WizardComponent} from "../../wizard/wizard.component";
 import {WELCOME_DASHBOARD_TEMPLATE} from "./dashboard-templates";
 import {HELP_SUPPORT_DASHBOARD_TEMPLATE} from "./help-support-templates";
 import {AppBuilderNavigationService} from "../navigation/app-builder-navigation.service";
+import { Subject } from 'rxjs';
 
 @Component({
     templateUrl: './new-dashboard-modal.component.html'
@@ -44,10 +45,13 @@ export class NewDashboardModalComponent {
 
     app: any;
     globalRoles: any;
+    public onSave: Subject<boolean>;
 
     @ViewChild(WizardComponent, {static: true}) wizard: WizardComponent;
 
-    constructor(public bsModalRef: BsModalRef, private appService: ApplicationService, private inventoryService: InventoryService, private navigation: AppBuilderNavigationService) {}
+    constructor(public bsModalRef: BsModalRef, private appService: ApplicationService, private inventoryService: InventoryService, private navigation: AppBuilderNavigationService) {
+        this.onSave = new Subject();
+    }
 
     showId() {
         switch(this.creationMode) {
@@ -91,7 +95,8 @@ export class NewDashboardModalComponent {
                 throw Error(`Unknown dashboard creation mode: ${this.creationMode}`);
             }
         }
-        this.bsModalRef.hide()
+        this.onSave.next(true);
+        this.bsModalRef.hide();
     }
 
     async addClonedDashboard(application, name: string, visibility: '' | 'hidden' | 'no-nav', dashboardId: string, icon: string, tabGroup: string, selectedGlobalRoles: any) {
