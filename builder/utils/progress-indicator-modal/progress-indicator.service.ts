@@ -5,8 +5,13 @@ import { Subject } from 'rxjs';
   export class ProgressIndicatorService {
 
     progress$ = new Subject<number>();
+    message$ = new Subject<string>();
 
     setProgress(progress: number) {
         this.progress$.next(progress);
+    }
+
+    setMessage(message: string) {
+      this.message$.next(message);
     }
   }

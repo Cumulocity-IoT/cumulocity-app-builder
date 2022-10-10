@@ -103,7 +103,7 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
         await this.widgetCatalogService.fetchWidgetCatalog()
             .subscribe(async (widgetCatalog: WidgetCatalog) => {
                 this.widgetCatalog = widgetCatalog;
-                await this.filterInstalledWidgets();
+                this.widgetCatalog.widgets = await this.widgetCatalogService.filterInstalledWidgets(this.widgetCatalog, this.userHasAdminRights);
                 this.applyFilter();
                 this.isBusy = false;
             }, error => {
@@ -200,7 +200,7 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
             this.widgetCatalogService.updateRemotesInCumulocityJson(widgetBinary).then(async () => {
                 widget.installed = true;
                 widget.isReloadRequired = true;
-                this.actionFlag(widget);
+                this.widgetCatalogService.actionFlagGetWidgets(widget, this.userHasAdminRights);
                 await new Promise(resolve => setTimeout(resolve, 5000));
                 this.hideProgressModalDialog();
             }, error => {
@@ -221,7 +221,7 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
                 this.widgetCatalogService.installPackage(fileOfBlob).then(async () => {
                     widget.installed = true;
                     widget.isReloadRequired = true;
-                    this.actionFlag(widget);
+                    this.widgetCatalogService.actionFlagGetWidgets(widget, this.userHasAdminRights);
                     await new Promise(resolve => setTimeout(resolve, 5000));
                     this.hideProgressModalDialog();
                 }, error => {
@@ -237,47 +237,14 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
     /* async installMultiple() {
         const selectedWidgets = this.filterWidgets.filter( (widget: WidgetModel) => widget.selected);
     } */
-    private async filterInstalledWidgets() {
-        if (!this.widgetCatalog || !this.widgetCatalog.widgets
-            || this.widgetCatalog.widgets.length === 0) {
-            return;
-        }
-
-        const currentApp: IApplication =  (await this.widgetCatalogService.getCurrentApp());
-        const installedPlugins = currentApp?.manifest?.remotes;
-        for(let widget of this.widgetCatalog.widgets) {
-            const widgetObj = (installedPlugins  && installedPlugins[widget.contextPath] && installedPlugins[widget.contextPath].length> 0);
-            widget.installed = (widgetObj != undefined && widgetObj);
-            widget.isCompatible = this.widgetCatalogService.isCompatiblieVersion(widget);
-            this.actionFlag(widget);
-        }
-       
-        this.widgetCatalog.widgets = this.widgetCatalog.widgets.filter(widget => !widget.installed);
-    }
+    
 
     toggleCompatible() {
         //   this.onlyCompatibleWidgets = !this.onlyCompatibleWidgets
         this.applyFilter();
     }
 
-    /**
-     * compatible: 001
-     * non compatible: 002
-     * refresh: 003
-     * force upgrade 004 (my widget)
-     * invisible 000
-     */
-    private actionFlag(widget: WidgetModel) {
-
-        if (this.userHasAdminRights) {
-            if (widget.isCompatible && !widget.installed) { widget.actionCode = '001'; }
-            else if (!widget.isCompatible && !widget.installed) { widget.actionCode = '002'; }
-            else if (widget.isReloadRequired && widget.installed) { widget.actionCode = '003'; }
-            else { widget.actionCode = '000'; }
-        } else {
-            widget.actionCode = '000';
-        }
-    }
+    
 
     ngOnDestroy() {
     }

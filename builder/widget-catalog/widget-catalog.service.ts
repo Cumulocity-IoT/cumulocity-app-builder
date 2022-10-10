@@ -26,7 +26,7 @@ import { WidgetCatalog, WidgetModel } from './widget-catalog.model';
 import * as semver from "semver";
 import * as packageJson from "./../../package.json";
 import { catchError, delay } from 'rxjs/operators';
-import { AppStateService, ZipService } from '@c8y/ngx-components';
+import { AlertService, AppStateService, ZipService } from '@c8y/ngx-components';
 import { SettingsService } from './../settings/settings.service';
 import { ProgressIndicatorService } from '../utils/progress-indicator-modal/progress-indicator.service';
 
@@ -37,7 +37,8 @@ export class WidgetCatalogService {
 
   C8Y_VERSION = '1015.X.X';
   private WidgetCatalogPath = '/widgetCatalog/widget-catalog.json';
-  private DemoCatalogWidgetsPath = '/demoCatalogWidgets/demo-catalog-widgets.json';
+ // private DemoCatalogWidgetsPath = '/demoCatalogWidgets/demo-catalog-widgets.json';
+  private DemoCatalogWidgetsPath = '/demoCatalogWidgets/demo-catalog-widgets.json?ref=development';
   private devBranchPath = "?ref=development";
   private GATEWAY_URL_GitHubAsset = '';
   private GATEWAY_URL_GitHubAPI = '';
@@ -70,7 +71,7 @@ export class WidgetCatalogService {
     private appService: ApplicationService, private appStateService: AppStateService,
     private runtimeWidgetInstallerService: RuntimeWidgetInstallerService, private settingsService: SettingsService,
     private externalService: AppBuilderExternalAssetsService, private zipService: ZipService,
-    private progressIndicatorService: ProgressIndicatorService) {
+    private progressIndicatorService: ProgressIndicatorService, private alertService: AlertService) {
     this.GATEWAY_URL_GitHubAPI = this.externalService.getURL('GITHUB', 'gatewayURL_Github');
     this.GATEWAY_URL_GitHubAsset = this.externalService.getURL('GITHUB', 'gatewayURL_GitHubAsset');
     this.GATEWAY_URL_GitHubAPI_FallBack = this.externalService.getURL('GITHUB', 'gatewayURL_Github_Fallback');
@@ -218,6 +219,7 @@ export class WidgetCatalogService {
   }
 
   async updateRemotesFromAppBuilderConfig( remotes: any) {
+    
     const currentApp: IApplication =  (await this.getCurrentApp());
     const c8yJson = await this.getCumulocityJsonFile(currentApp);
     if(c8yJson?.remotes) { 
@@ -255,10 +257,12 @@ export class WidgetCatalogService {
     try {
       widgetC8yJson = await this.getCumulocityJson(packageFile).toPromise().then(data => data);
       if (widgetC8yJson.contextPath === undefined) {
+        this.alertService.danger("Plugin Package has no context path.");
         throw Error("Plugin Package has no context path");
       }
     } catch (e) {
       console.log(e);
+      this.alertService.danger("Not a valid Plugin Package.");
       throw Error("Not a valid Plugin Package");
     }
     const appList = (await this.appService.list({ pageSize: 2000 })).data;
@@ -321,5 +325,42 @@ export class WidgetCatalogService {
       // updating config MO to retain widget status
     await this.settingsService.updateAppConfigurationForPlugin(remotes, this.currentApp.id, this.currentApp.manifest.version);
     return this.appService.storeAppManifest(this.currentApp, { ...c8yJson, remotes });
+  }
+
+  async filterInstalledWidgets(widgetCatalog: WidgetCatalog, userHasAdminRights: boolean) {
+    if (!widgetCatalog || !widgetCatalog.widgets
+        || widgetCatalog.widgets.length === 0) {
+        return;
+    }
+
+    const currentApp: IApplication =  (await this.getCurrentApp());
+    const installedPlugins = currentApp?.manifest?.remotes;
+    for(let widget of widgetCatalog.widgets) {
+        const widgetObj = (installedPlugins  && installedPlugins[widget.contextPath] && installedPlugins[widget.contextPath].length> 0);
+        widget.installed = (widgetObj != undefined && widgetObj);
+        widget.isCompatible = this.isCompatiblieVersion(widget);
+        this.actionFlagGetWidgets(widget, userHasAdminRights);
+    }
+   
+     return widgetCatalog.widgets.filter(widget => !widget.installed);
+  }
+
+  /**
+     * compatible: 001
+     * non compatible: 002
+     * refresh: 003
+     * force upgrade 004 (my widget)
+     * invisible 000
+     */
+  actionFlagGetWidgets(widget: WidgetModel, userHasAdminRights: boolean) {
+
+    if (userHasAdminRights) {
+      if (widget.isCompatible && !widget.installed) { widget.actionCode = '001'; }
+      else if (!widget.isCompatible && !widget.installed) { widget.actionCode = '002'; }
+      else if (widget.isReloadRequired && widget.installed) { widget.actionCode = '003'; }
+      else { widget.actionCode = '000'; }
+    } else {
+      widget.actionCode = '000';
+    }
   }
 }

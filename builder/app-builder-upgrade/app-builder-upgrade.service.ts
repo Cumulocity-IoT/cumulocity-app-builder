@@ -36,6 +36,7 @@ import * as semver from "semver";
 import { IApplication } from "@c8y/client";
 import * as _ from 'lodash';
 import { WidgetCatalogService } from "./../widget-catalog/widget-catalog.service";
+import { WidgetCatalog } from "./../widget-catalog/widget-catalog.model";
 
 const appVersion = require('../../package.json').version;
 @Injectable({ providedIn: 'root' })
@@ -48,7 +49,8 @@ export class AppBuilderUpgradeService {
     private GATEWAY_URL_GitHubAPI_FallBack = '';
     private GATEWAY_URL_Labcase_FallBack = '';
     private GATEWAY_URL_GitHubAsset_FallBack = '';
-    private appBuilderConfigPath = '/appbuilderConfig/app-builder-config.json';
+  //  private appBuilderConfigPath = '/appbuilderConfig/app-builder-config.json';
+    private appBuilderConfigPath = '/appbuilderConfig/app-builder-config.json?ref=development';
     private devBranchPath = "?ref=development";
     private appBuilderConfigModel: AppBuilderConfig;
     private applicationsList = [];
@@ -64,7 +66,7 @@ export class AppBuilderUpgradeService {
         private modalService: BsModalService, private progressIndicatorService: ProgressIndicatorService,
         private appService: ApplicationService, private externalService: AppBuilderExternalAssetsService,
         private settingService: SettingsService, private userService: UserService, private appStateService: AppStateService,
-        appIdService: AppIdService, private alertService: AlertService, private widgetCatalogSerivice: WidgetCatalogService) {
+        appIdService: AppIdService, private alertService: AlertService, private widgetCatalogService: WidgetCatalogService) {
         this.GATEWAY_URL_GitHubAsset = this.externalService.getURL('GITHUB', 'gatewayURL_GitHubAsset');
         this.GATEWAY_URL_GitHubAPI = this.externalService.getURL('GITHUB', 'gatewayURL_Github');
         this.GATEWAY_URL_Labcase = this.externalService.getURL('DBCATALOG', 'gatewayURL');
@@ -356,12 +358,40 @@ export class AppBuilderUpgradeService {
         if(appBuilderConfig?.configs?.remotes) {
             if(appVersion === appBuilderConfig?.appBuilderVersion && _.isEqual(appRemotes, appBuilderConfig?.configs.remotes)) {
                 console.info('All Widgets are installed!');
-            } else {
+            } else if (appVersion !== appBuilderConfig?.appBuilderVersion) {
                 this.showProgressModalDialog('Verifying widgets! Please wait...');
-                await this.widgetCatalogSerivice.updateRemotesFromAppBuilderConfig( appBuilderConfig?.configs.remotes);
+                const widgetCatalog: WidgetCatalog =  await new Promise(resolve => this.widgetCatalogService.fetchWidgetCatalog()
+                .subscribe(widgets => resolve(widgets))) as any;
+                widgetCatalog.widgets = await this.widgetCatalogService.filterInstalledWidgets(widgetCatalog, this.userHasAdminRights);
+
+                for (let remote in appBuilderConfig?.configs?.remotes) {
+                    let pluginBinary = widgetCatalog.widgets.find(widget => widget.contextPath === remote && widget.isCompatible);
+                    if (pluginBinary) {
+                        this.progressIndicatorService.setProgress(0);
+                        this.progressIndicatorService.setMessage(`Installing ${pluginBinary.title}`);
+                        this.progressIndicatorService.setProgress(10);
+                        const binary = await new Promise(resolve => this.widgetCatalogService.downloadBinary(pluginBinary.binaryLink)
+                        .subscribe(binaryData => resolve(binaryData))) as any;
+                        const blob = new Blob([binary], {
+                            type: 'application/zip'
+                        });
+                        const fileName = pluginBinary.binaryLink.replace(/^.*[\\\/]/, '');
+                        const fileOfBlob = new File([blob], fileName);
+                        await this.widgetCatalogService.installPackage(fileOfBlob);
+                    }
+                }
+                this.progressModal.hide()
+                this.showProgressModalDialog('Refreshing...');
+                await new Promise(resolve => setTimeout(resolve, 8000));
+                window.location.reload();
+
+            }
+            else {
+                this.showProgressModalDialog('Verifying widgets! Please wait...');
+                await this.widgetCatalogService.updateRemotesFromAppBuilderConfig( appBuilderConfig?.configs.remotes);
                 this.progressModal.hide();
                 this.showProgressModalDialog('Refreshing...');
-                await new Promise(resolve => setTimeout(resolve, 5000));
+                await new Promise(resolve => setTimeout(resolve, 8000));
                 window.location.reload();
             }
         }
