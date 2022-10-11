@@ -80,12 +80,12 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
 
     bsModalRef: BsModalRef;
     applyTheme = false;
-    autoLockDashboard = false;
+    autoLockDashboard = true;
     filteredDashboardList: any[];
-    newDashboardsOrder: any;
+    newDashboardsOrder: any[];
     currentDashboardId: any;
     dashboardId: any;
-    appBuilderDashboards: any;
+    appBuilderDashboards: any[];
 
     constructor(
         private appIdService: AppIdService, private appService: ApplicationService, private appStateService: AppStateService,
@@ -124,14 +124,16 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     }
 
     async ngOnInit() {
+        let count = 0;
         this.app.subscribe(app => {
             this.filteredDashboardList = app.applicationBuilder.dashboards;
             app.applicationBuilder.dashboards.forEach(async element => {
                 let c8y_dashboard = (await this.inventoryService.detail(element.id)).data;
-                if (c8y_dashboard.c8y_Dashboard.isFrozen === true) {
-                    this.autoLockDashboard = true;
-                } else {
-                    this.autoLockDashboard = false;
+                if (c8y_dashboard.c8y_Dashboard.isFrozen === false) {
+                    count++;
+                    if (count > 0) {
+                        this.autoLockDashboard = false;
+                    }
                 }
             });
         });
