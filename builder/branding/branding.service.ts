@@ -185,14 +185,15 @@ body {
 }
 
 .btn.btn-primary {
-    color: ${this.contrastingTextColor(app.applicationBuilder.branding.colors.primary)};
+    color:  var(--brand-primary);
     border-color: var(--brand-dark);
+    background-color: var(--brand-dark);
 }
 .btn.btn-primary:active,.btn.btn-primary:active:hover {
     color: ${this.contrastingTextColor(app.applicationBuilder.branding.colors.text)};
 }
 .btn.btn-primary:hover,.btn.btn-primary:focus {
-    color: var(--brand-dark);
+    color: var(--brand-primary);
 }
 .btn-default,.btn-default:focus,.btn-default:hover {
     color: var(--brand-dark);
@@ -259,6 +260,11 @@ td a {
 }
 .c8y-wizard .modal-header {
     color: var(--brand-dark) !important;    
+}
+.list-group .btn-xs:not(:hover) {
+    color: var(--brand-dark);
+    background-color: var(--brand-primary);
+    border-color: var(--brand-dark);
 }
 `;
             } else if (app.applicationBuilder.branding && app.applicationBuilder.branding.enabled && app.applicationBuilder.branding.colors) {
