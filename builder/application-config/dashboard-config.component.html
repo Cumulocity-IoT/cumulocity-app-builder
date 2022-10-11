@@ -99,8 +99,10 @@
                         <button class="btn btn-default" [(ngModel)]="autoLockDashboard"
                             title="Lock/Unlock All Dashboards"
                             [disabled]="app.applicationBuilder.dashboards.length === 0"
-                            (ngModelChange)="lockAllDashboards(app, $event)" btnCheckbox tabindex="0"><i
-                                class="dlt-c8y-icon-unlock"></i></button>
+                            (ngModelChange)="lockAllDashboards(app, $event)" btnCheckbox tabindex="0">
+                            <i class="dlt-c8y-icon-unlock" *ngIf="!autoLockDashboard"></i>
+                            <i class="dlt-c8y-icon-lock" *ngIf="autoLockDashboard"></i>
+                        </button>
                     </div>
                 </div>
                 <hr />

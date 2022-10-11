@@ -170,7 +170,9 @@ body {
     ${app.applicationBuilder.branding.logoHeight != undefined ? '--navigator-platform-logo-height: ' + app.applicationBuilder.branding.logoHeight + 'px;' : ''}
 }
 
-
+a, a:hover {
+    color:#1776BF;
+}
 .spinner > div {
     background-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
 }
@@ -235,6 +237,9 @@ label.c8y-checkbox input[type='checkbox']:checked + span::after, label.c8y-radio
 }
 label.c8y-radio input[type='radio']:checked + span::after {
     background-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+}
+.btn[btnCheckbox].active::before {
+    background-color: ${this.lighter(app.applicationBuilder.branding.colors.text)};
 }
 .c8y-switch input:checked + span:before {
     background-color: ${this.lighter(app.applicationBuilder.branding.colors.text)};
