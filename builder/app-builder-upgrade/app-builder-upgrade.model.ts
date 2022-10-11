@@ -19,15 +19,18 @@
 export interface AppBuilderConfig {
     versionInfo: VersionInfo;
     externalApps: ExternalApp[];
+    upgradeInfo: VersionInfo[];
 }
 
 export interface VersionInfo {
     updateAvailable?: string;
+    currentVersion?: string;
     updateURL?: string;
     fileName?: string;
     contextPath?: string;
     successMsg?: string;
     confirmMsg?: string;
+    verifyPlugins?: boolean;
 }
 
 export interface ExternalApp {

@@ -79,7 +79,7 @@
       "upgrade": true,
       "rightDrawer": true,
       "sensorAppOneLink": "http://onelink.to/pca6qe",
-      "version": "1.3.1",
+      "version": "1.3.2",
       "contentSecurityPolicy": "base-uri 'none'; default-src 'self' 'unsafe-inline' http: https: ws: wss: blob:; connect-src 'self' *.webmethodscloud.com *.aptrinsic.com *.billwerk.com http: https: ws: wss: blob:;  script-src 'self' open.mapquestapi.com *.twitter.com *.twimg.com *.aptrinsic.com 'unsafe-inline' 'unsafe-eval' data:; style-src * 'unsafe-inline' blob:; img-src * data: blob:; font-src * data:; frame-src *; worker-src 'self' blob:;",
       "icon": {
         "class": "fa fa-magic"
