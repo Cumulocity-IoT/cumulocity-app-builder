@@ -165,6 +165,8 @@ body {
     --link-color: #1776BF;
     --link-color-hover: #1776BF;
     --page-tabs-active-color: #1776BF;
+    --input-focus-border-color: #ccd2d6;
+    --list-group-actions-color-hover: var(--component-link-color, #000);
     ${app.applicationBuilder.branding.logoHeight != undefined ? '--navigator-platform-logo-height: ' + app.applicationBuilder.branding.logoHeight + 'px;' : ''}
 }
 
@@ -254,6 +256,9 @@ label.c8y-radio input[type='radio']:checked + span::after {
 }
 td a {
     color: #00f !important;
+}
+.c8y-wizard .modal-header {
+    color: var(--brand-dark) !important;    
 }
 `;
             } else if (app.applicationBuilder.branding && app.applicationBuilder.branding.enabled && app.applicationBuilder.branding.colors) {

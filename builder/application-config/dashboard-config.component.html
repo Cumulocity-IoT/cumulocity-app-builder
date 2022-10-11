@@ -56,7 +56,7 @@
     </div>
 
     <ng-template #itemTemplate let-item="item" let-index="index">
-        <div class="drag-handle"><i class="fa custom-icon-drag-handle"></i></div>
+        <div class="drag-handle" draggable="true" (dragover)="onDragAndDrop(index)"><i class="fa custom-icon-drag-handle"></i></div>
         <div class="col col-overflow" title="{{item.value.name}}">{{item.value.name}}</div>
         <div class="col col-overflow" title="{{item.value.id}}" id="dashboard-id-{{item.value.name}}-{{index}}">
             {{item.value.id}}</div>
@@ -92,12 +92,15 @@
                         <span class="input-group-addon">
                             <i c8yIcon="search" *ngIf="!filterValue || filterValue.length === 0"></i>
                             <i c8yIcon="times" class="text-muted" *ngIf="filterValue && filterValue.length > 0"
-                                (click)="filterValue= ''"></i>
+                                (click)="filterValue= '';searchDashboard(app)"></i>
                         </span>
                     </div>
                     <div style="margin-left: auto;margin-right: 0;display: block;">
-                        <button class="btn btn-default" [(ngModel)]="autoLockDashboard" title="Lock/Unlock All Dashboards"
-                        [disabled]="app.applicationBuilder.dashboards.length === 0" (ngModelChange)="lockAllDashboards(app, $event)" btnCheckbox tabindex="0"><i class="dlt-c8y-icon-unlock"></i></button>
+                        <button class="btn btn-default" [(ngModel)]="autoLockDashboard"
+                            title="Lock/Unlock All Dashboards"
+                            [disabled]="app.applicationBuilder.dashboards.length === 0"
+                            (ngModelChange)="lockAllDashboards(app, $event)" btnCheckbox tabindex="0"><i
+                                class="dlt-c8y-icon-unlock"></i></button>
                     </div>
                 </div>
                 <hr />

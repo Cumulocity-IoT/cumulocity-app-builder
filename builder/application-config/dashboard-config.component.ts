@@ -82,6 +82,10 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     applyTheme = false;
     autoLockDashboard = false;
     filteredDashboardList: any[];
+    newDashboardsOrder: any;
+    currentDashboardId: any;
+    dashboardId: any;
+    appBuilderDashboards: any;
 
     constructor(
         private appIdService: AppIdService, private appService: ApplicationService, private appStateService: AppStateService,
@@ -122,8 +126,15 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     async ngOnInit() {
         this.app.subscribe(app => {
             this.filteredDashboardList = app.applicationBuilder.dashboards;
+            app.applicationBuilder.dashboards.forEach(async element => {
+                let c8y_dashboard = (await this.inventoryService.detail(element.id)).data;
+                if (c8y_dashboard.c8y_Dashboard.isFrozen === true) {
+                    this.autoLockDashboard = true;
+                } else {
+                    this.autoLockDashboard = false;
+                }
+            });
         });
-        this.autoLockDashboard = false;
         this.isDashboardCatalogEnabled = await this.settingsService.isDashboardCatalogEnabled();
         this.globalRoles = await this.accessRightsService.getAllGlobalRoles();
     }
@@ -157,6 +168,8 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     }
 
     async reorderDashboards(app, newDashboardsOrder) {
+        this.newDashboardsOrder = newDashboardsOrder;
+        this.appBuilderDashboards = app.applicationBuilder.dashboards;
         if (newDashboardsOrder.length === app.applicationBuilder.dashboards.length) {
             app.applicationBuilder.dashboards = newDashboardsOrder;
 
@@ -164,17 +177,44 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
                 id: app.id,
                 applicationBuilder: app.applicationBuilder
             });
-        } else {
-            let dashboards = newDashboardsOrder.concat(app.applicationBuilder.dashboards);
-            dashboards = [...new Set([...newDashboardsOrder, ...app.applicationBuilder.dashboards])]
-            app.applicationBuilder.dashboards = dashboards;
-            this.delayedAppUpdateSubject.next({
-                id: app.id,
-                applicationBuilder: app.applicationBuilder
-            });
         }
     }
 
+    onDragAndDrop(index) {
+        if (this.newDashboardsOrder.length !== this.appBuilderDashboards.length) {
+            let length = this.newDashboardsOrder.length;
+            this.currentDashboardId = this.newDashboardsOrder[index].id;
+            if (index + 1 < length) {
+                this.dashboardId = this.newDashboardsOrder[index + 1].id;
+                let currentDashboardIdIndex = this.appBuilderDashboards.findIndex(dashboard => dashboard.id === this.currentDashboardId);
+                let dashboardIdIndex = this.appBuilderDashboards.findIndex(dashboard => dashboard.id === this.dashboardId);
+                let element = this.appBuilderDashboards[currentDashboardIdIndex];
+                this.appBuilderDashboards.splice(currentDashboardIdIndex, 1);
+                this.appBuilderDashboards.splice(dashboardIdIndex, 0, element);
+                this.app.subscribe((app) => {
+                    app.applicationBuilder.dashboards = this.appBuilderDashboards;
+                    this.delayedAppUpdateSubject.next({
+                        id: app.id,
+                        applicationBuilder: app.applicationBuilder
+                    });
+                });
+            } else {
+                this.dashboardId = this.newDashboardsOrder[index - 1].id;
+                let currentDashboardIdIndex = this.appBuilderDashboards.findIndex(dashboard => dashboard.id === this.currentDashboardId);
+                let dashboardIdIndex = this.appBuilderDashboards.findIndex(dashboard => dashboard.id === this.dashboardId);
+                let element = this.appBuilderDashboards[currentDashboardIdIndex];
+                this.appBuilderDashboards.splice(currentDashboardIdIndex, 1);
+                this.appBuilderDashboards.splice(dashboardIdIndex, 0, element);
+                this.app.subscribe((app) => {
+                    app.applicationBuilder.dashboards = this.appBuilderDashboards;
+                    this.delayedAppUpdateSubject.next({
+                        id: app.id,
+                        applicationBuilder: app.applicationBuilder
+                    });
+                });
+            }
+        }
+    }
     async saveAppChanges(app) {
         const savingAlert = new UpdateableAlert(this.alertService);
 
@@ -294,12 +334,12 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
             this.filteredDashboardList = [...app.applicationBuilder.dashboards];
             this.filteredDashboardList = this.filteredDashboardList.filter(x => {
                 return x.id.includes(this.filterValue) ||
-                    x.name.toLowerCase().includes(this.filterValue) ||
-                    x.icon.toLowerCase().includes(this.filterValue) ||
-                    x.tabGroup.toLowerCase().includes(this.filterValue) ||
-                    x.visibility.toLowerCase().includes(this.filterValue) ||
+                    x.name.toLowerCase().includes(this.filterValue.toLowerCase()) ||
+                    x.icon.toLowerCase().includes(this.filterValue.toLowerCase()) ||
+                    x.tabGroup.toLowerCase().includes(this.filterValue.toLowerCase()) ||
+                    x.visibility.toLowerCase().includes(this.filterValue.toLowerCase()) ||
                     (x.roles && x.roles.forEach(role => {
-                        role.name.toLowerCase().includes(this.filterValue)
+                        role.name.toLowerCase().includes(this.filterValue.toLowerCase())
                     }));
             });
         } else {
@@ -316,7 +356,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
                 type: 'warning',
                 alertType: 'confirm', //info|confirm
                 confirmPrimary: true //confirm Button is primary
-              }
+            }
             const autoLockDialogRef = this.alertModalDialog(alertMessage);
             autoLockDialogRef.content.event.subscribe(async data => {
                 if (data && data.isConfirm) {
@@ -335,7 +375,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
                     this.autoLockDashboard = !checked;
                 }
             });
-            
+
         } else {
             const alertMessage = {
                 title: 'Unlock Dashboard',
@@ -343,7 +383,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
                 type: 'warning',
                 alertType: 'confirm', //info|confirm
                 confirmPrimary: true //confirm Button is primary
-              }
+            }
             const autoLockDialogRef = this.alertModalDialog(alertMessage);
             autoLockDialogRef.content.event.subscribe(async data => {
                 if (data && data.isConfirm) {
