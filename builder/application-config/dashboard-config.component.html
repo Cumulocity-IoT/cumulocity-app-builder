@@ -57,21 +57,21 @@
 
     <ng-template #itemTemplate let-item="item" let-index="index">
         <div class="drag-handle" draggable="true" (dragover)="onDragAndDrop(index)"><i class="fa custom-icon-drag-handle"></i></div>
-        <div class="col col-overflow" title="{{item.value.name}}">{{item.value.name}}</div>
-        <div class="col col-overflow" title="{{item.value.id}}" id="dashboard-id-{{item.value.name}}-{{index}}">
+        <div class="col col-overflow" title="{{item.value.name}}" draggable="true" (dragover)="onDragAndDrop(index)">{{item.value.name}}</div>
+        <div class="col col-overflow" title="{{item.value.id}}" id="dashboard-id-{{item.value.name}}-{{index}}" draggable="true" (dragover)="onDragAndDrop(index)">
             {{item.value.id}}</div>
-        <div class="col col-overflow">{{item.value.visibility === 'no-nav' ? 'Tabs Only' :
+        <div class="col col-overflow" draggable="true" (dragover)="onDragAndDrop(index)">{{item.value.visibility === 'no-nav' ? 'Tabs Only' :
             item.value.visibility === 'hidden' ? 'Hidden': item.value.visibility}}</div>
-        <div class="col col-overflow" title="{{item.value.tabGroup}}">{{item.value.tabGroup}}</div>
-        <div class="col col-overflow">
+        <div class="col col-overflow" title="{{item.value.tabGroup}}" draggable="true" (dragover)="onDragAndDrop(index)">{{item.value.tabGroup}}</div>
+        <div class="col col-overflow" draggable="true" (dragover)="onDragAndDrop(index)">
             <span *ngFor="let role of item.value.roles" title="{{role.name}}">
                 {{role.name}} <br>
             </span>
         </div>
-        <div class="col col-overflow"><i [c8yIcon]="item.value.icon"></i> {{item.value.icon}}</div>
-        <div class="col col-overflow" title="{{item.value.deviceId}}">{{item.value.groupTemplate ? 'Children of: ' :
+        <div class="col col-overflow" draggable="true" (dragover)="onDragAndDrop(index)"><i [c8yIcon]="item.value.icon"></i> {{item.value.icon}}</div>
+        <div class="col col-overflow" title="{{item.value.deviceId}}" draggable="true" (dragover)="onDragAndDrop(index)">{{item.value.groupTemplate ? 'Children of: ' :
             ''}}{{item.value.deviceId || '-'}}</div>
-        <div>
+        <div draggable="true" (dragover)="onDragAndDrop(index)">
             <button class="btn btn-default" id="editDashboardButton-{{item.value.id}}"
                 (click)="showEditDashboardDialog(app, app.applicationBuilder.dashboards, index)">Edit</button>
             <button class="btn btn-default" id="deleteDashboardButton-{{item.value.id}}"
