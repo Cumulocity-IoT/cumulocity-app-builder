@@ -24,7 +24,7 @@ import {NewDashboardModalComponent} from "./application-config/new-dashboard-mod
 import {AppStateService, CoreModule, HOOK_NAVIGATOR_NODES, LoginService} from "@c8y/ngx-components";
 import {IconSelectorModule} from "../icon-selector/icon-selector.module";
 import {TooltipModule} from "ngx-bootstrap/tooltip";
-import {SortableModule, DraggableItemService} from "ngx-bootstrap/sortable";
+import {SortableModule} from "ngx-bootstrap/sortable";
 import {WizardModule} from "../wizard/wizard.module";
 import {BrandingModule} from "./branding/branding.module";
 import {AppBuilderNavigationService} from "./navigation/app-builder-navigation.service";
@@ -132,8 +132,7 @@ import { ButtonsModule } from "ngx-bootstrap/buttons";
         { provide: HOOK_NAVIGATOR_NODES, useExisting: AppBuilderNavigationService, multi: true },
         AppBuilderConfigNavigationRegistrationService,
         AppBuilderConfigNavigationService,
-        { provide: HOOK_NAVIGATOR_NODES, useExisting: AppBuilderConfigNavigationService, multi: true },
-        DraggableItemService
+        { provide: HOOK_NAVIGATOR_NODES, useExisting: AppBuilderConfigNavigationService, multi: true }
     ]
 })
 export class BuilderModule {

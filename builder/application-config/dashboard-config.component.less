@@ -52,6 +52,7 @@
     text-overflow: ellipsis;
   }
 }
+
 .dashboardInputTheme {
   color: var(--card-color, #000);
 }
@@ -60,4 +61,10 @@
   color: #000;
 }
 
-
+:host /deep/ .sortable-item-search {
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-drag: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}

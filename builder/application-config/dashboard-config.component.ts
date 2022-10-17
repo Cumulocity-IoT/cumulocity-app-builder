@@ -126,8 +126,8 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     async ngOnInit() {
         let count = 0;
         this.app.subscribe(app => {
-            this.filteredDashboardList = app.applicationBuilder.dashboards;
-            app.applicationBuilder.dashboards.forEach(async element => {
+            app.applicationBuilder.dashboards.forEach(async (element, i) => {
+                element.orderId = i + 1;
                 let c8y_dashboard = (await this.inventoryService.detail(element.id)).data;
                 if (c8y_dashboard.c8y_Dashboard.isFrozen === false) {
                     count++;
@@ -136,6 +136,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
                     }
                 }
             });
+            this.filteredDashboardList = app.applicationBuilder.dashboards;
         });
         this.isDashboardCatalogEnabled = await this.settingsService.isDashboardCatalogEnabled();
         this.globalRoles = await this.accessRightsService.getAllGlobalRoles();
@@ -174,7 +175,6 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
         this.appBuilderDashboards = app.applicationBuilder.dashboards;
         if (newDashboardsOrder.length === app.applicationBuilder.dashboards.length) {
             app.applicationBuilder.dashboards = newDashboardsOrder;
-
             this.delayedAppUpdateSubject.next({
                 id: app.id,
                 applicationBuilder: app.applicationBuilder
@@ -182,41 +182,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
         }
     }
 
-    onDragAndDrop(index) {
-        if (this.newDashboardsOrder.length !== this.appBuilderDashboards.length) {
-            let length = this.newDashboardsOrder.length;
-            this.currentDashboardId = this.newDashboardsOrder[index].id;
-            if (index + 1 < length) {
-                this.dashboardId = this.newDashboardsOrder[index + 1].id;
-                let currentDashboardIdIndex = this.appBuilderDashboards.findIndex(dashboard => dashboard.id === this.currentDashboardId);
-                let dashboardIdIndex = this.appBuilderDashboards.findIndex(dashboard => dashboard.id === this.dashboardId);
-                let element = this.appBuilderDashboards[currentDashboardIdIndex];
-                this.appBuilderDashboards.splice(currentDashboardIdIndex, 1);
-                this.appBuilderDashboards.splice(dashboardIdIndex, 0, element);
-                this.app.subscribe((app) => {
-                    app.applicationBuilder.dashboards = this.appBuilderDashboards;
-                    this.delayedAppUpdateSubject.next({
-                        id: app.id,
-                        applicationBuilder: app.applicationBuilder
-                    });
-                });
-            } else {
-                this.dashboardId = this.newDashboardsOrder[index - 1].id;
-                let currentDashboardIdIndex = this.appBuilderDashboards.findIndex(dashboard => dashboard.id === this.currentDashboardId);
-                let dashboardIdIndex = this.appBuilderDashboards.findIndex(dashboard => dashboard.id === this.dashboardId);
-                let element = this.appBuilderDashboards[currentDashboardIdIndex];
-                this.appBuilderDashboards.splice(currentDashboardIdIndex, 1);
-                this.appBuilderDashboards.splice(dashboardIdIndex, 0, element);
-                this.app.subscribe((app) => {
-                    app.applicationBuilder.dashboards = this.appBuilderDashboards;
-                    this.delayedAppUpdateSubject.next({
-                        id: app.id,
-                        applicationBuilder: app.applicationBuilder
-                    });
-                });
-            }
-        }
-    }
+
     async saveAppChanges(app) {
         const savingAlert = new UpdateableAlert(this.alertService);
 
