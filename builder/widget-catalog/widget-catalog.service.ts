@@ -36,7 +36,8 @@ const c8yVersion = require('./../../package.json')["@c8y/ngx-components"];
 export class WidgetCatalogService {
 
   C8Y_VERSION = '1015.X.X';
-  private WidgetCatalogPath = '/widgetCatalog/widget-catalog.json';
+//  private WidgetCatalogPath = '/widgetCatalog/widget-catalog.json';
+  private WidgetCatalogPath = '/widgetCatalog/widget-catalog.json?ref=development';
  // private DemoCatalogWidgetsPath = '/demoCatalogWidgets/demo-catalog-widgets.json';
   private DemoCatalogWidgetsPath = '/demoCatalogWidgets/demo-catalog-widgets.json?ref=development';
   private devBranchPath = "?ref=development";

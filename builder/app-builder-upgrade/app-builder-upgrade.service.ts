@@ -355,7 +355,7 @@ export class AppBuilderUpgradeService {
         const appVersion =  this.currentApp?.manifest?.version;
         const appRemotes = this.currentApp?.manifest?.remotes;
         const appBuilderConfig = (await this.settingService.getAppBuilderConfigs());
-        if(appBuilderConfig?.configs?.remotes) {
+        if(appBuilderConfig?.configs?.remotes && Object.keys(appBuilderConfig?.configs?.remotes).length > 0) {
             if(appVersion === appBuilderConfig?.appBuilderVersion && _.isEqual(appRemotes, appBuilderConfig?.configs.remotes)) {
                 console.info('All Widgets are installed!');
             } else if (appVersion !== appBuilderConfig?.appBuilderVersion) {
@@ -380,6 +380,8 @@ export class AppBuilderUpgradeService {
                         await this.widgetCatalogService.installPackage(fileOfBlob);
                     }
                 }
+
+                await new Promise(resolve => setTimeout(resolve, 5000));
                 this.progressModal.hide()
                 this.showProgressModalDialog('Refreshing...');
                 await new Promise(resolve => setTimeout(resolve, 8000));
@@ -389,9 +391,10 @@ export class AppBuilderUpgradeService {
             else {
                 this.showProgressModalDialog('Verifying widgets! Please wait...');
                 await this.widgetCatalogService.updateRemotesFromAppBuilderConfig( appBuilderConfig?.configs.remotes);
+                await new Promise(resolve => setTimeout(resolve, 5000));
                 this.progressModal.hide();
                 this.showProgressModalDialog('Refreshing...');
-                await new Promise(resolve => setTimeout(resolve, 8000));
+                await new Promise(resolve => setTimeout(resolve, 5000));
                 window.location.reload();
             }
         }
