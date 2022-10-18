@@ -56,7 +56,7 @@
     </div>
 
     <ng-template #itemTemplate let-item="item" let-index="index">
-        <div class="drag-handle"><i class="fa custom-icon-drag-handle"></i></div>
+        <div *ngIf="filterValue === ''" class="drag-handle"><i class="fa custom-icon-drag-handle"></i></div>
         <div class="col col-overflow" title="{{item.value.name}}">{{item.value.name}}</div>
         <div class="col col-overflow" title="{{item.value.id}}" id="dashboard-id-{{item.value.name}}-{{index}}">
             {{item.value.id}}</div>
@@ -115,9 +115,10 @@
                         <button class="btn btn-primary" id="addDashboardPrimaryButton" style="margin-top: 10px;"
                             (click)="showCreateDashboardDialog(app)">Add dashboard</button>
                     </div>
-                    <ng-container *ngIf="app.applicationBuilder.dashboards?.length">
+                    <ng-container *ngIf="app.applicationBuilder.dashboards?.length && filterValue === ''">
                         <div class="sortable-grid-header">
-                            <div class="drag-handle invisible"><i class="fa custom-icon-drag-handle"></i></div>
+                            <div *ngIf="filterValue === ''" class="drag-handle invisible"><i
+                                    class="fa custom-icon-drag-handle"></i></div>
                             <div class="col">Path</div>
                             <div class="col">Dashboard ID</div>
                             <div class="col">Visibility</div>
@@ -129,8 +130,57 @@
                                     class="btn btn-default">Delete</button></div>
                         </div>
                         <bs-sortable [ngModel]="filteredDashboardList" [itemTemplate]="itemTemplate"
-                            [itemClass]="filterValue !== '' ? 'sortable-item sortable-item-search' : 'sortable-item'" itemActiveClass="sortable-item-active"
-                            wrapperClass="sortable-grid" (onChange)="reorderDashboards(app, $event)"></bs-sortable>
+                            itemClass="sortable-item"
+                            itemActiveClass="sortable-item-active" wrapperClass="sortable-grid"
+                            (onChange)="reorderDashboards(app, $event)"></bs-sortable>
+                    </ng-container>
+                    <ng-container *ngIf="filterValue !== ''">
+                        <div class="table-responsive" style="margin-left: -16px;margin-right: -16px;margin-top:-16px;">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th style="font-weight: bold;padding-left: 30px;">Path</th>
+                                        <th style="font-weight: bold;">Dashboard ID</th>
+                                        <th style="font-weight: bold;">Visibility</th>
+                                        <th style="font-weight: bold;">Tab Group</th>
+                                        <th style="font-weight: bold;">Global Roles</th>
+                                        <th style="font-weight: bold;">Icon</th>
+                                        <th style="font-weight: bold;">Device(s)</th>
+                                        <th>
+                                            <button class="btn btn-default invisible">Edit</button>
+                                        </th>
+                                        <th>
+                                            <button class="btn btn-default invisible">Delete</button>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let item of filteredDashboardList;let i=index;">
+                                        <td style="padding-left: 30px;">{{item.name}}</td>
+                                        <td>{{item.id}}</td>
+                                        <td>{{item.visibility === 'no-nav' ? 'Tabs Only' :
+                                            item.visibility === 'hidden' ? 'Hidden': item.visibility}}</td>
+                                        <td>{{item.tabGroup}}</td>
+                                        <td><span *ngFor="let role of item.roles" title="{{role.name}}">
+                                                {{role.name}} <br>
+                                            </span></td>
+                                        <td><i [c8yIcon]="item.icon"></i> {{item.icon}}</td>
+                                        <td>
+                                            {{item.groupTemplate ? 'Children of: ' :
+                                            ''}}{{item.deviceId || '-'}}
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-default" id="editDashboardButton-{{item.id}}" style="float:right;"
+                                                (click)="showEditDashboardDialog(app, filteredDashboardList, i)">Edit</button>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-default" id="deleteDashboardButton-{{item.id}}"
+                                                (click)="deleteDashboard(app, filteredDashboardList, i)">Delete</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </ng-container>
                 </div>
             </div>

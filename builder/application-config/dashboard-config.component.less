@@ -60,11 +60,14 @@
 .dashboardInputTheme:focus {
   color: #000;
 }
-
-:host /deep/ .sortable-item-search {
-  user-select: none;
-  -moz-user-select: none;
-  -webkit-user-drag: none;
-  -webkit-user-select: none;
-  -ms-user-select: none;
+tr:hover {
+  background-color: #EFF1F3;
+  color: #000;
+}
+.table-hover > tbody > tr:hover {
+  background-color: #EFF1F3;
+  color: #000;
+}
+.table > tbody > tr > td {
+  padding: 3px 8px 6px;
 }
