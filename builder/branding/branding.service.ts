@@ -173,8 +173,11 @@ body {
 a, a:hover {
     color:#1776BF;
 }
+.card a, .card a:hover {
+    color:#1776BF;
+}
 .spinner > div {
-    background-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+    background-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)} !important;
 }
 
 
@@ -195,7 +198,9 @@ a, a:hover {
     color: ${this.contrastingTextColor(app.applicationBuilder.branding.colors.text)};
 }
 .btn.btn-primary:hover,.btn.btn-primary:focus {
-    color: var(--brand-primary);
+    color:  var(--brand-primary);
+    border-color: var(--brand-dark);
+    background-color: var(--brand-dark);
 }
 .btn-default,.btn-default:focus,.btn-default:hover {
     color: var(--brand-dark);
@@ -249,6 +254,10 @@ label.c8y-radio input[type='radio']:checked + span::after {
 }
 .pagination>.active>a {
     color: var(--brand-dark) !important;
+    border-color: #b0b9bf !important;
+}
+.pagination>li>a, .pagination>li>a:hover {
+    color: #b0b9bf !important;
     border-color: #b0b9bf !important;
 }
 .deviceSelectorCombo .selectedDevice {
