@@ -361,9 +361,15 @@ export class AppBuilderUpgradeService {
             } else if (appVersion !== appBuilderConfig?.appBuilderVersion) {
                 this.showProgressModalDialog('Verifying widgets! Please wait...');
                 const widgetCatalog: WidgetCatalog =  await new Promise(resolve => this.widgetCatalogService.fetchWidgetCatalog()
-                .subscribe(widgets => resolve(widgets))) as any;
+                .subscribe(widgets => resolve(widgets), 
+                error => {
+                    this.logError();      
+                })) as any;
                 widgetCatalog.widgets = await this.widgetCatalogService.filterInstalledWidgets(widgetCatalog, this.userHasAdminRights);
-
+                const totalRemotes = (appBuilderConfig?.configs?.remotes ? Object.keys(appBuilderConfig?.configs?.remotes).length : 0);
+                const eachRemoteProgress: number = (totalRemotes > 1 ?  (90/totalRemotes) : 0);
+                let overallProgress = 0;
+                if(totalRemotes > 1) { this.progressIndicatorService.setOverallProgress(overallProgress);}
                 for (let remote in appBuilderConfig?.configs?.remotes) {
                     let pluginBinary = widgetCatalog.widgets.find(widget => widget.contextPath === remote && widget.isCompatible);
                     if (pluginBinary) {
@@ -371,7 +377,9 @@ export class AppBuilderUpgradeService {
                         this.progressIndicatorService.setMessage(`Installing ${pluginBinary.title}`);
                         this.progressIndicatorService.setProgress(10);
                         const binary = await new Promise(resolve => this.widgetCatalogService.downloadBinary(pluginBinary.binaryLink)
-                        .subscribe(binaryData => resolve(binaryData))) as any;
+                        .subscribe(binaryData => resolve(binaryData), error => {
+                            this.logError();      
+                        })) as any;
                         const blob = new Blob([binary], {
                             type: 'application/zip'
                         });
@@ -379,12 +387,14 @@ export class AppBuilderUpgradeService {
                         const fileOfBlob = new File([blob], fileName);
                         await this.widgetCatalogService.installPackage(fileOfBlob);
                     }
+                    overallProgress = overallProgress + eachRemoteProgress;
+                    this.progressIndicatorService.setOverallProgress(overallProgress)
                 }
 
                 await new Promise(resolve => setTimeout(resolve, 5000));
                 this.progressModal.hide()
                 this.showProgressModalDialog('Refreshing...');
-                await new Promise(resolve => setTimeout(resolve, 8000));
+                await new Promise(resolve => setTimeout(resolve, 5000));
                 window.location.reload();
 
             }
@@ -399,5 +409,10 @@ export class AppBuilderUpgradeService {
             }
         }
         
+    }
+
+    private logError() {
+        this.alertService.danger("Unable verify plugin due to technical error! Please try after sometime.");
+        this.progressModal.hide();
     }
 }

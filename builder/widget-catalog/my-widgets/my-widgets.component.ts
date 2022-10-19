@@ -29,7 +29,6 @@ import { previewModalComponent } from '../preview-modal/preview-modal.component'
 import { WidgetCatalog, WidgetModel } from '../widget-catalog.model';
 import { WidgetCatalogService } from '../widget-catalog.service';
 import { concat, forkJoin, from, fromEvent, interval, Observable, of } from 'rxjs';
-import { RuntimeWidgetLoaderService } from 'cumulocity-runtime-widget-loader';
 import { AlertMessageModalComponent } from "../../utils/alert-message-modal/alert-message-modal.component";
 import { ActivatedRoute, Router } from "@angular/router";
 import { ProgressIndicatorService } from "../../utils/progress-indicator-modal/progress-indicator.service";
@@ -57,12 +56,9 @@ export class MyWidgetsComponent implements OnInit {
     constructor(private appStateService: AppStateService, private modalService: BsModalService,
         private userService: UserService, private widgetCatalogService: WidgetCatalogService,
         private alertService: AlertService, private componentService: DynamicComponentService,
-        private runtimeWidgetLoaderService: RuntimeWidgetLoaderService, private appService: ApplicationService,
+        private appService: ApplicationService,
         private router: Router, private route: ActivatedRoute,private progressIndicatorService: ProgressIndicatorService) {
         this.userHasAdminRights = userService.hasAllRoles(appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN", "ROLE_APPLICATION_MANAGEMENT_ADMIN"]);
-        /* this.runtimeWidgetLoaderService.isLoaded$.subscribe(isLoaded => {
-            this.widgetCatalogService.runtimeLoadingCompleted = isLoaded;
-        }) */
         this.widgetCatalogService.displayListValue$.subscribe((value) => {
             if (value) {
                 this.displayListValue = value;
@@ -412,7 +408,7 @@ export class MyWidgetsComponent implements OnInit {
 
     navigateToDetailPage(widget) {
         this.widgetCatalogService.setWidgetDetails(widget);
-        this.router.navigate(['widget-details', { id: widget.contextPath }], { relativeTo: this.route });
+        this.router.navigate(['plugin-details', { id: widget.contextPath }], { relativeTo: this.route });
     }
     
     sortColumn(col) {

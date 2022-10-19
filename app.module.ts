@@ -26,7 +26,6 @@ import { filter, first, map, startWith, tap, withLatestFrom } from "rxjs/operato
 import { IUser } from '@c8y/client';
 import { SimulationStrategiesModule } from "./simulation-strategies/simulation-strategies.module";
 import { CustomWidgetsModule } from "./custom-widgets/custom-widgets.module";
-import { RuntimeWidgetInstallerModule, RuntimeWidgetLoaderService } from "cumulocity-runtime-widget-loader";
 import { interval } from 'rxjs';
 import { SettingsService } from './builder/settings/settings.service';
 @NgModule({
@@ -41,9 +40,7 @@ import { SettingsService } from './builder/settings/settings.service';
     DashboardUpgradeModule,
     BuilderModule,
     SimulationStrategiesModule,
-    CustomWidgetsModule,
-
-   // RuntimeWidgetInstallerModule
+    CustomWidgetsModule
   ]
 })
 export class AppModule extends HybridAppModule {

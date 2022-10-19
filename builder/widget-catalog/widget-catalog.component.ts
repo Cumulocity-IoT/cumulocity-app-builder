@@ -29,7 +29,6 @@ import { interval, Subscription } from 'rxjs';
 import { previewModalComponent } from './preview-modal/preview-modal.component';
 import { WidgetCatalog, WidgetModel } from './widget-catalog.model';
 import { WidgetCatalogService } from './widget-catalog.service';
-import { RuntimeWidgetLoaderService } from 'cumulocity-runtime-widget-loader';
 import { AlertMessageModalComponent } from "../utils/alert-message-modal/alert-message-modal.component";
 import { Router, ActivatedRoute } from "@angular/router";
 import { ProgressIndicatorService } from "../utils/progress-indicator-modal/progress-indicator.service";
@@ -59,7 +58,6 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
     constructor(private appStateService: AppStateService, private modalService: BsModalService,
         private userService: UserService, private widgetCatalogService: WidgetCatalogService,
         private alertService: AlertService, private componentService: DynamicComponentService, private appService: ApplicationService,
-        private runtimeWidgetLoaderService: RuntimeWidgetLoaderService,
         private router: Router, private route: ActivatedRoute,
         private progressIndicatorService: ProgressIndicatorService) {
         this.userHasAdminRights = userService.hasAllRoles(appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN", "ROLE_APPLICATION_MANAGEMENT_ADMIN"]);
@@ -280,6 +278,6 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
 
     navigateToDetailPage(widget) {
         this.widgetCatalogService.setWidgetDetails(widget);
-        this.router.navigate(['widget-details', { id: widget.contextPath }], { relativeTo: this.route });
+        this.router.navigate(['plugin-details', { id: widget.contextPath }], { relativeTo: this.route });
     }
 }

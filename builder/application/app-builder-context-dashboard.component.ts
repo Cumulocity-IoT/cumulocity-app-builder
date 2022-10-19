@@ -24,7 +24,6 @@ import {last} from "lodash-es";
 import {SMART_RULES_AVAILABILITY_TOKEN} from "./smartrules/smart-rules-availability.upgraded-provider";
 import {IApplicationBuilderApplication} from "../iapplication-builder-application";
 import {AppStateService} from "@c8y/ngx-components";
-import {RuntimeWidgetInstallerModalService} from "cumulocity-runtime-widget-loader";
 import { SettingsService } from "../../builder/settings/settings.service";
 import { AccessRightsService } from "../../builder/access-rights.service";
 import { switchMap, tap } from "rxjs/operators";
@@ -93,7 +92,6 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
         @Inject(SMART_RULES_AVAILABILITY_TOKEN) private c8ySmartRulesAvailability: any,
         private userService: UserService,
         private appStateService: AppStateService,
-        private runtimeWidgetInstallerModalService: RuntimeWidgetInstallerModalService,
         private settingsService: SettingsService,
         private accessRightsService: AccessRightsService,
         private appIdService: AppIdService,
@@ -289,9 +287,6 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
         return path;
     }
 
-    showInstallModal() {
-        this.runtimeWidgetInstallerModalService.show();
-    }
 
     hasAdminRights() {
         return this.userService.hasAllRoles(this.appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN", "ROLE_APPLICATION_MANAGEMENT_ADMIN"]);

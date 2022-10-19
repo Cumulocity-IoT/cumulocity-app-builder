@@ -35,23 +35,23 @@ import { MarkdownModule } from 'ngx-markdown';
 
 const routes: Routes = [
     {
-        path: 'widget-catalog',
-        redirectTo: 'widget-catalog/my-widgets'
+        path: 'plugin-catalog',
+        redirectTo: 'plugin-catalog/my-plugins'
     },
     {
-        path: 'widget-catalog/my-widgets',
+        path: 'plugin-catalog/my-plugins',
         component: MyWidgetsComponent
     },
     {
-        path: 'widget-catalog/get-widgets',
+        path: 'plugin-catalog/get-plugins',
         component: WidgetCatalogComponent
     },
     {
-        path: 'widget-catalog/my-widgets/widget-details',
+        path: 'plugin-catalog/my-plugins/plugin-details',
         component: WidgetDetailsComponent
     },
     {
-        path: 'widget-catalog/get-widgets/widget-details',
+        path: 'plugin-catalog/get-plugins/plugin-details',
         component: WidgetDetailsComponent
     }
 ];

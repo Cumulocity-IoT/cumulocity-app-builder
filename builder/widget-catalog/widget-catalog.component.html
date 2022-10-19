@@ -1,4 +1,4 @@
-<c8y-title>Widget Catalog</c8y-title>
+<c8y-title>Plugin Catalog</c8y-title>
 <c8y-action-bar-item [placement]="'left'">
     <ul class="nav navbar-nav navbar-left">
         <li class="hidden-xs navbar-form">
@@ -26,7 +26,7 @@
                 <div class="card-header">
                     <!-- Search -->
                     <div id="searchWidget" class="col-xs-12 col-sm-6 col-md-6 col-lg-6 input-group input-group-search">
-                        <input type="search" class="form-control" placeholder="Search widget..."
+                        <input type="search" class="form-control" placeholder="Search plugin..."
                             [(ngModel)]="searchWidget" (keyup)="applyFilter()" />
                         <span class="input-group-addon">
                             <i c8yIcon="search" *ngIf="!searchString || searchString.length === 0"></i>
@@ -63,12 +63,12 @@
                     <div class="text-center" style="flex-direction: column; align-items: center;"
                         *ngIf="!widgetCatalog?.widgets?.length">
                         <h1 c8yIcon="package" class="c8y-icon-duocolor" style="font-size: 90px;"></h1>
-                        <h3>No Widget to list.</h3>
+                        <h3>No plugin to list.</h3>
                         <p>Please try after sometimes.</p>
                     </div>
                     <div class="text-center" style="flex-direction: column; align-items: center;"
-                        *ngIf="!filterWidgets?.length">
-                        <h3>No Widget to list.</h3>
+                        *ngIf="widgetCatalog?.widgets?.length && !filterWidgets?.length">
+                        <h3>No plugin to list.</h3>
                     </div>
                     <div class="table-responsive" *ngIf="filterWidgets?.length" style="margin-top: -15px;">
                         <table class="table table-hover table-striped table-sortable" id="getMoreWidgets">
@@ -151,7 +151,7 @@
                 <div class="card-header">
                     <!-- Search -->
                     <div id="searchWidget" class="col-xs-12 col-sm-6 col-md-6 col-lg-6 input-group input-group-search">
-                        <input type="search" class="form-control" placeholder="Search widget..."
+                        <input type="search" class="form-control" placeholder="Search plugin..."
                             [(ngModel)]="searchWidget" (keyup)="applyFilter()" />
                         <span class="input-group-addon">
                             <i c8yIcon="search" *ngIf="!searchString || searchString.length === 0"></i>
@@ -185,14 +185,14 @@
                 </div>
                 <hr />
                 <div class="card-block" *ngIf="!widgetCatalog?.widgets?.length">
-                    <div class="c8y-empty-state text-center" style="flex-direction: column; align-items: center;">
+                    <div class="text-center" style="flex-direction: column; align-items: center;">
                         <h1 c8yIcon="package" class="c8y-icon-duocolor" style="font-size: 90px;"></h1>
-                        <h3>No Widget to list.</h3>
-                        <p>Please Install widgets.</p>
+                        <h3>No plugin to list.</h3>
+                        <p>Please install plugins.</p>
                     </div>
-                    <div class="c8y-empty-state text-center" style="flex-direction: column; align-items: center;"
+                    <div class=" text-center" style="flex-direction: column; align-items: center;"
                         *ngIf="widgetCatalog?.widgets?.length && !filterWidgets?.length">
-                        <h3>No Widget to list.</h3>
+                        <h3>No plugin to list.</h3>
                     </div>
                 </div>
             </div>

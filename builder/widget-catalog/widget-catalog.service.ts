@@ -20,7 +20,6 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, isDevMode } from '@angular/core';
 import { ApplicationService, IApplication, IManifest } from '@c8y/client';
 import { AppBuilderExternalAssetsService } from 'app-builder-external-assets';
-import { RuntimeWidgetInstallerService } from 'cumulocity-runtime-widget-loader';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { WidgetCatalog, WidgetModel } from './widget-catalog.model';
 import * as semver from "semver";
@@ -70,7 +69,7 @@ export class WidgetCatalogService {
 
   constructor(private http: HttpClient,
     private appService: ApplicationService, private appStateService: AppStateService,
-    private runtimeWidgetInstallerService: RuntimeWidgetInstallerService, private settingsService: SettingsService,
+    private settingsService: SettingsService,
     private externalService: AppBuilderExternalAssetsService, private zipService: ZipService,
     private progressIndicatorService: ProgressIndicatorService, private alertService: AlertService) {
     this.GATEWAY_URL_GitHubAPI = this.externalService.getURL('GITHUB', 'gatewayURL_Github');
@@ -123,9 +122,6 @@ export class WidgetCatalogService {
       }));
   }
 
-  async installWidget(binary: Blob, widget: WidgetModel) {
-    await this.runtimeWidgetInstallerService.installWidget(binary, (msg, type) => { }, widget);
-  }
 
   downloadBinary(binaryId: string): Observable<ArrayBuffer> {
     return this.http.get(`${this.GATEWAY_URL_GitHubAsset}${binaryId}`, {
@@ -252,11 +248,15 @@ export class WidgetCatalogService {
     return this.currentApp;
   }
 
-  async installPackage(packageFile: File, onUpdate: (msg: string, type?: any) => void = () => { }) {
+  async installPackage(packageFile: File) {
     this.progressIndicatorService.setProgress(30);
     let widgetC8yJson;
     try {
-      widgetC8yJson = await this.getCumulocityJson(packageFile).toPromise().then(data => data);
+      widgetC8yJson = await this.getCumulocityJson(packageFile).toPromise().then(data => data).catch( (e) => {
+        console.log(e);
+        this.alertService.danger("Unable to find manfifest file. Please refresh and try again.");
+        throw Error("Unable to find manfifest file. Please refresh and try again.");
+      });
       if (widgetC8yJson.contextPath === undefined) {
         this.alertService.danger("Plugin Package has no context path.");
         throw Error("Plugin Package has no context path");
@@ -269,7 +269,6 @@ export class WidgetCatalogService {
     const appList = (await this.appService.list({ pageSize: 2000 })).data;
     if (appList.some(app => app.contextPath === widgetC8yJson.contextPath)) {
       this.progressIndicatorService.setProgress(35);
-      onUpdate("Widget already deployed! Updating widget...");
       const packageApp = appList.find(app => app.contextPath === widgetC8yJson.contextPath);
 
       // Upload the binary
@@ -286,7 +285,6 @@ export class WidgetCatalogService {
           "widgetName": packageApp.name
         });
       }
-      onUpdate("Plugin updated! Adding to application...");
       return this.updateRemotesInCumulocityJson(packageApp)
     } else {
       this.progressIndicatorService.setProgress(35);
@@ -315,7 +313,6 @@ export class WidgetCatalogService {
           "widgetName": packageApp.name
         });
       }
-      onUpdate("Plugin deployed! Adding to application...");
       return this.updateRemotesInCumulocityJson(packageApp)
     }
   }

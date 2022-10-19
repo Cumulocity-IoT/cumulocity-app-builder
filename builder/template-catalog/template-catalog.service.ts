@@ -26,10 +26,8 @@ import { BinaryDescription, CumulocityDashboard, DependencyDescription, DeviceDe
 import { ApplicationService, InventoryBinaryService, InventoryService } from "@c8y/ngx-components/api";
 import { AppBuilderNavigationService } from "../navigation/app-builder-navigation.service";
 import { Alert, AlertService } from "@c8y/ngx-components";
-// import { RuntimeWidgetInstallerService } from "cumulocity-runtime-widget-loader";
 import { AppBuilderExternalAssetsService } from 'app-builder-external-assets';
 import { DashboardConfig } from "builder/application-config/dashboard-config.component";
-import { RuntimeWidgetInstallerService } from "cumulocity-runtime-widget-loader";
 
 @Injectable()
 export class TemplateCatalogService {
@@ -48,7 +46,6 @@ export class TemplateCatalogService {
     constructor(private http: HttpClient, private inventoryService: InventoryService,
         private appService: ApplicationService, private navigation: AppBuilderNavigationService,
         private binaryService: InventoryBinaryService, private alertService: AlertService,
-        private runtimeWidgetInstallerService: RuntimeWidgetInstallerService,
         private externalService: AppBuilderExternalAssetsService) {
         this.GATEWAY_URL_GitHubAPI = this.externalService.getURL('GITHUB','gatewayURL_Github');
         this.GATEWAY_URL_GitHubAsset =  this.externalService.getURL('GITHUB','gatewayURL_GitHubAsset');
@@ -116,11 +113,6 @@ export class TemplateCatalogService {
         return this.http.get(`${url}`).pipe(map((dashboard: TemplateDetails) => {
             return dashboard;
         }));
-    }
-
-    async installWidget(binary: Blob) {
-        await this.runtimeWidgetInstallerService.installWidget(binary, (msg, type) => { });
-        this.alertService.success("Widget Added! Page will be refreshed once dashbaord is saved...");
     }
 
     downloadBinary(binaryId: string): Observable<ArrayBuffer> {

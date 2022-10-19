@@ -453,7 +453,7 @@ export class WidgetDetailsComponent implements OnInit {
                         widget.installed = true;
                         widget.isReloadRequired = true;
                         this.actionFlag(widget);
-                        await new Promise(resolve => setTimeout(resolve, 5000));
+                        await new Promise(resolve => setTimeout(resolve, 7000));
                         this.hideProgressModalDialog();
                     });
                 });
@@ -462,9 +462,9 @@ export class WidgetDetailsComponent implements OnInit {
 
     navigateToGridView() {
         if (this.getMoreWidgetsFlag) {
-            this.router.navigate(['widget-catalog/get-widgets']);
+            this.router.navigate(['plugin-catalog/get-plugins']);
         } else {
-            this.router.navigate(['widget-catalog/my-widgets']);
+            this.router.navigate(['plugin-catalog/my-plugins']);
         }
     }
 }
