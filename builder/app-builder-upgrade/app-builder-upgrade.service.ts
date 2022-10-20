@@ -156,6 +156,8 @@ export class AppBuilderUpgradeService {
             description: (confirmMsg ? confirmMsg: `You are about to upgrade Application Builder.
             Do you want to proceed?`),
             type: 'info',
+            externalLink: (this.versionInfo?.releaseLink ? this.versionInfo?.releaseLink : ''),
+            externalLinkLabel: "What's new?",
             alertType: 'confirm', //info|confirm
             confirmPrimary: true //confirm Button is primary
         }
@@ -184,8 +186,8 @@ export class AppBuilderUpgradeService {
         this.progressModal.hide();
         if (!this.errorReported) {
             const postUpdationMsg = {
-                title: 'Updation Completed',
-                description: (successMsg ? successMsg : 'Application Builder is successfully updated.'),
+                title: 'Upgrade Completed',
+                description: (successMsg ? successMsg : 'Application Builder is successfully upgraded.'),
                 type: 'info',
                 alertType: 'info' //info|confirm
             };
@@ -246,7 +248,7 @@ export class AppBuilderUpgradeService {
     }
 
     private async upgradeApp(binaryFile: any, appC8yJson: any, installationType: any) {
-        this.progressIndicatorService.setMessage('Updating Application Builder...');
+        this.progressIndicatorService.setMessage('Upgrading Application Builder...');
         if (installationType !== "INSTALL") {
             const appList = await this.getApplicationList();
             const appName = appList.find(app => app.contextPath === appC8yJson.contextPath && app.availability === 'PRIVATE');
@@ -385,6 +387,7 @@ export class AppBuilderUpgradeService {
 
                 });
                 let isDownloadUpgrade = true;
+                let plugins = [];
                 if (widgetCatalog && widgetCatalog.widgets && widgetCatalog.widgets.length > 0) {
                     widgetCatalog.widgets.forEach(widget => {
                         widget.isCompatible = this.widgetCatalogService.isCompatiblieVersion(widget);
@@ -395,7 +398,6 @@ export class AppBuilderUpgradeService {
                     this.progressIndicatorService.setProgress(25);
                     let installedWidgets = widgetCatalog.widgets.filter(widget => widget.installed);
                     let nonCompatibleWidgets = '';
-                    let plugins = [];
                     if(installedWidgets && installedWidgets.length > 0){
                         installedWidgets.forEach( widget => {
                             const compatiblePlugin = widgetCatalog.widgets.find( plugin => plugin.contextPath === widget.contextPath && 
@@ -440,6 +442,9 @@ export class AppBuilderUpgradeService {
                 if(isDownloadUpgrade) {
                     await this.downlaodAndUpgradeAppBuilder();
                 }
+                if(plugins && plugins.length > 0) {
+                    this.uninstallWidgets(plugins);
+                }
             }, error => {
                 this.alertService.danger("There is some technical error! Please try after sometime.");
                 this.progressModal.hide();
@@ -458,17 +463,22 @@ export class AppBuilderUpgradeService {
     }
 
     private async updateAppConfigurationForPlugin(plugins: any) {
-        const appList = await this.getApplicationList();
         let remotes = {};
+        for (const pluginBinary of plugins) {
+            (remotes[pluginBinary.contextPath] = remotes[pluginBinary.contextPath] || []).push(pluginBinary.moduleName);
+        };
+        // updating config MO to retain widget status
+        await this.settingService.updateAppConfigurationForPlugin(remotes);
+      }
+
+    private async uninstallWidgets(plugins: any) {
+        const appList = await this.getApplicationList();
         for (const pluginBinary of plugins) {
             const widgetAppObj = appList.find(app => app.contextPath === pluginBinary.contextPath)
             if (widgetAppObj) {
                 await this.appService.delete(widgetAppObj.id);
             }
-            (remotes[pluginBinary.contextPath] = remotes[pluginBinary.contextPath] || []).push(pluginBinary.moduleName);
         };
-        // updating config MO to retain widget status
-        await this.settingService.updateAppConfigurationForPlugin(remotes);
       }
     
 }

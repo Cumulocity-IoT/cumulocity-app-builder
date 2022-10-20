@@ -30,6 +30,7 @@ export interface VersionInfo {
     contextPath?: string;
     successMsg?: string;
     confirmMsg?: string;
+    releaseLink?: string;
     verifyPlugins?: boolean;
 }
 

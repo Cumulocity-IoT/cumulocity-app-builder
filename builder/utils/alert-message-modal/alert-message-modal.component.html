@@ -13,6 +13,8 @@
       </p><br>
         
         <div class="alert-footer" >
+          <a *ngIf="message.externalLink && message.externalLink !== ''" [href]="message.externalLink" target="_blank" 
+          class="btn btn-info pull-left" role="button">{{message.externalLinkLabel}}</a>
           <button *ngIf="message.alertType === 'confirm'"
             title="Cancel"
             class="btn btn-default" [ngClass]="{'btn-primary': !message.confirmPrimary}"
