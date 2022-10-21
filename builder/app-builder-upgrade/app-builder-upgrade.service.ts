@@ -76,12 +76,10 @@ export class AppBuilderUpgradeService {
 
         appIdService.appIdDelayedUntilAfterLogin$.pipe(first()).subscribe(() => {
             this.userHasAdminRights = userService.hasRole(appStateService.currentUser.value, "ROLE_APPLICATION_MANAGEMENT_ADMIN")
-            if(this.userHasAdminRights) {
                 this.appStateService.currentApplication.subscribe( app => {
                     this.currentApp = app;
                     this.verifyPlugins();
                 });
-            }
         });
     }
 
@@ -355,60 +353,63 @@ export class AppBuilderUpgradeService {
         const appVersion =  this.currentApp?.manifest?.version;
         const appRemotes = this.currentApp?.manifest?.remotes;
         const appBuilderConfig = (await this.settingService.getAppBuilderConfigs());
-        if(appBuilderConfig?.configs?.remotes && Object.keys(appBuilderConfig?.configs?.remotes).length > 0) {
-            if(appVersion === appBuilderConfig?.appBuilderVersion && _.isEqual(appRemotes, appBuilderConfig?.configs.remotes)) {
-                console.info('All Widgets are installed!');
-            } else if (appVersion !== appBuilderConfig?.appBuilderVersion) {
-                this.showProgressModalDialog('Verifying widgets! Please wait...');
-                const widgetCatalog: WidgetCatalog =  await new Promise(resolve => this.widgetCatalogService.fetchWidgetCatalog()
-                .subscribe(widgets => resolve(widgets), 
-                error => {
-                    this.logError();      
-                })) as any;
-                widgetCatalog.widgets = await this.widgetCatalogService.filterInstalledWidgets(widgetCatalog, this.userHasAdminRights);
-                const totalRemotes = (appBuilderConfig?.configs?.remotes ? Object.keys(appBuilderConfig?.configs?.remotes).length : 0);
-                const eachRemoteProgress: number = (totalRemotes > 1 ?  (90/totalRemotes) : 0);
-                let overallProgress = 0;
-                if(totalRemotes > 1) { this.progressIndicatorService.setOverallProgress(overallProgress);}
-                for (let remote in appBuilderConfig?.configs?.remotes) {
-                    let pluginBinary = widgetCatalog.widgets.find(widget => widget.contextPath === remote && widget.isCompatible);
-                    if (pluginBinary) {
-                        this.progressIndicatorService.setProgress(0);
-                        this.progressIndicatorService.setMessage(`Installing ${pluginBinary.title}`);
-                        this.progressIndicatorService.setProgress(10);
-                        const binary = await new Promise(resolve => this.widgetCatalogService.downloadBinary(pluginBinary.binaryLink)
-                        .subscribe(binaryData => resolve(binaryData), error => {
-                            this.logError();      
-                        })) as any;
-                        const blob = new Blob([binary], {
-                            type: 'application/zip'
-                        });
-                        const fileName = pluginBinary.binaryLink.replace(/^.*[\\\/]/, '');
-                        const fileOfBlob = new File([blob], fileName);
-                        await this.widgetCatalogService.installPackage(fileOfBlob);
+        if (appBuilderConfig?.configs?.remotes && Object.keys(appBuilderConfig?.configs?.remotes).length > 0) {
+            if (appVersion === appBuilderConfig?.appBuilderVersion && _.isEqual(appRemotes, appBuilderConfig?.configs.remotes)) {
+                console.info('All plugins are installed!');
+            } else if (this.userHasAdminRights) {
+                if (appVersion !== appBuilderConfig?.appBuilderVersion) {
+                    this.showProgressModalDialog('Verifying plugins! Please wait...');
+                    const widgetCatalog: WidgetCatalog = await new Promise(resolve => this.widgetCatalogService.fetchWidgetCatalog()
+                        .subscribe(widgets => resolve(widgets),
+                            error => {
+                                this.logError();
+                            })) as any;
+                    widgetCatalog.widgets = await this.widgetCatalogService.filterInstalledWidgets(widgetCatalog, this.userHasAdminRights);
+                    const totalRemotes = (appBuilderConfig?.configs?.remotes ? Object.keys(appBuilderConfig?.configs?.remotes).length : 0);
+                    const eachRemoteProgress: number = (totalRemotes > 1 ? (90 / totalRemotes) : 0);
+                    let overallProgress = 0;
+                    if (totalRemotes > 1) { this.progressIndicatorService.setOverallProgress(overallProgress); }
+                    for (let remote in appBuilderConfig?.configs?.remotes) {
+                        let pluginBinary = widgetCatalog.widgets.find(widget => widget.contextPath === remote && widget.isCompatible);
+                        if (pluginBinary) {
+                            this.progressIndicatorService.setProgress(0);
+                            this.progressIndicatorService.setMessage(`Installing ${pluginBinary.title}`);
+                            this.progressIndicatorService.setProgress(10);
+                            const binary = await new Promise(resolve => this.widgetCatalogService.downloadBinary(pluginBinary.binaryLink)
+                                .subscribe(binaryData => resolve(binaryData), error => {
+                                    this.logError();
+                                })) as any;
+                            const blob = new Blob([binary], {
+                                type: 'application/zip'
+                            });
+                            const fileName = pluginBinary.binaryLink.replace(/^.*[\\\/]/, '');
+                            const fileOfBlob = new File([blob], fileName);
+                            await this.widgetCatalogService.installPackage(fileOfBlob);
+                        }
+                        overallProgress = overallProgress + eachRemoteProgress;
+                        this.progressIndicatorService.setOverallProgress(overallProgress)
                     }
-                    overallProgress = overallProgress + eachRemoteProgress;
-                    this.progressIndicatorService.setOverallProgress(overallProgress)
+
+                    await new Promise(resolve => setTimeout(resolve, 5000));
+                    this.progressModal.hide()
+                    this.showProgressModalDialog('Refreshing...');
+                    await new Promise(resolve => setTimeout(resolve, 5000));
+                    window.location.reload();
                 }
-
-                await new Promise(resolve => setTimeout(resolve, 5000));
-                this.progressModal.hide()
-                this.showProgressModalDialog('Refreshing...');
-                await new Promise(resolve => setTimeout(resolve, 5000));
-                window.location.reload();
-
+                else {
+                    this.showProgressModalDialog('Verifying plugins! Please wait...');
+                    await this.widgetCatalogService.updateRemotesFromAppBuilderConfig(appBuilderConfig?.configs.remotes);
+                    await new Promise(resolve => setTimeout(resolve, 5000));
+                    this.progressModal.hide();
+                    this.showProgressModalDialog('Refreshing...');
+                    await new Promise(resolve => setTimeout(resolve, 5000));
+                    window.location.reload();
+                }
             }
             else {
-                this.showProgressModalDialog('Verifying widgets! Please wait...');
-                await this.widgetCatalogService.updateRemotesFromAppBuilderConfig( appBuilderConfig?.configs.remotes);
-                await new Promise(resolve => setTimeout(resolve, 5000));
-                this.progressModal.hide();
-                this.showProgressModalDialog('Refreshing...');
-                await new Promise(resolve => setTimeout(resolve, 5000));
-                window.location.reload();
+                this.alertService.danger('Plugin verification required! Please login with Admin permission and refresh this page.')
             }
-        }
-        
+        } 
     }
 
     private logError() {
