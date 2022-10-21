@@ -35,6 +35,7 @@ import { AppIdService } from "../app-id.service";
 import { catchError } from "rxjs/operators";
 import * as semver from "semver";
 import { WidgetCatalogService } from "./../widget-catalog/widget-catalog.service";
+import { contextPathFromURL } from "../utils/contextPathFromURL";
 import { WidgetCatalog, WidgetModel } from "builder/widget-catalog/widget-catalog.model";
 @Injectable({ providedIn: 'root' })
 export class AppBuilderUpgradeService {
@@ -83,9 +84,11 @@ export class AppBuilderUpgradeService {
     };
 
     async loadUpgradeBanner() {
-        const isAppBuilderUpgradeNotification = await this.settingService.isAppUpgradeNotification();
-        if (this.userHasAdminRights && isAppBuilderUpgradeNotification) {
-            await this.getAppBuilderConfig();
+        if(contextPathFromURL() == 'app-builder') {
+            const isAppBuilderUpgradeNotification = await this.settingService.isAppUpgradeNotification();
+            if (this.userHasAdminRights && isAppBuilderUpgradeNotification) {
+                await this.getAppBuilderConfig();
+            }
         }
     }
 
