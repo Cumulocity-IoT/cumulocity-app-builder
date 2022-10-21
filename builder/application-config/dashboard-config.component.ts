@@ -16,7 +16,7 @@
 * limitations under the License.
  */
 
-import { Component, Inject, OnDestroy, OnInit, Renderer2 } from "@angular/core";
+import { ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, Renderer2 } from "@angular/core";
 import { ApplicationService, InventoryService, IApplication, IManagedObject } from "@c8y/client";
 import { Observable, from, Subject, Subscription } from "rxjs";
 import { debounceTime, filter, map, switchMap, tap } from "rxjs/operators";
@@ -126,16 +126,20 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     async ngOnInit() {
         let count = 0;
         this.app.subscribe(app => {
-            app.applicationBuilder.dashboards.forEach(async (element, i) => {
-                element.orderId = i + 1;
-                let c8y_dashboard = (await this.inventoryService.detail(element.id)).data;
-                if (c8y_dashboard.c8y_Dashboard.isFrozen === false) {
-                    count++;
-                    if (count > 0) {
-                        this.autoLockDashboard = false;
+            if (app.applicationBuilder.dashboards.length !== 0) {
+                app.applicationBuilder.dashboards.forEach(async (element) => {
+                    let c8y_dashboard = (await this.inventoryService.detail(element.id)).data;
+                    if (c8y_dashboard.c8y_Dashboard.isFrozen === false) {
+                        count++;
+                        if (count > 0) {
+                            this.autoLockDashboard = false;
+                        }
                     }
-                }
-            });
+                });
+            } else {
+                this.autoLockDashboard = false;
+            }
+
             this.filteredDashboardList = app.applicationBuilder.dashboards;
         });
         this.isDashboardCatalogEnabled = await this.settingsService.isDashboardCatalogEnabled();
@@ -145,7 +149,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     private alertModalDialog(message: any): BsModalRef {
         return this.modalService.show(AlertMessageModalComponent, { class: 'c8y-wizard', initialState: { message } });
     }
-    async deleteDashboard(application, dashboards: DashboardConfig[], index: number) {
+    async deleteDashboard(application, dashboards: DashboardConfig[], i: number) {
         const alertMessage = {
             title: 'Delete Dashboard',
             description: `You are about to delete this dashboard. This operation is irreversible. Do you want to proceed?`,
@@ -156,13 +160,33 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
         const installDemoDialogRef = this.alertModalDialog(alertMessage);
         await installDemoDialogRef.content.event.subscribe(async data => {
             if (data && data.isConfirm) {
-                dashboards.splice(index, 1);
-                application.applicationBuilder.dashboards = [...dashboards];
+                if (this.filteredDashboardList.length !== application.applicationBuilder.dashboards.length) {
+                    let dashboardIDToDelete;
+                    this.filteredDashboardList.forEach((element, index) => {
+                        if (index === i) {
+                            dashboardIDToDelete = element.id;
+                        }
+                    });
+                    this.filteredDashboardList.splice(i, 1);
+                    dashboards = [...application.applicationBuilder.dashboards];
+                    dashboards.forEach((element, index) => {
+                        if (element.id === dashboardIDToDelete) {
+                            dashboards.splice(index, 1);
+                            application.applicationBuilder.dashboards = [...dashboards];
+                        }
+                    });
+                } else {
+                    dashboards.splice(i, 1);
+                    this.filteredDashboardList.splice(i, 1);
+                    application.applicationBuilder.dashboards = [...dashboards];
+                }
                 await this.appService.update({
                     id: application.id,
                     applicationBuilder: application.applicationBuilder
                 } as any);
-                this.filteredDashboardList = [...application.applicationBuilder.dashboards];
+                if (application.applicationBuilder.dashboards.length === 0) {
+                    this.autoLockDashboard = false;
+                }
                 this.navigation.refresh();
                 // TODO?
                 // this.tabs.refresh();
@@ -243,8 +267,19 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
         this.bsModalRef = this.modalService.show(NewDashboardModalComponent, { class: 'c8y-wizard', initialState: { app, globalRoles: this.globalRoles } });
         this.bsModalRef.content.onSave.subscribe((isReloadRequired: boolean) => {
             if (isReloadRequired) {
+                let count = 0;
                 this.app.subscribe((app) => {
-                    this.filteredDashboardList = [...app.applicationBuilder.dashboards];
+                    this.autoLockDashboard = true;
+                    //this.filteredDashboardList = [...app.applicationBuilder.dashboards];
+                    app.applicationBuilder.dashboards.forEach(async (element) => {
+                        let c8y_dashboard = (await this.inventoryService.detail(element.id)).data;
+                        if (c8y_dashboard.c8y_Dashboard.isFrozen === false) {
+                            count++;
+                            if (count > 0) {
+                                this.autoLockDashboard = false;
+                            }
+                        }
+                    });
                 });
             }
         });
@@ -257,6 +292,15 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
         if (dashboard.templateDashboard) {
             this.showTemplateDashboardEditModalDialog(app, dashboard, index);
         } else {
+            if (this.filterValue !== '') {
+                let dashboardIDToEdit = dashboard.id;
+                dashboards = [...app.applicationBuilder.dashboards];
+                dashboards.forEach((element, i) => {
+                    if (element.id === dashboardIDToEdit) {
+                        index = i;
+                    }
+                });
+            }
             this.bsModalRef = this.modalService.show(EditDashboardModalComponent, {
                 class: 'c8y-wizard',
                 initialState: {
