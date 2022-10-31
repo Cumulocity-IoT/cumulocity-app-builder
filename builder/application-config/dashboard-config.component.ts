@@ -16,10 +16,10 @@
 * limitations under the License.
  */
 
-import { Component, Inject, OnDestroy, OnInit, Renderer2 } from "@angular/core";
+import { ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, Renderer2 } from "@angular/core";
 import { ApplicationService, InventoryService, IApplication, IManagedObject } from "@c8y/client";
 import { Observable, from, Subject, Subscription } from "rxjs";
-import { debounceTime, filter, switchMap, tap } from "rxjs/operators";
+import { debounceTime, filter, map, switchMap, tap } from "rxjs/operators";
 import { AppBuilderNavigationService } from "../navigation/app-builder-navigation.service";
 import { AlertService, AppStateService } from "@c8y/ngx-components";
 import { BrandingService } from "../branding/branding.service";
@@ -70,6 +70,9 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     isDashboardCatalogEnabled: boolean = true;
     private globalRoles = [];
 
+
+    filterValue = '';
+
     app: Observable<any>;
 
     delayedAppUpdateSubject = new Subject<any>();
@@ -77,6 +80,12 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
 
     bsModalRef: BsModalRef;
     applyTheme = false;
+    autoLockDashboard = true;
+    filteredDashboardList: any[];
+    newDashboardsOrder: any[];
+    currentDashboardId: any;
+    dashboardId: any;
+    appBuilderDashboards: any[];
 
     constructor(
         private appIdService: AppIdService, private appService: ApplicationService, private appStateService: AppStateService,
@@ -115,46 +124,88 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     }
 
     async ngOnInit() {
+        let count = 0;
+        this.app.subscribe(app => {
+            if (app.applicationBuilder.dashboards.length !== 0) {
+                app.applicationBuilder.dashboards.forEach(async (element) => {
+                    let c8y_dashboard = (await this.inventoryService.detail(element.id)).data;
+                    if (c8y_dashboard.c8y_Dashboard.isFrozen === false) {
+                        count++;
+                        if (count > 0) {
+                            this.autoLockDashboard = false;
+                        }
+                    }
+                });
+            } else {
+                this.autoLockDashboard = false;
+            }
+
+            this.filteredDashboardList = app.applicationBuilder.dashboards;
+        });
         this.isDashboardCatalogEnabled = await this.settingsService.isDashboardCatalogEnabled();
-        this.globalRoles = await this.accessRightsService.getAllGlobalRoles();  
+        this.globalRoles = await this.accessRightsService.getAllGlobalRoles();
     }
 
     private alertModalDialog(message: any): BsModalRef {
         return this.modalService.show(AlertMessageModalComponent, { class: 'c8y-wizard', initialState: { message } });
     }
-    async deleteDashboard(application, dashboards: DashboardConfig[], index: number) {
+    async deleteDashboard(application, dashboards: DashboardConfig[], i: number) {
         const alertMessage = {
             title: 'Delete Dashboard',
             description: `You are about to delete this dashboard. This operation is irreversible. Do you want to proceed?`,
             type: 'danger',
             alertType: 'confirm', //info|confirm,
             confirmPrimary: true //confirm Button is primary
-          }
-          const installDemoDialogRef = this.alertModalDialog(alertMessage);
-          await installDemoDialogRef.content.event.subscribe(async data => {
-            if(data && data.isConfirm) {
-                dashboards.splice(index, 1);
-                application.applicationBuilder.dashboards = [...dashboards];
+        }
+        const installDemoDialogRef = this.alertModalDialog(alertMessage);
+        await installDemoDialogRef.content.event.subscribe(async data => {
+            if (data && data.isConfirm) {
+                if (this.filteredDashboardList.length !== application.applicationBuilder.dashboards.length) {
+                    let dashboardIDToDelete;
+                    this.filteredDashboardList.forEach((element, index) => {
+                        if (index === i) {
+                            dashboardIDToDelete = element.id;
+                        }
+                    });
+                    this.filteredDashboardList.splice(i, 1);
+                    dashboards = [...application.applicationBuilder.dashboards];
+                    dashboards.forEach((element, index) => {
+                        if (element.id === dashboardIDToDelete) {
+                            dashboards.splice(index, 1);
+                            application.applicationBuilder.dashboards = [...dashboards];
+                        }
+                    });
+                } else {
+                    dashboards.splice(i, 1);
+                    this.filteredDashboardList.splice(i, 1);
+                    application.applicationBuilder.dashboards = [...dashboards];
+                }
                 await this.appService.update({
                     id: application.id,
                     applicationBuilder: application.applicationBuilder
                 } as any);
-
+                if (application.applicationBuilder.dashboards.length === 0) {
+                    this.autoLockDashboard = false;
+                }
                 this.navigation.refresh();
                 // TODO?
                 // this.tabs.refresh();
             }
-          });
+        });
     }
 
     async reorderDashboards(app, newDashboardsOrder) {
-        app.applicationBuilder.dashboards = newDashboardsOrder;
-
-        this.delayedAppUpdateSubject.next({
-            id: app.id,
-            applicationBuilder: app.applicationBuilder
-        });
+        this.newDashboardsOrder = newDashboardsOrder;
+        this.appBuilderDashboards = app.applicationBuilder.dashboards;
+        if (newDashboardsOrder.length === app.applicationBuilder.dashboards.length) {
+            app.applicationBuilder.dashboards = newDashboardsOrder;
+            this.delayedAppUpdateSubject.next({
+                id: app.id,
+                applicationBuilder: app.applicationBuilder
+            });
+        }
     }
+
 
     async saveAppChanges(app) {
         const savingAlert = new UpdateableAlert(this.alertService);
@@ -213,7 +264,25 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     }
 
     showCreateDashboardDialog(app) {
-        this.bsModalRef = this.modalService.show(NewDashboardModalComponent, { class: 'c8y-wizard', initialState: { app,  globalRoles: this.globalRoles} });
+        this.bsModalRef = this.modalService.show(NewDashboardModalComponent, { class: 'c8y-wizard', initialState: { app, globalRoles: this.globalRoles } });
+        this.bsModalRef.content.onSave.subscribe((isReloadRequired: boolean) => {
+            if (isReloadRequired) {
+                let count = 0;
+                this.app.subscribe((app) => {
+                    this.autoLockDashboard = true;
+                    //this.filteredDashboardList = [...app.applicationBuilder.dashboards];
+                    app.applicationBuilder.dashboards.forEach(async (element) => {
+                        let c8y_dashboard = (await this.inventoryService.detail(element.id)).data;
+                        if (c8y_dashboard.c8y_Dashboard.isFrozen === false) {
+                            count++;
+                            if (count > 0) {
+                                this.autoLockDashboard = false;
+                            }
+                        }
+                    });
+                });
+            }
+        });
     }
 
     showEditDashboardDialog(app, dashboards: DashboardConfig[], index: number) {
@@ -223,6 +292,15 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
         if (dashboard.templateDashboard) {
             this.showTemplateDashboardEditModalDialog(app, dashboard, index);
         } else {
+            if (this.filterValue !== '') {
+                let dashboardIDToEdit = dashboard.id;
+                dashboards = [...app.applicationBuilder.dashboards];
+                dashboards.forEach((element, i) => {
+                    if (element.id === dashboardIDToEdit) {
+                        index = i;
+                    }
+                });
+            }
             this.bsModalRef = this.modalService.show(EditDashboardModalComponent, {
                 class: 'c8y-wizard',
                 initialState: {
@@ -238,8 +316,8 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
                     ...(dashboard.groupTemplate ? {
                         dashboardType: 'group-template'
                     } : {
-                            dashboardType: 'standard'
-                        })
+                        dashboardType: 'standard'
+                    })
                 }
             });
         }
@@ -261,5 +339,82 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     ngOnDestroy(): void {
         this.renderer.removeClass(this.document.body, 'dashboard-body-theme');
         this.delayedAppUpdateSubscription.unsubscribe();
+    }
+
+    searchDashboard(app) {
+        if (this.filterValue) {
+            this.filteredDashboardList = [...app.applicationBuilder.dashboards];
+            this.filteredDashboardList = this.filteredDashboardList.filter(x => {
+                return x.id.includes(this.filterValue) ||
+                    x.name.toLowerCase().includes(this.filterValue.toLowerCase()) ||
+                    x.icon.toLowerCase().includes(this.filterValue.toLowerCase()) ||
+                    x.tabGroup.toLowerCase().includes(this.filterValue.toLowerCase()) ||
+                    x.visibility.toLowerCase().includes(this.filterValue.toLowerCase()) ||
+                    (x.roles && x.roles.forEach(role => {
+                        role.name.toLowerCase().includes(this.filterValue.toLowerCase())
+                    }));
+            });
+        } else {
+            this.filteredDashboardList = [...app.applicationBuilder.dashboards];
+        }
+    }
+
+    lockAllDashboards(app, checked) {
+        this.autoLockDashboard = checked;
+        if (this.autoLockDashboard) {
+            const alertMessage = {
+                title: 'Lock Dashboard',
+                description: `You are about to lock all the dashboards. Do you want to proceed?`,
+                type: 'warning',
+                alertType: 'confirm', //info|confirm
+                confirmPrimary: true //confirm Button is primary
+            }
+            const autoLockDialogRef = this.alertModalDialog(alertMessage);
+            autoLockDialogRef.content.event.subscribe(async data => {
+                if (data && data.isConfirm) {
+                    app.applicationBuilder.dashboards.forEach(async element => {
+                        let c8y_dashboard = (await this.inventoryService.detail(element.id)).data;
+                        let dashboardObject = {
+                            c8y_Dashboard: {
+                                children: c8y_dashboard.c8y_Dashboard.children,
+                                isFrozen: true
+                            },
+                            id: element.id
+                        };
+                        this.inventoryService.update(dashboardObject);
+                    });
+                } else {
+                    this.autoLockDashboard = !checked;
+                }
+            });
+
+        } else {
+            const alertMessage = {
+                title: 'Unlock Dashboard',
+                description: `You are about to unlock all the dashboards. Do you want to proceed?`,
+                type: 'warning',
+                alertType: 'confirm', //info|confirm
+                confirmPrimary: true //confirm Button is primary
+            }
+            const autoLockDialogRef = this.alertModalDialog(alertMessage);
+            autoLockDialogRef.content.event.subscribe(async data => {
+                if (data && data.isConfirm) {
+                    app.applicationBuilder.dashboards.forEach(async element => {
+                        let c8y_dashboard = (await this.inventoryService.detail(element.id)).data;
+                        let dashboardObject = {
+                            c8y_Dashboard: {
+                                children: c8y_dashboard.c8y_Dashboard.children,
+                                isFrozen: false
+                            },
+                            id: element.id
+                        };
+                        this.inventoryService.update(dashboardObject);
+                    });
+                } else {
+                    this.autoLockDashboard = !checked;
+                }
+            });
+        }
+
     }
 }

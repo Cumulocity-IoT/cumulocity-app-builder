@@ -154,7 +154,10 @@ export class NewSimulatorModalComponent {
                 // createDevice
                 device = (await this.inventoryService.create({
                     c8y_IsDevice: {},
-                    name: this.simulatorName
+                    name: this.simulatorName,
+                    c8y_RequiredAvailability: {
+                        responseInterval: 5
+                    }
                 })).data;
                 this.deviceName = this.simulatorName;
                 this.deviceId = device.id;
@@ -238,6 +241,9 @@ export class NewSimulatorModalComponent {
             const childManageObject: Partial<IManagedObject> = {
                 c8y_IsDevice: {},
                 name: this.simulatorName + '-' + (index + 1),
+                c8y_RequiredAvailability: {
+                    responseInterval: 5
+                }
             };
             await this.inventoryService.childAssetsCreate(childManageObject, group.id);
         }

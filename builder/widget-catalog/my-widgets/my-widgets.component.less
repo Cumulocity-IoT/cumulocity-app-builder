@@ -115,6 +115,11 @@ table#myWidgets th {
   line-height: 2.4;
 }
 
+table#myWidgets {
+  table-layout: fixed;
+  width: 100%;
+}
+
 .arrow-down:after,.arrow-up:after{
   content: ' ';
   position: relative;
@@ -136,3 +141,7 @@ table#myWidgets th {
   vertical-align: super;
 }
  
+a.disabled {
+  pointer-events: none;
+  color: #ccc !important;
+}

@@ -121,7 +121,6 @@ export class AppListComponent {
         }
     }
     exportApp(app: IApplication) {
-        console.log(app);
         const filename = app.name + '.json';
         const jsonStr = JSON.stringify(app.applicationBuilder);
         let element = document.createElement('a');

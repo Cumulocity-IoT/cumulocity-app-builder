@@ -100,7 +100,7 @@
                                         </ng-container>
                                         <i class="widget-icon" [c8yIcon]="widget.icon"></i>
                                     </td>
-                                    <td style="font-size: 12px;">{{widget.title}}
+                                    <td style="font-size: 12px;word-wrap: break-word;">{{widget.title}}
                                         <i *ngIf="!widget.isCompatible || widget.isDeprecated"
                                             title="This widget may not compatible or deprecated!" c8yIcon="warning"
                                             class="warning-icon text-warning"></i>
@@ -199,8 +199,8 @@
                         <i c8yIcon="ellipsis-v"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-right" *dropdownMenu role="menu">
-                        <li role="menuitem">
-                            <a (click)="openDocumentation(widget.repository)" class="dropdown-item clickable fs-12">
+                        <li role="menuitem" [ngStyle]="widget.repository ? {'cursor': 'pointer'} : {'cursor': 'not-allowed'}">
+                            <a (click)="openDocumentation(widget.repository)" [class.disabled]="!widget.repository" class="dropdown-item clickable fs-12">
                                 <i c8yIcon="external-link"></i> Documentation
                             </a>
                         </li>

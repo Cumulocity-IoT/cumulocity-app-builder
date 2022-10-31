@@ -121,8 +121,9 @@ export class BrandingService {
 
 
 `;
-
-            if (app.applicationBuilder.branding && app.applicationBuilder.branding.enabled && app.applicationBuilder.branding.colors) {
+            // The below if condition works only when primary color is white
+            if (app.applicationBuilder.branding && app.applicationBuilder.branding.enabled && app.applicationBuilder.branding.colors
+                && (app.applicationBuilder.branding.colors.primary === '#ffffff' || app.applicationBuilder.branding.colors.primary === '#fff' || app.applicationBuilder.branding.colors.primary === 'white')) {
                 this.loadFaviconURL(app);
 
                 this.appBranding.innerText = `
@@ -159,6 +160,166 @@ body {
     --page-tabs-actions-color-hover: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     --list-group-actions-color: var(--component-link-color, #000);
     --dropdown-active-color:${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+    --tooltip-background: ${this.colorToHex(app.applicationBuilder.branding.colors.active)};/*0b385b*/
+    --tooltip-color: ${this.colorToHex(app.applicationBuilder.branding.colors.textOnActive)};
+    --link-color: #1776BF;
+    --link-color-hover: #1776BF;
+    --page-tabs-active-color: #1776BF;
+    --input-focus-border-color: #ccd2d6;
+    --list-group-actions-color-hover: var(--component-link-color, #000);
+    ${app.applicationBuilder.branding.logoHeight != undefined ? '--navigator-platform-logo-height: ' + app.applicationBuilder.branding.logoHeight + 'px;' : ''}
+}
+
+a, a:hover {
+    color:#1776BF;
+}
+.card a, .card a:hover {
+    color:#1776BF;
+}
+.spinner > div {
+    background-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)} !important;
+}
+
+
+.navigator .title .tenant-brand {
+    background-image: url(${CSS.escape(app.applicationBuilder.branding.logo || '')});
+}
+
+.title .c8y-app-icon {
+    ${app.applicationBuilder.branding.logoHeight != undefined ? '' : 'margin-top: -16px;'}
+}
+
+.btn.btn-primary {
+    color:  var(--brand-primary);
+    border-color: var(--brand-dark);
+    background-color: var(--brand-dark);
+}
+.btn.btn-primary:active,.btn.btn-primary:active:hover {
+    color: ${this.contrastingTextColor(app.applicationBuilder.branding.colors.text)};
+}
+.btn.btn-primary:hover,.btn.btn-primary:focus {
+    color:  var(--brand-primary);
+    border-color: var(--brand-dark);
+    background-color: var(--brand-dark);
+}
+.btn-default,.btn-default:focus,.btn-default:hover {
+    color: var(--brand-dark);
+    border-color: var(--brand-dark);
+}
+.btn-link,.btn-link:hover,.btn-link:focus {
+    color: var(--brand-dark);
+}
+.body-theme {
+    background: linear-gradient(0deg,rgba(0,0,0,0.43),rgba(0,0,0,0.43)) var(--brand-dark,#f2f3f4);
+    --body-background-color: var(--brand-dark,#f2f3f4);
+}
+.simulator-body-theme {
+   background: linear-gradient(0deg, rgba(0, 0, 0, 0.43), rgba(0, 0, 0, 0.43)) var(--brand-dark, #f2f3f4);
+  --body-background-color: var(--brand-dark, #f2f3f4);
+}
+.dashboard-body-theme {
+    background: linear-gradient(0deg,rgba(0,0,0,0.43),rgba(0,0,0,0.43)) var(--brand-dark,#f2f3f4);
+    --body-background-color: var(--brand-dark,#f2f3f4);
+}
+.label-color {
+    color: var(--navigator-active-color, #000);
+}
+.card-color {
+    background: var(--brand-primary, #fff);
+    color: var(--navigator-active-color, #000);
+}
+.nav-tabs > li > button {
+    color: var(--navigator-active-bg,#0b385b);
+}
+.nav-tabs > li > button:hover:not([disabled]) {
+    color: var(--brand-primary,#1776bf);
+}
+select.form-control:focus, select:focus {
+    color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+}
+label.c8y-checkbox input[type='checkbox']:checked + span::after, label.c8y-radio input[type='checkbox']:checked + span::after {
+    color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+}
+label.c8y-radio input[type='radio']:checked + span::after {
+    background-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+}
+.btn[btnCheckbox].active::before {
+    background-color: ${this.lighter(app.applicationBuilder.branding.colors.text)};
+}
+.c8y-switch input:checked + span:before {
+    background-color: ${this.lighter(app.applicationBuilder.branding.colors.text)};
+}
+.add-card, .card.add-card {
+    color: var(--brand-dark);
+}
+.pagination>.active>a {
+    color: var(--brand-dark) !important;
+    border-color: #b0b9bf !important;
+}
+.pagination>li>a, .pagination>li>a:hover {
+    color: #b0b9bf !important;
+    border-color: #b0b9bf !important;
+}
+.deviceSelectorCombo .selectedDevice {
+    color: var(--brand-dark);
+}
+.btn-clean:focus, .btn-clean:hover {
+    color: var(--brand-dark);
+}
+.text-primary {
+    color: var(--brand-dark);
+}
+td a {
+    color: #00f !important;
+}
+.c8y-wizard .modal-header {
+    color: var(--brand-dark) !important;    
+}
+.list-group .btn-xs:not(:hover) {
+    color: var(--brand-dark);
+    background-color: var(--brand-primary);
+    border-color: var(--brand-dark);
+}
+`;
+            } else if (app.applicationBuilder.branding && app.applicationBuilder.branding.enabled && app.applicationBuilder.branding.colors) {
+                this.loadFaviconURL(app);
+
+                this.appBranding.innerText = `
+body {
+    
+    /* Navigator color: */
+    --brand-primary: ${this.colorToHex(app.applicationBuilder.branding.colors.primary)};
+    --brand-light: ${this.lighter(app.applicationBuilder.branding.colors.primary)};
+    --navigator-active-bg: ${this.colorToHex(app.applicationBuilder.branding.colors.active)};
+    
+    /* Navigator text: */
+    --navigator-text-color: ${this.colorToHex(app.applicationBuilder.branding.colors.textOnPrimary)};
+    --navigator-title-color: ${this.colorToHex(app.applicationBuilder.branding.colors.textOnPrimary)};
+    --navigator-active-color: ${this.colorToHex(app.applicationBuilder.branding.colors.textOnActive)};
+    --navigator-hover-color: ${this.colorToHex(app.applicationBuilder.branding.colors.hover)};
+    
+
+    /* All the other text: */
+    --brand-dark: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+    /* --input-focus-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)}; */
+    --header-hover-color: ${this.colorToHex(app.applicationBuilder.branding.colors.hover)};
+    --header-color: ${app.applicationBuilder.branding.colors.headerBar ? this.colorToHex(app.applicationBuilder.branding.colors.headerBar) : '#ffffff'};
+    --dropdown-background: ${app.applicationBuilder.branding.colors.headerBar ? this.colorToHex(app.applicationBuilder.branding.colors.headerBar) : '#ffffff'};
+    --toolbar-background:${app.applicationBuilder.branding.colors.toolBar ? this.colorToHex(app.applicationBuilder.branding.colors.toolBar) : '#ffffff'};
+    --toolbar-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+    --page-tabs-background:${app.applicationBuilder.branding.colors.tabBar ? this.colorToHex(app.applicationBuilder.branding.colors.tabBar) : '#ffffff'};
+    --toolbar-actions-color-hover: ${app.applicationBuilder.branding.colors.toolBar ? this.colorToHex(app.applicationBuilder.branding.colors.hover) : '#ffffff'};
+    --toolbar-focus-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+    --dropdown-actions-color-hover: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+    --component-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+    --component-actions-color-hover: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+    --page-tabs-link-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+    --page-tabs-actions-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+    --page-tabs-actions-color-hover: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+    --list-group-actions-color: var(--component-link-color, #000);
+    --dropdown-active-color:${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+    --tooltip-background: ${this.colorToHex(app.applicationBuilder.branding.colors.active)};/*0b385b*/
+    --tooltip-color: ${this.colorToHex(app.applicationBuilder.branding.colors.textOnActive)};
     ${app.applicationBuilder.branding.logoHeight != undefined ? '--navigator-platform-logo-height: ' + app.applicationBuilder.branding.logoHeight + 'px;' : ''}
 }
 
@@ -204,7 +365,7 @@ body {
     color: var(--navigator-active-color, #000);
 }
 .nav-tabs > li > button {
-    color: var(--brand-light,#333333);
+    color: var(--navigator-active-bg,#0b385b);
 }
 .nav-tabs > li > button:hover:not([disabled]) {
     color: var(--brand-primary,#1776bf);

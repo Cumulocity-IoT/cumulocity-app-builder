@@ -5,14 +5,15 @@
         <button class="btn btn-link" (click)="showCreateDashboardDialog(app)" id="addDashboardButton">
             <i c8yIcon="plus-circle"></i> Add dashboard
         </button>
-        <button *ngIf="isDashboardCatalogEnabled" id="addDashboardCatalogButton" class="btn btn-link" (click)="showTemplateCatalogModalDialog(app)">
+        <button *ngIf="isDashboardCatalogEnabled" id="addDashboardCatalogButton" class="btn btn-link"
+            (click)="showTemplateCatalogModalDialog(app)">
             <i c8yIcon="book"></i> Dashboard catalog
         </button>
     </c8y-action-bar-item>
 
     <div class="card-group">
         <div class="col-xs-12 col-md-5">
-            <div class="card"  [ngClass]="{'card-color': applyTheme}">
+            <div class="card" [ngClass]="{'card-color': applyTheme}">
                 <div class="card-header">
                     <h2 class="text-light" style="margin-top: 20px;" translate="">Application Configuration</h2>
                 </div>
@@ -22,7 +23,7 @@
             </div>
         </div>
         <div class="col-xs-12 col-md-7">
-            <div class="card"  [ngClass]="{'card-color': applyTheme}">
+            <div class="card" [ngClass]="{'card-color': applyTheme}">
                 <div class="card-header">
                     <h4 translate>Details</h4>
                 </div>
@@ -36,41 +37,44 @@
                         </div>
 
                         <div class="form-group" *ngIf="app.contextPath != undefined">
-                            <label for="contextpath" [ngClass]="{'label-color': applyTheme}"><span>Context Path</span></label>
+                            <label for="contextpath" [ngClass]="{'label-color': applyTheme}"><span>Context
+                                    Path</span></label>
                             <input type="text" class="form-control" id="contextpath" name="contextpath"
                                 placeholder="e.g. my-app (required)" required [(ngModel)]="newAppContextPath">
                         </div>
 
                         <div class="form-group">
                             <label for="icon" [ngClass]="{'label-color': applyTheme}"><span>Icon</span></label>
-                            <icon-selector id="icon" name="icon" [(value)]="newAppIcon" ></icon-selector>
+                            <icon-selector id="icon" name="icon" [(value)]="newAppIcon"></icon-selector>
                         </div>
                     </form>
-                    <button class="btn btn-primary" id="saveApplicationDetails" [disabled]="!editAppBuilderAppForm.form.valid"
-                        (click)="saveAppChanges(app)">Save</button>
+                    <button class="btn btn-primary" id="saveApplicationDetails"
+                        [disabled]="!editAppBuilderAppForm.form.valid" (click)="saveAppChanges(app)">Save</button>
                 </div>
             </div>
         </div>
     </div>
 
     <ng-template #itemTemplate let-item="item" let-index="index">
-        <div class="drag-handle"><i class="fa custom-icon-drag-handle"></i></div>
+        <div *ngIf="filterValue === ''" class="drag-handle"><i class="fa custom-icon-drag-handle"></i></div>
         <div class="col col-overflow" title="{{item.value.name}}">{{item.value.name}}</div>
-        <div class="col col-overflow" title="{{item.value.id}}" id="dashboard-id-{{item.value.name}}-{{index}}">{{item.value.id}}</div>
-        <div class="col col-overflow" >{{item.value.visibility === 'no-nav' ? 'Tabs Only' : 
+        <div class="col col-overflow" title="{{item.value.id}}" id="dashboard-id-{{item.value.name}}-{{index}}">
+            {{item.value.id}}</div>
+        <div class="col col-overflow">{{item.value.visibility === 'no-nav' ? 'Tabs Only' :
             item.value.visibility === 'hidden' ? 'Hidden': item.value.visibility}}</div>
         <div class="col col-overflow" title="{{item.value.tabGroup}}">{{item.value.tabGroup}}</div>
-        <div class="col col-overflow" >
-            <span *ngFor="let role of item.value.roles"  title="{{role.name}}">
+        <div class="col col-overflow">
+            <span *ngFor="let role of item.value.roles" title="{{role.name}}">
                 {{role.name}} <br>
             </span>
         </div>
         <div class="col col-overflow"><i [c8yIcon]="item.value.icon"></i> {{item.value.icon}}</div>
-        <div class="col col-overflow" title="{{item.value.deviceId}}">{{item.value.groupTemplate ? 'Children of: ' : ''}}{{item.value.deviceId || '-'}}</div>
+        <div class="col col-overflow" title="{{item.value.deviceId}}">{{item.value.groupTemplate ? 'Children of: ' :
+            ''}}{{item.value.deviceId || '-'}}</div>
         <div>
-            <button class="btn btn-default" id="editDashboardButton-{{item.value.id}}" 
+            <button class="btn btn-default" id="editDashboardButton-{{item.value.id}}"
                 (click)="showEditDashboardDialog(app, app.applicationBuilder.dashboards, index)">Edit</button>
-            <button class="btn btn-default" id="deleteDashboardButton-{{item.value.id}}" 
+            <button class="btn btn-default" id="deleteDashboardButton-{{item.value.id}}"
                 (click)="deleteDashboard(app, app.applicationBuilder.dashboards, index)">Delete</button>
         </div>
     </ng-template>
@@ -78,9 +82,28 @@
     <div class="card-group">
 
         <div class="col-xs-12">
-            <div class="card"  [ngClass]="{'card-color': applyTheme}">
+            <div class="card" [ngClass]="{'card-color': applyTheme}">
                 <div class="card-header">
                     <h4 translate>Dashboards</h4>
+                    <div id="search" class="input-group input-group-search" style="width: 30%;margin-left: 50px;">
+                        <input type="search" class="form-control dashboardInputTheme"
+                            placeholder="Enter text to search..." (keyup)="searchDashboard(app)"
+                            [(ngModel)]="filterValue" />
+                        <span class="input-group-addon">
+                            <i c8yIcon="search" *ngIf="!filterValue || filterValue.length === 0"></i>
+                            <i c8yIcon="times" class="text-muted" *ngIf="filterValue && filterValue.length > 0"
+                                (click)="filterValue= '';searchDashboard(app)"></i>
+                        </span>
+                    </div>
+                    <div style="margin-left: auto;margin-right: 0;display: block;">
+                        <button class="btn btn-default" [(ngModel)]="autoLockDashboard"
+                            title="Lock/Unlock All Dashboards"
+                            [disabled]="app.applicationBuilder.dashboards.length === 0"
+                            (ngModelChange)="lockAllDashboards(app, $event)" btnCheckbox tabindex="0">
+                            <i class="dlt-c8y-icon-unlock" *ngIf="!autoLockDashboard"></i>
+                            <i class="dlt-c8y-icon-lock" *ngIf="autoLockDashboard"></i>
+                        </button>
+                    </div>
                 </div>
                 <hr />
                 <div class="card-block">
@@ -92,9 +115,10 @@
                         <button class="btn btn-primary" id="addDashboardPrimaryButton" style="margin-top: 10px;"
                             (click)="showCreateDashboardDialog(app)">Add dashboard</button>
                     </div>
-                    <ng-container *ngIf="app.applicationBuilder.dashboards?.length">
+                    <ng-container *ngIf="app.applicationBuilder.dashboards?.length && filterValue === ''">
                         <div class="sortable-grid-header">
-                            <div class="drag-handle invisible"><i class="fa custom-icon-drag-handle"></i></div>
+                            <div *ngIf="filterValue === ''" class="drag-handle invisible"><i
+                                    class="fa custom-icon-drag-handle"></i></div>
                             <div class="col">Path</div>
                             <div class="col">Dashboard ID</div>
                             <div class="col">Visibility</div>
@@ -105,9 +129,58 @@
                             <div class="invisible"><button class="btn btn-default">Edit</button><button
                                     class="btn btn-default">Delete</button></div>
                         </div>
-                        <bs-sortable [ngModel]="app.applicationBuilder.dashboards" [itemTemplate]="itemTemplate"
-                            itemClass="sortable-item" itemActiveClass="sortable-item-active"
-                            wrapperClass="sortable-grid" (onChange)="reorderDashboards(app, $event)"></bs-sortable>
+                        <bs-sortable [ngModel]="filteredDashboardList" [itemTemplate]="itemTemplate"
+                            itemClass="sortable-item"
+                            itemActiveClass="sortable-item-active" wrapperClass="sortable-grid"
+                            (onChange)="reorderDashboards(app, $event)"></bs-sortable>
+                    </ng-container>
+                    <ng-container *ngIf="filterValue !== ''">
+                        <div class="table-responsive" style="margin-left: -16px;margin-right: -16px;margin-top:-16px;">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th style="font-weight: bold;padding-left: 30px;">Path</th>
+                                        <th style="font-weight: bold;">Dashboard ID</th>
+                                        <th style="font-weight: bold;">Visibility</th>
+                                        <th style="font-weight: bold;">Tab Group</th>
+                                        <th style="font-weight: bold;">Global Roles</th>
+                                        <th style="font-weight: bold;">Icon</th>
+                                        <th style="font-weight: bold;">Device(s)</th>
+                                        <th>
+                                            <button class="btn btn-default invisible">Edit</button>
+                                        </th>
+                                        <th>
+                                            <button class="btn btn-default invisible">Delete</button>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let item of filteredDashboardList;let i=index;">
+                                        <td style="padding-left: 30px;">{{item.name}}</td>
+                                        <td>{{item.id}}</td>
+                                        <td>{{item.visibility === 'no-nav' ? 'Tabs Only' :
+                                            item.visibility === 'hidden' ? 'Hidden': item.visibility}}</td>
+                                        <td>{{item.tabGroup}}</td>
+                                        <td><span *ngFor="let role of item.roles" title="{{role.name}}">
+                                                {{role.name}} <br>
+                                            </span></td>
+                                        <td><i [c8yIcon]="item.icon"></i> {{item.icon}}</td>
+                                        <td>
+                                            {{item.groupTemplate ? 'Children of: ' :
+                                            ''}}{{item.deviceId || '-'}}
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-default" id="editDashboardButton-{{item.id}}" style="float:right;"
+                                                (click)="showEditDashboardDialog(app, filteredDashboardList, i)">Edit</button>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-default" id="deleteDashboardButton-{{item.id}}"
+                                                (click)="deleteDashboard(app, filteredDashboardList, i)">Delete</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </ng-container>
                 </div>
             </div>

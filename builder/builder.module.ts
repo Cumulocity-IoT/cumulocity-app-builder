@@ -61,6 +61,7 @@ import { WidgetCatalogModule } from './widget-catalog/widget-catalog.module';
 import { AlertMessageModalModule } from "./utils/alert-message-modal/alert-message-modal.module";
 import { AppBuilderUpgradeService } from "./app-builder-upgrade/app-builder-upgrade.service";
 import { NgSelectModule } from "@ng-select/ng-select";
+import { ButtonsModule } from "ngx-bootstrap/buttons";
 @NgModule({
     imports: [
         ApplicationModule,
@@ -111,7 +112,8 @@ import { NgSelectModule } from "@ng-select/ng-select";
         SettingsModule,
         WidgetCatalogModule,
         AlertMessageModalModule,
-        NgSelectModule
+        NgSelectModule,
+        ButtonsModule.forRoot()
     ],
     declarations: [
         DashboardConfigComponent,
@@ -130,7 +132,7 @@ import { NgSelectModule } from "@ng-select/ng-select";
         { provide: HOOK_NAVIGATOR_NODES, useExisting: AppBuilderNavigationService, multi: true },
         AppBuilderConfigNavigationRegistrationService,
         AppBuilderConfigNavigationService,
-        { provide: HOOK_NAVIGATOR_NODES, useExisting: AppBuilderConfigNavigationService, multi: true },
+        { provide: HOOK_NAVIGATOR_NODES, useExisting: AppBuilderConfigNavigationService, multi: true }
     ]
 })
 export class BuilderModule {
