@@ -79,6 +79,18 @@
         </div>
     </ng-template>
 
+    <div class="flex-grow">
+    <div  class="card-group">
+        <ul class=" appbuilder-dashboard-hierarchy__stepper" >
+            <li class="appbuilder-dashboard-hierarchy__step">
+        <c8y-dashboard-node
+                [node]="node.value"
+                *ngFor="let node of dashboardHierarchy.children | keyvalue"
+              >
+        </c8y-dashboard-node>
+            </li></ul>
+    </div>
+    </div>
     <div class="card-group">
 
         <div class="col-xs-12">
