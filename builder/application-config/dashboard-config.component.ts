@@ -21,7 +21,7 @@ import { ApplicationService, InventoryService, IApplication, IManagedObject } fr
 import { Observable, from, Subject, Subscription } from "rxjs";
 import { debounceTime, filter, map, switchMap, tap } from "rxjs/operators";
 import { AppBuilderNavigationService } from "../navigation/app-builder-navigation.service";
-import { AlertService, AppStateService } from "@c8y/ngx-components";
+import { AlertService, AppStateService, NavigatorNode } from "@c8y/ngx-components";
 import { BrandingService } from "../branding/branding.service";
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import { NewDashboardModalComponent } from "./new-dashboard-modal.component";
@@ -59,6 +59,12 @@ export interface DashboardConfig {
     }
 }
 
+export interface DashboardHierarchyModal {
+    dashboard?: DashboardConfig,
+    title?: string,
+    children?: DashboardHierarchyModal
+}
+
 @Component({
     templateUrl: './dashboard-config.component.html',
     styleUrls: ['./dashboard-config.component.less']
@@ -86,6 +92,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     currentDashboardId: any;
     dashboardId: any;
     appBuilderDashboards: any[];
+    dashboardHierarchy = {children: {}, node: {}};
 
     constructor(
         private appIdService: AppIdService, private appService: ApplicationService, private appStateService: AppStateService,
@@ -109,6 +116,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
             .pipe(debounceTime(500))
             .subscribe(async app => {
                 await this.appService.update(app);
+                this.prepareDashboardHierarchy(app);
                 this.navigation.refresh();
                 // TODO?
                 //this.tabs.refresh();
@@ -139,13 +147,33 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
             } else {
                 this.autoLockDashboard = false;
             }
-
             this.filteredDashboardList = app.applicationBuilder.dashboards;
         });
+        
         this.isDashboardCatalogEnabled = await this.settingsService.isDashboardCatalogEnabled();
         this.globalRoles = await this.accessRightsService.getAllGlobalRoles();
     }
 
+    private prepareDashboardHierarchy(app: any) {
+        this.dashboardHierarchy = {children: {}, node:[]};
+        app.applicationBuilder.dashboards.forEach(async (element) => {
+            const path = element.name.split('/').filter(pathSegment => pathSegment != '');
+            const currentHierarchyNode = path.reduce((parent, segment, j) => {
+                if (!parent.children[segment] || (j == path.length - 1)) {
+                    const navNode: DashboardHierarchyModal = {
+                        dashboard: element,
+                        title: segment
+                    };
+                    parent.children[segment] = {
+                        children: {},
+                        ...navNode
+                    };
+                }
+                return parent.children[segment];
+            }, this.dashboardHierarchy);
+        });
+        console.log(this.dashboardHierarchy);
+    }
     private alertModalDialog(message: any): BsModalRef {
         return this.modalService.show(AlertMessageModalComponent, { class: 'c8y-wizard', initialState: { message } });
     }

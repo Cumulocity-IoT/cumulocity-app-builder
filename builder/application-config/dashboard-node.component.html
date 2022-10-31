@@ -1,0 +1,18 @@
+<!-- Include the child assets using another <ul> -->
+
+<li class="appbuilder-dashboard-hierarchy__step">
+  <div class="appbuilder-dashboard-hierarchy__step--item" >
+    <c8y-li class="flex-grow a-i-center shadow1">
+      <c8y-li-icon (click)="expendCollapsedToggle(node)" [icon]="node.children && objectKeys(node.children).length > 0  ?  (!isCollapsed ?  'collapse-arrow': 'expand-arrow') : 'dashboard' "></c8y-li-icon>
+      <c8y-li-icon [icon]="node?.dashboard.icon ? node?.dashboard.icon : 'dashboard'"></c8y-li-icon>
+      <div class="l-h-1 text-truncate">
+        <p class="text-truncate" title="{{ node.title | translate }}">
+          {{ node.title | translate }}
+        </p>
+      </div>
+    </c8y-li>
+  </div>
+  <ul [collapse]="isCollapsed" [isAnimated]="true" >
+    <c8y-dashboard-node [node]="node.value" *ngFor="let node of node.children | keyvalue"> </c8y-dashboard-node>
+  </ul>
+</li>
