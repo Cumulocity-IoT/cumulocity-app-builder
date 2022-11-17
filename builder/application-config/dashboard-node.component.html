@@ -1,18 +1,45 @@
 <!-- Include the child assets using another <ul> -->
-
-<li class="appbuilder-dashboard-hierarchy__step">
-  <div class="appbuilder-dashboard-hierarchy__step--item" >
-    <c8y-li class="flex-grow a-i-center shadow1">
-      <c8y-li-icon (click)="expendCollapsedToggle(node)" [icon]="node.children && objectKeys(node.children).length > 0  ?  (!isCollapsed ?  'collapse-arrow': 'expand-arrow') : 'dashboard' "></c8y-li-icon>
-      <c8y-li-icon [icon]="node?.dashboard.icon ? node?.dashboard.icon : 'dashboard'"></c8y-li-icon>
-      <div class="l-h-1 text-truncate">
-        <p class="text-truncate" title="{{ node.title | translate }}">
-          {{ node.title | translate }}
-        </p>
+<ng-container>
+  <div class="item" cdkDrag cdkDropList [id]="node.id" [cdkDropListData]="node.children"
+    [cdkDropListConnectedTo]="connectedTo" (cdkDropListDropped)="onDragDrop($event)">
+    <c8y-li>
+      <div class="m-l-0-xs row">
+        <div class="col-xs-12 col-md-2" style="margin-left:-5px;">
+          <i (click)="expendCollapsedToggle(node)" [ngClass]="node.children.length === 0 ? 'empty-space': ''"
+            [c8yIcon]="node.children && objectKeys(node.children).length > 0  ?  (!isCollapsed ?  'collapse-arrow': 'expand-arrow') : '' "></i>
+          <i [c8yIcon]="node?.dashboard.icon ? node?.dashboard.icon : 'dashboard'" style="margin-left:5px;">
+          </i>
+          <span style="margin-left:20px;">{{ node.title | translate }}</span>
+        </div>
+        <div class="col-xs-12 col-md-2" style="text-align: center;">
+          {{ node.dashboard.id }}
+        </div>
+        <div class="col-xs-12 col-md-1" style="text-align: center;">
+          {{node.dashboard.visibility === 'no-nav' ? 'Tabs Only' : node.dashboard.visibility === 'hidden' ? 'Hidden': node.dashboard.visibility}}
+        </div>
+        <div class="col-xs-12 col-md-1" style="text-align: center;margin-left:5px;">
+          {{ node.dashboard.tabGroup }}
+        </div>
+        <div class="col-xs-12 col-md-2" style="text-align: center;">
+          <span *ngFor="let role of node.dashboard.roles" title="{{role.name}}">
+            {{role.name}} <br>
+          </span>
+        </div>
+        <div class="col-xs-12 col-md-1" style="text-align: center;">
+          {{node.dashboard.groupTemplate ? 'Children of: ' :''}}{{node.dashboard.deviceId || '-'}}
+        </div>
+        <div class="col-xs-12 col-md-3"  style="text-align: center;margin-top:-6px;">
+          <button class="btn btn-default" id="editDashboardButton-{{node.dashboard.id}}" (click)="editDashboardClicked(node.dashboard)">Edit</button>
+          <button class="btn btn-default" id="deleteDashboardButton-{{node.dashboard.id}}" (click)="deleteDashboardClicked(node.dashboard)">Delete</button>
+        </div>
       </div>
     </c8y-li>
+    <div class="sub-child" [collapse]="isCollapsed" [isAnimated]="true">
+      <ng-container *ngFor="let node of node.children | keyvalue">
+        <c8y-dashboard-node [node]="node.value" [connectedTo]="connectedTo" (itemDrop)="onDragDrop($event)"
+          (editDashboard)="editDashboardClicked($event)" (deleteDashboard)="deleteDashboardClicked($event)">
+        </c8y-dashboard-node>
+      </ng-container>
+    </div>
   </div>
-  <ul [collapse]="isCollapsed" [isAnimated]="true" >
-    <c8y-dashboard-node [node]="node.value" *ngFor="let node of node.children | keyvalue"> </c8y-dashboard-node>
-  </ul>
-</li>
+</ng-container>

@@ -73,31 +73,25 @@
             ''}}{{item.value.deviceId || '-'}}</div>
         <div>
             <button class="btn btn-default" id="editDashboardButton-{{item.value.id}}"
-                (click)="showEditDashboardDialog(app, app.applicationBuilder.dashboards, index)">Edit</button>
+                (click)="showEditDashboardDialog(app, filteredDashboardList, index)">Edit</button>
             <button class="btn btn-default" id="deleteDashboardButton-{{item.value.id}}"
-                (click)="deleteDashboard(app, app.applicationBuilder.dashboards, index)">Delete</button>
+                (click)="deleteDashboard(app, filteredDashboardList, index)">Delete</button>
         </div>
     </ng-template>
-
-    <div class="flex-grow">
-    <div  class="card-group">
-        <ul class=" appbuilder-dashboard-hierarchy__stepper" >
-            <li class="appbuilder-dashboard-hierarchy__step">
-        <c8y-dashboard-node
-                [node]="node.value"
-                *ngFor="let node of dashboardHierarchy.children | keyvalue"
-              >
-        </c8y-dashboard-node>
-            </li></ul>
-    </div>
-    </div>
     <div class="card-group">
-
         <div class="col-xs-12">
             <div class="card" [ngClass]="{'card-color': applyTheme}">
                 <div class="card-header">
                     <h4 translate>Dashboards</h4>
-                    <div id="search" class="input-group input-group-search" style="width: 30%;margin-left: 50px;">
+                    <div class="c8y-select-wrapper" style="margin-left: 20px;">
+                        <select class="form-control" [(ngModel)]="defaultListView" style="border-radius:20px;"
+                            (change)="displayList($event.target.value, app)">
+                            <option value="1">Tree View</option>
+                            <option value="2">List View</option>
+                        </select>
+                    </div>
+                    <div id="search" class="input-group input-group-search" style="width: 30%;margin-left: 50px;"
+                        *ngIf="defaultListView === '2'">
                         <input type="search" class="form-control dashboardInputTheme"
                             placeholder="Enter text to search..." (keyup)="searchDashboard(app)"
                             [(ngModel)]="filterValue" />
@@ -105,6 +99,18 @@
                             <i c8yIcon="search" *ngIf="!filterValue || filterValue.length === 0"></i>
                             <i c8yIcon="times" class="text-muted" *ngIf="filterValue && filterValue.length > 0"
                                 (click)="filterValue= '';searchDashboard(app)"></i>
+                        </span>
+                    </div>
+                    <div id="search" class="input-group input-group-search" style="width: 30%;margin-left: 50px;"
+                        *ngIf="defaultListView === '1'">
+                        <input type="search" class="form-control dashboardInputTheme"
+                            placeholder="Enter text to search..." (keyup)="searchInTreeDashboard(app)"
+                            [(ngModel)]="filterValueForTree" />
+                        <span class="input-group-addon">
+                            <i c8yIcon="search" *ngIf="!filterValueForTree || filterValueForTree.length === 0"></i>
+                            <i c8yIcon="times" class="text-muted"
+                                *ngIf="filterValueForTree && filterValueForTree.length > 0"
+                                (click)="filterValueForTree= '';searchInTreeDashboard(app)"></i>
                         </span>
                     </div>
                     <div style="margin-left: auto;margin-right: 0;display: block;">
@@ -127,7 +133,33 @@
                         <button class="btn btn-primary" id="addDashboardPrimaryButton" style="margin-top: 10px;"
                             (click)="showCreateDashboardDialog(app)">Add dashboard</button>
                     </div>
-                    <ng-container *ngIf="app.applicationBuilder.dashboards?.length && filterValue === ''">
+                    <div class="flex-grow" *ngIf="app.applicationBuilder.dashboards?.length && defaultListView === '1'">
+                        <div class="d-flex-md m-l-0-xs separator-bottom row"
+                            style="min-height: 45px;margin-top: -20px">
+                            <div class="flex-grow border-right font-bold align-center col-xs-12 col-md-2">Path</div>
+                            <div class="flex-grow border-right font-bold align-center col-xs-12 col-md-2">Dashboard ID</div>
+                            <div class="flex-grow border-right font-bold align-center col-xs-12 col-md-1">Visibility</div>
+                            <div class="flex-grow border-right font-bold align-center col-xs-12 col-md-1">Tab Group</div>
+                            <div class="flex-grow border-right font-bold align-center col-xs-12 col-md-2">Global Roles</div>
+                            <div class="flex-grow border-right font-bold align-center col-xs-12 col-md-1">Device(s)</div>
+                            <div class="flex-grow border-right invisible col-xs-12 col-md-3"><button
+                                    class="btn btn-default">Edit</button><button class="btn btn-default">Delete</button>
+                            </div>
+                        </div>
+                        <div class="">
+                            <div cdkDropList [id]="'-1'" [cdkDropListData]="dashboardHierarchy.children"
+                                [cdkDropListConnectedTo]="connectedTo" (cdkDropListDropped)="onDragDrop($event)">
+                                <ng-container *ngFor="let node of dashboardHierarchy.children | keyvalue">
+                                    <c8y-dashboard-node [node]="node.value" [connectedTo]="connectedTo"
+                                        (itemDrop)="onDragDrop($event)" (editDashboard)="editDashboardClicked($event)"
+                                        (deleteDashboard)="deleteDashboardClicked($event)">
+                                    </c8y-dashboard-node>
+                                </ng-container>
+                            </div>
+                        </div>
+                    </div>
+                    <ng-container
+                        *ngIf="app.applicationBuilder.dashboards?.length && filterValue === '' && defaultListView === '2'">
                         <div class="sortable-grid-header">
                             <div *ngIf="filterValue === ''" class="drag-handle invisible"><i
                                     class="fa custom-icon-drag-handle"></i></div>
@@ -142,11 +174,10 @@
                                     class="btn btn-default">Delete</button></div>
                         </div>
                         <bs-sortable [ngModel]="filteredDashboardList" [itemTemplate]="itemTemplate"
-                            itemClass="sortable-item"
-                            itemActiveClass="sortable-item-active" wrapperClass="sortable-grid"
-                            (onChange)="reorderDashboards(app, $event)"></bs-sortable>
+                            itemClass="sortable-item" itemActiveClass="sortable-item-active"
+                            wrapperClass="sortable-grid" (onChange)="reorderDashboards(app, $event)"></bs-sortable>
                     </ng-container>
-                    <ng-container *ngIf="filterValue !== ''">
+                    <ng-container *ngIf="filterValue !== '' && defaultListView === '2'">
                         <div class="table-responsive" style="margin-left: -16px;margin-right: -16px;margin-top:-16px;">
                             <table class="table">
                                 <thead>
@@ -182,7 +213,8 @@
                                             ''}}{{item.deviceId || '-'}}
                                         </td>
                                         <td>
-                                            <button class="btn btn-default" id="editDashboardButton-{{item.id}}" style="float:right;"
+                                            <button class="btn btn-default" id="editDashboardButton-{{item.id}}"
+                                                style="float:right;"
                                                 (click)="showEditDashboardDialog(app, filteredDashboardList, i)">Edit</button>
                                         </td>
                                         <td>

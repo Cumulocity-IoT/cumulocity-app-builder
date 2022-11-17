@@ -64,6 +64,7 @@ import { NgSelectModule } from "@ng-select/ng-select";
 import { ButtonsModule } from "ngx-bootstrap/buttons";
 import { DashboardNodeComponent } from "./application-config/dashboard-node.component";
 import { CollapseModule } from 'ngx-bootstrap/collapse';
+import { DragDropModule } from "@angular/cdk/drag-drop";
 @NgModule({
     imports: [
         ApplicationModule,
@@ -116,7 +117,8 @@ import { CollapseModule } from 'ngx-bootstrap/collapse';
         AlertMessageModalModule,
         NgSelectModule,
         ButtonsModule.forRoot(),
-        CollapseModule.forRoot()
+        CollapseModule.forRoot(),
+        DragDropModule
     ],
     declarations: [
         DashboardConfigComponent,

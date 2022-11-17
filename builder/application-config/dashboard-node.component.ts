@@ -16,34 +16,47 @@
 * limitations under the License.
  */
 
-import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
-import { IManagedObject, Realtime, InventoryService } from '@c8y/client';
-import { Observable, of } from 'rxjs';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { DOCUMENT } from '@angular/common';
+import { Component, Input, OnInit, Output, EventEmitter, Inject, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   selector: 'c8y-dashboard-node',
-  templateUrl: './dashboard-node.component.html'
+  templateUrl: './dashboard-node.component.html',
+  styleUrls: ['dashboard-node.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardNodeComponent implements OnInit {
   @Input() node: any;
-  @Input() selectedNode: any;
-  @Output() nodeClick = new EventEmitter<any>();
+  @Output() editDashboard = new EventEmitter<any>();
+  @Output() deleteDashboard = new EventEmitter<any>();
+  @Input() connectedTo: string[];
+  @Output() itemDrop: EventEmitter<CdkDragDrop<any>>;
+  depth = 0;
+
+  constructor(@Inject(DOCUMENT) private document: Document) { this.itemDrop = new EventEmitter(); }
 
   objectKeys = Object.keys;
   isCollapsed = true;
+
   ngOnInit() {
-    console.log(this.node);
-  }
-  nodeClicked() {
-    this.nodeClick.emit(this.node);
-  }
-  nodeChildClicked(node: any) {
-    this.nodeClick.emit(node);
   }
 
-  expendCollapsedToggle(node: any){
-    if(node.children && Object.keys(node.children).length > 0){ 
+  expendCollapsedToggle(node: any) {
+    if (node.children && Object.keys(node.children).length > 0) {
       this.isCollapsed = !this.isCollapsed;
     }
+  }
+
+  editDashboardClicked(dashboard) {
+    this.editDashboard.emit(dashboard);
+  }
+
+  deleteDashboardClicked(dashboard) {
+    this.deleteDashboard.emit(dashboard);
+  }
+
+  public onDragDrop(event: CdkDragDrop<any, any>): void {
+    this.itemDrop.emit(event);
   }
 }

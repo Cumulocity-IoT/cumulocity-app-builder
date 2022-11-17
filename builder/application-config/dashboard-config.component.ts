@@ -16,7 +16,7 @@
 * limitations under the License.
  */
 
-import { ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, Renderer2 } from "@angular/core";
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, Renderer2 } from "@angular/core";
 import { ApplicationService, InventoryService, IApplication, IManagedObject } from "@c8y/client";
 import { Observable, from, Subject, Subscription } from "rxjs";
 import { debounceTime, filter, map, switchMap, tap } from "rxjs/operators";
@@ -37,7 +37,7 @@ import { SettingsService } from './../../builder/settings/settings.service';
 import { AlertMessageModalComponent } from "./../../builder/utils/alert-message-modal/alert-message-modal.component";
 import { AccessRightsService } from "./../../builder/access-rights.service";
 import { DOCUMENT } from "@angular/common";
-
+import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 
 export interface DashboardConfig {
     id: string,
@@ -67,7 +67,8 @@ export interface DashboardHierarchyModal {
 
 @Component({
     templateUrl: './dashboard-config.component.html',
-    styleUrls: ['./dashboard-config.component.less']
+    styleUrls: ['./dashboard-config.component.less'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardConfigComponent implements OnInit, OnDestroy {
     newAppName: string;
@@ -76,8 +77,8 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     isDashboardCatalogEnabled: boolean = true;
     private globalRoles = [];
 
-
     filterValue = '';
+    filterValueForTree = '';
 
     app: Observable<any>;
 
@@ -92,14 +93,16 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     currentDashboardId: any;
     dashboardId: any;
     appBuilderDashboards: any[];
-    dashboardHierarchy = {children: {}, node: {}};
+    dashboardHierarchy = { id: {}, children: {}, node: {} } as any;
+    defaultListView = '1';
+    newDashboards = [];
 
     constructor(
         private appIdService: AppIdService, private appService: ApplicationService, private appStateService: AppStateService,
         private brandingService: BrandingService, private inventoryService: InventoryService, private navigation: AppBuilderNavigationService,
         private modalService: BsModalService, private alertService: AlertService, private settingsService: SettingsService,
         private accessRightsService: AccessRightsService,
-        @Inject(DOCUMENT) private document: Document, private renderer: Renderer2
+        @Inject(DOCUMENT) private document: Document, private renderer: Renderer2, private cd: ChangeDetectorRef
     ) {
         this.app = this.appIdService.appIdDelayedUntilAfterLogin$.pipe(
             switchMap(appId => from(
@@ -116,7 +119,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
             .pipe(debounceTime(500))
             .subscribe(async app => {
                 await this.appService.update(app);
-                this.prepareDashboardHierarchy(app);
+                //await this.prepareDashboardHierarchy(app);
                 this.navigation.refresh();
                 // TODO?
                 //this.tabs.refresh();
@@ -132,6 +135,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     }
 
     async ngOnInit() {
+        this.defaultListView = '1';
         let count = 0;
         this.app.subscribe(app => {
             if (app.applicationBuilder.dashboards.length !== 0) {
@@ -144,19 +148,22 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
                         }
                     }
                 });
+                if (this.defaultListView === '1') {
+                    this.prepareDashboardHierarchy(app);
+                }
             } else {
                 this.autoLockDashboard = false;
             }
             this.filteredDashboardList = app.applicationBuilder.dashboards;
         });
-        
+
         this.isDashboardCatalogEnabled = await this.settingsService.isDashboardCatalogEnabled();
         this.globalRoles = await this.accessRightsService.getAllGlobalRoles();
     }
 
     private prepareDashboardHierarchy(app: any) {
-        this.dashboardHierarchy = {children: {}, node:[]};
-        app.applicationBuilder.dashboards.forEach(async (element) => {
+        this.dashboardHierarchy = { id: '-1', children: {}, node: [] };
+        app.applicationBuilder.dashboards.forEach(async (element, index) => {
             const path = element.name.split('/').filter(pathSegment => pathSegment != '');
             const currentHierarchyNode = path.reduce((parent, segment, j) => {
                 if (!parent.children[segment] || (j == path.length - 1)) {
@@ -165,6 +172,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
                         title: segment
                     };
                     parent.children[segment] = {
+                        id: (index++).toString(),
                         children: {},
                         ...navNode
                     };
@@ -172,8 +180,21 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
                 return parent.children[segment];
             }, this.dashboardHierarchy);
         });
-        console.log(this.dashboardHierarchy);
+        this.dashboardHierarchy.children = Object.values(this.dashboardHierarchy.children);
+        this.dashboardHierarchy.children = this.convertToArray(this.dashboardHierarchy.children);
+        this.cd.detectChanges();
     }
+
+    convertToArray(dashboards) {
+        dashboards.forEach((db: any) => {
+            if (db.children) {
+                db.children = Object.values(db.children);
+                this.convertToArray(db.children);
+            }
+        });
+        return dashboards;
+    }
+
     private alertModalDialog(message: any): BsModalRef {
         return this.modalService.show(AlertMessageModalComponent, { class: 'c8y-wizard', initialState: { message } });
     }
@@ -212,6 +233,8 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
                     id: application.id,
                     applicationBuilder: application.applicationBuilder
                 } as any);
+                this.filteredDashboardList = [...application.applicationBuilder.dashboards];
+                this.prepareDashboardHierarchy(application);
                 if (application.applicationBuilder.dashboards.length === 0) {
                     this.autoLockDashboard = false;
                 }
@@ -231,6 +254,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
                 id: app.id,
                 applicationBuilder: app.applicationBuilder
             });
+            this.prepareDashboardHierarchy(app);
         }
     }
 
@@ -308,6 +332,9 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
                             }
                         }
                     });
+                    this.prepareDashboardHierarchy(app);
+                    this.filteredDashboardList = [...app.applicationBuilder.dashboards];
+                    this.cd.detectChanges();
                 });
             }
         });
@@ -348,6 +375,12 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
                     })
                 }
             });
+            this.bsModalRef.content.onSave.subscribe((isReloadRequired: boolean) => {
+                if (isReloadRequired) {
+                    this.prepareDashboardHierarchy(this.bsModalRef.content.app);
+                    this.filteredDashboardList = [...this.bsModalRef.content.app.applicationBuilder.dashboards];
+                }
+            });
         }
     }
 
@@ -356,6 +389,9 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
         this.bsModalRef.content.onSave.subscribe((isReloadRequired: boolean) => {
             if (isReloadRequired) {
                 location.reload();
+                if (this.defaultListView === '1') {
+                    this.prepareDashboardHierarchy(app);
+                }
             }
         });
     }
@@ -385,6 +421,30 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
         } else {
             this.filteredDashboardList = [...app.applicationBuilder.dashboards];
         }
+    }
+
+    searchInTreeDashboard(app) {
+        if (this.filterValueForTree) {
+            this.dashboardHierarchy.children = this.search(this.dashboardHierarchy.children);
+        } else {
+            this.prepareDashboardHierarchy(app);
+        }
+    }
+    contains(text: string): boolean {
+        return text.toLowerCase().indexOf(this.filterValueForTree.toLowerCase()) >= 0;
+    }
+
+    search(dashboards) {
+        return dashboards.reduce((res, node) => {
+            if (this.contains(node.dashboard.id) || this.contains(node.dashboard.name) || this.contains(node.dashboard.icon) || this.contains(node.dashboard.tabGroup) || this.contains(node.dashboard.visibility)) {
+                res.push(node);
+            } else if (node.children && node.children.length > 0) {
+                let arr = this.search(node.children);
+                if (arr.length > 0)
+                    res.push({children: arr, id: node.id, dashboard: node.dashboard});
+            }
+            return res;
+        }, []);
     }
 
     lockAllDashboards(app, checked) {
@@ -445,4 +505,150 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
         }
 
     }
+
+    // Tree List View
+    displayList(value, app) {
+        this.cd.detectChanges();
+        this.defaultListView = value;
+    }
+
+    updateDashboardStructure() {
+        let dashboards = {} as any;
+        dashboards = this.setDBName(this.dashboardHierarchy.children);
+        this.newDashboards = [];
+        this.getAllDashboards(dashboards);
+        this.app.subscribe((app) => {
+            app.applicationBuilder.dashboards = [...this.newDashboards];
+            this.delayedAppUpdateSubject.next({
+                id: app.id,
+                applicationBuilder: app.applicationBuilder
+            });
+        });
+        this.cd.detectChanges();
+    }
+
+    setDBName(dashboards) {
+        dashboards.forEach((db: any) => {
+            if (db.children.length > 0) {
+                db.children.forEach((childDB: any) => {
+                    childDB.dashboard.name = db.dashboard.name + '/' + childDB.title;
+                    if (childDB.children.length > 0) {
+                        childDB.children.forEach((subchildDB: any) => {
+                            subchildDB.dashboard.name = childDB.dashboard.name + '/' + subchildDB.title;
+                            this.setDBName(subchildDB.children);
+                        });
+                    }
+                });
+            }
+        });
+        return dashboards;
+    }
+
+    editDashboardClicked(dashboard) {
+        let index = -1;
+        this.newDashboards = [];
+        this.getAllDashboards(this.dashboardHierarchy.children);
+        index = this.newDashboards.findIndex(db => db.id === dashboard.id);
+        this.app.subscribe((app) => {
+            if (dashboard.templateDashboard) {
+                this.showTemplateDashboardEditModalDialog(app, dashboard, index);
+            }
+            this.bsModalRef = this.modalService.show(EditDashboardModalComponent, {
+                class: 'c8y-wizard',
+                initialState: {
+                    app,
+                    globalRoles: this.globalRoles,
+                    dashboardID: dashboard.id,
+                    dashboardName: dashboard.name,
+                    dashboardVisibility: dashboard.visibility || '',
+                    dashboardIcon: dashboard.icon,
+                    deviceId: dashboard.deviceId,
+                    tabGroup: dashboard.tabGroup,
+                    roles: dashboard.roles,
+                    ...(dashboard.groupTemplate ? {
+                        dashboardType: 'group-template'
+                    } : {
+                        dashboardType: 'standard'
+                    })
+                }
+            });
+            this.bsModalRef.content.onSave.subscribe((isReloadRequired: boolean) => {
+                if (isReloadRequired) {
+                    this.prepareDashboardHierarchy(this.bsModalRef.content.app);
+                    this.filteredDashboardList = [...this.bsModalRef.content.app.applicationBuilder.dashboards];
+                }
+            });
+        });
+    }
+
+    async deleteDashboardClicked(dashboard) {
+        const alertMessage = {
+            title: 'Delete Dashboard',
+            description: `You are about to delete this dashboard. This operation is irreversible. Do you want to proceed?`,
+            type: 'danger',
+            alertType: 'confirm', //info|confirm,
+            confirmPrimary: true //confirm Button is primary
+        }
+        const deleteDemoDialogRef = this.alertModalDialog(alertMessage);
+        await deleteDemoDialogRef.content.event.subscribe(async data => {
+            if (data && data.isConfirm) {
+                this.newDashboards = [];
+                this.getAllDashboards(this.dashboardHierarchy.children);
+                let index = this.newDashboards.findIndex(db => db.id === dashboard.id);
+                this.newDashboards.splice(index, 1);
+                this.app.subscribe(async (app) => {
+                    app.applicationBuilder.dashboards = [...this.newDashboards];
+                    await this.appService.update({
+                        id: app.id,
+                        applicationBuilder: app.applicationBuilder
+                    } as any);
+                    if (app.applicationBuilder.dashboards.length === 0) {
+                        this.autoLockDashboard = false;
+                    }
+                    this.navigation.refresh();
+                    this.prepareDashboardHierarchy(app);
+                    this.filteredDashboardList = [...this.newDashboards];
+                });
+                // TODO?
+                // this.tabs.refresh();
+            }
+        });
+    }
+
+    getAllDashboards(dashboards: any) {
+        dashboards.forEach((db: any) => {
+            this.newDashboards.push(db.dashboard);
+            this.getAllDashboards(db.children);
+        });
+    }
+
+    public get connectedTo(): string[] {
+        return this.getIdsRecursive(this.dashboardHierarchy).reverse();
+    }
+
+    private getIdsRecursive(node: any): string[] {
+        let ids = [node.id];
+        node.children.forEach(childnode => {
+            ids = ids.concat(this.getIdsRecursive(childnode));
+        });
+        return ids;
+    }
+
+    onDragDrop(event) {
+        if (event.previousContainer === event.container) {
+            moveItemInArray(
+                event.container.data,
+                event.previousIndex,
+                event.currentIndex
+            );
+        } else {
+            transferArrayItem(
+                event.previousContainer.data,
+                event.container.data,
+                event.previousIndex,
+                event.currentIndex
+            );
+        }
+        this.updateDashboardStructure();
+    };
 }
