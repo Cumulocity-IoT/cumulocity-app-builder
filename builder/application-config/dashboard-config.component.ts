@@ -135,7 +135,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     }
 
     async ngOnInit() {
-        this.defaultListView = '1';
+        this.defaultListView = '2';
         let count = 0;
         this.app.subscribe(app => {
             if (app.applicationBuilder.dashboards.length !== 0) {
@@ -362,6 +362,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
                     app,
                     globalRoles: this.globalRoles,
                     index,
+                    dashboardID: dashboard.id,
                     dashboardName: dashboard.name,
                     dashboardVisibility: dashboard.visibility || '',
                     dashboardIcon: dashboard.icon,
@@ -409,11 +410,12 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
         if (this.filterValue) {
             this.filteredDashboardList = [...app.applicationBuilder.dashboards];
             this.filteredDashboardList = this.filteredDashboardList.filter(x => {
-                return x.id.includes(this.filterValue) ||
-                    x.name.toLowerCase().includes(this.filterValue.toLowerCase()) ||
-                    x.icon.toLowerCase().includes(this.filterValue.toLowerCase()) ||
-                    x.tabGroup.toLowerCase().includes(this.filterValue.toLowerCase()) ||
-                    x.visibility.toLowerCase().includes(this.filterValue.toLowerCase()) ||
+                return (x.id && x.id.includes(this.filterValue)) ||
+                    (x.name && x.name.toLowerCase().includes(this.filterValue.toLowerCase())) ||
+                    (x.icon && x.icon.toLowerCase().includes(this.filterValue.toLowerCase()) )||
+                    (x.tabGroup && x.tabGroup.toLowerCase().includes(this.filterValue.toLowerCase())) ||
+                    (x.visibility && x.visibility.toLowerCase().includes(this.filterValue.toLowerCase())) ||
+                    (x.deviceId && x.deviceId.toLowerCase().includes(this.filterValue.toLowerCase())) ||
                     (x.roles && x.roles.forEach(role => {
                         role.name.toLowerCase().includes(this.filterValue.toLowerCase())
                     }));
@@ -431,17 +433,20 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
         }
     }
     contains(text: string): boolean {
-        return text.toLowerCase().indexOf(this.filterValueForTree.toLowerCase()) >= 0;
+        return text.toLowerCase().includes(this.filterValueForTree.toLowerCase());
     }
 
     search(dashboards) {
         return dashboards.reduce((res, node) => {
-            if (this.contains(node.dashboard.id) || this.contains(node.dashboard.name) || this.contains(node.dashboard.icon) || this.contains(node.dashboard.tabGroup) || this.contains(node.dashboard.visibility)) {
+            if ((node.dashboard.id && this.contains(node.dashboard.id)) || (node.dashboard.name && this.contains(node.dashboard.name)) || (node.dashboard.icon && this.contains(node.dashboard.icon)) || (node.dashboard.tabGroup && this.contains(node.dashboard.tabGroup)) || (node.dashboard.visibility && this.contains(node.dashboard.visibility))
+            || (node.dashboard.deviceId && this.contains(node.dashboard.deviceId)) ||(node.dashboard.roles && node.dashboard.roles.forEach(role => {
+                (role.name && this.contains(role.name))
+            }))) {
                 res.push(node);
             } else if (node.children && node.children.length > 0) {
                 let arr = this.search(node.children);
                 if (arr.length > 0)
-                    res.push({children: arr, id: node.id, dashboard: node.dashboard});
+                    res.push({children: arr, id: node.id, dashboard: node.dashboard, title: node.title});
             }
             return res;
         }, []);

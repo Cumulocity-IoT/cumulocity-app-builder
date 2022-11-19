@@ -43,7 +43,10 @@
     opacity: 0;
     padding-left: 15px;
 }
-.c8y-list__item {
-    height: 100%;
-    /*max-height: 40px;*/
+
+.item .c8y-list__item__body {
+    padding-bottom: 0px !important;
+}
+div.collapse div.c8y-list__item__collapse--container > c8y-li-collapse.children0 {
+    visibility: hidden;
 }

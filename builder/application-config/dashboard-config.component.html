@@ -136,7 +136,8 @@
                     <div class="flex-grow" *ngIf="app.applicationBuilder.dashboards?.length && defaultListView === '1'">
                         <div class="d-flex-md m-l-0-xs separator-bottom row"
                             style="min-height: 45px;margin-top: -20px">
-                            <div class="flex-grow border-right font-bold align-center col-xs-12 col-md-2">Path</div>
+                            <div class="flex-grow border-right font-bold align-center col-xs-12 col-sm-1" style="width:5%" ></div>
+                            <div class="flex-grow border-right font-bold col-xs-12 col-md-2" style="padding-left: 60px;margin:auto;">Path</div>
                             <div class="flex-grow border-right font-bold align-center col-xs-12 col-md-2">Dashboard ID</div>
                             <div class="flex-grow border-right font-bold align-center col-xs-12 col-md-1">Visibility</div>
                             <div class="flex-grow border-right font-bold align-center col-xs-12 col-md-1">Tab Group</div>
@@ -147,10 +148,10 @@
                             </div>
                         </div>
                         <div class="">
-                            <div cdkDropList [id]="'-1'" [cdkDropListData]="dashboardHierarchy.children"
+                            <div class="outer-div" cdkDropList [id]="'-1'" [cdkDropListData]="dashboardHierarchy.children"
                                 [cdkDropListConnectedTo]="connectedTo" (cdkDropListDropped)="onDragDrop($event)">
                                 <ng-container *ngFor="let node of dashboardHierarchy.children | keyvalue">
-                                    <c8y-dashboard-node [node]="node.value" [connectedTo]="connectedTo"
+                                    <c8y-dashboard-node [node]="node.value" [depth]="0" [connectedTo]="connectedTo"
                                         (itemDrop)="onDragDrop($event)" (editDashboard)="editDashboardClicked($event)"
                                         (deleteDashboard)="deleteDashboardClicked($event)">
                                     </c8y-dashboard-node>

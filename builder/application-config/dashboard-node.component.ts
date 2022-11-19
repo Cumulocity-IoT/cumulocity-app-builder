@@ -28,11 +28,11 @@ import { Component, Input, OnInit, Output, EventEmitter, Inject, ChangeDetection
 })
 export class DashboardNodeComponent implements OnInit {
   @Input() node: any;
+  @Input() depth: number;
   @Output() editDashboard = new EventEmitter<any>();
   @Output() deleteDashboard = new EventEmitter<any>();
   @Input() connectedTo: string[];
   @Output() itemDrop: EventEmitter<CdkDragDrop<any>>;
-  depth = 0;
 
   constructor(@Inject(DOCUMENT) private document: Document) { this.itemDrop = new EventEmitter(); }
 
