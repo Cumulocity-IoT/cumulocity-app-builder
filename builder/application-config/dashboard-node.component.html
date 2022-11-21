@@ -3,23 +3,23 @@
   <div class="item" cdkDrag cdkDropList [id]="node.id" [cdkDropListData]="node.children"
     [attr.aria-expanded]="!isCollapsed" [cdkDropListConnectedTo]="connectedTo" (cdkDropListDropped)="onDragDrop($event)"
     [ngClass]="!isCollapsed ? 'expanded': ''">
-    <c8y-li style="box-shadow:none;">
+    <c8y-li #li style="box-shadow:none;">
       <c8y-li-body>
         <div class="row d-flex-md m-l-0-xs" [ngStyle]="{ 'margin-left.px': depth * -8 + -12}">
-          <div class="col-sm-1" style="width:4%"></div>
+          <div class="col-xs-12 col-sm-1" style="width:4%"></div>
           <div class="col-xs-12 col-md-2">
             <i [c8yIcon]="node?.dashboard.icon ? node?.dashboard.icon : 'dashboard'">
             </i>
             <span style="margin-left:20px;">{{ node.title | translate }}</span>
           </div>
-          <div class="col-xs-12 col-md-2" style="padding-left: 65px;">
+          <div class="col-xs-12 col-md-2" style="text-align: center;">
             {{ node.dashboard.id }}
           </div>
-          <div class="col-xs-12 col-md-1" style="text-align: center; margin-left:5px;">
+          <div class="col-xs-12 col-md-1" style="text-align: center;">
             {{node.dashboard.visibility === 'no-nav' ? 'Tabs Only' : node.dashboard.visibility === 'hidden' ? 'Hidden':
             node.dashboard.visibility}}
           </div>
-          <div class="col-xs-12 col-md-1" style="text-align: center;margin-left:5px;">
+          <div class="col-xs-12 col-md-1" style="text-align: center;">
             {{ node.dashboard.tabGroup }}
           </div>
           <div class="col-xs-12 col-md-2" style="text-align: center;">
@@ -27,10 +27,10 @@
               {{role.name}} <br>
             </span>
           </div>
-          <div class="col-xs-12 col-md-1" style="text-align: center;">
+          <div class="col-xs-12 col-md-1" style="text-align: left;">
             {{node.dashboard.groupTemplate ? 'Children of: ' :''}}{{node.dashboard.deviceId || '-'}}
           </div>
-          <div class="col-xs-12 col-md-2" style="text-align: center;margin-top:-6px;margin-left:60px;">
+          <div class="col-xs-12 col-md-2" style="text-align: center;margin-top:-6px;">
             <button class="btn btn-default" id="editDashboardButton-{{node.dashboard.id}}"
               (click)="editDashboardClicked(node.dashboard)">Edit</button>
             <button class="btn btn-default" id="deleteDashboardButton-{{node.dashboard.id}}"
@@ -41,17 +41,15 @@
           </div>
         </div>
       </c8y-li-body>
-        <c8y-li-collapse>
-          <ng-container *ngFor="let node of node.children | keyvalue">
-            <c8y-dashboard-node class="sub-node" [node]="node.value" [depth]="depth + 1" [connectedTo]="connectedTo"
-              (itemDrop)="onDragDrop($event)" (editDashboard)="editDashboardClicked($event)"
-              (deleteDashboard)="deleteDashboardClicked($event)">
-            </c8y-dashboard-node>
-          </ng-container>
-          <!-- <div class="sub-child" [collapse]="isCollapsed" [isAnimated]="true">
-          
-        </div> -->
-        </c8y-li-collapse>
+      <c8y-li-collapse *ngIf="node.children.length > 0">
+        <ng-container *ngFor="let node of node.children | keyvalue">
+          <c8y-dashboard-node class="sub-node" [node]="node.value" [depth]="depth + 1" [connectedTo]="connectedTo"
+            (itemDrop)="onDragDrop($event)" (editDashboard)="editDashboardClicked($event)"
+            (deleteDashboard)="deleteDashboardClicked($event)">
+          </c8y-dashboard-node>
+        </ng-container>
+      </c8y-li-collapse>
+      <c8y-li-collapse *ngIf="node.children.length === 0"></c8y-li-collapse>
     </c8y-li>
   </div>
 </ng-container>

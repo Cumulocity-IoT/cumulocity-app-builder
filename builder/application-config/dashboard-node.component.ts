@@ -18,7 +18,7 @@
 
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { DOCUMENT } from '@angular/common';
-import { Component, Input, OnInit, Output, EventEmitter, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnInit, Output, EventEmitter, Inject, ChangeDetectionStrategy, AfterViewInit } from '@angular/core';
 
 @Component({
   selector: 'c8y-dashboard-node',

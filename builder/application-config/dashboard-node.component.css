@@ -47,6 +47,10 @@
 .item .c8y-list__item__body {
     padding-bottom: 0px !important;
 }
-div.collapse div.c8y-list__item__collapse--container > c8y-li-collapse.children0 {
-    visibility: hidden;
+
+.invisible-button {
+    float: right;
+    margin-right: -16px;
+    position: relative;
+    margin-top: -40px;
 }
