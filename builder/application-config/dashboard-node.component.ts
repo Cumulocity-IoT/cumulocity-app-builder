@@ -59,4 +59,12 @@ export class DashboardNodeComponent implements OnInit {
   public onDragDrop(event: CdkDragDrop<any, any>): void {
     this.itemDrop.emit(event);
   }
+
+  hasChildren() {
+    if (this.node.children.length > 0) {
+      return 'visibleTrue';
+    } else {
+      return 'visibleFalse';
+    }
+  }
 }
