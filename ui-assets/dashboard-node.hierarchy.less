@@ -1,8 +1,6 @@
-
-
 /* new components */
 .outer-div {
-  .expanded .c8y-list__item > div {
+  .expanded .c8y-list__item>div {
     position: relative;
 
     &::after {
@@ -16,7 +14,7 @@
     }
   }
 
-  .c8y-list__item > .expanded {
+  .c8y-list__item>.expanded {
     &::before {
       content: '';
       left: 0;
@@ -36,6 +34,7 @@
       background-color: var(--component-background);
     }
   }
+
   .expanded nested-list:first-child .c8y-list__item {
     .c8y-list__item__block {
       .separator-top-bottom();
@@ -50,10 +49,8 @@
 
   .expanded .collapse-btn:not([aria-expanded='true']) {
     transform: unset;
-    opacity: var(
-      --component-actions-opacity,
-      var(--root-component-actions-opacity, 0.5)
-    ) !important;
+    opacity: var(--component-actions-opacity,
+        var(--root-component-actions-opacity, 0.5)) !important;
 
     &:hover {
       opacity: 1 !important;
@@ -64,16 +61,20 @@
     transform: rotate(180deg);
     opacity: 1 !important;
   }
-  .c8y-list__item--double-actions .c8y-list__item__actions > * {
+
+  .c8y-list__item--double-actions .c8y-list__item__actions>* {
     margin-left: auto;
   }
-  
+
   .c8y-list__item__body:first-child {
     padding-left: 0px;
   }
-}
 
+  .visibleTrue .c8y-list__item__actions .collapse-btn {
+    visibility: visible !important;
+  }
 
-[hidden] {
-  display: none !important;
+  .visibleFalse .c8y-list__item__actions .collapse-btn {
+    visibility: hidden !important;
+  }
 }

@@ -1,8 +1,8 @@
 <!-- Include the child assets using another <ul> -->
 <ng-container>
-  <div class="item" cdkDrag cdkDropList [id]="node.id" [cdkDropListData]="node.children"
-    [attr.aria-expanded]="!isCollapsed" [cdkDropListConnectedTo]="connectedTo" (cdkDropListDropped)="onDragDrop($event)"
-    [ngClass]="!isCollapsed ? 'expanded': ''">
+  <div class="item" cdkDrag cdkDropList [id]="node.id" [cdkDropListData]="node.children" 
+    [cdkDropListConnectedTo]="connectedTo" (cdkDropListDropped)="onDragDrop($event)"
+    [ngClass]="hasChildren()">
     <c8y-li #li style="box-shadow:none;">
       <c8y-li-body>
         <div class="row d-flex-md m-l-0-xs" [ngStyle]="{ 'margin-left.px': depth * -8 + -12}">
@@ -41,7 +41,7 @@
           </div>
         </div>
       </c8y-li-body>
-      <c8y-li-collapse *ngIf="node.children.length > 0">
+      <c8y-li-collapse>
         <ng-container *ngFor="let node of node.children | keyvalue">
           <c8y-dashboard-node class="sub-node" [node]="node.value" [depth]="depth + 1" [connectedTo]="connectedTo"
             (itemDrop)="onDragDrop($event)" (editDashboard)="editDashboardClicked($event)"
@@ -49,7 +49,6 @@
           </c8y-dashboard-node>
         </ng-container>
       </c8y-li-collapse>
-      <c8y-li-collapse *ngIf="node.children.length === 0"></c8y-li-collapse>
     </c8y-li>
   </div>
 </ng-container>
