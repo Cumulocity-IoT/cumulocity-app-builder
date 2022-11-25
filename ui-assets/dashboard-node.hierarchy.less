@@ -1,6 +1,6 @@
 /* new components */
 .outer-div {
-  .expanded .c8y-list__item>div {
+  .expanded .list-item {
     position: relative;
 
     &::after {
@@ -13,20 +13,27 @@
       z-index: 5;
     }
   }
+  
 
-  .c8y-list__item>.expanded {
+  .expanded {
     &::before {
       content: '';
       left: 0;
       top: 0;
       position: absolute;
-      bottom: 25px;
+      bottom: 29px;
       border-left: 1px solid @brand-primary-light;
       z-index: 5;
     }
   }
 
-  .c8y-list__item {
+  .sub-child-container {
+    padding: 8px 0 0px 8px;
+    //background-image: none;
+    //background-color: var(--component-expanded-background);
+  }
+
+  /*.c8y-list__item {
     position: relative;
 
     &__block {
@@ -76,5 +83,5 @@
 
   .visibleFalse .c8y-list__item__actions .collapse-btn {
     visibility: hidden !important;
-  }
+  }*/
 }

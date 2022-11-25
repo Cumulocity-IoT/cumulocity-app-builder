@@ -40,6 +40,7 @@ export class DashboardNodeComponent implements OnInit {
   isCollapsed = true;
 
   ngOnInit() {
+    this.isCollapsed = true;
   }
 
   expendCollapsedToggle(node: any) {

@@ -412,7 +412,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
             this.filteredDashboardList = this.filteredDashboardList.filter(x => {
                 return (x.id && x.id.includes(this.filterValue)) ||
                     (x.name && x.name.toLowerCase().includes(this.filterValue.toLowerCase())) ||
-                    (x.icon && x.icon.toLowerCase().includes(this.filterValue.toLowerCase()) )||
+                    (x.icon && x.icon.toLowerCase().includes(this.filterValue.toLowerCase())) ||
                     (x.tabGroup && x.tabGroup.toLowerCase().includes(this.filterValue.toLowerCase())) ||
                     (x.visibility && x.visibility.toLowerCase().includes(this.filterValue.toLowerCase())) ||
                     (x.deviceId && x.deviceId.toLowerCase().includes(this.filterValue.toLowerCase())) ||
@@ -439,14 +439,14 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     search(dashboards) {
         return dashboards.reduce((res, node) => {
             if ((node.dashboard.id && this.contains(node.dashboard.id)) || (node.dashboard.name && this.contains(node.dashboard.name)) || (node.dashboard.icon && this.contains(node.dashboard.icon)) || (node.dashboard.tabGroup && this.contains(node.dashboard.tabGroup)) || (node.dashboard.visibility && this.contains(node.dashboard.visibility))
-            || (node.dashboard.deviceId && this.contains(node.dashboard.deviceId)) ||(node.dashboard.roles && node.dashboard.roles.forEach(role => {
-                (role.name && this.contains(role.name))
-            }))) {
+                || (node.dashboard.deviceId && this.contains(node.dashboard.deviceId)) || (node.dashboard.roles && node.dashboard.roles.forEach(role => {
+                    (role.name && this.contains(role.name))
+                }))) {
                 res.push(node);
             } else if (node.children && node.children.length > 0) {
                 let arr = this.search(node.children);
                 if (arr.length > 0)
-                    res.push({children: arr, id: node.id, dashboard: node.dashboard, title: node.title});
+                    res.push({ children: arr, id: node.id, dashboard: node.dashboard, title: node.title });
             }
             return res;
         }, []);
@@ -536,13 +536,8 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
         dashboards.forEach((db: any) => {
             if (db.children.length > 0) {
                 db.children.forEach((childDB: any) => {
-                    childDB.dashboard.name = db.dashboard.name + '/' + childDB.title;
-                    if (childDB.children.length > 0) {
-                        childDB.children.forEach((subchildDB: any) => {
-                            subchildDB.dashboard.name = childDB.dashboard.name + '/' + subchildDB.title;
-                            this.setDBName(subchildDB.children);
-                        });
-                    }
+                    childDB.dashboard.name = db.title + '/' + childDB.title;
+                    this.setDBName(childDB.children);
                 });
             }
         });
@@ -614,6 +609,9 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
                     this.prepareDashboardHierarchy(app);
                     this.filteredDashboardList = [...this.newDashboards];
                 });
+                
+                this.navigation.refresh();
+                this.cd.detectChanges();
                 // TODO?
                 // this.tabs.refresh();
             }
@@ -622,8 +620,20 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
 
     getAllDashboards(dashboards: any) {
         dashboards.forEach((db: any) => {
-            this.newDashboards.push(db.dashboard);
-            this.getAllDashboards(db.children);
+            if (db.children.length === 0) {
+                this.newDashboards.push(db.dashboard);
+            }
+            if (db.children.length > 0) {
+                this.newDashboards.push(db.dashboard);
+                db.children.forEach((childDB: any) => {
+                    if (db.dashboard.id !== childDB.dashboard.id) {
+                        this.newDashboards.push(childDB.dashboard);
+                    } else {
+                        return;
+                    }
+                    this.getAllDashboards(childDB.children);
+                });
+            }
         });
     }
 

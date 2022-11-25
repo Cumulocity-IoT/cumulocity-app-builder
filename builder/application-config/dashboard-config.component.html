@@ -84,7 +84,7 @@
                 <div class="card-header">
                     <h4 translate>Dashboards</h4>
                     <div class="c8y-select-wrapper" style="margin-left: 20px;">
-                        <select class="form-control" [(ngModel)]="defaultListView" style="border-radius:20px;"
+                        <select class="form-control" [(ngModel)]="defaultListView" style="border-radius:20px;" id="dashboardView"
                             (change)="displayList($event.target.value, app)">
                             <option value="1">Tree View</option>
                             <option value="2">List View</option>
@@ -134,23 +134,24 @@
                             (click)="showCreateDashboardDialog(app)">Add dashboard</button>
                     </div>
                     <div class="flex-grow" *ngIf="app.applicationBuilder.dashboards?.length && defaultListView === '1'">
-                        <div class="d-flex-md separator-bottom row"
-                            style="min-height: 45px;margin-top: -20px;margin-left:0px;margin-right:0px;">
-                            <div class="flex-grow border-right font-bold align-center col-xs-12 col-sm-1" style="width:4%" ></div>
-                            <div class="flex-grow border-right font-bold align-center col-xs-12 col-md-2">Path</div>
-                            <div class="flex-grow border-right font-bold align-center col-xs-12 col-md-2">Dashboard ID</div>
-                            <div class="flex-grow border-right font-bold align-center col-xs-12 col-md-1">Visibility</div>
-                            <div class="flex-grow border-right font-bold align-center col-xs-12 col-md-1">Tab Group</div>
-                            <div class="flex-grow border-right font-bold align-center col-xs-12 col-md-2">Global Roles</div>
-                            <div class="flex-grow border-right font-bold align-center col-xs-12 col-md-1">Device(s)</div>
-                            <div class="flex-grow border-right invisible col-xs-12 col-md-3"><button
-                                    class="btn btn-default">Edit</button><button class="btn btn-default">Delete</button>
+                        <div style="margin-top:-20px;min-height: 45px;display: flex;margin-left: -12px;">
+                            <div style="width:4%"></div>
+                            <div class="font-bold col"><div style="padding-top:15px;">Path</div></div>
+                            <div class="font-bold col"><div style="padding-top:15px;">Dashboard ID</div></div>
+                            <div class="font-bold col"><div style="padding-top:15px;">Visibility</div></div>
+                            <div class="font-bold col"><div style="padding-top:15px;">Tab Group</div></div>
+                            <div class="font-bold col"><div style="padding-top:15px;">Global Roles</div></div>
+                            <div class="font-bold col"><div style="padding-top:15px;">Device(s)</div></div>
+                            <div class="invisible col">
+                                <button class="btn btn-default">Edit</button>
+                                <button class="btn btn-default">Delete</button>
                             </div>
+                            <div class="col"></div>
                         </div>
                         <div class="">
                             <div class="outer-div" cdkDropList [id]="'-1'" [cdkDropListData]="dashboardHierarchy.children"
                                 [cdkDropListConnectedTo]="connectedTo" (cdkDropListDropped)="onDragDrop($event)">
-                                <ng-container *ngFor="let node of dashboardHierarchy.children | keyvalue">
+                                <ng-container *ngFor="let node of dashboardHierarchy.children | keyvalue;first as isFirst">
                                     <c8y-dashboard-node [node]="node.value" [depth]="0" [connectedTo]="connectedTo"
                                         (itemDrop)="onDragDrop($event)" (editDashboard)="editDashboardClicked($event)"
                                         (deleteDashboard)="deleteDashboardClicked($event)">
