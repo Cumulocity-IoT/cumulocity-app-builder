@@ -96,6 +96,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     dashboardHierarchy = { id: {}, children: {}, node: {} } as any;
     defaultListView = '1';
     newDashboards = [];
+    appBuilderObject: any;
 
     constructor(
         private appIdService: AppIdService, private appService: ApplicationService, private appStateService: AppStateService,
@@ -514,34 +515,50 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     // Tree List View
     displayList(value, app) {
         this.cd.detectChanges();
+        this.appBuilderObject = app;
         this.defaultListView = value;
     }
 
     updateDashboardStructure() {
-        let dashboards = {} as any;
-        dashboards = this.setDBName(this.dashboardHierarchy.children);
+        console.log('Actual Data', this.dashboardHierarchy)
+       // let dashboards = [...this.dashboardHierarchy];
+        let dbs = this.setDBName(this.dashboardHierarchy.children);
         this.newDashboards = [];
-        this.getAllDashboards(dashboards);
-        this.app.subscribe((app) => {
-            app.applicationBuilder.dashboards = [...this.newDashboards];
-            this.delayedAppUpdateSubject.next({
-                id: app.id,
-                applicationBuilder: app.applicationBuilder
-            });
+        console.log('After DB Name Re-structure',dbs);
+        this.getAllDashboards(dbs);
+        console.log('After Get All Dashboards',this.newDashboards);
+        this.appBuilderObject.applicationBuilder.dashboards = [...this.newDashboards];
+        this.delayedAppUpdateSubject.next({
+            id: this.appBuilderObject.id,
+            applicationBuilder: this.appBuilderObject.applicationBuilder
         });
+        this.prepareDashboardHierarchy(this.appBuilderObject);
+        this.filteredDashboardList = this.appBuilderObject.applicationBuilder.dashboards;
+        this.navigation.refresh();
         this.cd.detectChanges();
     }
 
     setDBName(dashboards) {
-        dashboards.forEach((db: any) => {
-            if (db.children.length > 0) {
-                db.children.forEach((childDB: any) => {
-                    childDB.dashboard.name = db.title + '/' + childDB.title;
-                    this.setDBName(childDB.children);
-                });
+        if (dashboards.length > 0) {
+            dashboards.forEach((dashboard: any) => {
+                dashboard.dashboard.name = dashboard.title;
+                if (dashboard.children.length > 0) {
+                    this.setChildDBName(dashboard);
+                }
+            });
+        }
+        return dashboards;
+    }
+
+    setChildDBName(dashboard) {
+        dashboard.children.forEach((childDB: any) => {
+            childDB.dashboard.name = dashboard.title + '/' + childDB.title;
+            childDB.title = childDB.dashboard.name;
+            if (childDB.children.length > 0) {
+                this.setChildDBName(childDB);
             }
         });
-        return dashboards;
+        return dashboard;
     }
 
     editDashboardClicked(dashboard) {
@@ -549,35 +566,33 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
         this.newDashboards = [];
         this.getAllDashboards(this.dashboardHierarchy.children);
         index = this.newDashboards.findIndex(db => db.id === dashboard.id);
-        this.app.subscribe((app) => {
-            if (dashboard.templateDashboard) {
-                this.showTemplateDashboardEditModalDialog(app, dashboard, index);
+        if (dashboard.templateDashboard) {
+            this.showTemplateDashboardEditModalDialog(this.appBuilderObject, dashboard, index);
+        }
+        this.bsModalRef = this.modalService.show(EditDashboardModalComponent, {
+            class: 'c8y-wizard',
+            initialState: {
+                app: this.appBuilderObject,
+                globalRoles: this.globalRoles,
+                dashboardID: dashboard.id,
+                dashboardName: dashboard.name,
+                dashboardVisibility: dashboard.visibility || '',
+                dashboardIcon: dashboard.icon,
+                deviceId: dashboard.deviceId,
+                tabGroup: dashboard.tabGroup,
+                roles: dashboard.roles,
+                ...(dashboard.groupTemplate ? {
+                    dashboardType: 'group-template'
+                } : {
+                    dashboardType: 'standard'
+                })
             }
-            this.bsModalRef = this.modalService.show(EditDashboardModalComponent, {
-                class: 'c8y-wizard',
-                initialState: {
-                    app,
-                    globalRoles: this.globalRoles,
-                    dashboardID: dashboard.id,
-                    dashboardName: dashboard.name,
-                    dashboardVisibility: dashboard.visibility || '',
-                    dashboardIcon: dashboard.icon,
-                    deviceId: dashboard.deviceId,
-                    tabGroup: dashboard.tabGroup,
-                    roles: dashboard.roles,
-                    ...(dashboard.groupTemplate ? {
-                        dashboardType: 'group-template'
-                    } : {
-                        dashboardType: 'standard'
-                    })
-                }
-            });
-            this.bsModalRef.content.onSave.subscribe((isReloadRequired: boolean) => {
-                if (isReloadRequired) {
-                    this.prepareDashboardHierarchy(this.bsModalRef.content.app);
-                    this.filteredDashboardList = [...this.bsModalRef.content.app.applicationBuilder.dashboards];
-                }
-            });
+        });
+        this.bsModalRef.content.onSave.subscribe((isReloadRequired: boolean) => {
+            if (isReloadRequired) {
+                this.prepareDashboardHierarchy(this.bsModalRef.content.app);
+                this.filteredDashboardList = [...this.bsModalRef.content.app.applicationBuilder.dashboards];
+            }
         });
     }
 
@@ -596,20 +611,17 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
                 this.getAllDashboards(this.dashboardHierarchy.children);
                 let index = this.newDashboards.findIndex(db => db.id === dashboard.id);
                 this.newDashboards.splice(index, 1);
-                this.app.subscribe(async (app) => {
-                    app.applicationBuilder.dashboards = [...this.newDashboards];
-                    await this.appService.update({
-                        id: app.id,
-                        applicationBuilder: app.applicationBuilder
-                    } as any);
-                    if (app.applicationBuilder.dashboards.length === 0) {
-                        this.autoLockDashboard = false;
-                    }
-                    this.navigation.refresh();
-                    this.prepareDashboardHierarchy(app);
-                    this.filteredDashboardList = [...this.newDashboards];
-                });
-                
+                this.appBuilderObject.applicationBuilder.dashboards = [...this.newDashboards];
+                await this.appService.update({
+                    id: this.appBuilderObject.id,
+                    applicationBuilder: this.appBuilderObject.applicationBuilder
+                } as any);
+                if (this.appBuilderObject.applicationBuilder.dashboards.length === 0) {
+                    this.autoLockDashboard = false;
+                }
+                this.navigation.refresh();
+                this.prepareDashboardHierarchy(this.appBuilderObject);
+                this.filteredDashboardList = [...this.newDashboards];
                 this.navigation.refresh();
                 this.cd.detectChanges();
                 // TODO?

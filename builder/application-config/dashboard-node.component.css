@@ -1,6 +1,6 @@
 /*** angular cdk-drop  ***/
 .cdk-drop-list-dragging {
-    background: #f2f3f4;
+    background: rgba(0, 0, 0, 0.2);
 }
 
 .cdk-drag-preview {
@@ -22,10 +22,10 @@
     transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
 
-.item .sub-child {
-    /*margin: 1rem;*/
+/*.item .sub-child {
+    margin: 1rem;
     padding-top: 5rem;
-}
+}*/
 
 .sub-child:last-child {
     border: none;
@@ -33,7 +33,7 @@
 
 .item {
     position: relative;
-    cursor: move;
+    cursor: pointer;
     /*border: 2px solid lightgrey;
     background-color: whitesmoke;
     border-radius: 10px;
@@ -55,6 +55,12 @@
     flex: 1;
 }
 
-div.sub-child.collapse.in.show {
-    padding: 0px !important;
+/*div.sub-child.collapse.in.show {
+    padding: 40px 0px 0px !important;
+}*/
+
+.column-overflow {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }

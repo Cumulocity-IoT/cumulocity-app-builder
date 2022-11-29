@@ -4,42 +4,40 @@
     [ngClass]="!isCollapsed ? 'expanded': ''" [attr.aria-expanded]="!isCollapsed" [cdkDropListConnectedTo]="connectedTo"
     (cdkDropListDropped)="onDragDrop($event)">
     <div class="list-item">
-      <div [ngStyle]="{ 'margin-left.px': depth * -8 + -12}" style="padding-top: 10px;display: flex;">
-        <div style="width:4%"></div>
-        <div class="col">
+      <div [ngStyle]="{ 'margin-left.px': depth * -8 + -12}" style="padding-top: 10px;display: block;white-space: nowrap;text-overflow: ellipsis;overflow: hidden;" (click)="expendCollapsedToggle(node)">
+        <div class="col-sm-1" style="width:4%"></div>
+        <div class="col-sm-2 column-overflow">
           <i [c8yIcon]="node?.dashboard.icon ? node?.dashboard.icon : 'dashboard'">
           </i>
           <span style="margin-left:20px;">{{ node.title | translate }}</span>
         </div>
-        <div class="col" style="text-align: left;" id="dashboard-id-{{node.title}}">
+        <div class="col-sm-2 column-overflow" id="dashboard-id-{{node.title}}">
           {{ node.dashboard.id }}
         </div>
-        <div class="col" style="text-align: left;">
+        <div class="col-sm-1 column-overflow">
           {{node.dashboard.visibility === 'no-nav' ? 'Tabs Only' : node.dashboard.visibility === 'hidden' ? 'Hidden':
           node.dashboard.visibility}}
         </div>
-        <div class="col" style="text-align: left;">
+        <div class="col-sm-1 column-overflow">
           {{ node.dashboard.tabGroup }}
         </div>
-        <div class="col" style="text-align: left;">
+        <div class="col-sm-1 column-overflow">
           <span *ngFor="let role of node.dashboard.roles" title="{{role.name}}">
             {{role.name}} <br>
           </span>
         </div>
-        <div class="col" style="text-align: left;">
+        <div class="col-sm-2 column-overflow">
           {{node.dashboard.groupTemplate ? 'Children of: ' :''}}{{node.dashboard.deviceId || '-'}}
         </div>
-        <div class="col" style="text-align: right;">
+        <div class="col-sm-2">
           <button class="btn btn-default" id="editDashboardButton-{{node.dashboard.id}}"
             (click)="editDashboardClicked(node.dashboard)">Edit</button>
           <button class="btn btn-default" id="deleteDashboardButton-{{node.dashboard.id}}"
             (click)="deleteDashboardClicked(node.dashboard)">Delete</button>
         </div>
-        <div class="col">
-          <i (click)="expendCollapsedToggle(node)" [ngClass]="node.children.length === 0 ? 'empty-space': ''"
-            style="float: right;margin:5px;" id="collapse-button"
-            [c8yIcon]="node.children && objectKeys(node.children).length > 0  ?  (!isCollapsed ?  'collapse-arrow': 'expand-arrow') : '' "></i>
-        </div>
+        <i [ngClass]="node.children.length === 0 ? 'empty-space': ''"
+          style="float: right;margin:5px;cursor: pointer;" id="collapse-button"
+          [c8yIcon]="node.children && objectKeys(node.children).length > 0  ?  (!isCollapsed ?  'collapse-arrow': 'expand-arrow') : '' "></i>
       </div>
       <ng-container *ngFor="let node of node.children | keyvalue">
         <div class="sub-child" [collapse]="isCollapsed">

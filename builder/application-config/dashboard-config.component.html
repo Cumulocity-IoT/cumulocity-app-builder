@@ -134,19 +134,18 @@
                             (click)="showCreateDashboardDialog(app)">Add dashboard</button>
                     </div>
                     <div class="flex-grow" *ngIf="app.applicationBuilder.dashboards?.length && defaultListView === '1'">
-                        <div style="margin-top:-20px;min-height: 45px;display: flex;margin-left: -12px;">
-                            <div style="width:4%"></div>
-                            <div class="font-bold col"><div style="padding-top:15px;">Path</div></div>
-                            <div class="font-bold col"><div style="padding-top:15px;">Dashboard ID</div></div>
-                            <div class="font-bold col"><div style="padding-top:15px;">Visibility</div></div>
-                            <div class="font-bold col"><div style="padding-top:15px;">Tab Group</div></div>
-                            <div class="font-bold col"><div style="padding-top:15px;">Global Roles</div></div>
-                            <div class="font-bold col"><div style="padding-top:15px;">Device(s)</div></div>
-                            <div class="invisible col">
+                        <div style="margin-top:-10px;min-height: 63px;display: block;margin-left: -12px;">
+                            <div class="col-sm-1" style="width:4%"></div>
+                            <div class="font-bold col-sm-2"><div style="padding-top:15px;">Path</div></div>
+                            <div class="font-bold col-sm-2"><div style="padding-top:15px;">Dashboard ID</div></div>
+                            <div class="font-bold col-sm-1"><div style="padding-top:15px;">Visibility</div></div>
+                            <div class="font-bold col-sm-1"><div style="padding-top:15px;">Tab Group</div></div>
+                            <div class="font-bold col-sm-1"><div style="padding-top:15px;">Global Roles</div></div>
+                            <div class="font-bold col-sm-2"><div style="padding-top:15px;">Device(s)</div></div>
+                            <div class="invisible col-sm-2">
                                 <button class="btn btn-default">Edit</button>
                                 <button class="btn btn-default">Delete</button>
                             </div>
-                            <div class="col"></div>
                         </div>
                         <div class="">
                             <div class="outer-div" cdkDropList [id]="'-1'" [cdkDropListData]="dashboardHierarchy.children"
