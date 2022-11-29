@@ -520,8 +520,6 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     }
 
     updateDashboardStructure() {
-        console.log('Actual Data', this.dashboardHierarchy)
-       // let dashboards = [...this.dashboardHierarchy];
         let dbs = this.setDBName(this.dashboardHierarchy.children);
         this.newDashboards = [];
         console.log('After DB Name Re-structure',dbs);
@@ -540,24 +538,24 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
 
     setDBName(dashboards) {
         if (dashboards.length > 0) {
-            dashboards.forEach((dashboard: any) => {
-                dashboard.dashboard.name = dashboard.title;
-                if (dashboard.children.length > 0) {
-                    this.setChildDBName(dashboard);
+            for (let db of dashboards) {
+                db.dashboard.name = db.title;
+                if (db.children.length > 0) {
+                    this.setChildDBName(db);
                 }
-            });
+            }
         }
         return dashboards;
     }
 
     setChildDBName(dashboard) {
-        dashboard.children.forEach((childDB: any) => {
+        for (let childDB of dashboard.children) {
             childDB.dashboard.name = dashboard.title + '/' + childDB.title;
             childDB.title = childDB.dashboard.name;
             if (childDB.children.length > 0) {
                 this.setChildDBName(childDB);
             }
-        });
+        }
         return dashboard;
     }
 
