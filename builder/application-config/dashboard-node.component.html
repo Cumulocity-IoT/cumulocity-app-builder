@@ -3,8 +3,7 @@
   <div class="item" cdkDrag cdkDropList [id]="node.id" [cdkDropListData]="node.children"
     [ngClass]="!isCollapsed ? 'expanded': ''" [attr.aria-expanded]="!isCollapsed" [cdkDropListConnectedTo]="connectedTo"
     (cdkDropListDropped)="onDragDrop($event)">
-    <div class="list-item">
-      <div [ngStyle]="{ 'margin-left.px': depth * -8 + -12}" style="padding-top: 10px;display: block;white-space: nowrap;text-overflow: ellipsis;overflow: hidden;" (click)="expendCollapsedToggle(node)">
+      <div class=" node-item" [ngStyle]="{ 'margin-left.px': depth * -8 + -12}" (click)="expendCollapsedToggle(node)">
         <div class="col-sm-1" style="width:4%"></div>
         <div class="col-sm-2 column-overflow">
           <i [c8yIcon]="node?.dashboard.icon ? node?.dashboard.icon : 'dashboard'">
@@ -39,16 +38,14 @@
           style="float: right;margin:5px;cursor: pointer;" id="collapse-button"
           [c8yIcon]="node.children && objectKeys(node.children).length > 0  ?  (!isCollapsed ?  'collapse-arrow': 'expand-arrow') : '' "></i>
       </div>
+   
       <ng-container *ngFor="let node of node.children | keyvalue">
         <div class="sub-child" [collapse]="isCollapsed">
-          <div class="sub-child-container">
             <c8y-dashboard-node [node]="node.value" [depth]="depth + 1" [connectedTo]="connectedTo"
               (itemDrop)="onDragDrop($event)" (editDashboard)="editDashboardClicked($event)"
               (deleteDashboard)="deleteDashboardClicked($event)">
             </c8y-dashboard-node>
-          </div>
         </div>
       </ng-container>
-    </div>
   </div>
 </ng-container>
