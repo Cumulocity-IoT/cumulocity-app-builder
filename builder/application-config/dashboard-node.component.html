@@ -3,7 +3,7 @@
   <div class="item" cdkDrag cdkDropList [id]="node.id" [cdkDropListData]="node.children"
     [ngClass]="!isCollapsed ? 'expanded': ''" [attr.aria-expanded]="!isCollapsed" [cdkDropListConnectedTo]="connectedTo"
     (cdkDropListDropped)="onDragDrop($event)">
-      <div class=" node-item" [ngStyle]="{ 'margin-left.px': depth * -8 + -12}" (click)="expendCollapsedToggle(node)">
+      <div class=" node-item" [ngStyle]="{ 'margin-left.px': depth * -8 + -12}" (click)="expandCollapsedToggle(node)">
         <div class="col-sm-1" style="width:4%"></div>
         <div class="col-sm-2 column-overflow">
           <i [c8yIcon]="node?.dashboard.icon ? node?.dashboard.icon : 'dashboard'">

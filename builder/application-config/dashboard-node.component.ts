@@ -40,10 +40,11 @@ export class DashboardNodeComponent implements OnInit {
   isCollapsed = true;
 
   ngOnInit() {
+    console.log(this.node);
     this.isCollapsed = true;
   }
 
-  expendCollapsedToggle(node: any) {
+  expandCollapsedToggle(node: any) {
     if (node.children && Object.keys(node.children).length > 0) {
       this.isCollapsed = !this.isCollapsed;
     }
@@ -59,13 +60,5 @@ export class DashboardNodeComponent implements OnInit {
 
   public onDragDrop(event: CdkDragDrop<any, any>): void {
     this.itemDrop.emit(event);
-  }
-
-  hasChildren() {
-    if (this.node.children.length > 0) {
-      return 'visibleTrue';
-    } else {
-      return 'visibleFalse';
-    }
   }
 }
