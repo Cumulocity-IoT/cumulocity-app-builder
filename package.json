@@ -1,6 +1,6 @@
 {
   "name": "app-builder",
-  "version": "1.2.8",
+  "version": "1.2.8-1",
   "description": "Application builder for Cumulocity (written by Software AG Global Presales)",
   "main": "index.ts",
   "scripts": {
@@ -32,7 +32,7 @@
     "@ng-reactive/async-input": "0.0.1",
     "@ng-select/ng-select": "^3.7.3",
     "angular": "1.6.9",
-    "app-builder-external-assets": "file:binary/app-builder-external-assets-1.1.0.tgz",
+    "app-builder-external-assets": "file:binary/app-builder-external-assets-1.1.1.tgz",
     "comlink": "^4.3.0",
     "core-js": "^3.4.0",
     "crypto-js": "^4.0.0",

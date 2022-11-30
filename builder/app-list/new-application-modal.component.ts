@@ -159,7 +159,8 @@ export class NewApplicationModalComponent implements OnInit {
             let isClone = false;
             let appList = (await this.appService.list({pageSize: 2000})).data;
             let appBuilder: any;
-            appBuilder = appList.find((app: any) => app.contextPath === contextPathFromURL() && app.availability === 'PRIVATE');
+            appBuilder = appList.find((app: any) => app.contextPath === contextPathFromURL() && (app.availability === 'PRIVATE' || 
+            (app.owner && app.owner.tenant && this.settingsService.getTenantName() === app.owner.tenant.id)));
             let existingAppBuilderId: any = '';
             if(appBuilder) { existingAppBuilderId = appBuilder.id; }
 
@@ -175,7 +176,7 @@ export class NewApplicationModalComponent implements OnInit {
                     appList = (await this.appService.list({pageSize: 2000})).data;
                     appBuilder = appList.find((app: any) => app.contextPath && app.contextPath.indexOf('app-builder') !== -1 && app.availability === 'PRIVATE');
                     isClone =  true;
-                    if(!appBuilderMarket) 
+                    if(!appBuilder) 
                         throw Error('Could not find application builder');
                 }
             }

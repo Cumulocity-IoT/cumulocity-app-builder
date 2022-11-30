@@ -29,12 +29,15 @@ import { Alert, AlertService } from "@c8y/ngx-components";
 import { RuntimeWidgetInstallerService } from "cumulocity-runtime-widget-loader";
 import { AppBuilderExternalAssetsService } from 'app-builder-external-assets';
 import { DashboardConfig } from "builder/application-config/dashboard-config.component";
+import { catchError } from 'rxjs/operators';
 
 @Injectable()
 export class TemplateCatalogService {
 
     private GATEWAY_URL = '';
+    private GATEWAY_URL_FallBack = '';
     private CATALOG_LABCASE_ID = '';
+    private isFallBackActive = false;
 
     constructor(private http: HttpClient, private inventoryService: InventoryService,
         private appService: ApplicationService, private navigation: AppBuilderNavigationService,
@@ -42,11 +45,23 @@ export class TemplateCatalogService {
         private runtimeWidgetInstallerService: RuntimeWidgetInstallerService,
         private externalService: AppBuilderExternalAssetsService) {
         this.GATEWAY_URL = this.externalService.getURL('DBCATALOG', 'gatewayURL');
+        this.GATEWAY_URL_FallBack = this.externalService.getURL('DBCATALOG', 'gatewayURL_Fallback');
         this.CATALOG_LABCASE_ID = this.externalService.getURL('DBCATALOG', 'labcaseId');
     }
 
     getTemplateCatalog(): Observable<TemplateCatalogEntry[]> {
-        return this.http.get(`${this.GATEWAY_URL}${this.CATALOG_LABCASE_ID}`).pipe(map(response => {
+        let url = `${this.GATEWAY_URL}${this.CATALOG_LABCASE_ID}`;
+        return this.getDataForTemplateCatalog(url);
+    }
+
+    getTemplateCatalogFallBack(): Observable<TemplateCatalogEntry[]> {
+        let url = `${this.GATEWAY_URL_FallBack}${this.CATALOG_LABCASE_ID}`;
+        this.isFallBackActive = true;
+        return this.getDataForTemplateCatalog(url);
+    }
+
+    getDataForTemplateCatalog(url: string): Observable<TemplateCatalogEntry[]> {
+        return this.http.get(`${url}`).pipe(map(response => {
             if (!has(response, 'catalog')) {
                 console.error('Failed to load catalog');
                 return undefined;
@@ -73,6 +88,13 @@ export class TemplateCatalogService {
             return dashboard;
         }));
     }
+    getTemplateDetailsFallBack(dashboardId: string): Observable<TemplateDetails> {
+        let url = `${this.GATEWAY_URL_FallBack}${dashboardId}`;
+        this.isFallBackActive = true;
+        return this.http.get(`${url}`).pipe(map((dashboard: TemplateDetails) => {
+            return dashboard;
+        }));
+    }
 
     async installWidget(binary: Blob) {
         await this.runtimeWidgetInstallerService.installWidget(binary, (msg, type) => { });
@@ -82,7 +104,12 @@ export class TemplateCatalogService {
     downloadBinary(binaryId: string): Observable<ArrayBuffer> {
         return this.http.get(`${this.GATEWAY_URL}${binaryId}`, {
             responseType: 'arraybuffer'
-        });
+        }).pipe(catchError(err => {
+            console.log('Template Catalog: Download Binary: Error in primary endpoint! using fallback...');
+            return this.http.get(`${this.GATEWAY_URL_FallBack}${binaryId}`, {
+              responseType: 'arraybuffer'
+            })
+        }));
     }
 
     uploadImage(image: File): Promise<string> {
@@ -197,6 +224,12 @@ export class TemplateCatalogService {
     }
 
     private downloadBinaryFromRepository(binaryId: string): Observable<HttpResponse<Blob>> {
+        if(this.isFallBackActive) {
+            return this.http.get(`${this.GATEWAY_URL_FallBack}${binaryId}`, {
+                responseType: 'blob',
+                observe: 'response'
+            });
+        }
         return this.http.get(`${this.GATEWAY_URL}${binaryId}`, {
             responseType: 'blob',
             observe: 'response'

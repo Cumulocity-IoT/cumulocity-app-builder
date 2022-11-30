@@ -25,6 +25,7 @@ import { TemplateCatalogService } from "./template-catalog.service";
 import { AlertService, DynamicComponentDefinition, DynamicComponentService } from "@c8y/ngx-components";
 import { Observable, Subject } from "rxjs";
 import { ProgressIndicatorModalComponent } from "../utils/progress-indicator-modal/progress-indicator-modal.component";
+import { catchError } from 'rxjs/operators';
 
 import './cumulocity.json';
 
@@ -87,7 +88,12 @@ export class TemplateCatalogModalComponent implements OnInit {
 
     loadTemplateCatalog(): void {
         this.showLoadingIndicator();
-        this.catalogService.getTemplateCatalog().subscribe((catalog: Array<TemplateCatalogEntry>) => {
+        this.catalogService.getTemplateCatalog()
+        .pipe(catchError(err => {
+            console.log('Dashboard Catalog: Error in primary endpoint! using fallback...');
+            return this.catalogService.getTemplateCatalogFallBack()
+        }))
+        .subscribe((catalog: Array<TemplateCatalogEntry>) => {
             this.hideLoadingIndicator();
             this.templates = catalog;
             this.filterTemplates =  (this.templates ? this.templates : []);
@@ -105,7 +111,11 @@ export class TemplateCatalogModalComponent implements OnInit {
 
     loadTemplateDetails(template: TemplateCatalogEntry): void {
         this.showLoadingIndicator();
-        this.catalogService.getTemplateDetails(template.dashboard).subscribe(templateDetails => {
+        this.catalogService.getTemplateDetails(template.dashboard)
+        .pipe(catchError(err => {
+            console.log('Dashboard Catalog Details: Error in primary endpoint! using fallback...');
+            return this.catalogService.getTemplateDetailsFallBack(template.dashboard)
+        })).subscribe(templateDetails => {
             this.hideLoadingIndicator();
             this.templateDetails = templateDetails;
             this.updateDepedencies();
