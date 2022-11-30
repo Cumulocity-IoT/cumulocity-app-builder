@@ -62,7 +62,8 @@ export interface DashboardConfig {
 export interface DashboardHierarchyModal {
     dashboard?: DashboardConfig,
     title?: string,
-    children?: DashboardHierarchyModal
+    children?: DashboardHierarchyModal,
+    isDashboard?: boolean;
 }
 
 @Component({
@@ -170,24 +171,33 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
                 if (!parent.children[segment] || (j == path.length - 1)) {
                     const navNode: DashboardHierarchyModal = {
                         dashboard: element,
-                        title: segment
+                        title: segment,
+                        isDashboard: (path[path.length - 1] === segment) 
                     };
-                    parent.children[segment] = {
-                        id: (index++).toString(),
-                        children: {},
-                        ...navNode
-                    };
-                    if (parent && parent.dashboard && parent.children && (parent.dashboard.id === parent.children[segment].dashboard.id)) {
+                    if(parent.children[segment]) {
+                        parent.children[segment] = {
+                            ...parent.children[segment],
+                            ...navNode
+                        }
+                    }else {
+                        parent.children[segment] = {
+                            id: (index++).toString(),
+                            children: {},
+                            ...navNode
+                        };
+                    }
+                    /* if (parent && parent.dashboard && parent.children && (parent.dashboard.id === parent.children[segment].dashboard.id)) {
                       // let parentObj = JSON.parse(JSON.stringify(parent));
                        parent.dashboard.id = '';
                        //parent = JSON.parse(JSON.stringify(parentObj));
-                    }
+                    } */
                 }
                 return parent.children[segment];
             }, this.dashboardHierarchy);
         });
         this.dashboardHierarchy.children = Object.values(this.dashboardHierarchy.children);
         this.dashboardHierarchy.children = this.convertToArray(this.dashboardHierarchy.children);
+        
        // let updatedDB = this.checkForDuplicateDashboards(this.dashboardHierarchy.children);
        // this.dashboardHierarchy.children = await this.checkForDuplicateDashboards(this.dashboardHierarchy.children);
         this.cd.detectChanges();
