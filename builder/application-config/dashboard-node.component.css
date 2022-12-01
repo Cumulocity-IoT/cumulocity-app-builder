@@ -1,10 +1,8 @@
 /*** angular cdk-drop  ***/
-.cdk-drop-list-dragging {
-    background: rgba(0, 0, 0, 0.2);
-}
 
 .cdk-drag-preview {
     box-sizing: border-box;
+    display: block;
     border-radius: 4px;
     box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
         0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
@@ -18,7 +16,7 @@
     transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
 
-.item.cdk-drop-list-dragging .example-box:not(.cdk-drag-placeholder) {
+.item.cdk-drop-list-dragging .item:not(.cdk-drag-placeholder) {
     transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
 
@@ -35,30 +33,23 @@
 .item {
     position: relative;
     cursor: pointer;
-    background-color: #f8f8f8;
+    background-color: #fff;
     margin-top: 15px;
     margin-bottom: 15px;
     padding-top: 15px;
     padding-bottom: 15px;
     display: block;
-    /*max-height: 40px;*/
-    border-top: 1px solid rgba(88, 101, 109, 0.1);
-    /*  min-height: 50px;  */
+    border: 1px solid rgba(88, 101, 109, 0.1);
 }
 
+.cdk-drop-list-dragging {
+  border: 1px double #000;
+}
 .empty-space {
     visibility: hidden;
     opacity: 0;
     padding-left: 15px;
 }
-
-.col {
-    flex: 1;
-}
-
-/*div.sub-child.collapse.in.show {
-    padding: 40px 0px 0px !important;
-}*/
 
 .column-overflow {
     white-space: nowrap;
@@ -67,11 +58,7 @@
 }
 
 .node-item {
-    /* padding-top: 10px;
-    display: block; 
-    white-space: nowrap;
-    text-overflow: ellipsis; */
     overflow: hidden;
-   /*  min-height: 10px; */
+    min-height: 10px;
     cursor: pointer;
 }
