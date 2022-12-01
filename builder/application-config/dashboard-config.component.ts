@@ -121,7 +121,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
             .pipe(debounceTime(500))
             .subscribe(async app => {
                 await this.appService.update(app);
-                //await this.prepareDashboardHierarchy(app);
+                await this.prepareDashboardHierarchy(app);
                 this.navigation.refresh();
                 // TODO?
                 //this.tabs.refresh();
@@ -150,9 +150,6 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
                         }
                     }
                 });
-                if (this.defaultListView === '1') {
-                    this.prepareDashboardHierarchy(app);
-                }
             } else {
                 this.autoLockDashboard = false;
             }
@@ -172,34 +169,26 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
                     const navNode: DashboardHierarchyModal = {
                         dashboard: element,
                         title: segment,
-                        isDashboard: (path[path.length - 1] === segment) 
+                        isDashboard: (path[path.length - 1] === segment)
                     };
-                    if(parent.children[segment]) {
+                    if (parent.children[segment]) {
                         parent.children[segment] = {
                             ...parent.children[segment],
                             ...navNode
                         }
-                    }else {
+                    } else {
                         parent.children[segment] = {
                             id: (index++).toString(),
                             children: {},
                             ...navNode
                         };
                     }
-                    /* if (parent && parent.dashboard && parent.children && (parent.dashboard.id === parent.children[segment].dashboard.id)) {
-                      // let parentObj = JSON.parse(JSON.stringify(parent));
-                       parent.dashboard.id = '';
-                       //parent = JSON.parse(JSON.stringify(parentObj));
-                    } */
                 }
                 return parent.children[segment];
             }, this.dashboardHierarchy);
         });
         this.dashboardHierarchy.children = Object.values(this.dashboardHierarchy.children);
         this.dashboardHierarchy.children = this.convertToArray(this.dashboardHierarchy.children);
-        
-       // let updatedDB = this.checkForDuplicateDashboards(this.dashboardHierarchy.children);
-       // this.dashboardHierarchy.children = await this.checkForDuplicateDashboards(this.dashboardHierarchy.children);
         this.cd.detectChanges();
     }
 
@@ -208,24 +197,6 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
             if (db.children) {
                 db.children = Object.values(db.children);
                 this.convertToArray(db.children);
-            }
-        });
-        return dashboards;
-    }
-
-    checkForDuplicateDashboards(dashboards) {
-        dashboards.forEach((parentdb: any) => {
-            if (parentdb.children.length > 0) {
-                parentdb.children.forEach((childDB: any) => {
-                    if (parentdb.dashboard.id === childDB.dashboard.id) {
-                        //let parentObj = JSON.parse(JSON.stringify(parentdb));
-                        parentdb.dashboard.id = '';
-                       // parentdb = JSON.parse(JSON.stringify(parentObj));
-                    }
-                    if (childDB.children.length > 0) {
-                        this.checkForDuplicateDashboards(childDB.children);
-                    }
-                });
             }
         });
         return dashboards;
@@ -557,9 +528,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     updateDashboardStructure() {
         let dbs = this.setDBName(this.dashboardHierarchy.children);
         this.newDashboards = [];
-        console.log('After DB Name Re-structure', dbs);
         this.getAllDashboards(dbs);
-        console.log('After Get All Dashboards', this.newDashboards);
         this.appBuilderObject.applicationBuilder.dashboards = [...this.newDashboards];
         this.delayedAppUpdateSubject.next({
             id: this.appBuilderObject.id,
@@ -574,7 +543,9 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     setDBName(dashboards) {
         if (dashboards.length > 0) {
             for (let db of dashboards) {
-                db.dashboard.name = db.title;
+                if (db.isDashboard) {
+                    db.dashboard.name = db.title;
+                }
                 if (db.children.length > 0) {
                     this.setChildDBName(db);
                 }
@@ -585,8 +556,16 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
 
     setChildDBName(dashboard) {
         for (let childDB of dashboard.children) {
-            childDB.dashboard.name = dashboard.title + '/' + childDB.title;
-            childDB.title = childDB.dashboard.name;
+            if (dashboard.isDashboard) {
+                childDB.dashboard.name = dashboard.title + '/' + childDB.title;
+                childDB.title = childDB.dashboard.name;
+            } else if (!dashboard.isDashboard && childDB.isDashboard) {
+                childDB.dashboard.name = dashboard.title + '/' + childDB.title;
+                childDB.title = childDB.dashboard.name;
+            } else if (!dashboard.isDashboard && !childDB.isDashboard && childDB.children.length > 0) {
+                childDB.dashboard.name = dashboard.title + '/' + childDB.title;
+                childDB.title = childDB.dashboard.name;
+            } 
             if (childDB.children.length > 0) {
                 this.setChildDBName(childDB);
             }
@@ -666,15 +645,17 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     getAllDashboards(dashboards: any) {
         dashboards.forEach((db: any) => {
             if (db.children.length === 0) {
-                this.newDashboards.push(db.dashboard);
+                if (db.isDashboard) {
+                    this.newDashboards.push(db.dashboard);
+                }
             }
             if (db.children.length > 0) {
-                this.newDashboards.push(db.dashboard);
+                if (db.isDashboard) {
+                    this.newDashboards.push(db.dashboard);
+                }
                 db.children.forEach((childDB: any) => {
-                    if (db.dashboard.id !== childDB.dashboard.id) {
+                    if (childDB.isDashboard) {
                         this.newDashboards.push(childDB.dashboard);
-                    } else {
-                        return;
                     }
                     this.getAllDashboards(childDB.children);
                 });

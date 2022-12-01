@@ -10,25 +10,25 @@
           </i>
           <span style="margin-left:20px;">{{ node.title | translate }}</span>
         </div>
-        <div class="col-sm-2 column-overflow" id="dashboard-id-{{node.title}}">
+        <div class="col-sm-2 column-overflow" id="dashboard-id-{{node.title}}" *ngIf="node.isDashboard">
           {{ node.dashboard.id }}
         </div>
-        <div class="col-sm-1 column-overflow">
+        <div class="col-sm-1 column-overflow" *ngIf="node.isDashboard">
           {{node.dashboard.visibility === 'no-nav' ? 'Tabs Only' : node.dashboard.visibility === 'hidden' ? 'Hidden':
           node.dashboard.visibility}}
         </div>
-        <div class="col-sm-1 column-overflow">
+        <div class="col-sm-1 column-overflow" *ngIf="node.isDashboard">
           {{ node.dashboard.tabGroup }}
         </div>
-        <div class="col-sm-1 column-overflow">
+        <div class="col-sm-1 column-overflow" *ngIf="node.isDashboard">
           <span *ngFor="let role of node.dashboard.roles" title="{{role.name}}">
             {{role.name}} <br>
           </span>
         </div>
-        <div class="col-sm-2 column-overflow">
+        <div class="col-sm-2 column-overflow" *ngIf="node.isDashboard">
           {{node.dashboard.groupTemplate ? 'Children of: ' :''}}{{node.dashboard.deviceId || '-'}}
         </div>
-        <div class="col-sm-2">
+        <div class="col-sm-2" *ngIf="node.isDashboard">
           <button class="btn btn-default" id="editDashboardButton-{{node.dashboard.id}}"
             (click)="editDashboardClicked(node.dashboard)">Edit</button>
           <button class="btn btn-default" id="deleteDashboardButton-{{node.dashboard.id}}"

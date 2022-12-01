@@ -40,7 +40,6 @@ export class DashboardNodeComponent implements OnInit {
   isCollapsed = true;
 
   ngOnInit() {
-    console.log(this.node);
     this.isCollapsed = true;
   }
 
