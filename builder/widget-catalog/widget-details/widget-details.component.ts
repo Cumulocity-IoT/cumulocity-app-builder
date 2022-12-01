@@ -82,7 +82,8 @@ export class WidgetDetailsComponent implements OnInit {
             this.description = this.description.replace("## Installation", '');
         this.description = this.description.replace(/\\n/g, "<br />");
         this.description = this.description.replace(/<img[^>]+>/g, "");
-        this.description = this.description.replace(/(?:https?):\/\/[\n\S]+/g, '');
+        console.log(this.description);
+        //this.description = this.description.replace(/(?:https?):\/\/[\n\S]+/g, '');
         if (this.description.match(/### Please(.*?)/g)) {
             if (this.description.match("### Please(.*?)## Features")) {
                 const regex2 = this.description.match("### Please(.*?)## Features");
@@ -102,16 +103,18 @@ export class WidgetDetailsComponent implements OnInit {
         if (this.description.match(/## Prerequisite(.*)/g))
             this.description = this.description.replace("## Prerequisite", "\n#### **Prerequisite**\n");
         if (this.description.match(/## Supported(.*)/g))
-            this.description = this.description.replace("## Supported Cumulocity Environments", "\n#### **Supported Cumulocity Environments**\n");
+            this.description = this.description.replace("## Supported Cumulocity Environments:", "\n#### **Supported Cumulocity Environments**\n");
+        if (this.description.match(/### Version compatibility(.*)/g))
+            this.description = this.description.replace("### Version compatibility", "\n#### **Version compatibility**\n");
         if (this.description.match(/(\|).*?(?=\|)/g))
             this.description = this.description.replace(/(\|).*?(?=\|)/g, '');
         if (this.description.match(/(\().*?(?=\))/g))
             this.description = this.description.replace(/(\().*?(?=\))/g, '');
-        this.description = this.replaceWithEmptyString({ '[](': '', '( />': '', ']': '', '### Please': '', '#/>': '', '"': '', '|': '' });
+        this.description = this.replaceWithEmptyString({ '[](': '', '( />': '', ']': '', '[': '', ')': '', '### Please': '', '#/>': '', '"': '', '|': '' });
     }
     replaceWithEmptyString(obj) {
         for (let x in obj) {
-            this.description = this.description.replace(x, obj[x]);
+            this.description = this.description.replaceAll(x, obj[x]);
         }
         return this.description;
     }
