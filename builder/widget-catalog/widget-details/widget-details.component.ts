@@ -82,7 +82,6 @@ export class WidgetDetailsComponent implements OnInit {
             this.description = this.description.replace("## Installation", '');
         this.description = this.description.replace(/\\n/g, "<br />");
         this.description = this.description.replace(/<img[^>]+>/g, "");
-        console.log(this.description);
         //this.description = this.description.replace(/(?:https?):\/\/[\n\S]+/g, '');
         if (this.description.match(/### Please(.*?)/g)) {
             if (this.description.match("### Please(.*?)## Features")) {
