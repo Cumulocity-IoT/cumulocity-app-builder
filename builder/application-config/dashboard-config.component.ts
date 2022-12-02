@@ -16,7 +16,7 @@
 * limitations under the License.
  */
 
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, Renderer2 } from "@angular/core";
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, Renderer2, ViewChild } from "@angular/core";
 import { ApplicationService, InventoryService, IApplication, IManagedObject } from "@c8y/client";
 import { Observable, from, Subject, Subscription } from "rxjs";
 import { debounceTime, filter, map, switchMap, tap } from "rxjs/operators";
@@ -98,6 +98,9 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     defaultListView = '1';
     newDashboards = [];
     appBuilderObject: any;
+    expandAllDashboards: boolean = true;
+
+    expandEventSubject: Subject<void> = new Subject<void>();
 
     constructor(
         private appIdService: AppIdService, private appService: ApplicationService, private appStateService: AppStateService,
@@ -137,7 +140,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     }
 
     async ngOnInit() {
-        this.defaultListView = '2';
+        this.defaultListView = '1';
         let count = 0;
         this.app.subscribe(app => {
             if (app.applicationBuilder.dashboards.length !== 0) {
@@ -154,6 +157,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
                 this.autoLockDashboard = false;
             }
             this.filteredDashboardList = app.applicationBuilder.dashboards;
+            this.prepareDashboardHierarchy(app);
         });
 
         this.isDashboardCatalogEnabled = await this.settingsService.isDashboardCatalogEnabled();
@@ -694,4 +698,9 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
         }
         this.updateDashboardStructure();
     };
+
+    expandAllNodes() {
+        this.expandAllDashboards = !this.expandAllDashboards;
+        this.expandEventSubject.next();
+    }
 }

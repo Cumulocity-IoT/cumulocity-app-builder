@@ -6,18 +6,19 @@
       <div class=" node-item" [ngStyle]="{ 'margin-left.px': depth * -8 + -12}" (click)="expandCollapsedToggle(node)">
         <div class="col-sm-1" style="width:4%"></div>
         <div class="col-sm-2 column-overflow">
-          <i [c8yIcon]="node?.dashboard.icon ? node?.dashboard.icon : 'dashboard'">
+          <i title="{{node.isDashboard ? node?.dashboard.icon ? node?.dashboard.icon : 'dashboard' : 'folder'}}" [c8yIcon]="node.isDashboard ? node?.dashboard.icon ? node?.dashboard.icon : 'dashboard' : 'folder'">
           </i>
-          <span style="margin-left:20px;">{{ node.title | translate }}</span>
+          <span title={{node.title}} style="margin-left:20px;">{{ node.title | translate }}</span>
         </div>
-        <div class="col-sm-2 column-overflow" id="dashboard-id-{{node.title}}" *ngIf="node.isDashboard">
+        <div class="col-sm-2 column-overflow" title={{node.dashboard.id}} id="dashboard-id-{{node.title}}" *ngIf="node.isDashboard">
           {{ node.dashboard.id }}
         </div>
-        <div class="col-sm-1 column-overflow" *ngIf="node.isDashboard">
+        <div class="col-sm-1 column-overflow" *ngIf="node.isDashboard" 
+        title="{{node.dashboard.visibility === 'no-nav' ? 'Tabs Only' : node.dashboard.visibility === 'hidden' ? 'Hidden': node.dashboard.visibility}}">
           {{node.dashboard.visibility === 'no-nav' ? 'Tabs Only' : node.dashboard.visibility === 'hidden' ? 'Hidden':
           node.dashboard.visibility}}
         </div>
-        <div class="col-sm-1 column-overflow" *ngIf="node.isDashboard">
+        <div class="col-sm-1 column-overflow" *ngIf="node.isDashboard" title="{{ node.dashboard.tabGroup }}">
           {{ node.dashboard.tabGroup }}
         </div>
         <div class="col-sm-1 column-overflow" *ngIf="node.isDashboard">
@@ -25,13 +26,13 @@
             {{role.name}} <br>
           </span>
         </div>
-        <div class="col-sm-2 column-overflow" *ngIf="node.isDashboard">
+        <div class="col-sm-2 column-overflow" *ngIf="node.isDashboard" title="{{node.dashboard.groupTemplate ? 'Children of: ' :''}}{{node.dashboard.deviceId || '-'}}">
           {{node.dashboard.groupTemplate ? 'Children of: ' :''}}{{node.dashboard.deviceId || '-'}}
         </div>
         <div class="col-sm-2" *ngIf="node.isDashboard">
-          <button class="btn btn-default" id="editDashboardButton-{{node.dashboard.id}}"
+          <button class="btn btn-default" id="editDashboardButton-{{node.dashboard.id}}" title="Edit Dashboard"
             (click)="editDashboardClicked(node.dashboard)">Edit</button>
-          <button class="btn btn-default" id="deleteDashboardButton-{{node.dashboard.id}}"
+          <button class="btn btn-default" id="deleteDashboardButton-{{node.dashboard.id}}" title="Delete Dashboard"
             (click)="deleteDashboardClicked(node.dashboard)">Delete</button>
         </div>
         <i [ngClass]="node.children.length === 0 ? 'empty-space': ''"
@@ -43,7 +44,7 @@
         <div class="sub-child" [collapse]="isCollapsed">
             <c8y-dashboard-node [node]="node.value" [depth]="depth + 1" [connectedTo]="connectedTo"
               (itemDrop)="onDragDrop($event)" (editDashboard)="editDashboardClicked($event)"
-              (deleteDashboard)="deleteDashboardClicked($event)">
+              (deleteDashboard)="deleteDashboardClicked($event)" [expandEvent]="expandEventSubject.asObservable()">
             </c8y-dashboard-node>
         </div>
       </ng-container>

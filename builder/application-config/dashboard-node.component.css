@@ -33,17 +33,18 @@
 .item {
     position: relative;
     cursor: pointer;
-    background-color: #fff;
+    background-color: var(--navigator-text-color);
     margin-top: 15px;
     margin-bottom: 15px;
     padding-top: 15px;
     padding-bottom: 15px;
     display: block;
     border: 1px solid rgba(88, 101, 109, 0.1);
+    color: #000;
 }
 
 .cdk-drop-list-dragging {
-  border: 1px double #000;
+  border: 1px double var(--brand-dark);
 }
 .empty-space {
     visibility: hidden;

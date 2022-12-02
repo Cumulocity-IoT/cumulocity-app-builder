@@ -146,14 +146,15 @@
                                 <button class="btn btn-default">Edit</button>
                                 <button class="btn btn-default">Delete</button>
                             </div>
+                            <i [c8yIcon]="!expandAllDashboards ?  'chevron-double-up': 'chevron-double-down'" (click)="expandAllNodes()" class="expandAll" title="{{!expandAllDashboards ?  'Collapse All': 'Expand All'}}"></i>
                         </div>
                         <div class="">
                             <div class="outer-div" cdkDropList [id]="'-1'" [cdkDropListData]="dashboardHierarchy.children"
                                 [cdkDropListConnectedTo]="connectedTo" (cdkDropListDropped)="onDragDrop($event)">
                                 <ng-container *ngFor="let node of dashboardHierarchy.children | keyvalue;first as isFirst">
-                                    <c8y-dashboard-node [node]="node.value" [depth]="0" [connectedTo]="connectedTo"
+                                    <c8y-dashboard-node #expandRef [node]="node.value" [depth]="0" [connectedTo]="connectedTo"
                                         (itemDrop)="onDragDrop($event)" (editDashboard)="editDashboardClicked($event)"
-                                        (deleteDashboard)="deleteDashboardClicked($event)">
+                                        (deleteDashboard)="deleteDashboardClicked($event)" [expandEvent]="expandEventSubject.asObservable()">
                                     </c8y-dashboard-node>
                                 </ng-container>
                             </div>
@@ -200,11 +201,12 @@
                                 </thead>
                                 <tbody>
                                     <tr *ngFor="let item of filteredDashboardList;let i=index;">
-                                        <td style="padding-left: 30px;">{{item.name}}</td>
-                                        <td>{{item.id}}</td>
-                                        <td>{{item.visibility === 'no-nav' ? 'Tabs Only' :
+                                        <td style="padding-left: 30px;" title="{{item.name}}">{{item.name}}</td>
+                                        <td title="{{item.id}}">{{item.id}}</td>
+                                        <td title="{{item.visibility === 'no-nav' ? 'Tabs Only' :
+                                        item.visibility === 'hidden' ? 'Hidden': item.visibility}}">{{item.visibility === 'no-nav' ? 'Tabs Only' :
                                             item.visibility === 'hidden' ? 'Hidden': item.visibility}}</td>
-                                        <td>{{item.tabGroup}}</td>
+                                        <td title="{{item.tabGroup}}">{{item.tabGroup}}</td>
                                         <td><span *ngFor="let role of item.roles" title="{{role.name}}">
                                                 {{role.name}} <br>
                                             </span></td>
@@ -215,11 +217,11 @@
                                         </td>
                                         <td>
                                             <button class="btn btn-default" id="editDashboardButton-{{item.id}}"
-                                                style="float:right;"
+                                                style="float:right;" title="Edit Dashboard"
                                                 (click)="showEditDashboardDialog(app, filteredDashboardList, i)">Edit</button>
                                         </td>
                                         <td>
-                                            <button class="btn btn-default" id="deleteDashboardButton-{{item.id}}"
+                                            <button class="btn btn-default" id="deleteDashboardButton-{{item.id}}" title="Delete Dashboard"
                                                 (click)="deleteDashboard(app, filteredDashboardList, i)">Delete</button>
                                         </td>
                                     </tr>

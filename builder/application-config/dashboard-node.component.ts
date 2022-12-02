@@ -18,7 +18,8 @@
 
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { DOCUMENT } from '@angular/common';
-import { Component, Input, OnInit, Output, EventEmitter, Inject, ChangeDetectionStrategy, AfterViewInit } from '@angular/core';
+import { Component, Input, OnInit, Output, EventEmitter, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Observable, Subject, Subscription } from 'rxjs';
 
 @Component({
   selector: 'c8y-dashboard-node',
@@ -33,7 +34,10 @@ export class DashboardNodeComponent implements OnInit {
   @Output() deleteDashboard = new EventEmitter<any>();
   @Input() connectedTo: string[];
   @Output() itemDrop: EventEmitter<CdkDragDrop<any>>;
-
+  @Input() expandEvent: Observable<void>;
+  private expandEventsSubscription: Subscription;
+  
+  expandEventSubject: Subject<void> = new Subject<void>();
   constructor(@Inject(DOCUMENT) private document: Document) { this.itemDrop = new EventEmitter(); }
 
   objectKeys = Object.keys;
@@ -41,6 +45,7 @@ export class DashboardNodeComponent implements OnInit {
 
   ngOnInit() {
     this.isCollapsed = true;
+    this.expandEventsSubscription = this.expandEvent.subscribe(() => this.expandCollapseAll());
   }
 
   expandCollapsedToggle(node: any) {
@@ -59,5 +64,14 @@ export class DashboardNodeComponent implements OnInit {
 
   public onDragDrop(event: CdkDragDrop<any, any>): void {
     this.itemDrop.emit(event);
+  }
+
+  expandCollapseAll() {
+    this.isCollapsed = !this.isCollapsed;
+    this.expandEventSubject.next();
+  }
+
+  ngOnDestroy() {
+    this.expandEventsSubscription.unsubscribe();
   }
 }
