@@ -165,6 +165,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     }
 
     private prepareDashboardHierarchy(app: any) {
+        this.appBuilderObject = app;
         this.dashboardHierarchy = { id: '-1', children: {}, node: [] };
         app.applicationBuilder.dashboards.forEach(async (element, index) => {
             const path = element.name.split('/').filter(pathSegment => pathSegment != '');
@@ -525,8 +526,10 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     // Tree List View
     displayList(value, app) {
         this.cd.detectChanges();
-        this.appBuilderObject = app;
         this.defaultListView = value;
+        if (this.defaultListView === '1') {
+            this.prepareDashboardHierarchy(app);
+        }
     }
 
     updateDashboardStructure() {
