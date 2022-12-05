@@ -28,16 +28,18 @@ export class AppDataService {
     private appDetails: Observable<any>;
     private appId: string | number = '';
     private lastUpdated = 0; 
+    forceUpdate = false;
     constructor(private appService: ApplicationService) {
     }
 
     getAppDetails(appId: string): Observable<any> {
         const currentTime = Date.now();
-        if(appId && appId !== this.appId) {
+        if(appId && (appId !== this.appId || this.forceUpdate)) {
             this.appId = appId;
-            if(this.lastUpdated == 0 || ( currentTime - this.lastUpdated > this.APP_DETAILS_REFRESH_INTERVAL)){
+            if(this.forceUpdate || this.lastUpdated == 0 || ( currentTime - this.lastUpdated > this.APP_DETAILS_REFRESH_INTERVAL)){
                 this.appDetails = from(this.appService.detail(appId).then(res => res.data as any));
                 this.lastUpdated = Date.now();
+                this.forceUpdate = false;
             }
         }
         return this.appDetails;

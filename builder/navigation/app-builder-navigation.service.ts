@@ -19,7 +19,7 @@
 import {Injectable} from "@angular/core";
 import {NavigatorNode, NavigatorNodeFactory} from "@c8y/ngx-components";
 import {BehaviorSubject, combineLatest, from, of} from "rxjs";
-import {flatMap, map, startWith, switchMap, tap} from "rxjs/operators";
+import {mergeMap, map, startWith, switchMap, tap} from "rxjs/operators";
 import {InventoryService} from "@c8y/client";
 import {AppIdService} from "../app-id.service";
 import {DashboardConfig} from "../application-config/dashboard-config.component";
@@ -38,14 +38,14 @@ export class AppBuilderNavigationService implements NavigatorNodeFactory {
     constructor(private appIdService: AppIdService, private appDataService: AppDataService,
         private accessRightsService: AccessRightsService, private inventoryService: InventoryService) {
         // Listen for appId changes or to forced refreshes and then update the navigation menu
-        combineLatest(appIdService.appIdDelayedUntilAfterLogin$, this.refreshSubject).pipe(
+        combineLatest([appIdService.appIdDelayedUntilAfterLogin$, this.refreshSubject]).pipe(
             map(([appId]) => appId),
             switchMap(appId => {
                 if (appId) {
                     return from(this.appDataService.getAppDetails(appId))
                         .pipe(
                             map(application => application.applicationBuilder.dashboards),
-                            flatMap(dashboards => from(this.dashboardsToNavNodes(appId, dashboards)))
+                            mergeMap(dashboards => from(this.dashboardsToNavNodes(appId, dashboards)))
                         );
                 } else {
                     return of([]);

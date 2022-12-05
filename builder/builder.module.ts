@@ -41,10 +41,8 @@ import { AppListModule, RedirectToDefaultApplicationOrBuilder } from "./app-list
 import { MarkdownModule } from "ngx-markdown";
 import { BrandingDirtyGuardService } from "./branding/branding-dirty-guard.service";
 import { AppListComponent } from "./app-list/app-list.component";
-import { LockStatus } from "./simulator/worker/simulation-lock.service";
 import { fromEvent, Observable } from "rxjs";
 import { distinctUntilChanged, filter, withLatestFrom } from "rxjs/operators";
-import { proxy } from "comlink";
 import { Client , BasicAuth, CookieAuth, TenantService } from '@c8y/client';
 import { TemplateCatalogModule } from "./template-catalog/template-catalog.module";
 import { RectangleSpinnerModule } from "./utils/rectangle-spinner/rectangle-spinner.module";
@@ -63,6 +61,7 @@ import { AppBuilderUpgradeService } from "./app-builder-upgrade/app-builder-upgr
 import { SimulatorWorkerAPI } from "./simulator/mainthread/simulator-worker-api.service";
 import { SimulatorManagerService } from "./simulator/mainthread/simulator-manager.service";
 import { NgSelectModule } from "@ng-select/ng-select";
+import { LockStatus } from "./simulator/mainthread/simulation-lock.service";
 @NgModule({
     imports: [
         ApplicationModule,

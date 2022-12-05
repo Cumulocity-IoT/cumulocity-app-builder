@@ -22,6 +22,7 @@ import {ApplicationService, InventoryService} from '@c8y/client';
 import {WizardComponent} from "../../wizard/wizard.component";
 import {AppBuilderNavigationService} from "../navigation/app-builder-navigation.service";
 import {IApplicationBuilderApplication} from "../iapplication-builder-application";
+import { AppDataService } from '../app-data.service';
 
 @Component({
     templateUrl: './edit-dashboard-modal.component.html'
@@ -45,7 +46,9 @@ export class EditDashboardModalComponent implements OnInit{
 
     @ViewChild(WizardComponent, {static: true}) wizard: WizardComponent;
 
-    constructor(public bsModalRef: BsModalRef, private appService: ApplicationService, private inventoryService: InventoryService, private navigation: AppBuilderNavigationService) {}
+    constructor(public bsModalRef: BsModalRef, private appService: ApplicationService, 
+        private inventoryService: InventoryService, private navigation: AppBuilderNavigationService,
+        private appDataService: AppDataService) {}
     
     async ngOnInit() {
         if(this.deviceId) {
@@ -86,6 +89,7 @@ export class EditDashboardModalComponent implements OnInit{
             id: this.app.id,
             applicationBuilder: this.app.applicationBuilder
         } as any);
+        this.appDataService.forceUpdate = true;
         this.bsModalRef.hide();
         this.navigation.refresh();
         // TODO?

@@ -23,6 +23,7 @@ import {WizardComponent} from "../../wizard/wizard.component";
 import {WELCOME_DASHBOARD_TEMPLATE} from "./dashboard-templates";
 import {HELP_SUPPORT_DASHBOARD_TEMPLATE} from "./help-support-templates";
 import {AppBuilderNavigationService} from "../navigation/app-builder-navigation.service";
+import { AppDataService } from '../app-data.service';
 
 @Component({
     templateUrl: './new-dashboard-modal.component.html'
@@ -47,7 +48,9 @@ export class NewDashboardModalComponent {
 
     @ViewChild(WizardComponent, {static: true}) wizard: WizardComponent;
 
-    constructor(public bsModalRef: BsModalRef, private appService: ApplicationService, private inventoryService: InventoryService, private navigation: AppBuilderNavigationService) {}
+    constructor(public bsModalRef: BsModalRef, private appService: ApplicationService, 
+        private inventoryService: InventoryService, private navigation: AppBuilderNavigationService,
+        private appDataService: AppDataService) {}
 
     showId() {
         switch(this.creationMode) {
@@ -177,6 +180,7 @@ export class NewDashboardModalComponent {
             id: application.id,
             applicationBuilder: application.applicationBuilder
         } as any);
+        this.appDataService.forceUpdate = true;
 
         this.navigation.refresh();
         // TODO?

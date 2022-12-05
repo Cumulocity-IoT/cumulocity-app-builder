@@ -15,7 +15,6 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
  */
-import * as Comlink from "comlink";
 import {Injectable} from "@angular/core";
 import {AppIdService} from "../../app-id.service";
 import {filter} from "rxjs/operators";

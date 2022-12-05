@@ -1,5 +1,4 @@
 import '@c8y/ng1-modules/core';
-import '@c8y/ng1-modules/imageWidget/cumulocity.json';
 import '@c8y/ng1-modules/assetPropertyWidget/cumulocity.json';
 import '@c8y/ng1-modules/devicePropertyWidget/cumulocity.json';
 import '@c8y/ng1-modules/alarms/cumulocity.json';
@@ -29,10 +28,10 @@ import '@c8y/ng1-modules/alarmsEventsExplorer/cumulocity.json';
 import '@c8y/ng1-modules/deviceDatabase4/cumulocity.json';
 import '@c8y/ng1-modules/modbusWidget4/cumulocity.json';
 import '@c8y/ng1-modules/scada/cumulocity.json';
-import '@c8y/ng1-modules/imageWidget/cumulocity.json';
+// import '@c8y/ng1-modules/imageWidget/cumulocity.json';
 import '@c8y/ng1-modules/htmlWidget/cumulocity.json';
 import '@c8y/ng1-modules/applicationLinks/cumulocity.json';
-import '@c8y/ng1-modules/quickLinks/cumulocity.json';
+// import '@c8y/ng1-modules/quickLinks/cumulocity.json';
 import '@c8y/ng1-modules/helpAndSupport/cumulocity.json';
 import '@c8y/ng1-modules/eventList/cumulocity.json';
 // import '@c8y/ng1-modules/export/cumulocity.json';

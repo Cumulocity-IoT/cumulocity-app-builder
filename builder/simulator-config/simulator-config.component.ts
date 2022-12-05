@@ -20,7 +20,6 @@ import { Component, Inject, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import { NewSimulatorModalComponent } from "./new-simulator-modal.component";
 import { EditSimulatorModalComponent } from "./edit-simulator-modal.component";
-import { LOCK_TIMEOUT, LockStatus } from "../simulator/worker/simulation-lock.service";
 import { BehaviorSubject, from, of } from "rxjs";
 import { switchMap} from "rxjs/operators";
 import * as delay from "delay";
@@ -36,6 +35,7 @@ import { DOCUMENT } from '@angular/common';
 import { FileSimulatorNotificationService } from './file-simulator.service';
 import { SimulatorWorkerAPI } from '../simulator/mainthread/simulator-worker-api.service';
 import { AppDataService } from './../../builder/app-data.service';
+import { LockStatus, LOCK_TIMEOUT } from './../../builder/simulator/mainthread/simulation-lock.service';
 @Component({
     templateUrl: './simulator-config.component.html',
     styleUrls: ['./simulator-config.component.less']

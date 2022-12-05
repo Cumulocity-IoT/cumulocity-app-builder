@@ -23,13 +23,13 @@ import { AppBuilderExternalAssetsService } from 'app-builder-external-assets';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { WidgetCatalog, WidgetModel } from './widget-catalog.model';
 import * as semver from "semver";
-import * as packageJson from "./../../package.json";
+// import * as packageJson from "./../../package.json";
 import { catchError, delay } from 'rxjs/operators';
 import { AlertService, AppStateService, ZipService } from '@c8y/ngx-components';
 import { SettingsService } from './../settings/settings.service';
 import { ProgressIndicatorService } from '../utils/progress-indicator-modal/progress-indicator.service';
 
-
+const packageJson = require('./../../package.json');
 const c8yVersion = require('./../../package.json')["@c8y/ngx-components"];
 @Injectable()
 export class WidgetCatalogService {
@@ -229,7 +229,7 @@ export class WidgetCatalogService {
   private async getCumulocityJsonFile(app: IApplication) {
     const c8yJson = await this.appService.getAppManifest(app);
     if (!c8yJson.imports) {
-      c8yJson.imports = {};
+      c8yJson.imports = [];
     }
     return c8yJson;
   }

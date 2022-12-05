@@ -28,6 +28,7 @@ import { SimulationStrategiesModule } from "./simulation-strategies/simulation-s
 import { CustomWidgetsModule } from "./custom-widgets/custom-widgets.module";
 import { interval } from 'rxjs';
 import { SettingsService } from './builder/settings/settings.service';
+import { WidgetsModule } from '@c8y/ngx-components/widgets';
 @NgModule({
   imports: [
     // Upgrade module must be the first
@@ -40,6 +41,7 @@ import { SettingsService } from './builder/settings/settings.service';
     DashboardUpgradeModule,
     BuilderModule,
     SimulationStrategiesModule,
+    WidgetsModule,
     CustomWidgetsModule
   ]
 })
