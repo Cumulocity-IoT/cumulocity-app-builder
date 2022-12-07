@@ -62,6 +62,9 @@ import { AlertMessageModalModule } from "./utils/alert-message-modal/alert-messa
 import { AppBuilderUpgradeService } from "./app-builder-upgrade/app-builder-upgrade.service";
 import { NgSelectModule } from "@ng-select/ng-select";
 import { ButtonsModule } from "ngx-bootstrap/buttons";
+import { DashboardNodeComponent } from "./application-config/dashboard-node.component";
+import { CollapseModule } from 'ngx-bootstrap/collapse';
+import { DragDropModule } from "@angular/cdk/drag-drop";
 @NgModule({
     imports: [
         ApplicationModule,
@@ -113,10 +116,13 @@ import { ButtonsModule } from "ngx-bootstrap/buttons";
         WidgetCatalogModule,
         AlertMessageModalModule,
         NgSelectModule,
-        ButtonsModule.forRoot()
+        ButtonsModule.forRoot(),
+        CollapseModule.forRoot(),
+        DragDropModule
     ],
     declarations: [
         DashboardConfigComponent,
+        DashboardNodeComponent,
         NewDashboardModalComponent,
         EditDashboardModalComponent,
         HomeComponent,

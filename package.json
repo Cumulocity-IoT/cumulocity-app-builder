@@ -4,7 +4,7 @@
   "description": "Application builder for Cumulocity (written by Software AG Global Presales)",
   "main": "index.ts",
   "scripts": {
-    "start": "c8ycli server --env.extraWebpackConfig=./extra-webpack.config.js",
+    "start": "c8ycli server --env.extraWebpackConfig=./extra-webpack.config.js ",
     "build": "set NODE_OPTIONS=--max_old_space_size=4096 && c8ycli build --env.extraWebpackConfig=./extra-webpack.config.js --env.mode=production",
     "build-dev": "set NODE_OPTIONS=--max_old_space_size=4096 && c8ycli build --env.extraWebpackConfig=./extra-webpack.config.js --env.mode=development",
     "deploy-ci": "c8ycli deploy  -u $npm_config_param1 -T $npm_config_param2 -U $npm_config_param3 -P $npm_config_param4",
@@ -34,7 +34,7 @@
     "@ng-select/ng-select": "^6.1.0",
     "@ngx-translate/core": "13.0.0",
     "angular": "1.6.9",
-    "app-builder-external-assets": "file:binary/app-builder-external-assets-2.0.8.tgz",
+    "app-builder-external-assets": "file:binary/app-builder-external-assets-2.1.0.tgz",
     "comlink": "^4.3.1",
     "core-js": "^3.15.2",
     "crypto-js": "^4.0.0",

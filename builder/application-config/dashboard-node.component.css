@@ -1,0 +1,72 @@
+/*** angular cdk-drop  ***/
+
+.cdk-drag-preview {
+    box-sizing: border-box;
+    display: block;
+    border-radius: 4px;
+    box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+        0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
+}
+
+.cdk-drag-placeholder {
+    opacity: 0;
+}
+
+.cdk-drag-animating {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.item.cdk-drop-list-dragging .item:not(.cdk-drag-placeholder) {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.item .sub-child {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    padding: 0px 0 0px 8px;
+}
+
+.sub-child:last-child {
+    border: none;
+}
+
+.item {
+    position: relative;
+    cursor: pointer;
+    background-color: var(--navigator-text-color);
+    margin-top: 15px;
+    margin-bottom: 15px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    display: block;
+    border: 1px solid rgba(88, 101, 109, 0.1);
+    color: #000;
+}
+
+.cdk-drop-list-dragging {
+    border: 1px double var(--brand-dark);
+}
+
+.empty-space {
+    visibility: hidden;
+    opacity: 0;
+    padding-left: 15px;
+}
+
+.collapse-expand-icon {
+    float: right;
+    margin: 5px;
+    cursor: pointer;
+}
+
+.column-overflow {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.node-item {
+    overflow: hidden;
+    min-height: 10px;
+    cursor: pointer;
+}

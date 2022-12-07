@@ -342,7 +342,7 @@ body {
     color: var(--brand-primary, #1776BF);
 }
 .btn-link:focus {
-    color: ${this.contrastingTextColor(app.applicationBuilder.branding.colors.text)};
+    /*color: ${this.contrastingTextColor(app.applicationBuilder.branding.colors.text)};*/
 }
 
 .body-theme {
