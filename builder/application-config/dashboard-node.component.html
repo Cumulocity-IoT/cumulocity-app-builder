@@ -35,8 +35,7 @@
           <button class="btn btn-default" id="deleteDashboardButton-{{node.dashboard.id}}" title="Delete Dashboard"
             (click)="deleteDashboardClicked(node.dashboard)">Delete</button>
         </div>
-        <i [ngClass]="node.children.length === 0 ? 'empty-space': ''"
-          style="float: right;margin:5px;cursor: pointer;" id="collapse-button"
+        <i class="collapse-expand-icon" [ngClass]="node.children.length === 0 ? 'empty-space': ''" id="collapse-button"
           [c8yIcon]="node.children && objectKeys(node.children).length > 0  ?  (!isCollapsed ?  'collapse-arrow': 'expand-arrow') : '' "></i>
       </div>
    

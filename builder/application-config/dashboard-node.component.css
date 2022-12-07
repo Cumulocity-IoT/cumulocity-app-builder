@@ -26,7 +26,7 @@
     padding: 0px 0 0px 8px;
 }
 
-.sub-child:last-child  {
+.sub-child:last-child {
     border: none;
 }
 
@@ -44,12 +44,19 @@
 }
 
 .cdk-drop-list-dragging {
-  border: 1px double var(--brand-dark);
+    border: 1px double var(--brand-dark);
 }
+
 .empty-space {
     visibility: hidden;
     opacity: 0;
     padding-left: 15px;
+}
+
+.collapse-expand-icon {
+    float: right;
+    margin: 5px;
+    cursor: pointer;
 }
 
 .column-overflow {

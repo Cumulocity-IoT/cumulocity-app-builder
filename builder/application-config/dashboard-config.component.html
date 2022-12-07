@@ -90,7 +90,7 @@
                             <option value="2">List View</option>
                         </select>
                     </div>
-                    <div id="search" class="input-group input-group-search" style="width: 30%;margin-left: 50px;"
+                    <div id="search" class="input-group input-group-search searchBar"
                         *ngIf="defaultListView === '2'">
                         <input type="search" class="form-control dashboardInputTheme"
                             placeholder="Enter text to search..." (keyup)="searchDashboard(app)"
@@ -101,7 +101,7 @@
                                 (click)="filterValue= '';searchDashboard(app)"></i>
                         </span>
                     </div>
-                    <div id="search" class="input-group input-group-search" style="width: 30%;margin-left: 50px;"
+                    <div id="search" class="searchBar input-group input-group-search"
                         *ngIf="defaultListView === '1'">
                         <input type="search" class="form-control dashboardInputTheme"
                             placeholder="Enter text to search..." (keyup)="searchInTreeDashboard(app)"
@@ -113,7 +113,7 @@
                                 (click)="filterValueForTree= '';searchInTreeDashboard(app)"></i>
                         </span>
                     </div>
-                    <div style="margin-left: auto;margin-right: 0;display: block;">
+                    <div class="lockUnlockToggle">
                         <button class="btn btn-default" [(ngModel)]="autoLockDashboard"
                             title="Lock/Unlock All Dashboards"
                             [disabled]="app.applicationBuilder.dashboards.length === 0"
@@ -134,14 +134,14 @@
                             (click)="showCreateDashboardDialog(app)">Add dashboard</button>
                     </div>
                     <div class="flex-grow" *ngIf="app.applicationBuilder.dashboards?.length && defaultListView === '1'">
-                        <div style="margin-top:-10px;min-height: 50px;display: block;margin-left: -12px;">
+                        <div class="tree-table-heading">
                             <div class="col-sm-1" style="width:4%"></div>
-                            <div class="font-bold col-sm-2"><div style="padding-top:15px;">Path</div></div>
-                            <div class="font-bold col-sm-2"><div style="padding-top:15px;">Dashboard ID</div></div>
-                            <div class="font-bold col-sm-1"><div style="padding-top:15px;">Visibility</div></div>
-                            <div class="font-bold col-sm-1"><div style="padding-top:15px;">Tab Group</div></div>
-                            <div class="font-bold col-sm-1"><div style="padding-top:15px;">Global Roles</div></div>
-                            <div class="font-bold col-sm-2"><div style="padding-top:15px;">Device(s)</div></div>
+                            <div class="font-bold col-sm-2"><div class="pt-15">Path</div></div>
+                            <div class="font-bold col-sm-2"><div class="pt-15">Dashboard ID</div></div>
+                            <div class="font-bold col-sm-1"><div class="pt-15">Visibility</div></div>
+                            <div class="font-bold col-sm-1"><div class="pt-15">Tab Group</div></div>
+                            <div class="font-bold col-sm-1"><div class="pt-15">Global Roles</div></div>
+                            <div class="font-bold col-sm-2"><div class="pt-15">Device(s)</div></div>
                             <div class="invisible col-sm-2">
                                 <button class="btn btn-default">Edit</button>
                                 <button class="btn btn-default">Delete</button>
@@ -180,17 +180,17 @@
                             wrapperClass="sortable-grid" (onChange)="reorderDashboards(app, $event)"></bs-sortable>
                     </ng-container>
                     <ng-container *ngIf="filterValue !== '' && defaultListView === '2'">
-                        <div class="table-responsive" style="margin-left: -16px;margin-right: -16px;margin-top:-16px;">
+                        <div class="table-responsive listTable">
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th style="font-weight: bold;padding-left: 30px;">Path</th>
-                                        <th style="font-weight: bold;">Dashboard ID</th>
-                                        <th style="font-weight: bold;">Visibility</th>
-                                        <th style="font-weight: bold;">Tab Group</th>
-                                        <th style="font-weight: bold;">Global Roles</th>
-                                        <th style="font-weight: bold;">Icon</th>
-                                        <th style="font-weight: bold;">Device(s)</th>
+                                        <th class="font-bold pl-30">Path</th>
+                                        <th class="font-bold">Dashboard ID</th>
+                                        <th class="font-bold">Visibility</th>
+                                        <th class="font-bold">Tab Group</th>
+                                        <th class="font-bold">Global Roles</th>
+                                        <th class="font-bold">Icon</th>
+                                        <th class="font-bold">Device(s)</th>
                                         <th>
                                             <button class="btn btn-default invisible">Edit</button>
                                         </th>
@@ -201,7 +201,7 @@
                                 </thead>
                                 <tbody>
                                     <tr *ngFor="let item of filteredDashboardList;let i=index;">
-                                        <td style="padding-left: 30px;" title="{{item.name}}">{{item.name}}</td>
+                                        <td class="pl-30" title="{{item.name}}">{{item.name}}</td>
                                         <td title="{{item.id}}">{{item.id}}</td>
                                         <td title="{{item.visibility === 'no-nav' ? 'Tabs Only' :
                                         item.visibility === 'hidden' ? 'Hidden': item.visibility}}">{{item.visibility === 'no-nav' ? 'Tabs Only' :
