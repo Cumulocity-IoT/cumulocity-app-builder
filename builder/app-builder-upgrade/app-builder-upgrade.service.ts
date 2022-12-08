@@ -351,7 +351,7 @@ export class AppBuilderUpgradeService {
 
     private async verifyPlugins() {
         const appVersion =  this.currentApp?.manifest?.version;
-        const appRemotes = this.currentApp?.manifest?.remotes;
+        const appRemotes = this.currentApp?.config.remotes;
         const appBuilderConfig = (await this.settingService.getAppBuilderConfigs());
         if (appBuilderConfig?.configs?.remotes && Object.keys(appBuilderConfig?.configs?.remotes).length > 0) {
             if (appVersion === appBuilderConfig?.appBuilderVersion && _.isEqual(appRemotes, appBuilderConfig?.configs.remotes)) {
@@ -369,8 +369,9 @@ export class AppBuilderUpgradeService {
                     const eachRemoteProgress: number = (totalRemotes > 1 ? (90 / totalRemotes) : 0);
                     let overallProgress = 0;
                     if (totalRemotes > 1) { this.progressIndicatorService.setOverallProgress(overallProgress); }
-                    for (let remote in appBuilderConfig?.configs?.remotes) {
-                        let pluginBinary = widgetCatalog.widgets.find(widget => widget.contextPath === remote && widget.isCompatible);
+                    const appBuilderConfigRemotes = this.widgetCatalogService.removeVersionFromPluginRemotes(appBuilderConfig?.configs?.remotes);
+                    for (let remote of appBuilderConfigRemotes) {
+                        let pluginBinary = widgetCatalog.widgets.find(widget => widget.contextPath === remote?.pluginContext && widget.isCompatible);
                         if (pluginBinary) {
                             this.progressIndicatorService.setProgress(0);
                             this.progressIndicatorService.setMessage(`Installing ${pluginBinary.title}`);
@@ -389,20 +390,17 @@ export class AppBuilderUpgradeService {
                         overallProgress = overallProgress + eachRemoteProgress;
                         this.progressIndicatorService.setOverallProgress(overallProgress)
                     }
-
-                    await new Promise(resolve => setTimeout(resolve, 5000));
                     this.progressModal.hide()
                     this.showProgressModalDialog('Refreshing...');
-                    await new Promise(resolve => setTimeout(resolve, 5000));
+                    await new Promise(resolve => setTimeout(resolve, 4000));
                     window.location.reload();
                 }
                 else {
                     this.showProgressModalDialog('Verifying plugins! Please wait...');
-                    await this.widgetCatalogService.updateRemotesFromAppBuilderConfig(appBuilderConfig?.configs.remotes);
-                    await new Promise(resolve => setTimeout(resolve, 5000));
+                    await this.widgetCatalogService.updateRemotesToAppBuilderConfig();
                     this.progressModal.hide();
                     this.showProgressModalDialog('Refreshing...');
-                    await new Promise(resolve => setTimeout(resolve, 5000));
+                    await new Promise(resolve => setTimeout(resolve, 4000));
                     window.location.reload();
                 }
             }

@@ -190,24 +190,20 @@ export class MyWidgetsComponent implements OnInit {
         await unInstallDemoDialogRef.content.event.subscribe(async data => {
             if (data && data.isConfirm) {
                 this.showProgressModalDialog(`Uninstalling widgets...`)
-                const currentApp: IApplication =  (await this.widgetCatalogService.getCurrentApp());
-                let remotes = currentApp?.manifest?.remotes;
+                this.progressIndicatorService.setProgress(10);
                 let isWidgetFound = false;
+                let updatedAppRemotes = null;
                  for (const widget of this.widgetCatalog.widgets) {
                     const widgetAppObj = this.appList.find(app => app.contextPath === widget.contextPath)
                     if(widgetAppObj) {
                         isWidgetFound = true;
-                        const remoteModules = widgetAppObj?.manifest?.exports;
-                        remoteModules.forEach((remote: any) => {
-                            (remotes[widget.contextPath]  = remotes[widget.contextPath].filter((p) => p !== remote.module));
-                        }); 
+                        updatedAppRemotes = await this.widgetCatalogService.removePlugins(widgetAppObj);
+                        widget.actionCode = '003';
                     }
                 };
                 if(isWidgetFound) {
-                    await this.widgetCatalogService.removePlugin(remotes);
-                    for (const widget of this.widgetCatalog.widgets) {
-                        widget.actionCode = '003';
-                    }
+                    this.progressIndicatorService.setProgress(90);
+                    await this.widgetCatalogService.updateAppConfigRemotes(updatedAppRemotes);
                 }
                 this.hideProgressModalDialog();
                 this.refresh();
@@ -309,11 +305,12 @@ export class MyWidgetsComponent implements OnInit {
         }
 
         const currentApp: IApplication =  (await this.widgetCatalogService.getCurrentApp());
-        const installedPlugins = currentApp?.manifest?.remotes;
+        let installedPlugins = currentApp?.config?.remotes;
+        installedPlugins = (installedPlugins ? this.widgetCatalogService.removeVersionFromPluginRemotes(installedPlugins) : []);
         for(let widget of this.widgetCatalog.widgets) {
             widget.isCompatible = this.widgetCatalogService.isCompatiblieVersion(widget);
             const appObj = this.appList.find(app => app.contextPath === widget.contextPath);
-            const widgetObj = (installedPlugins  && installedPlugins[widget.contextPath] && installedPlugins[widget.contextPath].length> 0);
+            const widgetObj = installedPlugins.find( plugin => plugin.pluginContext === widget.contextPath);
             widget.installedVersion = (widgetObj && appObj && appObj.manifest && appObj.manifest.version ? appObj.manifest.version : '');
             widget.installed = widgetObj && this.findInstalledWidget(widget); //(widgetObj != undefined);
             if (widget.installed && !widget.isReloadRequired && this.isUpdateAvailable(widget)) {
@@ -377,25 +374,14 @@ export class MyWidgetsComponent implements OnInit {
             if (data && data.isConfirm) {
                 this.showProgressModalDialog(`Uninstalling ${widget.title}`);
                 this.progressIndicatorService.setProgress(5);
-                await new Promise(resolve => setTimeout(resolve, 1000)); 
-                const currentApp: IApplication = (await this.widgetCatalogService.getCurrentApp());
-                this.progressIndicatorService.setProgress(15);
-                await new Promise(resolve => setTimeout(resolve, 1000)); 
-                let remotes = currentApp?.manifest?.remotes;
+                this.progressIndicatorService.setProgress(25);
                 const widgetAppObj = this.appList.find(app => app.contextPath === widget.contextPath)
-                if (widgetAppObj) {
-                    this.progressIndicatorService.setProgress(30);
-                    await new Promise(resolve => setTimeout(resolve, 1000)); 
-                    const remoteModules = widgetAppObj?.manifest?.exports;
-                    remoteModules.forEach((remote: any) => {
-                        (remotes[widget.contextPath] = remotes[widget.contextPath].filter((p) => p !== remote.module));
-                    });
-                    this.progressIndicatorService.setProgress(50);
-                    await this.widgetCatalogService.removePlugin(remotes);
-                    await new Promise(resolve => setTimeout(resolve, 5000));
-                    this.hideProgressModalDialog();
-                    widget.actionCode = '003';
-                }
+                const updatedAppRemotes = await this.widgetCatalogService.removePlugins(widgetAppObj);
+                this.progressIndicatorService.setProgress(90);
+                await this.widgetCatalogService.updateAppConfigRemotes(updatedAppRemotes);
+                this.hideProgressModalDialog();
+                widget.actionCode = '003';
+                
             }
         });
     }

@@ -7,7 +7,7 @@ module.exports =  {
             globalObject: "self"
         },
         module: {
-            rules: [
+           /*  rules: [
                 {
                     test: /\.html$/,
                     loader: 'raw-loader',
@@ -19,7 +19,7 @@ module.exports =  {
                     ]
                       
                 }
-            ]
+            ] */
         },
         plugins: [
            new webpack.DefinePlugin({

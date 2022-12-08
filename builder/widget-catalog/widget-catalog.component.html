@@ -60,13 +60,13 @@
                 </div>
                 <hr />
                 <div class="card-block">
-                    <div class="text-center" style="flex-direction: column; align-items: center;"
+                    <div class="c8y-empty-state text-center" style="max-width:100%;flex-direction: column; align-items: center;"
                         *ngIf="!widgetCatalog?.widgets?.length">
                         <h1 c8yIcon="package" class="c8y-icon-duocolor" style="font-size: 90px;"></h1>
                         <h3>No plugin to list.</h3>
                         <p>Please try after sometimes.</p>
                     </div>
-                    <div class="text-center" style="flex-direction: column; align-items: center;"
+                    <div class="c8y-empty-state text-center" style="max-width:100%; flex-direction: column; align-items: center;"
                         *ngIf="widgetCatalog?.widgets?.length && !filterWidgets?.length">
                         <h3>No plugin to list.</h3>
                     </div>
@@ -185,12 +185,12 @@
                 </div>
                 <hr />
                 <div class="card-block" *ngIf="!widgetCatalog?.widgets?.length">
-                    <div class="text-center" style="flex-direction: column; align-items: center;">
+                    <div class="c8y-empty-state text-center" style="max-width:100%; flex-direction: column; align-items: center;">
                         <h1 c8yIcon="package" class="c8y-icon-duocolor" style="font-size: 90px;"></h1>
                         <h3>No plugin to list.</h3>
                         <p>Please install plugins.</p>
                     </div>
-                    <div class=" text-center" style="flex-direction: column; align-items: center;"
+                    <div class="c8y-empty-state text-center" style="max-width:100%;flex-direction: column; align-items: center;"
                         *ngIf="widgetCatalog?.widgets?.length && !filterWidgets?.length">
                         <h3>No plugin to list.</h3>
                     </div>

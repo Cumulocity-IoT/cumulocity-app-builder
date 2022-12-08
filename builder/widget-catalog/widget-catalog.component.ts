@@ -193,20 +193,18 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
         this.showProgressModalDialog(`Installing ${widget.title}`)
         this.progressIndicatorService.setProgress(10);
         if(widgetBinary) {
-            await new Promise(resolve => setTimeout(resolve, 2000));
             this.progressIndicatorService.setProgress(30);
             this.widgetCatalogService.updateRemotesInCumulocityJson(widgetBinary).then(async () => {
                 widget.installed = true;
                 widget.isReloadRequired = true;
                 this.widgetCatalogService.actionFlagGetWidgets(widget, this.userHasAdminRights);
-                await new Promise(resolve => setTimeout(resolve, 5000));
+                await new Promise(resolve => setTimeout(resolve, 1000));
                 this.hideProgressModalDialog();
             }, error => {
                 this.alertService.danger("There is some technical error! Please try after sometime.");
                 console.error(error);
             });
         } else {
-            await new Promise(resolve => setTimeout(resolve, 1000));
             this.progressIndicatorService.setProgress(15);
             this.widgetCatalogService.downloadBinary(widget.binaryLink)
             .subscribe(data => {
@@ -220,7 +218,7 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
                     widget.installed = true;
                     widget.isReloadRequired = true;
                     this.widgetCatalogService.actionFlagGetWidgets(widget, this.userHasAdminRights);
-                    await new Promise(resolve => setTimeout(resolve, 5000));
+                    await new Promise(resolve => setTimeout(resolve, 1000));
                     this.hideProgressModalDialog();
                 }, error => {
                     this.alertService.danger("There is some technical error! Please try after sometime.");

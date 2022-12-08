@@ -236,23 +236,14 @@ export class WidgetDetailsComponent implements OnInit {
         await installDemoDialogRef.content.event.subscribe(async data => {
             if (data && data.isConfirm) {
                 this.showProgressModalDialog(`Uninstalling ${widget.title}`);
-                this.progressIndicatorService.setProgress(5);
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                const currentApp: IApplication = (await this.widgetCatalogService.getCurrentApp());
                 this.progressIndicatorService.setProgress(15);
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                let remotes = currentApp?.manifest?.remotes;
                 const widgetAppObj = this.appList.find(app => app.contextPath === widget.contextPath)
                 if (widgetAppObj) {
                     this.progressIndicatorService.setProgress(30);
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                    const remoteModules = widgetAppObj?.manifest?.exports;
-                    remoteModules.forEach((remote: any) => {
-                        (remotes[widget.contextPath] = remotes[widget.contextPath].filter((p) => p !== remote.module));
-                    });
-                    this.progressIndicatorService.setProgress(50);
-                    await this.widgetCatalogService.removePlugin(remotes);
-                    await new Promise(resolve => setTimeout(resolve, 5000));
+                    const updatedAppRemotes = await this.widgetCatalogService.removePlugins(widgetAppObj);
+                    this.progressIndicatorService.setProgress(70);
+                    await this.widgetCatalogService.updateAppConfigRemotes(updatedAppRemotes);
+                    await new Promise(resolve => setTimeout(resolve, 2000));
                     this.hideProgressModalDialog();
                     widget.actionCode = '003';
                 }

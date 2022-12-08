@@ -1,6 +1,6 @@
 {
   "name": "app-builder",
-  "version": "1.4.0-dev-10",
+  "version": "2.0.0-dev-1",
   "description": "Application builder for Cumulocity (written by Software AG Global Presales)",
   "main": "index.ts",
   "scripts": {
@@ -82,7 +82,7 @@
       "upgrade": true,
       "rightDrawer": true,
       "sensorAppOneLink": "http://onelink.to/pca6qe",
-      "version": "1.4.0-dev-10",
+      "version": "2.0.0-dev-1",
       "contentSecurityPolicy": "base-uri 'none'; default-src 'self' 'unsafe-inline' http: https: ws: wss: blob:; connect-src 'self' *.webmethodscloud.com *.aptrinsic.com *.billwerk.com http: https: ws: wss: blob:;  script-src 'self' open.mapquestapi.com *.twitter.com *.twimg.com *.aptrinsic.com 'unsafe-inline' 'unsafe-eval' data:; style-src * 'unsafe-inline' blob:; img-src * data: blob:; font-src * data:; frame-src *; worker-src 'self' blob:;",
       "icon": {
         "class": "fa fa-magic"
