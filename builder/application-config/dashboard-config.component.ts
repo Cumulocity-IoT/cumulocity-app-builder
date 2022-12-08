@@ -468,7 +468,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
         this.autoLockDashboard = checked;
         if (this.autoLockDashboard) {
             const alertMessage = {
-                title: 'Lock Dashboard',
+                title: 'Lock All Dashboards',
                 description: `You are about to lock all the dashboards. Do you want to proceed?`,
                 type: 'warning',
                 alertType: 'confirm', //info|confirm
@@ -495,7 +495,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
 
         } else {
             const alertMessage = {
-                title: 'Unlock Dashboard',
+                title: 'Unlock All Dashboards',
                 description: `You are about to unlock all the dashboards. Do you want to proceed?`,
                 type: 'warning',
                 alertType: 'confirm', //info|confirm
