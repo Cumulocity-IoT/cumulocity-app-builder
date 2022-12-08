@@ -5,10 +5,11 @@ Application Builder is an open-source tool for you to create web applications 
 ![](https://user-images.githubusercontent.com/38696279/72333172-47cec300-36b3-11ea-9abf-1bb29b490a22.png)
 
 ## What's new?
-* **Role Based Access:** User can now control dashboard visibility in application builder by assigning global role(s) to a dashboard.
-* **File(CSV/JSON) Based Simulator:** Application Builder now supports File Based Simulators(Server-side). User just need to install micro-service from [here](https://github.com/SoftwareAG/cumulocity-app-builder/releases/download/v1.3.1/csv-simulator-ms.zip) and use simulator type as File(CSV/JSON). User can import CSV/JSON file to create measurements/events to simulate use cases.
-* **Widget Catalog:** Grid view introduced to enhance user experience.
-* **Branding:** Improvement in branding functionalities such as one clicks theme selection and addition of new themes (Navy Blue, Dark).
+
+* **Dashboard Tree view:** Dashboard Tree view provides hierarchical view for quicker and easier access to dashboard.
+* **Dashboard Locking:** User can now lock/unlock all dashboards by just one click.
+* **Dashboard Search:** Smart search introduced to quickly search your dashboard.
+* **Seamless upgrade experience:** Improved user experience during application builder upgradation.
 * **Various bug fixes**
 
 ## Features
@@ -25,8 +26,10 @@ Application Builder is an open-source tool for you to create web applications 
 * **Dashboard Catalog:** User can select any pre-designed template for dashboard and ability to install dependent runtime widgets.
 * **Widget Catalog:** Now user has ability to install/update runtime widgets directly from Widget Catalog. This is single place where user can also find widget details such as documentation, preview, license and author details.
 *  **Branding:** Now user can use color picker to choose millions of colors to customize branding. Header, Action bar and tab bar are also customizable.
-*  **Theme:** Application builder now support dark theme and branded themes for dashboards and widgets.
+*  **Theme:** Application builder now support one clicks theme selection.
 *  **Server-Side Simulators:** Application Builder now supports Server-side simulators. User just need to install micro-service from [here](https://github.com/SoftwareAG/cumulocity-app-builder/releases/download/v1.3.1/simulator-app-builder.zip) and you will get option while creating simulator to "Run on Server".
+* **Role Based Access:** User can now control dashboard visibility in application builder by assigning global role(s) to a dashboard.
+* **File(CSV/JSON) Based Simulator:** Application Builder now supports File Based Simulators(Server-side). User just need to install micro-service from [here](https://github.com/SoftwareAG/cumulocity-app-builder/releases/download/v1.3.1/csv-simulator-ms.zip) and use simulator type as File(CSV/JSON). User can import CSV/JSON file to create measurements/events to simulate use cases.
 *  **Help & Support:** Try out our new help & support dashboard template while creating dashboard. This will help user to quickly create help and support page for cumulocity application.
 *  **Demo Catalog:** User now able to try out pre-built cumulocity demos by installing Demo Catalog which is available in your home page.
 *  **Auto Upgrade Notification:** From Application Builder 1.3.0 onwards user will get notification whenever new version of app builder available and ability to seamless upgrade by single click.
@@ -109,7 +112,7 @@ cd cumulocity-app-builder
 ```
 2. (Optional) Checkout a specific version: 
 ```
-git checkout v1.3.1
+git checkout v1.3.2
 ```
 3. Install the dependencies: 
 ```
