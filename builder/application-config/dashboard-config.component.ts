@@ -327,8 +327,9 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
         this.appStateService.currentUser.next(this.appStateService.currentUser.value);
     }
 
-    showCreateDashboardDialog(app) {
-        this.bsModalRef = this.modalService.show(NewDashboardModalComponent, { class: 'c8y-wizard', initialState: { app, globalRoles: this.globalRoles } });
+    async showCreateDashboardDialog(app) {
+        let latestApp = await (await this.appService.detail(app.id)).data;
+        this.bsModalRef = this.modalService.show(NewDashboardModalComponent, { class: 'c8y-wizard', initialState: { app: latestApp, globalRoles: this.globalRoles } });
         this.bsModalRef.content.onSave.subscribe((isReloadRequired: boolean) => {
             if (isReloadRequired) {
                 let count = 0;
