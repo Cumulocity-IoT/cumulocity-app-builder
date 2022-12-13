@@ -92,26 +92,29 @@ export class AppBuilderNavigationService implements NavigatorNodeFactory {
             }, hierarchy);
 
             if (dashboard.groupTemplate) {
-                const childAssets = (await this.inventoryService.childAssetsList(dashboard.deviceId, {pageSize: 2000, query: 'hasany(c8y_IsDevice,c8y_IsAsset)'})).data;
-                for (const device of childAssets) {
-                    const nodeName = device.name || device.id;
-                    const navNode = new NavigatorNode({
-                        label: nodeName,
-                        icon: dashboard.icon,
-                        priority: dashboards.length - i + 1000,
-                    });
-                    if (dashboard.tabGroup) {
-                        navNode.path = `/application/${appId}/tabgroup/${device.id}/dashboard/${dashboard.id}/device/${device.id}`;
-                    } else {
-                        navNode.path = `/application/${appId}/dashboard/${dashboard.id}/device/${device.id}`;
+                const childAssets = await this.inventoryService.childAssetsList(dashboard.deviceId, {pageSize: 2000, query: 'hasany(c8y_IsDevice,c8y_IsAsset)'})
+                .catch(error => {console.error('error in group search',error) }) as any;
+                if (childAssets && childAssets.data) {
+                    for (const device of childAssets?.data) {
+                        const nodeName = device.name || device.id;
+                        const navNode = new NavigatorNode({
+                            label: nodeName,
+                            icon: dashboard.icon,
+                            priority: dashboards.length - i + 1000,
+                        });
+                        if (dashboard.tabGroup) {
+                            navNode.path = `/application/${appId}/tabgroup/${device.id}/dashboard/${dashboard.id}/device/${device.id}`;
+                        } else {
+                            navNode.path = `/application/${appId}/dashboard/${dashboard.id}/device/${device.id}`;
+                        }
+                        currentHierarchyNode.node.add(navNode);
+                        currentHierarchyNode.children[nodeName] = {
+                            children: {},
+                            node: navNode
+                        };
                     }
-                    currentHierarchyNode.node.add(navNode);
-                    currentHierarchyNode.children[nodeName] = {
-                        children: {},
-                        node: navNode
-                    };
+                    currentHierarchyNode.node.icon = 'c8y-group';
                 }
-                currentHierarchyNode.node.icon = 'c8y-group';
             } else if (dashboard.deviceId) {
                 if (dashboard.tabGroup) {
                     currentHierarchyNode.node.path = `/application/${appId}/tabgroup/${dashboard.tabGroup}/dashboard/${dashboard.id}/device/${dashboard.deviceId}`;

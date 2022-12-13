@@ -87,7 +87,7 @@ export class WidgetCatalogService {
           console.log('Fetch Widget Catalog: Error in primary endpoint! using fallback...');
           return this.http.get<WidgetCatalog>(`${urlFallBack}${this.devBranchPath}`, this.HTTP_HEADERS)
         }));
-    }
+   }
     return this.http.get<WidgetCatalog>(`${url}`, this.HTTP_HEADERS)
       .pipe(catchError(err => {
         console.log('Fetch Widget Catalog: Error in primary endpoint! using fallback...');
@@ -131,6 +131,12 @@ export class WidgetCatalogService {
   isCompatiblieVersion(widget: any) {
     if (!widget || !widget.requiredPlatformVersion) return false;
     return semver.satisfies(this.C8Y_VERSION, widget.requiredPlatformVersion);
+  }
+
+  isNextCompatiblieVersion(nextC8yVersion: any, widget: any) {
+    if (!widget || !widget.requiredPlatformVersion) return false;
+    const major = '>=' + semver.major(nextC8yVersion) + '.X.X';
+    return semver.satisfies(widget.requiredPlatformVersion, major);
   }
 
   isLatestVersionAvailable(widget: WidgetModel) {

@@ -24,7 +24,7 @@ import { AppIdService } from '../app-id.service';
 import { from, of, Subject } from 'rxjs';
 import { contextPathFromURL } from '../utils/contextPathFromURL';
 import {UpdateableAlert} from "../utils/UpdateableAlert";
-import { switchMap } from 'rxjs/operators';
+import { distinctUntilChanged, switchMap } from 'rxjs/operators';
 import * as delay from "delay";
 
 @Injectable({providedIn: 'root'})
@@ -45,6 +45,7 @@ export class SettingsService {
     private analyticsProvider: any = {};
     private isAppConfigNotFound = false;
     delayedTenantUpdateSubject = new Subject<any>();
+    private currentApp: IApplication;
     
     constructor(appIdService: AppIdService, private appService: ApplicationService, private inventoryService: InventoryService,
         private alertService: AlertService, private externalAssetService: AppBuilderExternalAssetsService,
@@ -52,7 +53,7 @@ export class SettingsService {
             const providerList = this.externalAssetService.getAssetsList('ANALYTICS')
             this.analyticsProvider = providerList.find( provider => provider.key === 'gainsight');
             this.analyticsProvider.providerURL = this.externalAssetService.getURL('ANALYTICS','gainsight');
-            appIdService.appIdDelayedUntilAfterLogin$.pipe(switchMap(appId => {
+            appIdService.appIdDelayedUntilAfterLogin$.pipe(distinctUntilChanged()).pipe(switchMap(appId => {
                 return from(this.getAppBuilderConfig());
               
             }))
@@ -76,7 +77,10 @@ export class SettingsService {
                 app = appList.find(app => app.contextPath === contextPathFromURL());
                 if(!app) { throw Error('Could not find current application.');}
             } 
-            if(app) { this.appbuilderId = app.id; }
+            if(app) { 
+                this.appbuilderId = app.id; 
+                this.currentApp = app;
+            }
             return this.appbuilderId;
         }
     }
@@ -199,6 +203,30 @@ export class SettingsService {
     async isAppUpgradeNotification() {
         const customProp = await this.getCustomProperties();
         return (!customProp || (customProp  && ( !customProp.appUpgradeNotification || customProp.appUpgradeNotification === "true")));
+    }
+
+    async updateAppConfigurationForPlugin(remotes: any){
+        
+        if(this.appBuilderConfig) {
+            return await this.inventoryService.update({
+                id: this.appBuilderConfig.id,
+                configs: {remotes},
+                c8y_Global: {},
+                appBuilderVersion: this.currentApp.manifest.version
+            })
+        } else if (this.isAppConfigNotFound) {
+            return await this.inventoryService.create({
+                c8y_Global: {},
+                type: "AppBuilder-Configuration",
+                configs: {remotes},
+                appBuilderId: this.appbuilderId,
+                appBuilderVersion: this.currentApp.manifest.version
+            });
+        } 
+        else  {
+            await delay(500);
+            return await this.updateAppConfigurationForPlugin(remotes);
+        }
     }
 
 }

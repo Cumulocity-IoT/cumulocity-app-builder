@@ -1,0 +1,51 @@
+<!-- Include the child assets using another <ul> -->
+<ng-container>
+  <div class="item" cdkDrag cdkDropList [id]="node.id" [cdkDropListData]="node.children"
+    [ngClass]="!isCollapsed ? 'expanded': ''" [attr.aria-expanded]="!isCollapsed" [cdkDropListConnectedTo]="connectedTo"
+    (cdkDropListDropped)="onDragDrop($event)">
+      <div class=" node-item" [ngStyle]="{ 'margin-left.px': depth * -8 + -12}" (click)="expandCollapsedToggle(node)">
+        <div class="col-sm-1" style="width:4%"></div>
+        <div class="col-sm-2 column-overflow">
+          <i title="{{node.isDashboard ? node?.dashboard.icon ? node?.dashboard.icon : 'dashboard' : 'folder'}}" [c8yIcon]="node.isDashboard ? node?.dashboard.icon ? node?.dashboard.icon : 'dashboard' : 'folder'">
+          </i>
+          <span title={{node.title}} style="margin-left:20px;">{{ node.title | translate }}</span>
+        </div>
+        <div class="col-sm-2 column-overflow" title={{node.dashboard.id}} id="dashboard-id-{{node.title}}" *ngIf="node.isDashboard">
+          {{ node.dashboard.id }}
+        </div>
+        <div class="col-sm-1 column-overflow" *ngIf="node.isDashboard" 
+        title="{{node.dashboard.visibility === 'no-nav' ? 'Tabs Only' : node.dashboard.visibility === 'hidden' ? 'Hidden': node.dashboard.visibility}}">
+          {{node.dashboard.visibility === 'no-nav' ? 'Tabs Only' : node.dashboard.visibility === 'hidden' ? 'Hidden':
+          node.dashboard.visibility}}
+        </div>
+        <div class="col-sm-1 column-overflow" *ngIf="node.isDashboard" title="{{ node.dashboard.tabGroup }}">
+          {{ node.dashboard.tabGroup }}
+        </div>
+        <div class="col-sm-1 column-overflow" *ngIf="node.isDashboard">
+          <span *ngFor="let role of node.dashboard.roles" title="{{role.name}}">
+            {{role.name}} <br>
+          </span>
+        </div>
+        <div class="col-sm-2 column-overflow" *ngIf="node.isDashboard" title="{{node.dashboard.groupTemplate ? 'Children of: ' :''}}{{node.dashboard.deviceId || '-'}}">
+          {{node.dashboard.groupTemplate ? 'Children of: ' :''}}{{node.dashboard.deviceId || '-'}}
+        </div>
+        <div class="col-sm-2" *ngIf="node.isDashboard">
+          <button class="btn btn-default" id="editDashboardButton-{{node.dashboard.id}}" title="Edit Dashboard"
+            (click)="editDashboardClicked(node.dashboard)">Edit</button>
+          <button class="btn btn-default" id="deleteDashboardButton-{{node.dashboard.id}}" title="Delete Dashboard"
+            (click)="deleteDashboardClicked(node.dashboard)">Delete</button>
+        </div>
+        <i class="collapse-expand-icon" [ngClass]="node.children.length === 0 ? 'empty-space': ''" id="collapse-button"
+          [c8yIcon]="node.children && objectKeys(node.children).length > 0  ?  (!isCollapsed ?  'collapse-arrow': 'expand-arrow') : '' "></i>
+      </div>
+   
+      <ng-container *ngFor="let node of node.children | keyvalue">
+        <div class="sub-child" [collapse]="isCollapsed">
+            <c8y-dashboard-node [node]="node.value" [depth]="depth + 1" [connectedTo]="connectedTo"
+              (itemDrop)="onDragDrop($event)" (editDashboard)="editDashboardClicked($event)"
+              (deleteDashboard)="deleteDashboardClicked($event)" [expandEvent]="expandEventSubject.asObservable()">
+            </c8y-dashboard-node>
+        </div>
+      </ng-container>
+  </div>
+</ng-container>

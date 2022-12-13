@@ -46,4 +46,6 @@ export interface WidgetModel {
     actionCode?: string;
     isDeprecated?: boolean;
     releaseDate?: string;
+    isNextVersionAvailable?: boolean;
+    moduleName?: string;
 }
