@@ -106,7 +106,5 @@
     },
     "cli": {}
   },
-  "browserslist": ["last 2 major versions"],
-  "c8y.application.version": "1.4.0-dev-06",
-  "main:": "1.4.0-dev-06"
+  "browserslist": ["last 2 major versions"]
 }
