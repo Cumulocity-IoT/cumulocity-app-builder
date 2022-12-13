@@ -6,7 +6,7 @@ Application Builder is an open-source tool for you to create web applications 
 
 ## What's new?
 
-* **Dashboard Tree view:** Dashboard Tree view provides hierarchical view for quicker and easier access to dashboard.
+* **Dashboard Tree view:** Dashboard Tree view provides hierarchical view for quicker and easier access to a dashboard.
 * **Dashboard Locking:** User can now lock/unlock all dashboards by just one click.
 * **Dashboard Search:** Smart search introduced to quickly search your dashboard.
 * **Seamless upgrade experience:** Upgrade of application builder made simpler.
