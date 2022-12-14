@@ -140,6 +140,12 @@ export class WidgetCatalogService {
     return semver.satisfies(widget.requiredPlatformVersion, major);
   }
 
+  isNextCompatiblieVersion(nextC8yVersion: any, widget: any) {
+    if (!widget || !widget.requiredPlatformVersion) return false;
+    const major = '>=' + semver.major(nextC8yVersion) + '.X.X';
+    return semver.satisfies(widget.requiredPlatformVersion, major);
+  }
+
   isLatestVersionAvailable(widget: WidgetModel) {
     return semver.lt(widget.installedVersion, widget.version);
   }
@@ -205,13 +211,13 @@ export class WidgetCatalogService {
     this.progressIndicatorService.setProgress(95);
     // updating config MO to retain widget status
     const updatedRemotes = await this.pluginsService.addRemotes(currentApp, packageObj);
-    return this.settingsService.updateAppConfigurationForPlugin(updatedRemotes, currentApp.id, currentApp.manifest.version)
+    return this.settingsService.updateAppConfigurationForPlugin(updatedRemotes)
   }
 
   async updateRemotesToAppBuilderConfig() {
     
     const currentApp: IApplication =  (await this.getCurrentApp(true));
-    return this.settingsService.updateAppConfigurationForPlugin(currentApp?.config?.remotes, this.currentApp.id, this.currentApp.manifest.version);
+    return this.settingsService.updateAppConfigurationForPlugin(currentApp?.config?.remotes);
   }
 
   private getCumulocityJson(archive: File): Observable<any> {
@@ -316,7 +322,7 @@ export class WidgetCatalogService {
     return this.pluginsService.removeRemotes(currentApp, packageObj);
   }
   async updateAppConfigRemotes(remotes: any) {
-    return this.settingsService.updateAppConfigurationForPlugin(remotes, this.currentApp.id, this.currentApp.manifest.version);
+    return this.settingsService.updateAppConfigurationForPlugin(remotes);
   }
 
   async filterInstalledWidgets(widgetCatalog: WidgetCatalog, userHasAdminRights: boolean) {

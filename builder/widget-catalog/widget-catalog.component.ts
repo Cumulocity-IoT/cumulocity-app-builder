@@ -141,7 +141,7 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
     async installWidget(widget: WidgetModel): Promise<void> {
         const currentHost = window.location.host.split(':')[0];
         if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
-            this.alertService.warning("Runtime widget installation isn't supported when running Application Builder on localhost or in development mode.");
+            this.alertService.warning("Runtime widget installation isn't supported when running Application Builder on localhost.");
             return;
         }
 

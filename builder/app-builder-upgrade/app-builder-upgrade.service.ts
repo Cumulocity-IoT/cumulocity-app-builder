@@ -53,6 +53,7 @@ export class AppBuilderUpgradeService {
     private appBuilderConfigPath = '/appbuilderConfig/app-builder-config.json?ref=development';
     private devBranchPath = "?ref=development";
     private appBuilderConfigModel: AppBuilderConfig;
+    private versionInfo: VersionInfo;
     private applicationsList = [];
     private currentApp: IApplication;
     userHasAdminRights: boolean;
@@ -60,7 +61,6 @@ export class AppBuilderUpgradeService {
     public appVersion: string =  appVersion;
     public newVersion: boolean = false;
     public errorReported = false;
-    
 
     constructor(private http: HttpClient, public rendererFactory: RendererFactory2, @Inject(DOCUMENT) private _document: Document,
         private modalService: BsModalService, private progressIndicatorService: ProgressIndicatorService,
@@ -91,16 +91,18 @@ export class AppBuilderUpgradeService {
     };
 
     async loadUpgradeBanner() {
-        const isAppBuilderUpgradeNotification = await this.settingService.isAppUpgradeNotification();
-        if (this.userHasAdminRights && isAppBuilderUpgradeNotification) {
-            await this.getAppBuilderConfig();
+        if(contextPathFromURL() == 'app-builder') {
+            const isAppBuilderUpgradeNotification = await this.settingService.isAppUpgradeNotification();
+            if (this.userHasAdminRights && isAppBuilderUpgradeNotification) {
+                await this.getAppBuilderConfig();
+            }
         }
     }
 
     private createAndRenderBanner() {
         this.renderer = this.rendererFactory.createRenderer(null, null);
         const appbuilderUpgradeBanner = this.renderer.createElement("div");
-        const textElement = this.renderer.createText(`Application Builder ${this.appBuilderConfigModel.versionInfo.updateAvailable} available.`);
+        const textElement = this.renderer.createText(`Application Builder ${this.versionInfo.updateAvailable} is now available.`);
         const textElementUpdateLink = this.renderer.createText(' Update now!');
         const updateLink = this.renderer.createElement("a");
         this.renderer.addClass(appbuilderUpgradeBanner, 'app-builder-upgrade-banner');
@@ -116,29 +118,31 @@ export class AppBuilderUpgradeService {
         .subscribe(async appBuilderConfig => {
             this.appBuilderConfigModel = appBuilderConfig;
             let isValidContextPath = false;
-            if (this.appBuilderConfigModel && this.appBuilderConfigModel.versionInfo) {
-                if (this.isLatestVersionAvailable(this.appVersion,this.appBuilderConfigModel.versionInfo.updateAvailable)) {
-                    this.newVersion = true;
-                } else {
-                    this.newVersion = false;
+            if (this.appBuilderConfigModel && this.appBuilderConfigModel.upgradeInfo) {
+                this.versionInfo = this.appBuilderConfigModel.upgradeInfo.find( info => info.currentVersion === this.appVersion);
+                if(this.versionInfo) {
+                    if (this.isLatestVersionAvailable(this.appVersion,this.versionInfo.updateAvailable)) {
+                        this.newVersion = true;
+                    } else {
+                        this.newVersion = false;
+                    }
+                    const appList = await this.getApplicationList();
+                    const currentTenantId = this.settingService.getTenantName();
+                    let appBuilderApp = appList.find( 
+                        app => this.versionInfo.contextPath && app.contextPath === this.versionInfo.contextPath &&  (String(app.availability) === 'PRIVATE'));
+                    if(!appBuilderApp) {
+                        // Checking app builder subscribed one..
+                        appBuilderApp = appList.find( 
+                            app => this.versionInfo.contextPath && app.contextPath === this.versionInfo.contextPath );
+                    }
+                    const appBuilderTenantId = (appBuilderApp && appBuilderApp.owner && appBuilderApp.owner.tenant ? appBuilderApp.owner.tenant.id : undefined);
+                    if(appBuilderApp && currentTenantId === appBuilderTenantId) { isValidContextPath = true;} 
+                    /* else {
+                        this.alertService.warning("Unable to detect valid Application Builder", 
+                        "Context Path of installed version of application builder is not matching with server");
+                    } */
                 }
-                const appList = await this.getApplicationList();
-                const currentTenantId = this.settingService.getTenantName();
-                let appBuilderApp = appList.find( 
-                    app => this.appBuilderConfigModel.versionInfo.contextPath && 
-                    app.contextPath === this.appBuilderConfigModel.versionInfo.contextPath &&  (String(app.availability) === 'PRIVATE'));
-                if(!appBuilderApp) {
-                    // Checking app builder subscribed one..
-                    appBuilderApp = appList.find( 
-                        app => this.appBuilderConfigModel.versionInfo.contextPath && 
-                        app.contextPath === this.appBuilderConfigModel.versionInfo.contextPath );
-                }
-                const appBuilderTenantId = (appBuilderApp && appBuilderApp.owner && appBuilderApp.owner.tenant ? appBuilderApp.owner.tenant.id : undefined);
-                if(appBuilderApp && currentTenantId === appBuilderTenantId) { isValidContextPath = true;} 
-                /* else {
-                    this.alertService.warning("Unable to detect valid Application Builder", 
-                    "Context Path of installed version of application builder is not matching with server");
-                } */
+                
             }
             if (this.newVersion && isValidContextPath) {
                 this.createAndRenderBanner();
@@ -156,38 +160,52 @@ export class AppBuilderUpgradeService {
             this.alertService.warning("Application Updation isn't supported when running Application Builder on localhost.");
             return;
         }
-        const confirmMsg = this.appBuilderConfigModel?.versionInfo?.confirmMsg;
+        const confirmMsg = this.versionInfo?.confirmMsg;
         const alertMessage = {
             title: 'Installation Confirmation',
             description: (confirmMsg ? confirmMsg: `You are about to upgrade Application Builder.
             Do you want to proceed?`),
             type: 'info',
+            externalLink: (this.versionInfo?.releaseLink ? this.versionInfo?.releaseLink : ''),
+            externalLinkLabel: "What's new?",
             alertType: 'confirm', //info|confirm
             confirmPrimary: true //confirm Button is primary
         }
         const upgradeAppBuilderDialogRef = this.alertModalDialog(alertMessage);
         upgradeAppBuilderDialogRef.content.event.subscribe(async data => {
             if (data && data.isConfirm) {
-                this.showProgressModalDialog('Updating Application Builder...');
-                const updateURL = this.appBuilderConfigModel.versionInfo.updateURL;
-                const successMsg = this.appBuilderConfigModel?.versionInfo?.successMsg;
-                const fileName = updateURL.replace(/^.*[\\\/]/, '');
-                await this.downloadAndInstall(updateURL, fileName, true, 'UPGRADE');
-                this.progressModal.hide();
-                if(!this.errorReported) {
-                    const postUpdationMsg = {
-                        title: 'Updation Completed',
-                        description: (successMsg ? successMsg: 'Application Builder is successfully updated.'),
-                        type: 'info',
-                        alertType: 'info' //info|confirm
-                    };
-                    const postUpdationDialogRef = this.alertModalDialog(postUpdationMsg);
-                    await postUpdationDialogRef.content.event.subscribe(data => {
-                        window.location.reload();
-                    });
+                if(this.versionInfo.verifyPlugins){
+                    this.showProgressModalDialog('Verifying existing widgets...');
+                    await this.verifyWidgetCompatibilityWithPlugin();
+                } else {
+                    this.showProgressModalDialog('Downloading Application Builder...');
+                    await this.downlaodAndUpgradeAppBuilder();
                 }
+                
             }
         });
+    }
+
+    private async downlaodAndUpgradeAppBuilder() {
+        this.progressIndicatorService.setProgress(30);
+        const updateURL = this.versionInfo.updateURL;
+        const successMsg = this.versionInfo?.successMsg;
+        const fileName = updateURL.replace(/^.*[\\\/]/, '');
+        await this.downloadAndInstall(updateURL, fileName, true, 'UPGRADE');
+        await new Promise(resolve => setTimeout(resolve, 5000));
+        this.progressModal.hide();
+        if (!this.errorReported) {
+            const postUpdationMsg = {
+                title: 'Upgrade Completed',
+                description: (successMsg ? successMsg : 'Application Builder is successfully upgraded.'),
+                type: 'info',
+                alertType: 'info' //info|confirm
+            };
+            const postUpdationDialogRef = this.alertModalDialog(postUpdationMsg);
+            await postUpdationDialogRef.content.event.subscribe(data => {
+                window.location.reload();
+            });
+        }
     }
 
     showProgressModalDialog(message: string): void {
@@ -203,6 +221,7 @@ export class AppBuilderUpgradeService {
     }
 
     async downloadAndInstall(binaryLocation: string, fileName: string, isGithub: boolean, installationType: 'INSTALL' | 'UPGRADE' | 'ANY') {
+        this.progressIndicatorService.setMessage('Downloading Application Builder...');
         this.errorReported = false;
         if (!binaryLocation) {
             console.error('Missing link to download binary');
@@ -210,16 +229,16 @@ export class AppBuilderUpgradeService {
             this.errorReported = true;
             return;
         }
-        this.progressIndicatorService.setProgress(20);
+        this.progressIndicatorService.setProgress(40);
         const data: ArrayBuffer = await this.downloadBinary(binaryLocation, isGithub);
         const blob = new Blob([data], {
             type: 'application/zip'
         });
         const binaryFile = new File([blob], fileName, { type: "'application/zip'" })
-        this.progressIndicatorService.setProgress(30);
+        this.progressIndicatorService.setProgress(50);
         let appC8yJson;
         try {
-            this.progressIndicatorService.setProgress(40);
+            this.progressIndicatorService.setProgress(60);
             const binaryZip = await JSZip.loadAsync(binaryFile);
             appC8yJson = JSON.parse(await binaryZip.file('cumulocity.json').async("text"));
             if (appC8yJson.contextPath === undefined) {
@@ -238,6 +257,7 @@ export class AppBuilderUpgradeService {
     }
 
     private async upgradeApp(binaryFile: any, appC8yJson: any, installationType: any) {
+        this.progressIndicatorService.setMessage('Upgrading Application Builder...');
         if (installationType !== "INSTALL") {
             const appList = await this.getApplicationList();
             const appName = appList.find(app => app.contextPath === appC8yJson.contextPath && app.availability === 'PRIVATE');
@@ -258,7 +278,7 @@ export class AppBuilderUpgradeService {
             }
         } else if(installationType !== "UPGRADE") {
             // Create the custom App
-            this.progressIndicatorService.setProgress(50);
+            this.progressIndicatorService.setProgress(70);
             const custmApp = (await this.appService.create({
                 ...appC8yJson,
                 resourcesUrl: "/",
@@ -267,7 +287,7 @@ export class AppBuilderUpgradeService {
 
             // Upload the binary
             const appBinary = (await this.appService.binary(custmApp).upload(binaryFile)).data;
-            this.progressIndicatorService.setProgress(70);
+            this.progressIndicatorService.setProgress(80);
             // Update the app
             await this.appService.update({
                 id: custmApp.id,
@@ -284,15 +304,15 @@ export class AppBuilderUpgradeService {
             this.errorReported = true;
             return;
         }
-        this.progressIndicatorService.setProgress(80);
+        this.progressIndicatorService.setProgress(90);
     }
 
     private async uploadApp(appName: any, binaryFile: any, appC8yJson: any){
-        this.progressIndicatorService.setProgress(50);
+        this.progressIndicatorService.setProgress(70);
                 // Upload the binary
                 const appBinary = (await this.appService.binary(appName).upload(binaryFile)).data;
                 // Update the app
-                this.progressIndicatorService.setProgress(70);
+                this.progressIndicatorService.setProgress(80);
                 await this.appService.update({
                     ...appC8yJson,
                     id: appName.id,

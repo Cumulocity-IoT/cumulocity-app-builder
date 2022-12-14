@@ -62,6 +62,10 @@ import { SimulatorWorkerAPI } from "./simulator/mainthread/simulator-worker-api.
 import { SimulatorManagerService } from "./simulator/mainthread/simulator-manager.service";
 import { NgSelectModule } from "@ng-select/ng-select";
 import { LockStatus } from "./simulator/mainthread/simulation-lock.service";
+import { ButtonsModule } from "ngx-bootstrap/buttons";
+import { DashboardNodeComponent } from "./application-config/dashboard-node.component";
+import { CollapseModule } from 'ngx-bootstrap/collapse';
+import { DragDropModule } from "@angular/cdk/drag-drop";
 @NgModule({
     imports: [
         ApplicationModule,
@@ -112,10 +116,14 @@ import { LockStatus } from "./simulator/mainthread/simulation-lock.service";
         SettingsModule,
         WidgetCatalogModule,
         AlertMessageModalModule,
-        NgSelectModule
+        NgSelectModule,
+        ButtonsModule.forRoot(),
+        CollapseModule.forRoot(),
+        DragDropModule
     ],
     declarations: [
         DashboardConfigComponent,
+        DashboardNodeComponent,
         NewDashboardModalComponent,
         EditDashboardModalComponent,
         HomeComponent,
@@ -131,7 +139,7 @@ import { LockStatus } from "./simulator/mainthread/simulation-lock.service";
         { provide: HOOK_NAVIGATOR_NODES, useExisting: AppBuilderNavigationService, multi: true },
         AppBuilderConfigNavigationRegistrationService,
         AppBuilderConfigNavigationService,
-        { provide: HOOK_NAVIGATOR_NODES, useExisting: AppBuilderConfigNavigationService, multi: true },
+        { provide: HOOK_NAVIGATOR_NODES, useExisting: AppBuilderConfigNavigationService, multi: true }
     ]
 })
 export class BuilderModule {

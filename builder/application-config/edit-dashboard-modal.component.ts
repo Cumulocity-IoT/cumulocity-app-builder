@@ -23,6 +23,7 @@ import {WizardComponent} from "../../wizard/wizard.component";
 import {AppBuilderNavigationService} from "../navigation/app-builder-navigation.service";
 import {IApplicationBuilderApplication} from "../iapplication-builder-application";
 import { AppDataService } from '../app-data.service';
+import { Subject } from 'rxjs';
 
 @Component({
     templateUrl: './edit-dashboard-modal.component.html'
@@ -39,16 +40,21 @@ export class EditDashboardModalComponent implements OnInit{
     roles: any = '';
     dashboardVisibility: '' | 'hidden' | 'no-nav' = '';
     globalRoles: any;
+    dashboardID: string = '';
 
     index: number = 0;
 
     app: IApplicationBuilderApplication;
+    public onSave: Subject<boolean>;
 
     @ViewChild(WizardComponent, {static: true}) wizard: WizardComponent;
 
     constructor(public bsModalRef: BsModalRef, private appService: ApplicationService, 
         private inventoryService: InventoryService, private navigation: AppBuilderNavigationService,
-        private appDataService: AppDataService) {}
+        private appDataService: AppDataService) {
+            this.onSave = new Subject();
+        }
+    
     
     async ngOnInit() {
         if(this.deviceId) {
@@ -66,8 +72,8 @@ export class EditDashboardModalComponent implements OnInit{
     }
     async save() {
         this.busy = true;
-
-        const dashboard = this.app.applicationBuilder.dashboards[this.index];
+        let index = this.app.applicationBuilder.dashboards.findIndex((db: any) => db.id === this.dashboardID);
+        const dashboard = this.app.applicationBuilder.dashboards[index];
 
         const dashboardManagedObject = (await this.inventoryService.detail(dashboard.id)).data;
         if (dashboardManagedObject.c8y_Dashboard.name === dashboard.name) {
@@ -90,6 +96,7 @@ export class EditDashboardModalComponent implements OnInit{
             applicationBuilder: this.app.applicationBuilder
         } as any);
         this.appDataService.forceUpdate = true;
+        this.onSave.next(true);
         this.bsModalRef.hide();
         this.navigation.refresh();
         // TODO?

@@ -1,0 +1,30 @@
+/* new components */
+.outer-div {
+  .expanded .sub-child {
+    position: relative;
+
+    &::after {
+      content: '';
+      border-top: 1px solid @brand-primary-light;
+      width: 8px;
+      position: absolute;
+      top: 26px;
+      left: 0px;
+      z-index: 5;
+    }
+  }
+
+
+  .expanded {
+    &::before {
+      content: '';
+      left: 0;
+      top: 0;
+      position: absolute;
+      bottom: 67px;
+      border-left: 1px solid @brand-primary-light;
+      z-index: 5;
+    }
+  }
+
+}

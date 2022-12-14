@@ -45,6 +45,7 @@ export class SettingsService {
     private analyticsProvider: any = {};
     private isAppConfigNotFound = false;
     delayedTenantUpdateSubject = new Subject<any>();
+    private currentApp: IApplication;
     
     constructor(appIdService: AppIdService, private appService: ApplicationService, private inventoryService: InventoryService,
         private alertService: AlertService, private externalAssetService: AppBuilderExternalAssetsService,
@@ -76,7 +77,10 @@ export class SettingsService {
                 app = appList.find(app => app.contextPath === contextPathFromURL());
                 if(!app) { throw Error('Could not find current application.');}
             } 
-            if(app) { this.appbuilderId = app.id; }
+            if(app) { 
+                this.appbuilderId = app.id; 
+                this.currentApp = app;
+            }
             return this.appbuilderId;
         }
     }
@@ -132,24 +136,6 @@ export class SettingsService {
         location.reload();
     }
 
-    async updateAppConfigurationForPlugin(remotes: any, appBuilderId: string | number, appBuilderVersion: string){
-        if(this.appBuilderConfig) {
-            return await this.inventoryService.update({
-                id: this.appBuilderConfig.id,
-                configs: {remotes},
-                c8y_Global: {},
-                appBuilderVersion
-            })
-        } else  {
-            return await this.inventoryService.create({
-                    c8y_Global: {},
-                    type: "AppBuilder-Configuration",
-                    configs: {remotes},
-                    appBuilderId,
-                    appBuilderVersion
-            });
-        }
-    }
 
     setTenant(tenant: ICurrentTenant | null) {
         this.currentTenant = tenant;
@@ -228,4 +214,28 @@ export class SettingsService {
             return await this.getAppBuilderConfigs();
         }
     }
+    async updateAppConfigurationForPlugin(remotes: any){
+        
+        if(this.appBuilderConfig) {
+            return await this.inventoryService.update({
+                id: this.appBuilderConfig.id,
+                configs: {remotes},
+                c8y_Global: {},
+                appBuilderVersion: this.currentApp.manifest.version
+            })
+        } else if (this.isAppConfigNotFound) {
+            return await this.inventoryService.create({
+                c8y_Global: {},
+                type: "AppBuilder-Configuration",
+                configs: {remotes},
+                appBuilderId: this.appbuilderId,
+                appBuilderVersion: this.currentApp.manifest.version
+            });
+        } 
+        else  {
+            await delay(500);
+            return await this.updateAppConfigurationForPlugin(remotes);
+        }
+    }
+
 }

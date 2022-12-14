@@ -19,4 +19,5 @@ import { Subject } from 'rxjs';
     setMessage(message: string) {
       this.message$.next(message);
     }
+  
   }
