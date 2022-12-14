@@ -29,7 +29,7 @@ import { ProgressIndicatorService } from "../utils/progress-indicator-modal/prog
 import * as JSZip from "jszip";
 import { BsModalRef, BsModalService } from "ngx-bootstrap/modal";
 import { Observable } from "rxjs";
-import { AppBuilderConfig } from "./app-builder-upgrade.model";
+import { AppBuilderConfig, VersionInfo } from "./app-builder-upgrade.model";
 import { AppIdService } from "../app-id.service";
 import { catchError,delay,first} from "rxjs/operators";
 import * as semver from "semver";
@@ -37,6 +37,7 @@ import { IApplication } from "@c8y/client";
 import * as _ from 'lodash';
 import { WidgetCatalogService } from "./../widget-catalog/widget-catalog.service";
 import { WidgetCatalog } from "./../widget-catalog/widget-catalog.model";
+import { contextPathFromURL } from "./../utils/contextPathFromURL";
 
 const appVersion = require('../../package.json').version;
 @Injectable({ providedIn: 'root' })
@@ -174,13 +175,17 @@ export class AppBuilderUpgradeService {
         const upgradeAppBuilderDialogRef = this.alertModalDialog(alertMessage);
         upgradeAppBuilderDialogRef.content.event.subscribe(async data => {
             if (data && data.isConfirm) {
-                if(this.versionInfo.verifyPlugins){
+                this.showProgressModalDialog('Downloading Application Builder...');
+                await this.downlaodAndUpgradeAppBuilder();
+
+                // TODO: To be removed since plugin verification not required for future release
+                /* if(this.versionInfo.verifyPlugins){
                     this.showProgressModalDialog('Verifying existing widgets...');
                     await this.verifyWidgetCompatibilityWithPlugin();
                 } else {
                     this.showProgressModalDialog('Downloading Application Builder...');
                     await this.downlaodAndUpgradeAppBuilder();
-                }
+                } */
                 
             }
         });
