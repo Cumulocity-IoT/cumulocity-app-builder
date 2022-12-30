@@ -255,7 +255,7 @@ export class TemplateCatalogModalComponent implements OnInit {
             this.widgetCatalogService.updateRemotesInCumulocityJson(widgetBinaryFound).then(async () => {
                 dependency.isInstalled = true;
                 this.isReloadRequired = true;
-                await new Promise(resolve => setTimeout(resolve, 5000));
+                await new Promise(resolve => setTimeout(resolve, 1000));
                 this.hideProgressModalDialog();
             }, error => {
                 this.alertService.danger("There is some technical error! Please try after sometime.");

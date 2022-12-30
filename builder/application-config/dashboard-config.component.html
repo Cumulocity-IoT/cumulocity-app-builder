@@ -2,7 +2,7 @@
 
 <ng-container *ngIf="app | async as app">
     <c8y-action-bar-item [placement]="'right'">
-        <button class="btn btn-link" (click)="showCreateDashboardDialog(app)" id="addDashboardButton">
+        <button class="btn btn-link" *ngIf="showAddDashboard" (click)="showCreateDashboardDialog(app)" id="addDashboardButton">
             <i c8yIcon="plus-circle"></i> Add dashboard
         </button>
         <button *ngIf="isDashboardCatalogEnabled" id="addDashboardCatalogButton" class="btn btn-link"
@@ -130,7 +130,7 @@
                         <h1 c8yIcon="c8y-chart" class="c8y-icon-duocolor" style="font-size: 90px;"></h1>
                         <h3>No dashboards to list.</h3>
                         <p>Please add dashboards to this application.</p>
-                        <button class="btn btn-primary" id="addDashboardPrimaryButton" style="margin-top: 10px;"
+                        <button class="btn btn-primary" *ngIf="showAddDashboard" id="addDashboardPrimaryButton" style="margin-top: 10px;"
                             (click)="showCreateDashboardDialog(app)">Add dashboard</button>
                     </div>
                     <div class="flex-grow" *ngIf="app.applicationBuilder.dashboards?.length && defaultListView === '1'">

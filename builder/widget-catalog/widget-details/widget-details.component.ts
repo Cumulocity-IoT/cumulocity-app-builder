@@ -424,7 +424,7 @@ export class WidgetDetailsComponent implements OnInit {
                 widget.installed = true;
                 widget.isReloadRequired = true;
                 this.actionFlag(widget);
-                await new Promise(resolve => setTimeout(resolve, 5000));
+                await new Promise(resolve => setTimeout(resolve, 1000));
                 this.hideProgressModalDialog();
             }, error => {
                 this.alertService.danger("There is some technical error! Please try after sometime.");
@@ -446,8 +446,11 @@ export class WidgetDetailsComponent implements OnInit {
                         widget.installed = true;
                         widget.isReloadRequired = true;
                         this.actionFlag(widget);
-                        await new Promise(resolve => setTimeout(resolve, 7000));
+                        await new Promise(resolve => setTimeout(resolve, 1000));
                         this.hideProgressModalDialog();
+                    }, error => {
+                        this.alertService.danger("There is some technical error! Please try after sometime.");
+                        console.error(error);
                     });
                 });
         }

@@ -17,7 +17,7 @@
  */
 
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, Renderer2, ViewChild } from "@angular/core";
-import { ApplicationService, InventoryService, IApplication, IManagedObject } from "@c8y/client";
+import { ApplicationService, InventoryService, IApplication, IManagedObject, UserService } from "@c8y/client";
 import { Observable, from, Subject, Subscription } from "rxjs";
 import { debounceTime, filter, map, switchMap, tap } from "rxjs/operators";
 import { AppBuilderNavigationService } from "../navigation/app-builder-navigation.service";
@@ -76,6 +76,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     newAppContextPath: string;
     newAppIcon: string;
     isDashboardCatalogEnabled: boolean = true;
+    showAddDashboard: boolean = true;
     private globalRoles = [];
 
     filterValue = '';
@@ -106,7 +107,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
         private appIdService: AppIdService, private appService: ApplicationService, private appStateService: AppStateService,
         private brandingService: BrandingService, private inventoryService: InventoryService, private navigation: AppBuilderNavigationService,
         private modalService: BsModalService, private alertService: AlertService, private settingsService: SettingsService,
-        private accessRightsService: AccessRightsService,
+        private accessRightsService: AccessRightsService, private userService: UserService,
         @Inject(DOCUMENT) private document: Document, private renderer: Renderer2, private cd: ChangeDetectorRef
     ) {
         this.app = this.appIdService.appIdDelayedUntilAfterLogin$.pipe(
@@ -161,6 +162,11 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
         });
 
         this.isDashboardCatalogEnabled = await this.settingsService.isDashboardCatalogEnabled();
+        if (this.userService.hasAllRoles(this.appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN","ROLE_APPLICATION_MANAGEMENT_ADMIN"])) {
+            this.showAddDashboard = true;
+        } else {
+            this.showAddDashboard = false;
+        }
         this.globalRoles = await this.accessRightsService.getAllGlobalRoles();
     }
 
