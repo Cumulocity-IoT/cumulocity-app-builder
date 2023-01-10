@@ -64,9 +64,9 @@ export class AppListNavigation implements NavigatorNodeFactory {
                             priority: 0
                         }));
                         const widgetCatalogNode = new NavigatorNode({
-                            label: 'Plugin Catalog',
-                            icon: 'data-sheet',
-                            path: `/plugin-catalog/my-plugins`,
+                            label: 'Widget Catalog',
+                            icon: 'registry-editor',
+                            path: `/widget-catalog/my-widgets`,
                             priority: 2
                         });
                         if (this.userService.hasAllRoles(this.appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN","ROLE_APPLICATION_MANAGEMENT_ADMIN"])) {

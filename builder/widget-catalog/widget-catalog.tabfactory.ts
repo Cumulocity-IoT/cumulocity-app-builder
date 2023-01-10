@@ -9,19 +9,19 @@ export class WidgetCatalogTabFactory implements TabFactory {
     get() {
         const tabs: Tab[] = [];
 
-        if (this.router.url.match(/plugin-catalog/g)) {
+        if (this.router.url.match(/widget-catalog/g)) {
             tabs.push({
-                path: 'plugin-catalog/my-plugins',
+                path: 'widget-catalog/my-widgets',
                 priority: 100,
-                label: 'My Plugins',
-                icon: 'registry-editor'
+                label: 'My Widgets',
+                icon: 'packages'
             } as Tab);
 
             tabs.push({
-                path: 'plugin-catalog/get-plugins',
+                path: 'widget-catalog/get-widgets',
                 priority: 90,
-                label: 'Get More Plugins',
-                icon: 'pull-down'
+                label: 'Get More Widgets',
+                icon: 'archive-file'
             } as Tab);
         }
         return tabs;

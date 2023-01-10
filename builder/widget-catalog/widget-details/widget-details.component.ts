@@ -458,9 +458,9 @@ export class WidgetDetailsComponent implements OnInit {
 
     navigateToGridView() {
         if (this.getMoreWidgetsFlag) {
-            this.router.navigate(['plugin-catalog/get-plugins']);
+            this.router.navigate(['widget-catalog/get-widgets']);
         } else {
-            this.router.navigate(['plugin-catalog/my-plugins']);
+            this.router.navigate(['widget-catalog/my-widgets']);
         }
     }
 }

@@ -276,6 +276,6 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
 
     navigateToDetailPage(widget) {
         this.widgetCatalogService.setWidgetDetails(widget);
-        this.router.navigate(['plugin-details', { id: widget.contextPath }], { relativeTo: this.route });
+        this.router.navigate(['widget-details', { id: widget.contextPath }], { relativeTo: this.route });
     }
 }
