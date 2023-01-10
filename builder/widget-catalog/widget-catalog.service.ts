@@ -20,7 +20,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, isDevMode } from '@angular/core';
 import { ApplicationService, IApplication, IManifest } from '@c8y/client';
 import { AppBuilderExternalAssetsService } from 'app-builder-external-assets';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, config, Observable } from 'rxjs';
 import { WidgetCatalog, WidgetModel } from './widget-catalog.model';
 import * as semver from "semver";
 import { catchError, delay } from 'rxjs/operators';
@@ -137,7 +137,7 @@ export class WidgetCatalogService {
   isCompatiblieVersion(widget: any) {
     if (!widget || !widget.requiredPlatformVersion) return false;
     const major = '>=' + semver.major(this.C8Y_VERSION) + '.X.X';
-    return semver.satisfies(widget.requiredPlatformVersion, major);
+    return semver.satisfies(this.C8Y_VERSION, widget.requiredPlatformVersion);
   }
 
   isNextCompatiblieVersion(nextC8yVersion: any, widget: any) {
@@ -210,8 +210,22 @@ export class WidgetCatalogService {
     const packageObj = this.pluginsService.getMFExports(pluginBinary) ;
     this.progressIndicatorService.setProgress(95);
     // updating config MO to retain widget status
-    const updatedRemotes = await this.pluginsService.addRemotes(currentApp, packageObj);
-    return this.settingsService.updateAppConfigurationForPlugin(updatedRemotes)
+    let remotes = await this.pluginsService.addRemotes(currentApp, packageObj);
+
+    // for C8y 1015 compatibility
+    if(!remotes) {
+      remotes = (currentApp?.config?.remotes ? currentApp.config?.remotes : {});
+      packageObj.forEach((remote: any) => {
+        const key = remote.contextPath + '@' + remote.version;
+        (remotes[key] = remotes[key] || []).push(remote.module);
+      });
+      const config = { remotes};
+       let updatedApp = (await this.appService.update({
+        id: currentApp.id,
+        config
+      } as any)).data;
+    }
+    return this.settingsService.updateAppConfigurationForPlugin(remotes)
   }
 
   async updateRemotesToAppBuilderConfig() {
