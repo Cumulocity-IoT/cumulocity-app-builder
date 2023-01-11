@@ -184,8 +184,8 @@
 
                 </div>
                 <hr />
-                <div class="card-block" *ngIf="!widgetCatalog?.widgets?.length">
-                    <div class="c8y-empty-state text-center" style="max-width:100%; flex-direction: column; align-items: center;">
+                <div class="card-block" >
+                    <div *ngIf="!widgetCatalog?.widgets?.length" class="c8y-empty-state text-center" style="max-width:100%; flex-direction: column; align-items: center;">
                         <h1 c8yIcon="package" class="c8y-icon-duocolor" style="font-size: 90px;"></h1>
                         <h3>No widget to list.</h3>
                         <p>Please install widgets.</p>

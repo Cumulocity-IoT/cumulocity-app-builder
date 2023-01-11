@@ -131,8 +131,8 @@
                         placeholder="e.g. my-group (required)" required autofocus [(ngModel)]="groupName">
                 </div>
                 <div class="form-group">
-                    <label for="numberOfDevice"><span>Number of Devices</span></label>
-                    <input type="number" class="form-control" id="numberOfDevice" name="numberOfDevice"
+                    <label for="numberOfDevice"><span>Number of Devices (max 5)</span></label>
+                    <input type="number" max="5" class="form-control" id="numberOfDevice" name="numberOfDevice"
                         placeholder="e.g. 2 (required)" required autofocus [(ngModel)]="numberOfDevice">
                 </div>
             </form>

@@ -42,7 +42,7 @@
     "lodash-es": "^4.0.0",
     "@ng-select/ng-select": "^9.1.0",
     "@ng-reactive/async-input": "0.0.1",
-    "app-builder-external-assets": "file:binary/app-builder-external-assets-3.0.1.tgz",
+    "app-builder-external-assets": "file:binary/app-builder-external-assets-3.1.0.tgz",
     "font-awesome": "^4.7.0",
     "fontawesome": "^4.7.2",
     "jszip": "^3.10.1",
@@ -96,15 +96,20 @@
         "required": true,
         "functional": "These cookies are used to support you during your first steps in the product, to deliver content tailored to your needs, and to collect usage statistics."
       },
-      "copy": [{
-        "from": "./ui-assets/fonts",
-        "to": "./fonts/"
-      }, {
-        "from": "./ui-assets/img",
-        "to": "./img/"
-      }]
+      "copy": [
+        {
+          "from": "./ui-assets/fonts",
+          "to": "./fonts/"
+        },
+        {
+          "from": "./ui-assets/img",
+          "to": "./img/"
+        }
+      ]
     },
     "cli": {}
   },
-  "browserslist": ["last 2 major versions"]
+  "browserslist": [
+    "last 2 major versions"
+  ]
 }

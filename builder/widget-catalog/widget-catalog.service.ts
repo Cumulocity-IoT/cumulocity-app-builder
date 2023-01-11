@@ -19,7 +19,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, isDevMode } from '@angular/core';
 import { ApplicationService, IApplication, IManifest } from '@c8y/client';
-import { AppBuilderExternalAssetsService } from 'app-builder-external-assets';
 import { BehaviorSubject, config, Observable } from 'rxjs';
 import { WidgetCatalog, WidgetModel } from './widget-catalog.model';
 import * as semver from "semver";
@@ -27,6 +26,7 @@ import { catchError, delay } from 'rxjs/operators';
 import { AlertService, AppStateService, PluginsService, ZipService } from '@c8y/ngx-components';
 import { SettingsService } from './../settings/settings.service';
 import { ProgressIndicatorService } from '../utils/progress-indicator-modal/progress-indicator.service';
+import { AppBuilderExternalAssetsService } from 'app-builder-external-assets';
 
 const packageJson = require('./../../package.json');
 const c8yVersion = require('./../../package.json')["@c8y/ngx-components"];
