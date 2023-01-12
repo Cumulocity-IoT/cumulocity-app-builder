@@ -246,7 +246,7 @@ export class TemplateCatalogModalComponent implements OnInit {
             return;
         }
         const widgetBinaryFound = this.appList.find(app => app.manifest?.isPackage && (app.name.toLowerCase() === dependency.title?.toLowerCase() ||
-            (app.contextPath && app.contextPath?.toLowerCase() === dependency.contextPath.toLowerCase())));
+            (app.contextPath && app.contextPath?.toLowerCase() === dependency?.contextPath?.toLowerCase())));
         this.showProgressModalDialog(`Installing ${dependency.title}`);
         if (widgetBinaryFound) {
             this.progressIndicatorService.setProgress(10);
