@@ -35,9 +35,9 @@ export class WidgetCatalogService {
 
   C8Y_VERSION = '1016.X.X';
 //  private WidgetCatalogPath = '/widgetCatalog/widget-catalog.json';
-  private WidgetCatalogPath = '/widgetCatalog/widget-catalog.json?ref=development';
+  private WidgetCatalogPath = '/widgetCatalog/widget-catalog.json?ref=preprod';
  // private DemoCatalogWidgetsPath = '/demoCatalogWidgets/demo-catalog-widgets.json';
-  private DemoCatalogWidgetsPath = '/demoCatalogWidgets/demo-catalog-widgets.json?ref=development';
+  private DemoCatalogWidgetsPath = '/demoCatalogWidgets/demo-catalog-widgets.json?ref=preprod';
   private devBranchPath = "?ref=development";
   private GATEWAY_URL_GitHubAsset = '';
   private GATEWAY_URL_GitHubAPI = '';
@@ -137,7 +137,7 @@ export class WidgetCatalogService {
   isCompatiblieVersion(widget: any) {
     if (!widget || !widget.requiredPlatformVersion) return false;
     const major = '>=' + semver.major(this.C8Y_VERSION) + '.X.X';
-    return semver.satisfies(this.C8Y_VERSION, widget.requiredPlatformVersion);
+    return semver.satisfies(this.C8Y_VERSION, widget.requiredPlatformVersion) || semver.satisfies(widget.requiredPlatformVersion,major);
   }
 
   isNextCompatiblieVersion(nextC8yVersion: any, widget: any) {

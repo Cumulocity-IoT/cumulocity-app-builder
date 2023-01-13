@@ -96,20 +96,15 @@
         "required": true,
         "functional": "These cookies are used to support you during your first steps in the product, to deliver content tailored to your needs, and to collect usage statistics."
       },
-      "copy": [
-        {
-          "from": "./ui-assets/fonts",
-          "to": "./fonts/"
-        },
-        {
-          "from": "./ui-assets/img",
-          "to": "./img/"
-        }
-      ]
+      "copy": [{
+        "from": "./ui-assets/fonts",
+        "to": "./fonts/"
+      }, {
+        "from": "./ui-assets/img",
+        "to": "./img/"
+      }]
     },
     "cli": {}
   },
-  "browserslist": [
-    "last 2 major versions"
-  ]
+  "browserslist": ["last 2 major versions"]
 }

@@ -51,7 +51,7 @@ export class AppBuilderUpgradeService {
     private GATEWAY_URL_Labcase_FallBack = '';
     private GATEWAY_URL_GitHubAsset_FallBack = '';
   //  private appBuilderConfigPath = '/appbuilderConfig/app-builder-config.json';
-    private appBuilderConfigPath = '/appbuilderConfig/app-builder-config.json?ref=development';
+    private appBuilderConfigPath = '/appbuilderConfig/app-builder-config.json?ref=preprod';
     private devBranchPath = "?ref=development";
     private appBuilderConfigModel: AppBuilderConfig;
     private versionInfo: VersionInfo;
@@ -391,7 +391,7 @@ export class AppBuilderUpgradeService {
                             })) as any;
                     widgetCatalog.widgets = await this.widgetCatalogService.filterInstalledWidgets(widgetCatalog, this.userHasAdminRights);
                     const totalRemotes = (appBuilderConfig?.configs?.remotes ? Object.keys(appBuilderConfig?.configs?.remotes).length : 0);
-                    const eachRemoteProgress: number = (totalRemotes > 1 ? (90 / totalRemotes) : 0);
+                    const eachRemoteProgress: number = Math.floor((totalRemotes > 1 ? (90 / totalRemotes) : 0));
                     let overallProgress = 0;
                     if (totalRemotes > 1) { this.progressIndicatorService.setOverallProgress(overallProgress); }
                     const appBuilderConfigRemotes = this.widgetCatalogService.removeVersionFromPluginRemotes(appBuilderConfig?.configs?.remotes);
