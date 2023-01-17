@@ -18,7 +18,7 @@
 
 import { DOCUMENT } from "@angular/common";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-import { Inject, Injectable, isDevMode, Renderer2, RendererFactory2 } from "@angular/core";
+import { Inject, Injectable, Renderer2, RendererFactory2 } from "@angular/core";
 import { AlertService, AppStateService } from "@c8y/ngx-components";
 import { ApplicationService, UserService } from "@c8y/ngx-components/api";
 import { AppBuilderExternalAssetsService } from "app-builder-external-assets";
@@ -51,14 +51,14 @@ export class AppBuilderUpgradeService {
     private GATEWAY_URL_Labcase_FallBack = '';
     private GATEWAY_URL_GitHubAsset_FallBack = '';
   //  private appBuilderConfigPath = '/appbuilderConfig/app-builder-config.json';
-    private appBuilderConfigPath = '/appbuilderConfig/app-builder-config.json?ref=preprod';
+    private appBuilderConfigPath = '/appbuilderConfig/app-builder-config.json';
     private devBranchPath = "?ref=development";
+    private preprodBranchPath = "?ref=preprod";
     private appBuilderConfigModel: AppBuilderConfig;
     private versionInfo: VersionInfo;
     private applicationsList = [];
     private currentApp: IApplication;
     userHasAdminRights: boolean;
-
     public appVersion: string =  appVersion;
     public newVersion: boolean = false;
     public errorReported = false;
@@ -354,18 +354,25 @@ export class AppBuilderUpgradeService {
     fetchAppBuilderConfig(): Observable<AppBuilderConfig> {
         const url = `${this.GATEWAY_URL_GitHubAPI}${this.appBuilderConfigPath}`;
         const urlFallBack = `${this.GATEWAY_URL_GitHubAPI_FallBack}${this.appBuilderConfigPath}`;
-        if(isDevMode()){
-          return this.http.get<AppBuilderConfig>(`${url}${this.devBranchPath}`, this.HTTP_HEADERS)
+        if (this.appVersion.includes('dev')) {
+            return this.http.get<AppBuilderConfig>(`${url}${this.devBranchPath}`, this.HTTP_HEADERS)
           .pipe(catchError(err => {
             console.log('App Builder Config: Error in primary endpoint! using fallback...');
             return this.http.get<AppBuilderConfig>(`${urlFallBack}${this.devBranchPath}`, this.HTTP_HEADERS)
           }));
-        }
-        return this.http.get<AppBuilderConfig>(`${url}`, this.HTTP_HEADERS)
+        } else if (this.appVersion.includes('rc')) {
+            return this.http.get<AppBuilderConfig>(`${url}${this.preprodBranchPath}`, this.HTTP_HEADERS)
         .pipe(catchError(err => {
             console.log('App Builder Config: Error in primary endpoint! using fallback...');
-            return this.http.get<AppBuilderConfig>(`${urlFallBack}`, this.HTTP_HEADERS)
+            return this.http.get<AppBuilderConfig>(`${urlFallBack}${this.preprodBranchPath}`, this.HTTP_HEADERS)
           }));
+        } else {
+            return this.http.get<AppBuilderConfig>(`${url}`, this.HTTP_HEADERS)
+            .pipe(catchError(err => {
+                console.log('App Builder Config: Error in primary endpoint! using fallback...');
+                return this.http.get<AppBuilderConfig>(`${urlFallBack}`, this.HTTP_HEADERS)
+              }));
+        }
     }
 
     async getApplicationList() {

@@ -594,26 +594,27 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
         index = this.newDashboards.findIndex(db => db.id === dashboard.id);
         if (dashboard.templateDashboard) {
             this.showTemplateDashboardEditModalDialog(this.appBuilderObject, dashboard, index);
+        } else {
+            this.bsModalRef = this.modalService.show(EditDashboardModalComponent, {
+                class: 'c8y-wizard',
+                initialState: {
+                    app: this.appBuilderObject,
+                    globalRoles: this.globalRoles,
+                    dashboardID: dashboard.id,
+                    dashboardName: dashboard.name,
+                    dashboardVisibility: dashboard.visibility || '',
+                    dashboardIcon: dashboard.icon,
+                    deviceId: dashboard.deviceId,
+                    tabGroup: dashboard.tabGroup,
+                    roles: dashboard.roles,
+                    ...(dashboard.groupTemplate ? {
+                        dashboardType: 'group-template'
+                    } : {
+                        dashboardType: 'standard'
+                    })
+                }
+            });
         }
-        this.bsModalRef = this.modalService.show(EditDashboardModalComponent, {
-            class: 'c8y-wizard',
-            initialState: {
-                app: this.appBuilderObject,
-                globalRoles: this.globalRoles,
-                dashboardID: dashboard.id,
-                dashboardName: dashboard.name,
-                dashboardVisibility: dashboard.visibility || '',
-                dashboardIcon: dashboard.icon,
-                deviceId: dashboard.deviceId,
-                tabGroup: dashboard.tabGroup,
-                roles: dashboard.roles,
-                ...(dashboard.groupTemplate ? {
-                    dashboardType: 'group-template'
-                } : {
-                    dashboardType: 'standard'
-                })
-            }
-        });
         this.bsModalRef.content.onSave.subscribe((isReloadRequired: boolean) => {
             if (isReloadRequired) {
                 this.prepareDashboardHierarchy(this.bsModalRef.content.app);

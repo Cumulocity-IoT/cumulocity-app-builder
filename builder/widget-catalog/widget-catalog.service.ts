@@ -17,7 +17,7 @@
  */
 
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Injectable, isDevMode } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { ApplicationService, IApplication, IManifest } from '@c8y/client';
 import { BehaviorSubject, config, Observable } from 'rxjs';
 import { WidgetCatalog, WidgetModel } from './widget-catalog.model';
@@ -34,11 +34,13 @@ const c8yVersion = require('./../../package.json')["@c8y/ngx-components"];
 export class WidgetCatalogService {
 
   C8Y_VERSION = '1016.X.X';
-//  private WidgetCatalogPath = '/widgetCatalog/widget-catalog.json';
-  private WidgetCatalogPath = '/widgetCatalog/widget-catalog.json?ref=preprod';
- // private DemoCatalogWidgetsPath = '/demoCatalogWidgets/demo-catalog-widgets.json';
-  private DemoCatalogWidgetsPath = '/demoCatalogWidgets/demo-catalog-widgets.json?ref=preprod';
+  pkgVersion: any;
+  private WidgetCatalogPath = '/widgetCatalog/widget-catalog.json';
+ // private WidgetCatalogPath = '/widgetCatalog/widget-catalog.json?ref=preprod';
+  private DemoCatalogWidgetsPath = '/demoCatalogWidgets/demo-catalog-widgets.json';
+ // private DemoCatalogWidgetsPath = '/demoCatalogWidgets/demo-catalog-widgets.json?ref=preprod';
   private devBranchPath = "?ref=development";
+  private preprodBranchPath = "?ref=preprod";
   private GATEWAY_URL_GitHubAsset = '';
   private GATEWAY_URL_GitHubAPI = '';
   private GATEWAY_URL_GitHubAsset_FallBack = '';
@@ -75,7 +77,8 @@ export class WidgetCatalogService {
     this.GATEWAY_URL_GitHubAsset = this.externalService.getURL('GITHUB', 'gatewayURL_GitHubAsset');
     this.GATEWAY_URL_GitHubAPI_FallBack = this.externalService.getURL('GITHUB', 'gatewayURL_Github_Fallback');
     this.GATEWAY_URL_GitHubAsset_FallBack = this.externalService.getURL('GITHUB', 'gatewayURL_GitHubAsset_Fallback');
-    this.C8Y_VERSION = packageJson.dependencies['@c8y/ngx-components']
+    this.C8Y_VERSION = packageJson.dependencies['@c8y/ngx-components'];
+    this.pkgVersion = packageJson.version;
     this.GATEWAY_URL_Labcase = this.externalService.getURL('DBCATALOG', 'gatewayURL');
     this.GATEWAY_URL_Labcase_FallBack = this.externalService.getURL('DBCATALOG', 'gatewayURL_Fallback');
     this.GATEWAY_URL_GitHub = this.externalService.getURL('GITHUB', 'gatewayURL_GithubAPI');
@@ -90,35 +93,50 @@ export class WidgetCatalogService {
   fetchWidgetCatalog(): Observable<WidgetCatalog> {
     const url = `${this.GATEWAY_URL_GitHubAPI}${this.WidgetCatalogPath}`;
     const urlFallBack = `${this.GATEWAY_URL_GitHubAPI_FallBack}${this.WidgetCatalogPath}`;
-    /* if (isDevMode()) {
+    if (this.pkgVersion.includes('dev')) {
       return this.http.get<WidgetCatalog>(`${url}${this.devBranchPath}`, this.HTTP_HEADERS)
         .pipe(catchError(err => {
           console.log('Fetch Widget Catalog: Error in primary endpoint! using fallback...');
           return this.http.get<WidgetCatalog>(`${urlFallBack}${this.devBranchPath}`, this.HTTP_HEADERS)
         }));
-    } */
-    return this.http.get<WidgetCatalog>(`${url}`, this.HTTP_HEADERS)
+    } else if (this.pkgVersion.includes('rc')) { 
+      return this.http.get<WidgetCatalog>(`${url}${this.preprodBranchPath}`, this.HTTP_HEADERS)
+        .pipe(catchError(err => {
+          console.log('Fetch Widget Catalog: Error in primary endpoint! using fallback...');
+          return this.http.get<WidgetCatalog>(`${urlFallBack}${this.preprodBranchPath}`, this.HTTP_HEADERS)
+        }));
+    } else {
+      return this.http.get<WidgetCatalog>(`${url}`, this.HTTP_HEADERS)
       .pipe(catchError(err => {
         console.log('Fetch Widget Catalog: Error in primary endpoint! using fallback...');
         return this.http.get<WidgetCatalog>(`${urlFallBack}`, this.HTTP_HEADERS)
       }));
+    }
   }
 
   fetchWidgetForDemoCatalog(): Observable<WidgetCatalog> {
     const url = `${this.GATEWAY_URL_GitHubAPI}${this.DemoCatalogWidgetsPath}`;
     const urlFallBack = `${this.GATEWAY_URL_GitHubAPI_FallBack}${this.DemoCatalogWidgetsPath}`;
-   /*  if (isDevMode()) {
+    if (this.pkgVersion.includes('dev')) {
       return this.http.get<WidgetCatalog>(`${url}${this.devBranchPath}`, this.HTTP_HEADERS)
         .pipe(catchError(err => {
           console.log('Fetch Widget For Demo Catalog: Error in primary endpoint! using fallback...');
           return this.http.get<WidgetCatalog>(`${urlFallBack}${this.devBranchPath}`, this.HTTP_HEADERS)
         }));
-    } */
-    return this.http.get<WidgetCatalog>(`${url}`, this.HTTP_HEADERS)
+    } else if (this.pkgVersion.includes('rc')) {  
+      return this.http.get<WidgetCatalog>(`${url}${this.preprodBranchPath}`, this.HTTP_HEADERS)
+      .pipe(catchError(err => {
+        console.log('Fetch Widget For Demo Catalog: Error in primary endpoint! using fallback...');
+        return this.http.get<WidgetCatalog>(`${urlFallBack}${this.preprodBranchPath}`, this.HTTP_HEADERS)
+      }));
+    } else {
+      return this.http.get<WidgetCatalog>(`${url}`, this.HTTP_HEADERS)
       .pipe(catchError(err => {
         console.log('Fetch Widget For Demo Catalog: Error in primary endpoint! using fallback...');
         return this.http.get<WidgetCatalog>(`${urlFallBack}`, this.HTTP_HEADERS)
       }));
+    }
+    
   }
 
 

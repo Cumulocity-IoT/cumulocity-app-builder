@@ -121,7 +121,7 @@
                                     <td style="font-size: 12px;">{{widget.requiredPlatformVersion}}</td>
                                     <td style="font-size: 12px;">{{widget.license}}</td>
                                     <td style="font-size: 12px;">{{widget.releaseDate | date : "dd-MM-yyyy"}}</td>
-                                    <td style="font-size: 12px;text-transform:capitalize;" *ngIf="widget.pluginType"><span class="label label-info">{{widget.pluginType}}</span></td>
+                                    <td style="font-size: 12px;text-transform:capitalize;" [style.visibility]="widget.pluginType && show ? hidden : visible"><span class="label label-info">{{widget.pluginType}}</span></td>
                                     <td style="font-size: 12px;">{{widget.author}}</td>
                                     <td>
                                         <div>

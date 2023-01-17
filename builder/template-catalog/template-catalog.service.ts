@@ -17,7 +17,7 @@
  */
 
 import { HttpClient, HttpResponse } from "@angular/common/http";
-import { Injectable, isDevMode } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { catchError, map } from "rxjs/operators";
 import { has, get } from "lodash-es";
@@ -29,6 +29,7 @@ import { Alert, AlertService } from "@c8y/ngx-components";
 import { AppBuilderExternalAssetsService } from 'app-builder-external-assets';
 import { DashboardConfig } from "builder/application-config/dashboard-config.component";
 
+const packageJson = require('./../../package.json');
 @Injectable()
 export class TemplateCatalogService {
 
@@ -40,6 +41,8 @@ export class TemplateCatalogService {
     private GATEWAY_URL_GitHubAPI_FallBack = '';
     private dashboardCatalogPath = '/dashboardCatalog/catalog.json';
     private devBranchPath = "?ref=development";
+    private preprodBranchPath = "?ref=preprod";
+    pkgVersion: any;
     private isFallBackActive = false;
 
 
@@ -51,13 +54,16 @@ export class TemplateCatalogService {
         this.GATEWAY_URL_GitHubAsset =  this.externalService.getURL('GITHUB','gatewayURL_GitHubAsset');
         this.GATEWAY_URL_GitHubAPI_FallBack = this.externalService.getURL('GITHUB','gatewayURL_Github_Fallback');
         this.GATEWAY_URL_GitHubAsset_FallBack =  this.externalService.getURL('GITHUB','gatewayURL_GitHubAsset_Fallback');
+        this.pkgVersion = packageJson.version;
         
     }
 
     getTemplateCatalog(): Observable<TemplateCatalogEntry[]> {
         let url = `${this.GATEWAY_URL_GitHubAPI}${this.dashboardCatalogPath}`;
-        if(isDevMode()) {
+        if(this.pkgVersion.includes('dev')) {
             url = url + this.devBranchPath;
+        } else if (this.pkgVersion.includes('rc')) {
+            url = url + this.preprodBranchPath;
         }
         return this.getDataForTemplateCatalog(url);
     }
@@ -65,8 +71,10 @@ export class TemplateCatalogService {
     getTemplateCatalogFallBack(): Observable<TemplateCatalogEntry[]> {
         let url = `${this.GATEWAY_URL_GitHubAPI_FallBack}${this.dashboardCatalogPath}`;
         this.isFallBackActive = true;
-        if(isDevMode()) {
+        if(this.pkgVersion.includes('dev')) {
             url = url + this.devBranchPath;
+        } else if (this.pkgVersion.includes('rc')) {
+            url = url + this.preprodBranchPath;
         }
         return this.getDataForTemplateCatalog(url);
     }
@@ -95,9 +103,11 @@ export class TemplateCatalogService {
     }
 
     getTemplateDetails(dashboardId: string): Observable<TemplateDetails> {
-        let url = `${this.GATEWAY_URL_GitHubAPI}${dashboardId}`;
-        if(isDevMode()) {
+        let url = `${this.GATEWAY_URL_GitHubAPI}${dashboardId}` + this.devBranchPath;
+        if(this.pkgVersion.includes('dev')) {
             url = url + this.devBranchPath;
+        } else if (this.pkgVersion.includes('rc')) {
+            url = url + this.preprodBranchPath;
         }
         return this.http.get(`${url}`).pipe(map((dashboard: TemplateDetails) => {
             return dashboard;
@@ -107,8 +117,10 @@ export class TemplateCatalogService {
     getTemplateDetailsFallBack(dashboardId: string): Observable<TemplateDetails> {
         let url = `${this.GATEWAY_URL_GitHubAPI_FallBack}${dashboardId}`;
         this.isFallBackActive = true;
-        if(isDevMode()) {
+        if(this.pkgVersion.includes('dev')) {
             url = url + this.devBranchPath;
+        } else if (this.pkgVersion.includes('rc')) {
+            url = url + this.preprodBranchPath;
         }
         return this.http.get(`${url}`).pipe(map((dashboard: TemplateDetails) => {
             return dashboard;
@@ -132,10 +144,12 @@ export class TemplateCatalogService {
         if(this.isFallBackActive) {
             url = `${this.GATEWAY_URL_GitHubAPI_FallBack}`;
         }
-        if(isDevMode()){
+        if(this.pkgVersion.includes('dev')) {
             return url + `${relativePath}${this.devBranchPath}`;
+        } else if (this.pkgVersion.includes('rc')) {
+            return url + `${relativePath}${this.preprodBranchPath}`;
         }
-       return  url + `${relativePath}`;
+        return  url + `${relativePath}`;
     }
 
     uploadImage(image: File): Promise<string> {
