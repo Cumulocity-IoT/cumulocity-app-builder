@@ -201,7 +201,7 @@ export class AppBuilderUpgradeService {
         this.progressModal.hide();
         if (!this.errorReported) {
             const postUpdationMsg = {
-                title: 'Upgrade Completed',
+                title: 'Upgrade In Progress',
                 description: (successMsg ? successMsg : 'Application Builder is successfully upgraded.'),
                 type: 'info',
                 alertType: 'info' //info|confirm
