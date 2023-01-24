@@ -402,6 +402,7 @@ export class AppBuilderUpgradeService {
                     let overallProgress = 0;
                     if (totalRemotes > 1) { this.progressIndicatorService.setOverallProgress(overallProgress); }
                     const appBuilderConfigRemotes = this.widgetCatalogService.removeVersionFromPluginRemotes(appBuilderConfig?.configs?.remotes);
+                    let appConfigUpdated = false;
                     for (let remote of appBuilderConfigRemotes) {
                         let pluginBinary = widgetCatalog.widgets.find(widget => widget.contextPath === remote?.pluginContext && widget.isCompatible);
                         if (pluginBinary) {
@@ -418,9 +419,13 @@ export class AppBuilderUpgradeService {
                             const fileName = pluginBinary.binaryLink.replace(/^.*[\\\/]/, '');
                             const fileOfBlob = new File([blob], fileName);
                             await this.widgetCatalogService.installPackage(fileOfBlob);
+                            appConfigUpdated = true;
                         }
                         overallProgress = overallProgress + eachRemoteProgress;
                         this.progressIndicatorService.setOverallProgress(overallProgress)
+                    }
+                    if(!appConfigUpdated) {
+                        this.settingService.updateAppConfigurationForPlugin(appRemotes)
                     }
                     this.progressModal.hide()
                     this.showProgressModalDialog('Refreshing...');

@@ -148,31 +148,7 @@ export class BuilderModule {
         simSvc: SimulatorWorkerAPI, simulatorManagerService: SimulatorManagerService,
         appIdService: AppIdService, private settingService: SettingsService, private appBuilderUpgradeService: AppBuilderUpgradeService,
         rendererFactory: RendererFactory2, @Inject(DOCUMENT) private _document: Document, private tenantService: TenantService) {
-        // Pass the app state to the worker from the main thread (Initially and every time it changes)
-        appStateService.currentUser
-        .pipe(filter(user => !!user))
-        .pipe(distinctUntilChanged())
-        .subscribe(async (user) => {
-            let isCookieAuth = false;
-            let cookieAuth = null;
-            let xsrfToken = null;
-            const token = localStorage.getItem(loginService.TOKEN_KEY) || sessionStorage.getItem(loginService.TOKEN_KEY);
-            if (!token) {
-                // XSRF token required by webworker while cookie auth used. use case: login using sso
-                cookieAuth = new CookieAuth();
-                xsrfToken = cookieAuth.getCookieValue('XSRF-TOKEN');
-                isCookieAuth = true;
-            }
-            if (user != null) {
-                const tfa = localStorage.getItem(loginService.TFATOKEN_KEY) || sessionStorage.getItem(loginService.TFATOKEN_KEY);
-                if (token !== undefined && token) {
-                    return await simSvc.setUserAndCredentials(user, { token, tfa }, isCookieAuth, null);
-                } else {
-                    return await simSvc.setUserAndCredentials(user, { token, tfa }, isCookieAuth, xsrfToken);
-                }
-            }
-            return await simSvc.setUserAndCredentials(user, {}, isCookieAuth, xsrfToken);
-        });
+        
         
         simulatorManagerService.initialize();
         const lockStatus$ = new Observable<{ isLocked: boolean, isLockOwned: boolean, lockStatus?: LockStatus }>(subscriber => {
