@@ -39,7 +39,7 @@ import { AppListService } from "./app-list.service";
 })
 export class AppListComponent {
     //   applications: Observable<IApplication[]>;
-    applications: IApplication[];
+    applications: IApplication[] = [];
     allApplications: IApplication[];
 
     userHasAdminRights: boolean;
