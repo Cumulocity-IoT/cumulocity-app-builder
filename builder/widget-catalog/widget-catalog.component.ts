@@ -73,7 +73,28 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
 
 
     async ngOnInit() {
-        if (this.widgetCatalogService.runtimeLoadingCompleted) {
+        const ownAppBuilder = (await this.widgetCatalogService.isOwnAppBuilder());
+        if (!ownAppBuilder) {
+            const alertMessage = {
+                title: 'Application Builder',
+                description: `You are using subscribed Application Builder. You need to install Application Builder in this tenant to use Widget Catalog.
+                    Please confirm to install Application Builder`,
+                type: 'warning',
+                alertType: 'confirm', //info|confirm
+                confirmPrimary: true //confirm Button is primary
+            }
+            const installDemoDialogRef = this.alertModalDialog(alertMessage);
+            await installDemoDialogRef.content.event.subscribe(async data => {
+                if (data && data.isConfirm) {
+                    this.showProgressModalDialog('Please wait...');
+                    await this.widgetCatalogService.cloneAppBuilder();
+                    window.location.reload();
+                } else {
+                    this.router.navigateByUrl(`/home`);
+                }
+            });
+        }
+        else if (this.widgetCatalogService.runtimeLoadingCompleted) {
             this.loadWidgetsFromCatalog();
         } else {
             this.isBusy = true;

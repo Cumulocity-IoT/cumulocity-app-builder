@@ -292,7 +292,10 @@ export class WidgetCatalogService {
     if (appList.some(app => app.contextPath === widgetC8yJson.contextPath)) {
       isUpdate = true;
       const packageApp = appList.find(app => app.contextPath === widgetC8yJson.contextPath);
-      await this.appService.delete(packageApp.id);
+       await this.appService.delete(packageApp.id).catch( (e) => {
+        console.error(e);
+      });
+      
       this.progressIndicatorService.setProgress(35);
       
       // Upload the binary
@@ -313,38 +316,45 @@ export class WidgetCatalogService {
     }  //else {
       this.progressIndicatorService.setProgress(35);
       // Create the pluginPackage's app
-      let packageApp = (await this.appService.create({
-        name: widgetC8yJson.name,
-        key: widgetC8yJson.key,
-        contextPath: widgetC8yJson.contextPath,
-        manifest: { isPackage: true } as unknown as IManifest,
-        resourcesUrl: "/",
-        type: "HOSTED"
-      } as any)).data;
-
-      // Upload the binary
-      const appBinary = (await this.appService.binary(packageApp).upload(packageFile)).data;
-
-      // Update the app
-      this.progressIndicatorService.setProgress(40);
-      packageApp = (await this.appService.update({
-        id: packageApp.id,
-        activeVersionId: appBinary.id.toString()
-      } as any)).data;
-
-      if (window && window['aptrinsic']) {
-        if(isUpdate) {
-          window['aptrinsic']('track', 'gp_runtime_widget_updated', {
-            "widgetName": packageApp.name
-          });
-        } else {
-          window['aptrinsic']('track', 'gp_runtime_widget_installed', {
-            "widgetName": packageApp.name
-          });
+      try {
+        let packageApp = (await this.appService.create({
+          name: widgetC8yJson.name,
+          key: widgetC8yJson.key,
+          contextPath: widgetC8yJson.contextPath,
+          manifest: { isPackage: true } as unknown as IManifest,
+          resourcesUrl: "/",
+          type: "HOSTED"
+        } as any)).data;
+  
+        // Upload the binary
+        const appBinary = (await this.appService.binary(packageApp).upload(packageFile)).data;
+  
+        // Update the app
+        this.progressIndicatorService.setProgress(40);
+        packageApp = (await this.appService.update({
+          id: packageApp.id,
+          activeVersionId: appBinary.id.toString()
+        } as any)).data;
+  
+        if (window && window['aptrinsic']) {
+          if(isUpdate) {
+            window['aptrinsic']('track', 'gp_runtime_widget_updated', {
+              "widgetName": packageApp.name
+            });
+          } else {
+            window['aptrinsic']('track', 'gp_runtime_widget_installed', {
+              "widgetName": packageApp.name
+            });
+          }
+         
         }
-       
+        return this.updateRemotesInCumulocityJson(packageApp)
       }
-      return this.updateRemotesInCumulocityJson(packageApp)
+      catch(e) {
+        console.log(e);
+        const appRemotes = this.currentApp?.config.remotes;
+        return this.settingsService.updateAppConfigurationForPlugin(appRemotes)
+      }
    // }
   }
 
@@ -397,5 +407,25 @@ export class WidgetCatalogService {
     } else {
       widget.actionCode = '000';
     }
+  }
+
+  async isOwnAppBuilder() {
+    const currentApp = await this.getCurrentApp();
+    const currentTenantId = this.settingsService.getTenantName();
+    const appBuilderTenantId = (currentApp && currentApp.owner && currentApp.owner.tenant ? currentApp.owner.tenant.id : undefined);
+    return (currentApp && currentTenantId === appBuilderTenantId);
+  }
+
+  async cloneAppBuilder() {
+    const currentApp = await this.getCurrentApp();
+    let { data: clonedAppBuilder } = await this.appService.clone(currentApp.id);
+    clonedAppBuilder.contextPath = currentApp.contextPath;
+    clonedAppBuilder.key = currentApp.key;
+    clonedAppBuilder.name = currentApp.name;
+    delete clonedAppBuilder.type;
+    await this.appService.update({
+      id: clonedAppBuilder.id,
+      ...clonedAppBuilder
+    });
   }
 }

@@ -20,7 +20,8 @@ import { Component, isDevMode, OnDestroy, OnInit } from "@angular/core";
 import {
     ApplicationService,
     UserService,
-    IApplication
+    IApplication,
+    FetchClient
 } from "@c8y/client";
 import { AlertService, AppStateService, DynamicComponentService } from "@c8y/ngx-components";
 import { ProgressIndicatorModalComponent } from '../../utils/progress-indicator-modal/progress-indicator-modal.component';
@@ -56,7 +57,7 @@ export class MyWidgetsComponent implements OnInit {
     constructor(private appStateService: AppStateService, private modalService: BsModalService,
         private userService: UserService, private widgetCatalogService: WidgetCatalogService,
         private alertService: AlertService, private componentService: DynamicComponentService,
-        private appService: ApplicationService,
+        private appService: ApplicationService, private fetchClient: FetchClient,
         private router: Router, private route: ActivatedRoute,private progressIndicatorService: ProgressIndicatorService) {
         this.userHasAdminRights = userService.hasAllRoles(appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN", "ROLE_APPLICATION_MANAGEMENT_ADMIN"]);
         this.widgetCatalogService.displayListValue$.subscribe((value) => {
@@ -69,9 +70,30 @@ export class MyWidgetsComponent implements OnInit {
     }
 
 
-    ngOnInit() {
+   async ngOnInit() {
         if (this.userHasAdminRights) {
-            if (this.widgetCatalogService.runtimeLoadingCompleted) {
+            const ownAppBuilder = (await this.widgetCatalogService.isOwnAppBuilder());
+            if(!ownAppBuilder) {
+                const alertMessage = {
+                    title: 'Application Builder',
+                    description: `You are using subscribed Application Builder. You need to install Application Builder in this tenant to use Widget Catalog.
+                    Please confirm to install Application Builder`,
+                    type: 'warning',
+                    alertType: 'confirm', //info|confirm
+                    confirmPrimary: true //confirm Button is primary
+                }
+                const installDemoDialogRef = this.alertModalDialog(alertMessage);
+                await installDemoDialogRef.content.event.subscribe(async data => {
+                    if (data && data.isConfirm) {
+                        this.showProgressModalDialog('Please wait...');
+                        await this.widgetCatalogService.cloneAppBuilder();
+                        window.location.reload();
+                    } else {
+                        this.router.navigateByUrl(`/home`);
+                    }
+                });
+            }
+            else if (this.widgetCatalogService.runtimeLoadingCompleted) {
                 this.loadWidgetsFromCatalog();
             } else {
                 this.isBusy = true;
@@ -312,7 +334,7 @@ export class MyWidgetsComponent implements OnInit {
             const appObj = this.appList.find(app => app.contextPath === widget.contextPath);
             const widgetObj = installedPlugins.find( plugin => plugin.pluginContext === widget.contextPath);
             widget.installedVersion = (widgetObj && appObj && appObj.manifest && appObj.manifest.version ? appObj.manifest.version : '');
-            widget.installed = widgetObj && this.findInstalledWidget(widget); //(widgetObj != undefined);
+            widget.installed = widgetObj && appObj && this.findInstalledWidget(widget); //(widgetObj != undefined);
             if (widget.installed && !widget.isReloadRequired && this.isUpdateAvailable(widget)) {
                 this.isUpdateRequired = true;
             }
