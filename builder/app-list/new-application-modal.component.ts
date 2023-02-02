@@ -299,6 +299,12 @@ export class NewApplicationModalComponent implements OnInit {
                     ...defaultAppBuilderData
                 } as any);
 
+                
+                // update manifest
+                await this.appService.storeAppManifest(app.id, {
+                    ...appBuilder.manifest,
+                    icon: defaultAppBuilderData.icon
+                });
                 // Update App Builder Custom Properties
                 await this.updateAppBuilderConfiguration(existingAppBuilderId, appId);
 

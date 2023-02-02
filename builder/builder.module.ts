@@ -149,7 +149,6 @@ export class BuilderModule {
         appIdService: AppIdService, private settingService: SettingsService, private appBuilderUpgradeService: AppBuilderUpgradeService,
         rendererFactory: RendererFactory2, @Inject(DOCUMENT) private _document: Document, private tenantService: TenantService) {
         
-        
         simulatorManagerService.initialize();
         const lockStatus$ = new Observable<{ isLocked: boolean, isLockOwned: boolean, lockStatus?: LockStatus }>(subscriber => {
             const listenerId = simSvc

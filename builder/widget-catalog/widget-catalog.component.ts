@@ -77,8 +77,9 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
         if (!ownAppBuilder) {
             const alertMessage = {
                 title: 'Application Builder',
-                description: `You are using subscribed Application Builder. You need to install Application Builder in this tenant to use Widget Catalog.
-                    Please confirm to install Application Builder`,
+                description: `It looks like you are currently using a subscribed Application Builder in this tenant. To use the Widget Catalog, you’ll need to install an instance of the Application Builder.
+                
+                Please confirm if you wish to install the Application Builder.`,
                 type: 'warning',
                 alertType: 'confirm', //info|confirm
                 confirmPrimary: true //confirm Button is primary
