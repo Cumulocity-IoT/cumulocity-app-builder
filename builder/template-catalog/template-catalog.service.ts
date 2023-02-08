@@ -103,7 +103,7 @@ export class TemplateCatalogService {
     }
 
     getTemplateDetails(dashboardId: string): Observable<TemplateDetails> {
-        let url = `${this.GATEWAY_URL_GitHubAPI}${dashboardId}` + this.devBranchPath;
+        let url = `${this.GATEWAY_URL_GitHubAPI}${dashboardId}`;
         if(this.pkgVersion.includes('dev')) {
             url = url + this.devBranchPath;
         } else if (this.pkgVersion.includes('rc')) {
