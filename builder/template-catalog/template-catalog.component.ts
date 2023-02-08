@@ -63,6 +63,8 @@ export class TemplateCatalogModalComponent implements OnInit {
 
     public searchTemplate = '';
 
+    public dashboardPath: string = null;
+
     private appList = [];
 
     public dashboardConfiguration = {
@@ -197,7 +199,7 @@ export class TemplateCatalogModalComponent implements OnInit {
 
     async onSaveButtonClicked() {
         this.showProgressModalDialog('Create Dashboard ...')
-
+        this.dashboardConfiguration.dashboardName = (this.dashboardPath ? `${this.dashboardPath}/${this.dashboardConfiguration.dashboardName}` : this.dashboardConfiguration.dashboardName);
         await this.catalogService.createDashboard(this.app, this.dashboardConfiguration, this.selectedTemplate, this.templateDetails);
 
         this.hideProgressModalDialog();

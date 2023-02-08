@@ -36,6 +36,7 @@ export class NewDashboardModalComponent {
 
     dashboardId: string = '12598412';
     dashboardName: string = '';
+    dashboardPath: string = null;
     dashboardIcon: string = 'th';
     deviceId: string = '';
     deviceName: string = '';
@@ -152,7 +153,8 @@ export class NewDashboardModalComponent {
         await this.addTemplateDashboard(application, name, visibility, icon, template, tabGroup, selectedGlobalRoles);
     }
 
-    async addTemplateDashboard(application, name: string, visibility: '' | 'hidden' | 'no-nav', icon: string, template: any, tabGroup: string, selectedGlobalRoles: any, isGroupTemplate: boolean = false) {
+    async addTemplateDashboard(application, dbName: string, visibility: '' | 'hidden' | 'no-nav', icon: string, template: any, tabGroup: string, selectedGlobalRoles: any, isGroupTemplate: boolean = false) {
+        const name = (this.dashboardPath ? `${this.dashboardPath}/${dbName}` : dbName );
         const dashboardManagedObject = (await this.inventoryService.create({
             c8y_Global: {},
             "c8y_Dashboard!name!app-builder-db": {},

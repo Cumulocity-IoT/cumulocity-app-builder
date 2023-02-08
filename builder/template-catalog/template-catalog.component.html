@@ -71,9 +71,18 @@
             <form name="newDashboardCreationForm" #newDashboardCreationForm="ngForm" class="">
                 <div class="form-group">
                     <label for="name"><span>Path</span></label>
-                    <input type="text" class="form-control" id="name" name="name"
-                        placeholder="e.g. Some Folder/My First Application (required)" required
-                        [(ngModel)]="dashboardConfiguration.dashboardName">
+                    <div class="row ">
+                        <div class="col-xs-6">
+                            <ng-select [items]="app.applicationBuilder.dashboards"  bindLabel="name" bindValue="name" id="pathPrefix" name="pathPrefix" [multiple]="false" [closeOnSelect]="true" [searchable]="true"
+                            placeholder="Path(Optional)"  [appendTo]="(appendTo ?  appendTo : 'body')" [(ngModel)]="dashboardPath" >
+                            </ng-select>
+                        </div>
+                        <div class="col-xs-6">
+                            <input type="text" class="form-control" id="name" name="name"
+                            placeholder="path/name (required)" required
+                            [(ngModel)]="dashboardConfiguration.dashboardName">
+                        </div>
+                   </div>
                 </div>
 
                 <div class="form-group">
