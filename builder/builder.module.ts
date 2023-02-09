@@ -180,7 +180,8 @@ export class BuilderModule {
                     this.registerAndTrackAnalyticsProvider(true);
                 }
                 let isUnderMaintenance = await this.settingService.getAppBuilderMaintenanceStatus();
-                if (isUnderMaintenance === 'true') {
+                let isUpgrade = sessionStorage.getItem('isUpgrade');
+                if (isUnderMaintenance === 'true' && isUpgrade !== 'true') {
                     const alertMessage = {
                         title: 'Under Maintenance',
                         description: `Application Builder is currently Under Maintenance. Please check after sometime. If problem persists, please contact the administrator. `,
