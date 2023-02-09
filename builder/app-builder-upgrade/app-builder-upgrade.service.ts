@@ -383,7 +383,7 @@ export class AppBuilderUpgradeService {
 
     private async verifyPlugins() {
         const appVersion =  this.currentApp?.manifest?.version;
-        const appRemotes = this.currentApp?.config.remotes;
+        const appRemotes = this.currentApp?.config?.remotes;
         const appBuilderConfig = (await this.settingService.getAppBuilderConfigs());
         if (appBuilderConfig?.configs?.remotes && Object.keys(appBuilderConfig?.configs?.remotes).length > 0) {
             if (appVersion === appBuilderConfig?.appBuilderVersion && _.isEqual(appRemotes, appBuilderConfig?.configs.remotes)) {
