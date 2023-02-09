@@ -48,4 +48,5 @@ export interface WidgetModel {
     releaseDate?: string;
     isNextVersionAvailable?: boolean;
     moduleName?: string;
+    oldContextPath?: string;
 }

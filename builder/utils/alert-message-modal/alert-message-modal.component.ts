@@ -1,4 +1,5 @@
 import { Component, EventEmitter, ViewEncapsulation } from "@angular/core";
+import { LoginService } from "@c8y/ngx-components";
 import { BsModalRef } from 'ngx-bootstrap/modal';
 
 @Component({
@@ -10,7 +11,7 @@ export class AlertMessageModalComponent {
 
     message: any;
     public event: EventEmitter<any> = new EventEmitter();
-    constructor(public bsModalRef: BsModalRef) {}
+    constructor(public bsModalRef: BsModalRef,private loginService: LoginService) {}
     colorStatusClass() {
         switch (this.message.type) {
             case 'danger':
@@ -30,5 +31,9 @@ export class AlertMessageModalComponent {
     dismiss() {
         this.event.emit({isConfirm: false});
         this.bsModalRef.hide();
+    }
+
+    logout() {
+        this.loginService.logout();
     }
 }
