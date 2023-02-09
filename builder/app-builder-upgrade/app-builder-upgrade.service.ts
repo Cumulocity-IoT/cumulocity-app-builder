@@ -192,6 +192,7 @@ export class AppBuilderUpgradeService {
     }
 
     private async downlaodAndUpgradeAppBuilder() {
+        sessionStorage.setItem('isUpgrade', 'true');
         this.progressIndicatorService.setProgress(30);
         const updateURL = this.versionInfo.updateURL;
         const successMsg = this.versionInfo?.successMsg;
@@ -201,7 +202,7 @@ export class AppBuilderUpgradeService {
         this.progressModal.hide();
         if (!this.errorReported) {
             const postUpdationMsg = {
-                title: 'Upgrade In Progress',
+                title: this.versionInfo.title,
                 description: (successMsg ? successMsg : 'Application Builder is successfully upgraded.'),
                 type: 'info',
                 alertType: 'info' //info|confirm
@@ -235,14 +236,15 @@ export class AppBuilderUpgradeService {
             return;
         }
         this.progressIndicatorService.setProgress(40);
-        const data: ArrayBuffer = await this.downloadBinary(binaryLocation, isGithub);
-        const blob = new Blob([data], {
-            type: 'application/zip'
-        });
-        const binaryFile = new File([blob], fileName, { type: "'application/zip'" })
-        this.progressIndicatorService.setProgress(50);
         let appC8yJson;
+        let binaryFile;
         try {
+            const data: ArrayBuffer = await this.downloadBinary(binaryLocation, isGithub);
+            const blob = new Blob([data], {
+                type: 'application/zip'
+            });
+            binaryFile = new File([blob], fileName, { type: "'application/zip'" })
+            this.progressIndicatorService.setProgress(50);
             this.progressIndicatorService.setProgress(60);
             const binaryZip = await JSZip.loadAsync(binaryFile);
             appC8yJson = JSON.parse(await binaryZip.file('cumulocity.json').async("text"));
@@ -255,6 +257,9 @@ export class AppBuilderUpgradeService {
             console.log(e);
             this.alertService.danger("Unable to download new version.");
             this.errorReported = true;
+            sessionStorage.setItem('isUpgrade', 'false');
+            this.settingService.updateAppBuilderMO();
+            this.progressModal.hide();
             throw Error("Not a Binary");
         }
 
@@ -383,7 +388,7 @@ export class AppBuilderUpgradeService {
 
     private async verifyPlugins() {
         const appVersion =  this.currentApp?.manifest?.version;
-        const appRemotes = this.currentApp?.config.remotes;
+        const appRemotes = this.currentApp?.config?.remotes;
         const appBuilderConfig = (await this.settingService.getAppBuilderConfigs());
         if (appBuilderConfig?.configs?.remotes && Object.keys(appBuilderConfig?.configs?.remotes).length > 0) {
             if (appVersion === appBuilderConfig?.appBuilderVersion && _.isEqual(appRemotes, appBuilderConfig?.configs.remotes)) {
@@ -427,7 +432,9 @@ export class AppBuilderUpgradeService {
                     if(!appConfigUpdated) {
                         this.settingService.updateAppConfigurationForPlugin(appRemotes)
                     }
-                    this.progressModal.hide()
+                    this.progressModal.hide();
+                    sessionStorage.setItem('isUpgrade', 'false');
+                    this.settingService.updateAppBuilderMO();
                     this.showProgressModalDialog('Refreshing...');
                     await new Promise(resolve => setTimeout(resolve, 4000));
                     window.location.reload();

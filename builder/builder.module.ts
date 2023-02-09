@@ -66,6 +66,8 @@ import { ButtonsModule } from "ngx-bootstrap/buttons";
 import { DashboardNodeComponent } from "./application-config/dashboard-node.component";
 import { CollapseModule } from 'ngx-bootstrap/collapse';
 import { DragDropModule } from "@angular/cdk/drag-drop";
+import { BsModalRef, BsModalService } from "ngx-bootstrap/modal";
+import { AlertMessageModalComponent } from "./utils/alert-message-modal/alert-message-modal.component";
 @NgModule({
     imports: [
         ApplicationModule,
@@ -147,7 +149,8 @@ export class BuilderModule {
     constructor(appStateService: AppStateService, loginService: LoginService, 
         simSvc: SimulatorWorkerAPI, simulatorManagerService: SimulatorManagerService,
         appIdService: AppIdService, private settingService: SettingsService, private appBuilderUpgradeService: AppBuilderUpgradeService,
-        rendererFactory: RendererFactory2, @Inject(DOCUMENT) private _document: Document, private tenantService: TenantService) {
+        rendererFactory: RendererFactory2, @Inject(DOCUMENT) private _document: Document,
+        private modalService: BsModalService) {
         
         simulatorManagerService.initialize();
         const lockStatus$ = new Observable<{ isLocked: boolean, isLockOwned: boolean, lockStatus?: LockStatus }>(subscriber => {
@@ -176,7 +179,19 @@ export class BuilderModule {
                     this.renderer = rendererFactory.createRenderer(null, null);
                     this.registerAndTrackAnalyticsProvider(true);
                 }
-                this.appBuilderUpgradeService.loadUpgradeBanner();
+                let isUnderMaintenance = await this.settingService.getAppBuilderMaintenanceStatus();
+                if (isUnderMaintenance === 'true') {
+                    const alertMessage = {
+                        title: 'Under Maintenance',
+                        description: `Application Builder is currently Under Maintenance. Please check after sometime. If problem persists, please contact the administrator. `,
+                        type: 'warning',
+                        alertType: 'maintenance', //info|confirm
+                        confirmPrimary: false //confirm Button is primary
+                    }
+                    this.alertModalDialog(alertMessage);
+                } else {
+                    this.appBuilderUpgradeService.loadUpgradeBanner();
+                }
             }
         });
        
@@ -188,6 +203,10 @@ export class BuilderModule {
             if(appId) {   await simSvc.setAppId(appId) }
             this.registerAndTrackAnalyticsProvider(false, appId);
         });
+    }
+
+    alertModalDialog(message: any): BsModalRef {
+        return this.modalService.show(AlertMessageModalComponent, { class: 'c8y-wizard', initialState: { message } });
     }
 
     private async registerAndTrackAnalyticsProvider(isRegister: boolean, appId?: any) {

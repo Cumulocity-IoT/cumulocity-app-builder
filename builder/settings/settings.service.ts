@@ -103,6 +103,16 @@ export class SettingsService {
         }
     }
 
+    async getAppBuilderMaintenanceStatus() {
+        if(this.appBuilderConfig) {
+            return (this.appBuilderConfig.underMaintenance ? this.appBuilderConfig.underMaintenance : false);
+        }
+        else {
+            await delay(500);
+            return await this.getAppBuilderMaintenanceStatus();
+        }
+    }
+
     async isDashboardCatalogEnabled() {
         const customProp = await this.getCustomProperties();
         return (!customProp || (customProp  && ( !customProp.dashboardCataglogEnabled || customProp.dashboardCataglogEnabled === "true")));
@@ -156,8 +166,8 @@ export class SettingsService {
     }
 
     private async isAnalyticsProviderActive() {
-        if(this.appBuilderConfig && this.appBuilderConfig.customProperties) {
-            const customProperties = this.appBuilderConfig.customProperties;
+        if(this.appBuilderConfig) {
+            const customProperties = this.appBuilderConfig?.customProperties;
             return (customProperties && customProperties.gainsightEnabled === 'true')
         }
         else {
@@ -214,14 +224,15 @@ export class SettingsService {
             return await this.getAppBuilderConfigs();
         }
     }
-    async updateAppConfigurationForPlugin(remotes: any){
+    async updateAppConfigurationForPlugin(remotes: any, underMaintenance?: any){
         
         if(this.appBuilderConfig) {
             return await this.inventoryService.update({
                 id: this.appBuilderConfig.id,
                 configs: {remotes},
                 c8y_Global: {},
-                appBuilderVersion: this.currentApp.manifest.version
+                appBuilderVersion: this.currentApp.manifest.version,
+                underMaintenance: underMaintenance
             })
         } else if (this.isAppConfigNotFound) {
             return await this.inventoryService.create({
@@ -238,4 +249,10 @@ export class SettingsService {
         }
     }
 
+    async updateAppBuilderMO() {
+        await this.inventoryService.update({
+            id: this.appBuilderConfig.id,
+            underMaintenance: 'false'
+        })
+    }
 }
