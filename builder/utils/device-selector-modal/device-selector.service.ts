@@ -16,6 +16,6 @@ export class DeviceSelectorModalService {
 
     queryDevices(deviceName?: string): Promise<IResultList<IManagedObject>> {
         let searchString = deviceName ? `*${deviceName}*` : '*';
-        return this.inventoryService.listQuery({ __filter: { __and: [{ __has: 'c8y_IsDevice' }, { name: searchString }] } }, this.LIST_FILTER);
+        return this.inventoryService.listQuery({ __filter: { __and: [{ __or: [{__has: 'c8y_IsDevice' }, {__has: 'c8y_IsAsset'  } ]}, { name: searchString }] } }, this.LIST_FILTER);
     }
 }

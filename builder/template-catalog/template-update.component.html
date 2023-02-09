@@ -53,12 +53,12 @@
 
                 <div *ngIf="templateDetails.input?.devices?.length > 0">
                     <div class="form-group" *ngFor="let device of templateDetails.input.devices; let i = index">
-                        <label for="device"><span>Device/Sensor - Type: {{device.type}}</span></label>
+                        <label for="device"><span>Device/Sensor/Asset - Type: {{device.type}}</span></label>
                         <form class="form-inline">
                             <div class="form-group" style="width: 60%; padding:0px">
                                 <label class="sr-only" for="selected-device">Device/Sensor</label>
                                 <input [readonly]="true" name="selected-device" class="form-control"
-                                    style="width: 100%;" id="selected-device" placeholder="Device/Sensor" type="text"
+                                    style="width: 100%;" id="selected-device" placeholder="Device/Sensor/Asset" type="text"
                                     [ngModel]="templateDetails.input.devices[i].reprensentation?.name">
                             </div>
                             <button type="button" style="width: 40%;" class="btn btn-primary"
