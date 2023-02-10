@@ -175,11 +175,11 @@ export class AppBuilderUpgradeService {
                     if (this.appBuilderApp && this.appBuilderApp.availability === 'MARKET') {
                         const alertMessage = {
                             title: 'Installation Confirmation',
-                            description: `You are about to upgrade the Application Builder which is subscribed by other tenants. The changes made in the application builder may have an effect on the other tenants who have subscribed to it. It is important to make sure that you are aware of possible effect on other tenants and their applications before proceeding further. 
-                            Do you want to proceed ?`,
+                            description: `You are about to upgrade the subscribed application. If any sub-tenant is subscribing to this application, it could be affected. 
+                            Do you wish to proceed?`,
                             type: 'warning',
                             alertType: 'confirm', //info|confirm
-                            confirmPrimary: false //confirm Button is primary
+                            confirmPrimary: true //confirm Button is primary
                         }
                         const upgradeAppBuilderDialogRef = this.alertModalDialog(alertMessage);
                         upgradeAppBuilderDialogRef.content.event.subscribe(async data => {
