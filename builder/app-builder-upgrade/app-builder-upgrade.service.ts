@@ -335,7 +335,8 @@ export class AppBuilderUpgradeService {
                 await this.appService.update({
                     ...appC8yJson,
                     id: appName.id,
-                    activeVersionId: appBinary.id.toString()
+                    activeVersionId: appBinary.id.toString(),
+                    config: {remotes:{}}
                 });
                 if (window && window['aptrinsic']) {
                     window['aptrinsic']('track', 'gp_application_updated', {
