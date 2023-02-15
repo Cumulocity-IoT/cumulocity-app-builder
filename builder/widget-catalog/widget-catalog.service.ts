@@ -89,19 +89,16 @@ export class WidgetCatalogService {
     if (this.pkgVersion.includes('dev')) {
       return this.http.get<WidgetCatalog>(`${url}${this.devBranchPath}`, this.HTTP_HEADERS)
         .pipe(catchError(err => {
-          console.log('Fetch Widget Catalog: Error in primary endpoint! using fallback...');
           return this.http.get<WidgetCatalog>(`${urlFallBack}${this.devBranchPath}`, this.HTTP_HEADERS)
         }));
     } else if (this.pkgVersion.includes('rc')) { 
       return this.http.get<WidgetCatalog>(`${url}${this.preprodBranchPath}`, this.HTTP_HEADERS)
         .pipe(catchError(err => {
-          console.log('Fetch Widget Catalog: Error in primary endpoint! using fallback...');
           return this.http.get<WidgetCatalog>(`${urlFallBack}${this.preprodBranchPath}`, this.HTTP_HEADERS)
         }));
     } else {
       return this.http.get<WidgetCatalog>(`${url}`, this.HTTP_HEADERS)
       .pipe(catchError(err => {
-        console.log('Fetch Widget Catalog: Error in primary endpoint! using fallback...');
         return this.http.get<WidgetCatalog>(`${urlFallBack}`, this.HTTP_HEADERS)
       }));
     }
@@ -113,19 +110,16 @@ export class WidgetCatalogService {
     if (this.pkgVersion.includes('dev')) {
       return this.http.get<WidgetCatalog>(`${url}${this.devBranchPath}`, this.HTTP_HEADERS)
         .pipe(catchError(err => {
-          console.log('Fetch Widget For Demo Catalog: Error in primary endpoint! using fallback...');
           return this.http.get<WidgetCatalog>(`${urlFallBack}${this.devBranchPath}`, this.HTTP_HEADERS)
         }));
     } else if (this.pkgVersion.includes('rc')) {  
       return this.http.get<WidgetCatalog>(`${url}${this.preprodBranchPath}`, this.HTTP_HEADERS)
       .pipe(catchError(err => {
-        console.log('Fetch Widget For Demo Catalog: Error in primary endpoint! using fallback...');
         return this.http.get<WidgetCatalog>(`${urlFallBack}${this.preprodBranchPath}`, this.HTTP_HEADERS)
       }));
     } else {
       return this.http.get<WidgetCatalog>(`${url}`, this.HTTP_HEADERS)
       .pipe(catchError(err => {
-        console.log('Fetch Widget For Demo Catalog: Error in primary endpoint! using fallback...');
         return this.http.get<WidgetCatalog>(`${urlFallBack}`, this.HTTP_HEADERS)
       }));
     }
@@ -140,7 +134,6 @@ export class WidgetCatalogService {
       responseType: 'arraybuffer'
     })
       .pipe(catchError(err => {
-        console.log('Widget Catalog: Download Binary: Error in primary endpoint! using fallback...');
         return this.http.get(`${this.GATEWAY_URL_GitHubAsset_FallBack}${binaryId}`, {
           responseType: 'arraybuffer'
         })
@@ -177,7 +170,6 @@ export class WidgetCatalogService {
       responseType: 'arraybuffer'
     })
       .pipe(catchError(err => {
-        console.log('Widget Catalog: Download Binary from Labcase: Error in primary endpoint! using fallback...');
         return this.http.get(`${this.GATEWAY_URL_Labcase_FallBack}${binaryId}`, {
           responseType: 'arraybuffer'
         })
@@ -201,7 +193,6 @@ export class WidgetCatalogService {
     return this.http.get(`${url}`, {
       responseType: 'text'
     }).pipe(catchError(err => {
-      console.log('Widget Catalog: Get Widget Details From Readme: Error in primary endpoint! using fallback...');
       return this.http.get(`${urlFallBack}`, {
         responseType: 'text'
       })

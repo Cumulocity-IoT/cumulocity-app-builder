@@ -354,7 +354,6 @@ export class AppBuilderUpgradeService {
             responseType: 'arraybuffer'
         })
         .pipe(catchError(err => {
-            console.log('App Builder Upgrade Binary: Error in primary endpoint! using fallback...');
             let url = `${this.GATEWAY_URL_GitHubAsset_FallBack}${binaryId}`;
             if (!isGithub) {
                 url = `${this.GATEWAY_URL_Labcase_FallBack}${binaryId}`
@@ -372,19 +371,16 @@ export class AppBuilderUpgradeService {
         if (this.appVersion.includes('dev')) {
             return this.http.get<AppBuilderConfig>(`${url}${this.devBranchPath}`, this.HTTP_HEADERS)
           .pipe(catchError(err => {
-            console.log('App Builder Config: Error in primary endpoint! using fallback...');
             return this.http.get<AppBuilderConfig>(`${urlFallBack}${this.devBranchPath}`, this.HTTP_HEADERS)
           }));
         } else if (this.appVersion.includes('rc')) {
             return this.http.get<AppBuilderConfig>(`${url}${this.preprodBranchPath}`, this.HTTP_HEADERS)
         .pipe(catchError(err => {
-            console.log('App Builder Config: Error in primary endpoint! using fallback...');
             return this.http.get<AppBuilderConfig>(`${urlFallBack}${this.preprodBranchPath}`, this.HTTP_HEADERS)
           }));
         } else {
             return this.http.get<AppBuilderConfig>(`${url}`, this.HTTP_HEADERS)
             .pipe(catchError(err => {
-                console.log('App Builder Config: Error in primary endpoint! using fallback...');
                 return this.http.get<AppBuilderConfig>(`${urlFallBack}`, this.HTTP_HEADERS)
               }));
         }

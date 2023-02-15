@@ -97,7 +97,6 @@ export class TemplateCatalogModalComponent implements OnInit {
         this.showLoadingIndicator();
         this.catalogService.getTemplateCatalog()
         .pipe(catchError(err => {
-            console.log('Dashboard Catalog: Error in primary endpoint! using fallback...');
             return this.catalogService.getTemplateCatalogFallBack()
         }))
         .subscribe((catalog: Array<TemplateCatalogEntry>) => {
@@ -125,7 +124,6 @@ export class TemplateCatalogModalComponent implements OnInit {
         this.showLoadingIndicator();
         this.catalogService.getTemplateDetails(template.dashboard)
         .pipe(catchError(err => {
-            console.log('Dashboard Catalog Details: Error in primary endpoint! using fallback...');
             return this.catalogService.getTemplateDetailsFallBack(template.dashboard)
         }))
         .subscribe(templateDetails => {
