@@ -26,7 +26,6 @@ import { BinaryDescription, CumulocityDashboard, DependencyDescription, DeviceDe
 import { ApplicationService, InventoryBinaryService, InventoryService } from "@c8y/ngx-components/api";
 import { AppBuilderNavigationService } from "../navigation/app-builder-navigation.service";
 import { Alert, AlertService } from "@c8y/ngx-components";
-// import { RuntimeWidgetInstallerService } from "cumulocity-runtime-widget-loader";
 import { AppBuilderExternalAssetsService } from 'app-builder-external-assets';
 import { DashboardConfig } from "builder/application-config/dashboard-config.component";
 import { RuntimeWidgetInstallerService } from "cumulocity-runtime-widget-loader";
@@ -35,8 +34,6 @@ const packageJson = require('./../../package.json');
 @Injectable()
 export class TemplateCatalogService {
 
- //   private GATEWAY_URL = '';
- //   private CATALOG_LABCASE_ID = '';
     private GATEWAY_URL_GitHubAsset = '';
     private GATEWAY_URL_GitHubAPI = '';
     private GATEWAY_URL_GitHubAsset_FallBack = '';
@@ -140,6 +137,7 @@ export class TemplateCatalogService {
             responseType: 'arraybuffer'
         })
         .pipe(catchError(err => {
+            console.log('Template Catalog: Download Binary: Error in primary endpoint! using fallback...');
             return this.http.get(`${this.GATEWAY_URL_GitHubAsset_FallBack}${binaryId}`, {
               responseType: 'arraybuffer'
             })

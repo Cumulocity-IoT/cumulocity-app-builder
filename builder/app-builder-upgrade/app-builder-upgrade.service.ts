@@ -134,10 +134,6 @@ export class AppBuilderUpgradeService {
                     }
                     const appBuilderTenantId = (this.appBuilderApp && this.appBuilderApp.owner && this.appBuilderApp.owner.tenant ? this.appBuilderApp.owner.tenant.id : undefined);
                     if(this.appBuilderApp && currentTenantId === appBuilderTenantId) { isValidContextPath = true;} 
-                    /* else {
-                        this.alertService.warning("Unable to detect valid Application Builder", 
-                        "Context Path of installed version of application builder is not matching with server");
-                    } */
                 }
                 
             }
@@ -354,6 +350,7 @@ export class AppBuilderUpgradeService {
             responseType: 'arraybuffer'
         })
         .pipe(catchError(err => {
+            console.log('App Builder Upgrade Binary: Error in primary endpoint! using fallback...');
             let url = `${this.GATEWAY_URL_GitHubAsset_FallBack}${binaryId}`;
             if (!isGithub) {
                 url = `${this.GATEWAY_URL_Labcase_FallBack}${binaryId}`
@@ -371,16 +368,19 @@ export class AppBuilderUpgradeService {
         if (this.appVersion.includes('dev')) {
             return this.http.get<AppBuilderConfig>(`${url}${this.devBranchPath}`, this.HTTP_HEADERS)
           .pipe(catchError(err => {
+            console.log('App Builder Config: Error in primary endpoint! using fallback...');
             return this.http.get<AppBuilderConfig>(`${urlFallBack}${this.devBranchPath}`, this.HTTP_HEADERS)
           }));
         } else if (this.appVersion.includes('rc')) {
             return this.http.get<AppBuilderConfig>(`${url}${this.preprodBranchPath}`, this.HTTP_HEADERS)
         .pipe(catchError(err => {
+            console.log('App Builder Config: Error in primary endpoint! using fallback...');
             return this.http.get<AppBuilderConfig>(`${urlFallBack}${this.preprodBranchPath}`, this.HTTP_HEADERS)
           }));
         } else {
             return this.http.get<AppBuilderConfig>(`${url}`, this.HTTP_HEADERS)
             .pipe(catchError(err => {
+                console.log('App Builder Config: Error in primary endpoint! using fallback...');
                 return this.http.get<AppBuilderConfig>(`${urlFallBack}`, this.HTTP_HEADERS)
               }));
         }
@@ -514,9 +514,7 @@ export class AppBuilderUpgradeService {
                 try {
                     await this.appService.delete(widgetAppObj.id);
                 } catch (e) {
-                        console.log(e);
-                        //this.alertService.danger("Unable to delete widget as it is assigned to other tenant.");
-                        //throw Error("Unable to delete widget as it is assigned to other tenant.");
+                        console.error(e);
                 }
             }
         };

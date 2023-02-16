@@ -57,6 +57,7 @@ export class TemplateUpdateModalComponent implements OnInit {
         this.showLoadingIndicator();
         this.catalogService.getTemplateDetails(this.dashboardConfig.templateDashboard.id)
         .pipe(catchError(err => {
+            console.log('Dashboard Details: Error in primary endpoint using fallback');
             return this.catalogService.getTemplateDetailsFallBack(this.dashboardConfig.templateDashboard.id)
             }))
             .subscribe(templateDetails => {
