@@ -103,6 +103,16 @@ export class SettingsService {
         }
     }
 
+    async getAppBuilderMaintenanceStatus() {
+        if(this.appBuilderConfig) {
+            return (this.appBuilderConfig?.underMaintenance ? this.appBuilderConfig?.underMaintenance : 'false');
+        }
+        else {
+            await delay(500);
+            return await this.getAppBuilderMaintenanceStatus();
+        }
+    }
+
     async isDashboardCatalogEnabled() {
         const customProp = await this.getCustomProperties();
         return (!customProp || (customProp  && ( !customProp.dashboardCataglogEnabled || customProp.dashboardCataglogEnabled === "true")));
@@ -205,14 +215,15 @@ export class SettingsService {
         return (!customProp || (customProp  && ( !customProp.appUpgradeNotification || customProp.appUpgradeNotification === "true")));
     }
 
-    async updateAppConfigurationForPlugin(remotes: any){
+    async updateAppConfigurationForPlugin(remotes: any, underMaintenance?: any){
         
         if(this.appBuilderConfig) {
             return await this.inventoryService.update({
                 id: this.appBuilderConfig.id,
                 configs: {remotes},
                 c8y_Global: {},
-                appBuilderVersion: this.currentApp.manifest.version
+                appBuilderVersion: this.currentApp.manifest.version,
+                underMaintenance: underMaintenance
             })
         } else if (this.isAppConfigNotFound) {
             return await this.inventoryService.create({
@@ -227,6 +238,13 @@ export class SettingsService {
             await delay(500);
             return await this.updateAppConfigurationForPlugin(remotes);
         }
+    }
+
+    async updateAppBuilderMO() {
+        await this.inventoryService.update({
+            id: this.appBuilderConfig.id,
+            underMaintenance: 'false'
+        })
     }
 
 }
