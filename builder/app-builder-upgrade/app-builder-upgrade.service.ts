@@ -202,6 +202,7 @@ export class AppBuilderUpgradeService {
         const updateURL = this.versionInfo.updateURL;
         const successMsg = this.versionInfo?.successMsg;
         const fileName = updateURL.replace(/^.*[\\\/]/, '');
+        this.progressIndicatorService.setMessage('Downloading Application Builder...');
         await this.downloadAndInstall(updateURL, fileName, true, 'UPGRADE');
         await new Promise(resolve => setTimeout(resolve, 5000));
         this.progressModal.hide();
@@ -233,7 +234,6 @@ export class AppBuilderUpgradeService {
 
 
     async downloadAndInstall(binaryLocation: string, fileName: string, isGithub: boolean, installationType: 'INSTALL' | 'UPGRADE' | 'ANY') {
-        this.progressIndicatorService.setMessage('Downloading Application Builder...');
         this.errorReported = false;
         if (!binaryLocation) {
             console.error('Missing link to download binary');
@@ -272,7 +272,7 @@ export class AppBuilderUpgradeService {
     }
 
     private async upgradeApp(binaryFile: any, appC8yJson: any, installationType: any) {
-        this.progressIndicatorService.setMessage('Upgrading Application Builder...');
+        this.progressIndicatorService.setMessage('Upgrading Application...');
         if (installationType !== "INSTALL") {
             const appList = await this.getApplicationList();
             const appName = appList.find(app => app.contextPath === appC8yJson.contextPath && app.availability === 'PRIVATE');
