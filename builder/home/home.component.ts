@@ -27,7 +27,8 @@ import { UserService } from "@c8y/ngx-components/api";
 import { AlertService, AppStateService } from "@c8y/ngx-components";
 import { ExternalApp } from "../app-builder-upgrade/app-builder-upgrade.model";
 import { Router } from "@angular/router";
-import { catchError } from "rxjs/operators";
+import * as semver from "semver";
+import * as packageJson from "./../../package.json";
 
 @Component({
     templateUrl: './home.component.html',
@@ -38,6 +39,7 @@ export class HomeComponent implements OnInit{
     bsModalRef: BsModalRef;
     mediaList = [];
     userHasAdminRights: boolean;
+    pkgVersion: any;
 
     constructor(private modalService: BsModalService, private externalService: AppBuilderExternalAssetsService,
         private appBuilderUpgradeService: AppBuilderUpgradeService, private alertService: AlertService,
@@ -47,6 +49,7 @@ export class HomeComponent implements OnInit{
 
     ngOnInit() {
         this.mediaList = this.externalService.getAssetsList('MEDIA');
+        this.pkgVersion = packageJson.version;
     }
 
     getURL(type) {
@@ -90,7 +93,8 @@ export class HomeComponent implements OnInit{
            await this.appBuilderUpgradeService.fetchAppBuilderConfig()
            .subscribe( async appBuilderConfig => {
                 if(appBuilderConfig && appBuilderConfig.externalApps && appBuilderConfig.externalApps.length > 0){
-                    const demoCatalogApp: ExternalApp = appBuilderConfig.externalApps.find( app => app.appName === 'demoCatalog');
+                    const demoCatalogApp: ExternalApp = appBuilderConfig.externalApps.find( app => app.appName === 'demo-catalog' && 
+                    this.verifyAppBuilderVersion(app.appBuilderVersion));
                     if(demoCatalogApp && demoCatalogApp.binaryLink){
                         const currentHost = window.location.host.split(':')[0];
                         if (currentHost === 'localhost' || currentHost === '127.0.0.1' || isDevMode()) {
@@ -113,6 +117,10 @@ export class HomeComponent implements OnInit{
              this.alertService.danger("User does not have the required permissions to install Demo Catalog", "Missing Application Admin Permission");
         }
         
+    }
+    private verifyAppBuilderVersion(nextVersion: string) {
+        const version =  semver.valid(semver.coerce(this.pkgVersion ));
+        return semver.satisfies(version, nextVersion);
     }
     private initiateInstallation(dempCatalogApp: ExternalApp) {
         const alertMessage = {
