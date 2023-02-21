@@ -403,7 +403,7 @@ export class AppBuilderUpgradeService {
                 widgetCatalog = widgetList1;
                 widgetList2.widgets.forEach((widget: WidgetModel) => {
                     const widgetObj = widgetCatalog.widgets.find(widgetObj => widgetObj.contextPath === widget.contextPath);
-                    if (!widgetObj) {  widgetCatalog.widgets.push(widget);  }
+                    if (!widgetObj && this.widgetCatalogService.isCompatiblieVersion(widget)) {  widgetCatalog.widgets.push(widget);  }
                 });
                 appList.forEach(app => {
                     const appWidgetObj = widgetCatalog.widgets.find(widgetObj => widgetObj.contextPath === app.contextPath);
