@@ -40,4 +40,5 @@ export interface ExternalApp {
     binaryLink?: string;
     fileName?: string;
     contextPath?:string;
+    appBuilderVersion?: string;
 }
