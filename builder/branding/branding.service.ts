@@ -144,13 +144,13 @@ body {
     /* All the other text: */
     --brand-dark: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     /* --input-focus-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)}; */
-    --header-hover-color: ${this.colorToHex(app.applicationBuilder.branding.colors.hover)};
+    --header-hover-color: ${app.applicationBuilder.branding.colors.hover ? this.colorToHex(app.applicationBuilder.branding.colors.hover) : '#14629f'};
     --header-color: ${app.applicationBuilder.branding.colors.headerBar ? this.colorToHex(app.applicationBuilder.branding.colors.headerBar) : '#ffffff'};
     --dropdown-background: ${app.applicationBuilder.branding.colors.headerBar ? this.colorToHex(app.applicationBuilder.branding.colors.headerBar) : '#ffffff'};
     --toolbar-background:${app.applicationBuilder.branding.colors.toolBar ? this.colorToHex(app.applicationBuilder.branding.colors.toolBar) : '#ffffff'};
     --toolbar-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     --page-tabs-background:${app.applicationBuilder.branding.colors.tabBar ? this.colorToHex(app.applicationBuilder.branding.colors.tabBar) : '#ffffff'};
-    --toolbar-actions-color-hover: ${app.applicationBuilder.branding.colors.toolBar ? this.colorToHex(app.applicationBuilder.branding.colors.hover) : '#ffffff'};
+    --toolbar-actions-color-hover: ${app.applicationBuilder.branding.colors.toolBar ? this.colorToHex(app.applicationBuilder.branding.colors.hover) : '#14629f'};
     --toolbar-focus-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     --dropdown-actions-color-hover: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     --component-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
@@ -302,13 +302,13 @@ body {
     /* All the other text: */
     --brand-dark: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     /* --input-focus-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)}; */
-    --header-hover-color: ${this.colorToHex(app.applicationBuilder.branding.colors.hover)};
+    --header-hover-color: ${app.applicationBuilder.branding.colors.hover ? this.colorToHex(app.applicationBuilder.branding.colors.hover) : '#14629f'};
     --header-color: ${app.applicationBuilder.branding.colors.headerBar ? this.colorToHex(app.applicationBuilder.branding.colors.headerBar) : '#ffffff'};
     --dropdown-background: ${app.applicationBuilder.branding.colors.headerBar ? this.colorToHex(app.applicationBuilder.branding.colors.headerBar) : '#ffffff'};
     --toolbar-background:${app.applicationBuilder.branding.colors.toolBar ? this.colorToHex(app.applicationBuilder.branding.colors.toolBar) : '#ffffff'};
     --toolbar-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     --page-tabs-background:${app.applicationBuilder.branding.colors.tabBar ? this.colorToHex(app.applicationBuilder.branding.colors.tabBar) : '#ffffff'};
-    --toolbar-actions-color-hover: ${app.applicationBuilder.branding.colors.toolBar ? this.colorToHex(app.applicationBuilder.branding.colors.hover) : '#ffffff'};
+    --toolbar-actions-color-hover: ${app.applicationBuilder.branding.colors.toolBar ? this.colorToHex(app.applicationBuilder.branding.colors.hover) : '#14629f'};
     --toolbar-focus-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     --dropdown-actions-color-hover: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     --component-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};

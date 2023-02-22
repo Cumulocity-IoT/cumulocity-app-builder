@@ -23,6 +23,8 @@ import { map, switchMap, tap } from "rxjs/operators";
 import { from, Observable } from "rxjs";
 import { BrandingService } from "./branding.service";
 import { DOCUMENT } from "@angular/common";
+import { CustomBrandingComponent } from "./custom-branding.component";
+import { BsModalRef, BsModalService } from "ngx-bootstrap/modal";
 
 @Component({
     templateUrl: './branding.component.html'
@@ -32,8 +34,11 @@ export class BrandingComponent implements OnInit,OnDestroy {
     dirty = false;
     showIcon = true;
     applyTheme = false;
+    bsModalRef: BsModalRef;
+    themeName = "";
+
     constructor(private route: ActivatedRoute, private appService: ApplicationService, private brandingService: BrandingService,
-        @Inject(DOCUMENT) private document: Document, private renderer: Renderer2) {
+        @Inject(DOCUMENT) private document: Document, private renderer: Renderer2, private modalService: BsModalService) {
         const appId = route.paramMap.pipe(
             map(paramMap => paramMap.get('applicationId'))
         );
@@ -45,6 +50,9 @@ export class BrandingComponent implements OnInit,OnDestroy {
             )),
             tap((app: any & { applicationBuilder: any }) => {
                 this.showIcon = !app.applicationBuilder.branding.hideIcon;
+                if (app.applicationBuilder.branding.colors.hover === '' || app.applicationBuilder.branding.colors.hover === undefined) {
+                    app.applicationBuilder.branding.colors.hover = '#14629F';
+                }
             })
         )
     }
@@ -56,6 +64,7 @@ export class BrandingComponent implements OnInit,OnDestroy {
                 this.renderer.addClass(this.document.body, 'body-theme');
             } else {
                 this.applyTheme = false;
+                app.applicationBuilder.branding.colors.hover = '#14629F';
             }
         }); 
     }
@@ -142,12 +151,31 @@ export class BrandingComponent implements OnInit,OnDestroy {
             this.renderer.removeClass(this.document.body, 'body-theme');
             this.renderer.removeClass(this.document.body, 'dashboard-body-theme');
             this.applyTheme = false;
+            this.themeName = '';
            // app.applicationBuilder.branding.enabled = false;
             this.showBrandingChange(app);
         } else {
             this.applyTheme = true;
             this.renderer.addClass(this.document.body, 'body-theme');
             this.showBrandingChange(app);
+            if (selectedTheme !== this.themeName) {
+                this.themeName = '';
+            }
         }
+    }
+
+    saveTheme(app) {
+        this.bsModalRef = this.modalService.show(CustomBrandingComponent, {
+            initialState:{ app: app }
+        });
+    }
+
+    onThemeChange(value, app) {
+        this.themeName = value;
+        app.applicationBuilder.customBranding.forEach((theme) => {
+            if (theme.themeName === value) {
+                this.setTheme(app,theme.colors.primary, theme.colors.active, theme.colors.text, theme.colors.textOnPrimary, theme.colors.textOnActive, theme.colors.hover, theme.colors.headerBar, theme.colors.tabBar, theme.colors.toolBar,this.themeName);
+            }
+        })
     }
 }

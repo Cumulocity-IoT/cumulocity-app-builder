@@ -29,6 +29,7 @@ import {BrandingDirtyGuardService} from "./branding-dirty-guard.service";
 import { ButtonsModule } from 'ngx-bootstrap/buttons';
 import {AppIdService} from "../app-id.service";
 import { AppDataService } from "./../../builder/app-data.service";
+import { CustomBrandingComponent } from "./custom-branding.component";
 @NgModule({
     imports: [
         CommonModule,
@@ -36,8 +37,11 @@ import { AppDataService } from "./../../builder/app-data.service";
         ButtonsModule.forRoot()
     ],
     declarations: [
-        BrandingComponent
-    ]
+        BrandingComponent,
+        CustomBrandingComponent
+    ],entryComponents: [
+        CustomBrandingComponent
+    ],
 })
 export class BrandingModule {
     constructor(appIdService: AppIdService, appService: ApplicationService, 

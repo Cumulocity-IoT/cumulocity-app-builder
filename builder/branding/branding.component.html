@@ -71,6 +71,14 @@
                     <button class="btn" style="--brand-primary: #D40511; border: solid 1px var(--brand-light);background-color: #D40511;color:#fff;" (click)="setTheme(app, '#D40511', '#8b0000', '#ffffff', '#ffffff', '#ffffff','#8b0000', '#ff0718', '#ff0718', '#ff0718','Red')">Red</button>
                     <button class="btn" style="--brand-primary: #009000; border: solid 1px var(--brand-light);background-color: #009000;color:#fff;" (click)="setTheme(app, '#009000', '#205115', '#ffffff', '#ffffff', '#ffffff','#205115', '#00ce00', '#00ce00', '#00ce00','Green')">Green</button>
                     <button class="btn" style="--brand-primary: #243138; border: solid 1px var(--brand-light);background-color: #243138;color:#fff;" (click)="setTheme(app, '#243138', '#13202a', '#ffffff', '#ffffff', '#ffffff','#ffffff', '#334650','#334650', '#334650', 'Dark')">Dark</button>
+                    <div *ngIf="app.applicationBuilder.customBranding" style="width: 20%;display: inline-block;position: absolute;margin-left: 20px;">
+                        <select id="custom-branding" [(ngModel)]="themeName" (change)="onThemeChange($event.target.value, app)">
+                            <option value="" disabled selected hidden>Choose Custom Theme</option>
+                            <option *ngFor="let theme of app.applicationBuilder.customBranding" [value]="theme.themeName">
+                            {{theme.themeName}}
+                            </option>
+                        </select>
+                    </div>
                 </div>
             </div>
         </div>
@@ -78,6 +86,9 @@
             <div class="card" [ngClass]="{'card-color': applyTheme}">
                 <div class="card-header">
                     <h4 translate>Colors</h4>
+                    <button class="btn btn-primary" (click)="saveTheme(app)" title="Save Theme" style="margin-left:auto">
+                         Save
+                    </button>
                 </div>
                 <hr/>
                 <div class="card-block">
