@@ -7,42 +7,44 @@
             Add application
         </a>
     </div>
-    <div class="c8y-empty-state text-center" style="max-width:100%; flex-direction: column; align-items: center;" *ngIf="!applications.length">
+    <div class="c8y-empty-state text-center" style="max-width:100%; flex-direction: column; align-items: center;" *ngIf="!isBusy && !applications.length">
         <h3>No application to list.</h3>
     </div>
-    <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2" *ngFor="let app of applications">
-        <div class="card clickable" (click)="openApp(app)">
-            <div class="dropdown card-actions" dropdown (click)="$event.stopPropagation()" *ngIf="userHasAdminRights">
-                <button title="Settings" id="appSettings-{{app.name}}" class="dropdown-toggle c8y-dropdown" dropdownToggle type="button">
-                    <i c8yIcon="ellipsis-v"></i>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-right" *dropdownMenu role="menu">
-                    <li role="menuitem">
-                        <a class="dropdown-item" (click)="openApp(app, '/config')">
-                            <i c8yIcon="edit"></i> Edit
-                        </a>
-                    </li>
-                    <!-- <li role="menuitem">
-                        <a class="dropdown-item" (click)="exportApp(app)">
-                            <i c8yIcon="download"></i> Export
-                        </a>
-                    </li> -->
-                    <li role="menuitem">
-                        <a (click)="deleteApplication(app.id)" class="dropdown-item clickable">
-                            <i c8yIcon="times"></i> Remove
-                        </a>
-                    </li>
-                </ul>
-            </div>
-            <div class="card-block text-center" style="margin-bottom: 5px;">
-                <h1 style="margin: 15px 0 10px; font-size: 42px;"><c8y-app-icon [app]="app"></c8y-app-icon></h1>
-                <p style="word-wrap: break-word;" class="e2e-appCardName">{{app.name}}</p>
-            </div>
-            <div class="card-actions-group">
-                <a class="clickable" id="OpenApp-{{app.name}}">
-                    <i c8yIcon="external-link"></i> Open
-                </a>
+    <ng-container *ngIf="applications && applications.length > 0">
+        <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2" *ngFor="let app of applications">
+            <div class="card clickable" (click)="openApp(app)">
+                <div class="dropdown card-actions" dropdown (click)="$event.stopPropagation()" *ngIf="userHasAdminRights">
+                    <button title="Settings" id="appSettings-{{app.name}}" class="dropdown-toggle c8y-dropdown" dropdownToggle type="button">
+                        <i c8yIcon="ellipsis-v"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-right" *dropdownMenu role="menu">
+                        <li role="menuitem">
+                            <a class="dropdown-item" (click)="openApp(app, '/config')">
+                                <i c8yIcon="edit"></i> Edit
+                            </a>
+                        </li>
+                        <!-- <li role="menuitem">
+                            <a class="dropdown-item" (click)="exportApp(app)">
+                                <i c8yIcon="download"></i> Export
+                            </a>
+                        </li> -->
+                        <li role="menuitem">
+                            <a (click)="deleteApplication(app.id)" class="dropdown-item clickable">
+                                <i c8yIcon="times"></i> Remove
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-block text-center" style="margin-bottom: 5px;">
+                    <h1 style="margin: 15px 0 10px; font-size: 42px;"><c8y-app-icon [app]="app"></c8y-app-icon></h1>
+                    <p style="word-wrap: break-word;" class="e2e-appCardName">{{app.name}}</p>
+                </div>
+                <div class="card-actions-group">
+                    <a class="clickable" id="OpenApp-{{app.name}}">
+                        <i c8yIcon="external-link"></i> Open
+                    </a>
+                </div>
             </div>
         </div>
-    </div>
+    </ng-container>
 </div>
