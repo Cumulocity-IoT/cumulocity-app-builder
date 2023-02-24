@@ -64,10 +64,12 @@ export class BrandingComponent implements OnInit,OnDestroy {
             if (app.applicationBuilder.branding.enabled && (app.applicationBuilder.selectedTheme && app.applicationBuilder.selectedTheme !== 'Default')) {
                 if (this.themeName === 'Navy Blue' || this.themeName === 'Red' || this.themeName === 'Green' || this.themeName === "Yellow" || this.themeName === 'Dark') {
                     this.applyTheme = true;
+                    this.themeName = '';
                     this.renderer.addClass(this.document.body, 'body-theme');
                 }
             } else {
                 this.applyTheme = false;
+                this.themeName = '';
                 app.applicationBuilder.branding.colors.hover = '#14629F';
             }
         }); 
@@ -177,7 +179,9 @@ export class BrandingComponent implements OnInit,OnDestroy {
             initialState:{ app: appBuilderObject }
         });
         this.bsModalRef.content.onSave.subscribe(async () => {
-            window.location.reload();
+            this.themeName = this.bsModalRef.content.themeName;
+            const appId = this.route.snapshot.paramMap.get('applicationId');
+            this.app = from(this.appService.detail(appId).then(res => res.data as any));
         });
     }
 
