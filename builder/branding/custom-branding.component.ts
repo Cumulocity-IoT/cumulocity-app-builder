@@ -19,6 +19,7 @@
 import { Component, OnInit } from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap/modal';
 import { ApplicationService } from '@c8y/client';
+import { Subject } from 'rxjs';
 
 
 @Component({
@@ -45,7 +46,11 @@ export class CustomBrandingComponent implements OnInit{
     
     app: any;
     themeName: any;
-    constructor(public bsModalRef: BsModalRef, private appService: ApplicationService) { }
+    public onSave: Subject<boolean>;
+
+    constructor(public bsModalRef: BsModalRef, private appService: ApplicationService) {
+        this.onSave = new Subject();
+     }
 
     ngOnInit() {
         //console.log(this.app);
@@ -58,11 +63,12 @@ export class CustomBrandingComponent implements OnInit{
             this.app.applicationBuilder.customBranding = [];
             this.app.applicationBuilder.customBranding.push({themeName: this.themeName, colors: this.app.applicationBuilder.branding.colors}); 
         }
-        console.log(this.app);
+        this.app.applicationBuilder.selectedTheme = this.themeName;
         await this.appService.update({
              id: this.app.id,
              applicationBuilder: this.app.applicationBuilder
         } as any);
+        this.onSave.next(true);
         this.bsModalRef.hide();
     }
 }

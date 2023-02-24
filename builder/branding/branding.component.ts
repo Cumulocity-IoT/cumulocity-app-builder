@@ -25,6 +25,7 @@ import { BrandingService } from "./branding.service";
 import { DOCUMENT } from "@angular/common";
 import { CustomBrandingComponent } from "./custom-branding.component";
 import { BsModalRef, BsModalService } from "ngx-bootstrap/modal";
+import { cloneDeep } from "lodash-es";
 
 @Component({
     templateUrl: './branding.component.html'
@@ -59,9 +60,12 @@ export class BrandingComponent implements OnInit,OnDestroy {
 
     ngOnInit(): void {
         this.app.subscribe((app) => {
+            this.themeName = app.applicationBuilder.selectedTheme;
             if (app.applicationBuilder.branding.enabled && (app.applicationBuilder.selectedTheme && app.applicationBuilder.selectedTheme !== 'Default')) {
-                this.applyTheme = true;
-                this.renderer.addClass(this.document.body, 'body-theme');
+                if (this.themeName === 'Navy Blue' || this.themeName === 'Red' || this.themeName === 'Green' || this.themeName === "Yellow" || this.themeName === 'Dark') {
+                    this.applyTheme = true;
+                    this.renderer.addClass(this.document.body, 'body-theme');
+                }
             } else {
                 this.applyTheme = false;
                 app.applicationBuilder.branding.colors.hover = '#14629F';
@@ -155,27 +159,36 @@ export class BrandingComponent implements OnInit,OnDestroy {
            // app.applicationBuilder.branding.enabled = false;
             this.showBrandingChange(app);
         } else {
-            this.applyTheme = true;
-            this.renderer.addClass(this.document.body, 'body-theme');
-            this.showBrandingChange(app);
             if (selectedTheme !== this.themeName) {
                 this.themeName = '';
+                this.applyTheme = true;
+                this.renderer.addClass(this.document.body, 'body-theme');
+            } else if (selectedTheme === this.themeName) {
+                this.applyTheme = false;
+                this.renderer.removeClass(this.document.body, 'body-theme');
             }
+            this.showBrandingChange(app);
         }
     }
 
     saveTheme(app) {
+        let appBuilderObject = cloneDeep(app);
         this.bsModalRef = this.modalService.show(CustomBrandingComponent, {
-            initialState:{ app: app }
+            initialState:{ app: appBuilderObject }
+        });
+        this.bsModalRef.content.onSave.subscribe(async () => {
+            window.location.reload();
         });
     }
 
     onThemeChange(value, app) {
         this.themeName = value;
-        app.applicationBuilder.customBranding.forEach((theme) => {
-            if (theme.themeName === value) {
-                this.setTheme(app,theme.colors.primary, theme.colors.active, theme.colors.text, theme.colors.textOnPrimary, theme.colors.textOnActive, theme.colors.hover, theme.colors.headerBar, theme.colors.tabBar, theme.colors.toolBar,this.themeName);
-            }
-        })
+        if (this.themeName !== '') {
+            app.applicationBuilder.customBranding.forEach((theme) => {
+                if (theme.themeName === value) {
+                    this.setTheme(app,theme.colors.primary, theme.colors.active, theme.colors.text, theme.colors.textOnPrimary, theme.colors.textOnActive, theme.colors.hover, theme.colors.headerBar, theme.colors.tabBar, theme.colors.toolBar,this.themeName);
+                }
+            })
+        }
     }
 }
