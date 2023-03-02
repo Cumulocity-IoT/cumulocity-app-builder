@@ -488,7 +488,7 @@ export class AppBuilderUpgradeService {
 
      // if same widget exists in widget catalog json more than one time with different version
     private findInstalledWidget(widget: WidgetModel, widgetCatalog: any) {
-        const checkWidgetInCatalog = widgetCatalog.widgets.filter(widgetCatalogWidget => widgetCatalogWidget.contextPath === widget.contextPath);
+        const checkWidgetInCatalog = widgetCatalog.widgets.filter(widgetCatalogWidget => widget.id ? widgetCatalogWidget.id === widget.id : widgetCatalogWidget.contextPath === widget.contextPath);
         if (checkWidgetInCatalog && checkWidgetInCatalog.length > 1) {
             const isWidgetInstalled = checkWidgetInCatalog.find(installObj => installObj.installed);
             if (isWidgetInstalled) return false;
