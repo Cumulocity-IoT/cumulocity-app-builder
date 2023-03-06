@@ -37,6 +37,8 @@ import * as semver from "semver";
 import { WidgetCatalogService } from "./../widget-catalog/widget-catalog.service";
 import { contextPathFromURL } from "../utils/contextPathFromURL";
 import { WidgetCatalog, WidgetModel } from "builder/widget-catalog/widget-catalog.model";
+
+
 @Injectable({ providedIn: 'root' })
 export class AppBuilderUpgradeService {
     private renderer: Renderer2;
@@ -49,6 +51,7 @@ export class AppBuilderUpgradeService {
     private GATEWAY_URL_GitHubAsset_FallBack = '';
     private appBuilderConfigPath = '/appbuilderConfig/app-builder-config.json';
     private devBranchPath = "?ref=development";
+    private preprodBranchPath = "?ref=preprod";
     private appBuilderConfigModel: AppBuilderConfig;
     private versionInfo: VersionInfo;
     private applicationsList = [];
@@ -57,6 +60,7 @@ export class AppBuilderUpgradeService {
     public appVersion: string = version;
     public newVersion: boolean = false;
     public errorReported = false;
+    appBuilderApp: any;
 
     constructor(private http: HttpClient, public rendererFactory: RendererFactory2, @Inject(DOCUMENT) private _document: Document,
         private modalService: BsModalService, private progressIndicatorService: ProgressIndicatorService,
@@ -121,19 +125,15 @@ export class AppBuilderUpgradeService {
                     }
                     const appList = await this.getApplicationList();
                     const currentTenantId = this.settingService.getTenantName();
-                    let appBuilderApp = appList.find( 
+                    this.appBuilderApp = appList.find( 
                         app => this.versionInfo.contextPath && app.contextPath === this.versionInfo.contextPath &&  (String(app.availability) === 'PRIVATE'));
-                    if(!appBuilderApp) {
+                    if(!this.appBuilderApp) {
                         // Checking app builder subscribed one..
-                        appBuilderApp = appList.find( 
+                        this.appBuilderApp = appList.find( 
                             app => this.versionInfo.contextPath && app.contextPath === this.versionInfo.contextPath );
                     }
-                    const appBuilderTenantId = (appBuilderApp && appBuilderApp.owner && appBuilderApp.owner.tenant ? appBuilderApp.owner.tenant.id : undefined);
-                    if(appBuilderApp && currentTenantId === appBuilderTenantId) { isValidContextPath = true;} 
-                    /* else {
-                        this.alertService.warning("Unable to detect valid Application Builder", 
-                        "Context Path of installed version of application builder is not matching with server");
-                    } */
+                    const appBuilderTenantId = (this.appBuilderApp && this.appBuilderApp.owner && this.appBuilderApp.owner.tenant ? this.appBuilderApp.owner.tenant.id : undefined);
+                    if(this.appBuilderApp && currentTenantId === appBuilderTenantId) { isValidContextPath = true;} 
                 }
                 
             }
@@ -144,7 +144,7 @@ export class AppBuilderUpgradeService {
     }
 
     private isLatestVersionAvailable(currentVersion: string, availableVersion: string) {
-        return semver.lt(currentVersion, availableVersion);
+       return semver.lt(currentVersion, availableVersion);
     }
 
     private initiateUpgrade(event: any) {
@@ -168,28 +168,47 @@ export class AppBuilderUpgradeService {
         upgradeAppBuilderDialogRef.content.event.subscribe(async data => {
             if (data && data.isConfirm) {
                 if(this.versionInfo.verifyPlugins){
-                    this.showProgressModalDialog('Verifying existing widgets...');
-                    await this.verifyWidgetCompatibilityWithPlugin();
+                    if (this.appBuilderApp && this.appBuilderApp.availability === 'MARKET') {
+                        const alertMessage = {
+                            title: 'Installation Confirmation',
+                            description: `You are about to upgrade the subscribed application. If any sub-tenant is subscribing to this application, it could be affected. 
+                            Do you wish to proceed?`,
+                            type: 'warning',
+                            alertType: 'confirm', //info|confirm
+                            confirmPrimary: true //confirm Button is primary
+                        }
+                        const upgradeAppBuilderDialogRef = this.alertModalDialog(alertMessage);
+                        upgradeAppBuilderDialogRef.content.event.subscribe(async data => {
+                            if (data && data.isConfirm) {
+                                this.showProgressModalDialog('Verifying existing widgets...');
+                                await this.verifyWidgetCompatibilityWithPlugin();
+                            }
+                        });
+                    } else {
+                        this.showProgressModalDialog('Verifying existing widgets...');
+                        await this.verifyWidgetCompatibilityWithPlugin();
+                    }
                 } else {
                     this.showProgressModalDialog('Downloading Application Builder...');
                     await this.downlaodAndUpgradeAppBuilder();
                 }
-                
             }
         });
     }
 
     private async downlaodAndUpgradeAppBuilder() {
+        sessionStorage.setItem('isUpgrade', 'true');
         this.progressIndicatorService.setProgress(30);
         const updateURL = this.versionInfo.updateURL;
         const successMsg = this.versionInfo?.successMsg;
         const fileName = updateURL.replace(/^.*[\\\/]/, '');
+        this.progressIndicatorService.setMessage('Downloading Application Builder...');
         await this.downloadAndInstall(updateURL, fileName, true, 'UPGRADE');
         await new Promise(resolve => setTimeout(resolve, 5000));
         this.progressModal.hide();
         if (!this.errorReported) {
             const postUpdationMsg = {
-                title: 'Upgrade Completed',
+                title: this.versionInfo.title,
                 description: (successMsg ? successMsg : 'Application Builder is successfully upgraded.'),
                 type: 'info',
                 alertType: 'info' //info|confirm
@@ -215,7 +234,6 @@ export class AppBuilderUpgradeService {
 
 
     async downloadAndInstall(binaryLocation: string, fileName: string, isGithub: boolean, installationType: 'INSTALL' | 'UPGRADE' | 'ANY') {
-        this.progressIndicatorService.setMessage('Downloading Application Builder...');
         this.errorReported = false;
         if (!binaryLocation) {
             console.error('Missing link to download binary');
@@ -224,14 +242,15 @@ export class AppBuilderUpgradeService {
             return;
         }
         this.progressIndicatorService.setProgress(40);
-        const data: ArrayBuffer = await this.downloadBinary(binaryLocation, isGithub);
-        const blob = new Blob([data], {
-            type: 'application/zip'
-        });
-        const binaryFile = new File([blob], fileName, { type: "'application/zip'" })
-        this.progressIndicatorService.setProgress(50);
         let appC8yJson;
+        let binaryFile;
         try {
+            const data: ArrayBuffer = await this.downloadBinary(binaryLocation, isGithub);
+            const blob = new Blob([data], {
+                type: 'application/zip'
+            });
+            binaryFile = new File([blob], fileName, { type: "'application/zip'" })
+            this.progressIndicatorService.setProgress(50);
             this.progressIndicatorService.setProgress(60);
             const binaryZip = await JSZip.loadAsync(binaryFile);
             appC8yJson = JSON.parse(await binaryZip.file('cumulocity.json').async("text"));
@@ -244,14 +263,16 @@ export class AppBuilderUpgradeService {
             console.log(e);
             this.alertService.danger("Unable to download new version.");
             this.errorReported = true;
+            sessionStorage.setItem('isUpgrade', 'false');
+            this.settingService.updateAppBuilderMO();
+            this.progressModal.hide();
             throw Error("Not a Binary");
         }
-
         await this.upgradeApp(binaryFile, appC8yJson, installationType);
     }
 
     private async upgradeApp(binaryFile: any, appC8yJson: any, installationType: any) {
-        this.progressIndicatorService.setMessage('Upgrading Application Builder...');
+        this.progressIndicatorService.setMessage('Upgrading Application...');
         if (installationType !== "INSTALL") {
             const appList = await this.getApplicationList();
             const appName = appList.find(app => app.contextPath === appC8yJson.contextPath && app.availability === 'PRIVATE');
@@ -310,7 +331,8 @@ export class AppBuilderUpgradeService {
                 await this.appService.update({
                     ...appC8yJson,
                     id: appName.id,
-                    activeVersionId: appBinary.id.toString()
+                    activeVersionId: appBinary.id.toString(),
+                    config: {remotes:{}}
                 });
                 if (window && window['aptrinsic']) {
                     window['aptrinsic']('track', 'gp_application_updated', {
@@ -343,18 +365,25 @@ export class AppBuilderUpgradeService {
     fetchAppBuilderConfig(): Observable<AppBuilderConfig> {
         const url = `${this.GATEWAY_URL_GitHubAPI}${this.appBuilderConfigPath}`;
         const urlFallBack = `${this.GATEWAY_URL_GitHubAPI_FallBack}${this.appBuilderConfigPath}`;
-        if(isDevMode()){
-          return this.http.get<AppBuilderConfig>(`${url}${this.devBranchPath}`, this.HTTP_HEADERS)
+        if (this.appVersion.includes('dev')) {
+            return this.http.get<AppBuilderConfig>(`${url}${this.devBranchPath}`, this.HTTP_HEADERS)
           .pipe(catchError(err => {
             console.log('App Builder Config: Error in primary endpoint! using fallback...');
             return this.http.get<AppBuilderConfig>(`${urlFallBack}${this.devBranchPath}`, this.HTTP_HEADERS)
           }));
-        }
-        return this.http.get<AppBuilderConfig>(`${url}`, this.HTTP_HEADERS)
+        } else if (this.appVersion.includes('rc')) {
+            return this.http.get<AppBuilderConfig>(`${url}${this.preprodBranchPath}`, this.HTTP_HEADERS)
         .pipe(catchError(err => {
             console.log('App Builder Config: Error in primary endpoint! using fallback...');
-            return this.http.get<AppBuilderConfig>(`${urlFallBack}`, this.HTTP_HEADERS)
+            return this.http.get<AppBuilderConfig>(`${urlFallBack}${this.preprodBranchPath}`, this.HTTP_HEADERS)
           }));
+        } else {
+            return this.http.get<AppBuilderConfig>(`${url}`, this.HTTP_HEADERS)
+            .pipe(catchError(err => {
+                console.log('App Builder Config: Error in primary endpoint! using fallback...');
+                return this.http.get<AppBuilderConfig>(`${urlFallBack}`, this.HTTP_HEADERS)
+              }));
+        }
     }
 
     async getApplicationList() {
@@ -374,7 +403,7 @@ export class AppBuilderUpgradeService {
                 widgetCatalog = widgetList1;
                 widgetList2.widgets.forEach((widget: WidgetModel) => {
                     const widgetObj = widgetCatalog.widgets.find(widgetObj => widgetObj.contextPath === widget.contextPath);
-                    if (!widgetObj) {  widgetCatalog.widgets.push(widget);  }
+                    if (!widgetObj && this.widgetCatalogService.isNextCompatiblieVersion(widget)) {  widgetCatalog.widgets.push(widget);  }
                 });
                 appList.forEach(app => {
                     const appWidgetObj = widgetCatalog.widgets.find(widgetObj => widgetObj.contextPath === app.contextPath);
@@ -403,8 +432,8 @@ export class AppBuilderUpgradeService {
                     let nonCompatibleWidgets = '';
                     if(installedWidgets && installedWidgets.length > 0){
                         installedWidgets.forEach( widget => {
-                            const compatiblePlugin = widgetCatalog.widgets.find( plugin => plugin.contextPath === widget.contextPath && 
-                                this.widgetCatalogService.isNextCompatiblieVersion('1015.0.0', plugin));
+                            const compatiblePlugin = widgetCatalog.widgets.find( plugin =>  (plugin.oldContextPath ? plugin.oldContextPath === widget.contextPath : plugin.contextPath === widget.contextPath) && 
+                                this.widgetCatalogService.isNextCompatiblieVersion(plugin));
                             if(compatiblePlugin) {
                                 widget.isNextVersionAvailable = true;
                                 plugins.push(compatiblePlugin);
@@ -433,6 +462,9 @@ export class AppBuilderUpgradeService {
                                     await this.updateAppConfigurationForPlugin(plugins);
                                     this.progressIndicatorService.setProgress(28);
                                     await this.downlaodAndUpgradeAppBuilder();
+                                    if(plugins && plugins.length > 0) {
+                                        await this.uninstallWidgets(plugins);
+                                    }
                                 }
                             });
                         } else if(plugins && plugins.length > 0) {
@@ -445,8 +477,8 @@ export class AppBuilderUpgradeService {
                 if(isDownloadUpgrade) {
                     await this.downlaodAndUpgradeAppBuilder();
                 }
-                if(plugins && plugins.length > 0) {
-                    this.uninstallWidgets(plugins);
+                if(isDownloadUpgrade && plugins && plugins.length > 0) {
+                    await this.uninstallWidgets(plugins);
                 }
             }, error => {
                 this.alertService.danger("There is some technical error! Please try after sometime.");
@@ -456,7 +488,7 @@ export class AppBuilderUpgradeService {
 
      // if same widget exists in widget catalog json more than one time with different version
     private findInstalledWidget(widget: WidgetModel, widgetCatalog: any) {
-        const checkWidgetInCatalog = widgetCatalog.widgets.filter(widgetCatalogWidget => widgetCatalogWidget.contextPath === widget.contextPath);
+        const checkWidgetInCatalog = widgetCatalog.widgets.filter(widgetCatalogWidget => widget.id ? widgetCatalogWidget.id === widget.id : widgetCatalogWidget.contextPath === widget.contextPath);
         if (checkWidgetInCatalog && checkWidgetInCatalog.length > 1) {
             const isWidgetInstalled = checkWidgetInCatalog.find(installObj => installObj.installed);
             if (isWidgetInstalled) return false;
@@ -471,7 +503,7 @@ export class AppBuilderUpgradeService {
             (remotes[pluginBinary.contextPath] = remotes[pluginBinary.contextPath] || []).push(pluginBinary.moduleName);
         };
         // updating config MO to retain widget status
-        await this.settingService.updateAppConfigurationForPlugin(remotes);
+        await this.settingService.updateAppConfigurationForPlugin(remotes, 'true');
       }
 
     private async uninstallWidgets(plugins: any) {
@@ -479,7 +511,11 @@ export class AppBuilderUpgradeService {
         for (const pluginBinary of plugins) {
             const widgetAppObj = appList.find(app => app.contextPath === pluginBinary.contextPath)
             if (widgetAppObj) {
-                await this.appService.delete(widgetAppObj.id);
+                try {
+                    await this.appService.delete(widgetAppObj.id);
+                } catch (e) {
+                        console.error(e);
+                }
             }
         };
       }

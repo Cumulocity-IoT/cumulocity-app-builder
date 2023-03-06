@@ -157,7 +157,7 @@ export class WidgetDetailsComponent implements OnInit {
                 this.widgetCatalog = widgetList1;
                 widgetList2.widgets.forEach((widget: WidgetModel) => {
                     const widgetObj = this.widgetCatalog.widgets.find(widgetObj => widgetObj.contextPath === widget.contextPath);
-                    if (!widgetObj) {
+                    if (!widgetObj && this.widgetCatalogService.isCompatiblieVersion(widget)) {
                         this.widgetCatalog.widgets.push(widget);
                     }
                 });

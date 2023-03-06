@@ -45,7 +45,7 @@ import { LockStatus } from "./simulator/worker/simulation-lock.service";
 import { fromEvent, Observable } from "rxjs";
 import { withLatestFrom } from "rxjs/operators";
 import { proxy } from "comlink";
-import { Client , BasicAuth, CookieAuth, TenantService } from '@c8y/client';
+import { Client , BasicAuth, CookieAuth } from '@c8y/client';
 import { TemplateCatalogModule } from "./template-catalog/template-catalog.module";
 import { RectangleSpinnerModule } from "./utils/rectangle-spinner/rectangle-spinner.module";
 import { DeviceSelectorModalModule } from "./utils/device-selector-modal/device-selector.module";
@@ -65,6 +65,8 @@ import { ButtonsModule } from "ngx-bootstrap/buttons";
 import { DashboardNodeComponent } from "./application-config/dashboard-node.component";
 import { CollapseModule } from 'ngx-bootstrap/collapse';
 import { DragDropModule } from "@angular/cdk/drag-drop";
+import { BsModalRef, BsModalService } from "ngx-bootstrap/modal";
+import { AlertMessageModalComponent } from "./utils/alert-message-modal/alert-message-modal.component";
 @NgModule({
     imports: [
         ApplicationModule,
@@ -145,7 +147,8 @@ export class BuilderModule {
     private renderer: Renderer2;
     constructor(appStateService: AppStateService, loginService: LoginService, simSvc: SimulatorCommunicationService, 
         appIdService: AppIdService, private settingService: SettingsService, private appBuilderUpgradeService: AppBuilderUpgradeService,
-        rendererFactory: RendererFactory2, @Inject(DOCUMENT) private _document: Document, private tenantService: TenantService) {
+        rendererFactory: RendererFactory2, @Inject(DOCUMENT) private _document: Document,
+        private modalService: BsModalService) {
         // Pass the app state to the worker from the main thread (Initially and every time it changes)
         appStateService.currentUser.subscribe(async (user) => {
             let isCookieAuth = false;
@@ -192,7 +195,20 @@ export class BuilderModule {
                     this.renderer = rendererFactory.createRenderer(null, null);
                     this.registerAndTrackAnalyticsProvider(true);
                 }
-                this.appBuilderUpgradeService.loadUpgradeBanner();
+                let isUnderMaintenance = await this.settingService.getAppBuilderMaintenanceStatus();
+                let isUpgrade = sessionStorage.getItem('isUpgrade');
+                if (isUnderMaintenance === 'true' && isUpgrade !== 'true') {
+                    const alertMessage = {
+                        title: 'Under Maintenance',
+                        description: `Application Builder is currently Under Maintenance. Please check after sometime. If problem persists, please contact the administrator. `,
+                        type: 'warning',
+                        alertType: 'maintenance', //info|confirm
+                        confirmPrimary: false //confirm Button is primary
+                    }
+                    this.alertModalDialog(alertMessage);
+                } else {
+                    this.appBuilderUpgradeService.loadUpgradeBanner();
+                }
             }
         });
        
@@ -201,6 +217,10 @@ export class BuilderModule {
             await simSvc.simulator.setAppId(appId)
             this.registerAndTrackAnalyticsProvider(false, appId);
         });
+    }
+
+    alertModalDialog(message: any): BsModalRef {
+        return this.modalService.show(AlertMessageModalComponent, { class: 'c8y-wizard', initialState: { message } });
     }
 
     private async registerAndTrackAnalyticsProvider(isRegister: boolean, appId?: any) {

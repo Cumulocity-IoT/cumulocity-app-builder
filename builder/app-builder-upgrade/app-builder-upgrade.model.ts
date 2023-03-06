@@ -32,6 +32,7 @@ export interface VersionInfo {
     confirmMsg?: string;
     releaseLink?: string;
     verifyPlugins?: boolean;
+    title?: string;
 }
 
 export interface ExternalApp {
@@ -39,4 +40,5 @@ export interface ExternalApp {
     binaryLink?: string;
     fileName?: string;
     contextPath?:string;
+    appBuilderVersion?: string;
 }
