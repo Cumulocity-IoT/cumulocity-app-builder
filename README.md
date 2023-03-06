@@ -7,7 +7,7 @@ Application Builder is an open-source tool for you to create web applications 
 ## What's new?
 
 * **Seamless upgrade experience:** Changes made in Application Builder upgrade functionality to support seamless installation of widgets/plugins.
-* **Cumulocity:** Application Builder now using 1011.0.38.
+* **Cumulocity Version:** Based on Cumulocity 1011.0.38.
 * **Various bug fixes**
 
 ## Features
