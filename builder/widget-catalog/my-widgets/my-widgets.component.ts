@@ -23,7 +23,7 @@ import {
     IApplication,
     FetchClient
 } from "@c8y/client";
-import { AlertService, AppStateService, DynamicComponentService } from "@c8y/ngx-components";
+import { AlertService, AppStateService, DynamicComponentService, PluginsService } from "@c8y/ngx-components";
 import { ProgressIndicatorModalComponent } from '../../utils/progress-indicator-modal/progress-indicator-modal.component';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { previewModalComponent } from '../preview-modal/preview-modal.component';
@@ -57,7 +57,7 @@ export class MyWidgetsComponent implements OnInit {
     constructor(private appStateService: AppStateService, private modalService: BsModalService,
         private userService: UserService, private widgetCatalogService: WidgetCatalogService,
         private alertService: AlertService, private componentService: DynamicComponentService,
-        private appService: ApplicationService, private fetchClient: FetchClient,
+        private appService: ApplicationService, private fetchClient: FetchClient, private pluginsService: PluginsService,
         private router: Router, private route: ActivatedRoute,private progressIndicatorService: ProgressIndicatorService) {
         this.userHasAdminRights = userService.hasAllRoles(appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN", "ROLE_APPLICATION_MANAGEMENT_ADMIN"]);
         this.widgetCatalogService.displayListValue$.subscribe((value) => {
@@ -119,8 +119,7 @@ export class MyWidgetsComponent implements OnInit {
     private async loadWidgetsFromCatalog() {
 
         this.isBusy = true;
-        this.appList = (await this.appService.list({ pageSize: 2000 })).data;
-        this.appList = this.appList.filter(app => (app.name && app.name.toLowerCase().includes('widget') || app.contextPath && app.contextPath.includes('widget')) && app.manifest && app.manifest.noAppSwitcher === true);
+        this.appList = await this.pluginsService.listPackages();
         forkJoin([this.widgetCatalogService.fetchWidgetCatalog(), this.widgetCatalogService.fetchWidgetForDemoCatalog()])
             .subscribe(async ([widgetList1, widgetList2]) => {
                 this.widgetCatalog = widgetList1;
