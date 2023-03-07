@@ -25,7 +25,8 @@ import { Subject } from 'rxjs';
 @Component({
     template: `
     <div class="modal-header text-center bg-primary">
-        <h4  style="margin:0; letter-spacing: 0.15em;">Save Theme</h4>
+        <h4 *ngIf="config === 'save'" style="margin:0; letter-spacing: 0.15em;">Save Theme</h4>
+        <h4 *ngIf="config === 'edit'" style="margin:0; letter-spacing: 0.15em;">Edit Theme</h4>
     </div>
     <div class="modal-body c8y-wizard-form">
         <form name="saveThemeForm" #saveThemeForm="ngForm" class="c8y-wizard-form">
@@ -45,7 +46,9 @@ import { Subject } from 'rxjs';
 export class CustomBrandingComponent implements OnInit{
     
     app: any;
+    config: any;
     themeName: any;
+    theme?: any;
     public onSave: Subject<boolean>;
 
     constructor(public bsModalRef: BsModalRef, private appService: ApplicationService) {
@@ -54,14 +57,27 @@ export class CustomBrandingComponent implements OnInit{
 
     ngOnInit() {
         //console.log(this.app);
+        if (this.config === 'edit') {
+            this.themeName = this.theme;
+        }
     }
 
     async saveBranding() {
-        if (this.app.applicationBuilder.customBranding) {
-            this.app.applicationBuilder.customBranding.push({themeName: this.themeName, colors: this.app.applicationBuilder.branding.colors});
-        } else {
-            this.app.applicationBuilder.customBranding = [];
-            this.app.applicationBuilder.customBranding.push({themeName: this.themeName, colors: this.app.applicationBuilder.branding.colors}); 
+        if(this.config === 'save') {
+            if (this.app.applicationBuilder.customBranding) {
+                this.app.applicationBuilder.customBranding.push({themeName: this.themeName, colors: this.app.applicationBuilder.branding.colors});
+            } else {
+                this.app.applicationBuilder.customBranding = [];
+                this.app.applicationBuilder.customBranding.push({themeName: this.themeName, colors: this.app.applicationBuilder.branding.colors}); 
+            }
+        } else if (this.config === 'edit') {
+            this.app.applicationBuilder.customBranding.forEach((customTheme) => {
+                if (customTheme.themeName === this.theme) {
+                    customTheme.themeName = this.themeName;
+                    customTheme.colors = this.app.applicationBuilder.branding.colors;
+                    return;
+                }
+            });
         }
         this.app.applicationBuilder.selectedTheme = this.themeName;
         await this.appService.update({

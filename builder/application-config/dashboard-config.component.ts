@@ -353,6 +353,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
                     });
                     this.prepareDashboardHierarchy(app);
                     this.filteredDashboardList = [...app.applicationBuilder.dashboards];
+                    this.navigation.refresh();
                     this.cd.detectChanges();
                 });
             }
@@ -646,7 +647,6 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
                 if (this.appBuilderObject.applicationBuilder.dashboards.length === 0) {
                     this.autoLockDashboard = false;
                 }
-                this.navigation.refresh();
                 this.prepareDashboardHierarchy(this.appBuilderObject);
                 this.filteredDashboardList = [...this.newDashboards];
                 this.navigation.refresh();

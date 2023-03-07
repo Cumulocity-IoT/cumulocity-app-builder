@@ -42,11 +42,6 @@ import { DOCUMENT } from "@angular/common";
             <legacy-data-explorer *ngSwitchCase="'data_explorer'"></legacy-data-explorer>
             
             <ng-container *ngSwitchDefault>
-                <c8y-action-bar-item priority="0" placement="more" *ngIf="hasAdminRights()">
-                    <li>
-                        <button (click)="showInstallModal()"><i c8yIcon="upload"></i> Install widget</button>
-                    </li>
-                </c8y-action-bar-item>
                 <ng-container [ngSwitch]="isGroupTemplate">
                     <dashboard-by-id *ngSwitchCase="false" [dashboardId]="dashboardId" [context]="context"
                                      [disabled]="disabled" style="display:block;" [ngStyle]="tabGroup? '':{'min-height': 'calc(100vh - 100px)'}"></dashboard-by-id>

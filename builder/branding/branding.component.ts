@@ -30,13 +30,14 @@ import { cloneDeep } from "lodash-es";
 @Component({
     templateUrl: './branding.component.html'
 })
-export class BrandingComponent implements OnInit,OnDestroy {
+export class BrandingComponent implements OnInit, OnDestroy {
     app: Observable<any>;
     dirty = false;
     showIcon = true;
     applyTheme = false;
     bsModalRef: BsModalRef;
     themeName = "";
+    customTheme: boolean = false;
 
     constructor(private route: ActivatedRoute, private appService: ApplicationService, private brandingService: BrandingService,
         @Inject(DOCUMENT) private document: Document, private renderer: Renderer2, private modalService: BsModalService) {
@@ -66,13 +67,17 @@ export class BrandingComponent implements OnInit,OnDestroy {
                     this.applyTheme = true;
                     this.themeName = '';
                     this.renderer.addClass(this.document.body, 'body-theme');
+                    this.customTheme = false;
+                } else {
+                    this.customTheme = true;
                 }
             } else {
+                this.customTheme = false;
                 this.applyTheme = false;
                 this.themeName = '';
                 app.applicationBuilder.branding.colors.hover = '#14629F';
             }
-        }); 
+        });
     }
 
     async save(app) {
@@ -140,7 +145,7 @@ export class BrandingComponent implements OnInit,OnDestroy {
         this.showBrandingChange(app);
     }
 
-    setTheme(app, primary, active, text, textOnPrimary, textOnActive, hover, headerBar, tabBar, toolBar,selectedTheme) {
+    setTheme(app, primary, active, text, textOnPrimary, textOnActive, hover, headerBar, tabBar, toolBar, selectedTheme) {
         app.applicationBuilder.branding.enabled = true;
         app.applicationBuilder.branding.colors.primary = primary;
         app.applicationBuilder.branding.colors.active = active;
@@ -152,17 +157,19 @@ export class BrandingComponent implements OnInit,OnDestroy {
         app.applicationBuilder.branding.colors.tabBar = tabBar;
         app.applicationBuilder.branding.colors.toolBar = toolBar;
         app.applicationBuilder.selectedTheme = selectedTheme;
-        
+
         if (selectedTheme === 'Default') {
+            this.customTheme = false;
             this.renderer.removeClass(this.document.body, 'body-theme');
             this.renderer.removeClass(this.document.body, 'dashboard-body-theme');
             this.applyTheme = false;
             this.themeName = '';
-           // app.applicationBuilder.branding.enabled = false;
+            // app.applicationBuilder.branding.enabled = false;
             this.showBrandingChange(app);
         } else {
             if (selectedTheme !== this.themeName) {
                 this.themeName = '';
+                this.customTheme = false;
                 this.applyTheme = true;
                 this.renderer.addClass(this.document.body, 'body-theme');
             } else if (selectedTheme === this.themeName) {
@@ -173,10 +180,10 @@ export class BrandingComponent implements OnInit,OnDestroy {
         }
     }
 
-    saveTheme(app) {
+    saveTheme(app, config) {
         let appBuilderObject = cloneDeep(app);
         this.bsModalRef = this.modalService.show(CustomBrandingComponent, {
-            initialState:{ app: appBuilderObject }
+            initialState: { app: appBuilderObject, config: config, theme: this.themeName }
         });
         this.bsModalRef.content.onSave.subscribe(async () => {
             this.themeName = this.bsModalRef.content.themeName;
@@ -185,12 +192,25 @@ export class BrandingComponent implements OnInit,OnDestroy {
         });
     }
 
+    async deleteTheme(app) {
+        let finalApp = app.applicationBuilder.customBranding.filter((theme) => theme.themeName !== this.themeName);
+        app.applicationBuilder.customBranding = finalApp;
+        app.applicationBuilder.selectedTheme = 'Default';
+        this.setTheme(app, '#1776bf', '#14629F', '#0b385b', '#ffffff', '#ffffff','#14629F', '#ffffff', '#ffffff', '#ffffff','Default');
+        await this.appService.update({
+            id: app.id,
+            applicationBuilder: app.applicationBuilder
+        } as any);
+    }
+
     onThemeChange(value, app) {
         this.themeName = value;
         if (this.themeName !== '') {
             app.applicationBuilder.customBranding.forEach((theme) => {
                 if (theme.themeName === value) {
-                    this.setTheme(app,theme.colors.primary, theme.colors.active, theme.colors.text, theme.colors.textOnPrimary, theme.colors.textOnActive, theme.colors.hover, theme.colors.headerBar, theme.colors.tabBar, theme.colors.toolBar,this.themeName);
+                    this.customTheme = true;
+                    this.setTheme(app, theme.colors.primary, theme.colors.active, theme.colors.text, theme.colors.textOnPrimary, theme.colors.textOnActive, theme.colors.hover, theme.colors.headerBar, theme.colors.tabBar, theme.colors.toolBar, this.themeName);
+                    return;
                 }
             })
         }

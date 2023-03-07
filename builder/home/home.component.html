@@ -15,7 +15,7 @@
                         <p class="home-margin-top-5">
                             <img src="./images/c8y-app-color-dropper.png" class="home-welcome-icon"> Re-brand the applications.</p>
                         <p class="home-margin-top-5"><img src="./images/c8y-app-simulate.png" class="home-welcome-icon">Simulate devices.</p>
-                        <p class="home-margin-top-5"><img src="./images/c8y-app-installing-updates.png" class="home-welcome-icon">Install runtime widgets.</p>
+                        <p class="home-margin-top-5"><img src="./images/c8y-app-installing-updates.png" class="home-welcome-icon">Install Widget Plugins.</p>
                     </div>
                 </div>
                 <div class="col-xs-12 col-sm-4 col-md-4">
@@ -27,7 +27,7 @@
             <div class="col-xs-12 col-sm-6 col-md-6"> 
                 <div class="card home-wdiget-card">
                     <div class="card-header">
-                        Find Runtime Widgets
+                        Get More Widgets
                     </div>
                     <div class="card-block">
                         <div class="row home-widget-body">
@@ -35,7 +35,7 @@
                                 <img  (click)="openLink('widget')"  src="./images/c8y-app-installing-updates.png">
                             </div>
                             <div class="col-xs-8 col-sm-10 col-md-10">
-                                Find runtime widgets that can be directly installed inside Application Builder at <a [href]="getURL('widget')" target="_blank">Software AG Open Source</a>.
+                                Get More Widgets by exploring the Application Builder Widget Catalog.
                             </div>
                         </div>
                     </div>
@@ -46,8 +46,11 @@
                     <!-- <div class="card-header">
                         Upgrade Application Builder
                     </div> -->
-                    <div class="card-header">
+                    <div class="card-header" *ngIf="!demoCatalogExist">
                         Install Demo Catalog
+                    </div>
+                    <div class="card-header" *ngIf="demoCatalogExist">
+                        Open Demo Catalog
                     </div>
                     <div class="card-block">
                         <div class="row home-widget-body">
@@ -55,7 +58,8 @@
                                 <img  (click)="openLink('source')"  src="./images/c8y-app-upgrade.png">
                             </div>
                             <div class="col-xs-8 col-sm-10 col-md-10">
-                                Discover how you can leverage other demos for your Iot use case <a  href="#" (click)="installDemoCatalog()" target="_self" >Install Demo Catalog</a>
+                                Discover how you can leverage other demos for your Iot use case <a  href="#" *ngIf="!demoCatalogExist" (click)="installDemoCatalog()" target="_self" >Install Demo Catalog</a>
+                                <a  href="#" *ngIf="demoCatalogExist" (click)="openDemoCatalog()" target="_self" >Open Demo Catalog</a>
                             </div>
                             <!-- <div class="col-xs-8 col-sm-10 col-md-10">
                                 Find the latest release of Application Builder on <a [href]="getURL('source')" target="_blank" >Software AG Open Source</a>.
