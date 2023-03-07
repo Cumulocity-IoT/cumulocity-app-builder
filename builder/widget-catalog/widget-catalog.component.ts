@@ -22,7 +22,7 @@ import {
     IApplication,
     UserService
 } from "@c8y/client";
-import { AlertService, AppStateService, DynamicComponentService } from "@c8y/ngx-components";
+import { AlertService, AppStateService, DynamicComponentService, PluginsService } from "@c8y/ngx-components";
 import { ProgressIndicatorModalComponent } from '../utils/progress-indicator-modal/progress-indicator-modal.component';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { interval, Subscription } from 'rxjs';
@@ -57,7 +57,8 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
     displayListValue: any;
     constructor(private appStateService: AppStateService, private modalService: BsModalService,
         private userService: UserService, private widgetCatalogService: WidgetCatalogService,
-        private alertService: AlertService, private componentService: DynamicComponentService, private appService: ApplicationService,
+        private alertService: AlertService, private componentService: DynamicComponentService, 
+        private appService: ApplicationService, private pluginsService: PluginsService,
         private router: Router, private route: ActivatedRoute,
         private progressIndicatorService: ProgressIndicatorService) {
         this.userHasAdminRights = userService.hasAllRoles(appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN", "ROLE_APPLICATION_MANAGEMENT_ADMIN"]);
@@ -119,7 +120,7 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
     private async loadWidgetsFromCatalog() {
 
         this.isBusy = true;
-        this.appList = (await this.appService.list({ pageSize: 2000 })).data;
+        this.appList = await this.pluginsService.listPackages(); 
         await this.widgetCatalogService.fetchWidgetCatalog()
             .subscribe(async (widgetCatalog: WidgetCatalog) => {
                 this.widgetCatalog = widgetCatalog;
@@ -167,7 +168,7 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
             return;
         }
 
-        const widgetBinaryFound = this.appList.find(app => app.manifest?.isPackage && (app.name.toLowerCase() === widget.title?.toLowerCase() ||
+        const widgetBinaryFound = this.appList.find(app => (app.name.toLowerCase() === widget.title?.toLowerCase() ||
             (app.contextPath && app.contextPath?.toLowerCase() === widget.contextPath.toLowerCase())))
       
         if (widget.actionCode === '002' || widget.isDeprecated) {
