@@ -84,7 +84,7 @@ export class SettingsService {
             return this.appbuilderId;
         }
     }
-    private async getAppBuilderConfig() {
+    async getAppBuilderConfig() {
         const appBuilderId = await this.getAPPBuilderId();
         const AppBuilderConfigList = (await this.inventoryService.list( {pageSize: 100, query: `type eq AppBuilder-Configuration and appBuilderId eq '${appBuilderId}'`})).data;
         this.appBuilderConfig = (AppBuilderConfigList.length > 0 ? AppBuilderConfigList[0] : null);
