@@ -509,7 +509,7 @@ export class AppBuilderUpgradeService {
     private async uninstallWidgets(plugins: any) {
         const appList = await this.getApplicationList();
         for (const pluginBinary of plugins) {
-            const widgetAppObj = appList.find(app => app.contextPath === pluginBinary.contextPath)
+            const widgetAppObj = appList.find(app => pluginBinary.oldContextPath ? app.contextPath === pluginBinary.oldContextPath : app.contextPath === pluginBinary.contextPath)
             if (widgetAppObj) {
                 try {
                     await this.appService.delete(widgetAppObj.id);
