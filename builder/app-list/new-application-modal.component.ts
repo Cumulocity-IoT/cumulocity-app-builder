@@ -214,7 +214,8 @@ export class NewApplicationModalComponent implements OnInit {
                     existingAppBuilderId = appBuilderMarket.id;
                     appBuilder = await this.fetchClient.fetch(`application/applications/${appBuilderMarket.id}/clone`, { method: 'POST' }) as Response;
                     appList = (await this.appService.list({ pageSize: 2000 })).data;
-                    appBuilder = appList.find((app: any) => app.contextPath && app.contextPath.indexOf('app-builder') !== -1 && app.availability === 'PRIVATE');
+                    appBuilder = appList.find((app: any) => app.contextPath && app.contextPath.indexOf('app-builder') !== -1 && (app.availability === 'PRIVATE' || 
+                    (app.owner && app.owner.tenant && this.settingsService.getTenantName() === app.owner.tenant.id)));
                     isClone = true;
                     if (!appBuilderMarket)
                         throw Error('Could not find application builder');
