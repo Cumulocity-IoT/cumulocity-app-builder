@@ -452,7 +452,7 @@ export class AppBuilderUpgradeService {
             this.progressIndicatorService.setOverallProgress(overallProgress)
         }
         if (!appConfigUpdated) {
-            this.settingService.updateAppConfigurationForPlugin(appRemotes);
+            await this.settingService.updateAppConfigurationForPlugin(appRemotes);
         }
         this.progressModal.hide();
         if (nonCompatibleWidgets) {
@@ -531,7 +531,7 @@ export class AppBuilderUpgradeService {
                                     nonCompatibleWidgets += `${widget.title} \n`;
                                 }
                             });
-
+                            await this.updateAppConfigurationForPlugin(plugins);
                             if (plugins && plugins.length > 0) {
                                 sessionStorage.setItem('isUpgrade', 'true');
                                 await this.updateAppConfigurationForPlugin(plugins, 'true');
@@ -553,7 +553,7 @@ export class AppBuilderUpgradeService {
         }
     }
 
-    private async updateAppConfigurationForPlugin(plugins: any, underMaintenance) {
+    private async updateAppConfigurationForPlugin(plugins: any, underMaintenance?: any) {
         let remotes = {};
         for (const pluginBinary of plugins) {
             (remotes[pluginBinary.contextPath] = remotes[pluginBinary.contextPath] || []).push(pluginBinary.moduleName);
