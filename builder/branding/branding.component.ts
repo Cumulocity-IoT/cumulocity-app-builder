@@ -45,6 +45,9 @@ export class BrandingComponent implements OnInit,OnDestroy {
             )),
             tap((app: any & { applicationBuilder: any }) => {
                 this.showIcon = !app.applicationBuilder.branding.hideIcon;
+                if (app.applicationBuilder.branding.colors.hover === '' || app.applicationBuilder.branding.colors.hover === undefined) {
+                    app.applicationBuilder.branding.colors.hover = '#14629F';
+                }
             })
         )
     }
@@ -56,6 +59,7 @@ export class BrandingComponent implements OnInit,OnDestroy {
                 this.renderer.addClass(this.document.body, 'body-theme');
             } else {
                 this.applyTheme = false;
+                app.applicationBuilder.branding.colors.hover = '#14629F';
             }
         }); 
     }
