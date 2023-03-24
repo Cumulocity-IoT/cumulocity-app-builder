@@ -59,6 +59,10 @@ export class HomeComponent implements OnInit {
     getURL(type) {
         return this.externalService.getURL('HOME', type);
     }
+
+    navigateToWidgetCatalog() {
+        this.router.navigateByUrl(`/widget-catalog/get-widgets`);
+    }
     // Open External Link based or play media
     openLink(type) {
         switch (type) {

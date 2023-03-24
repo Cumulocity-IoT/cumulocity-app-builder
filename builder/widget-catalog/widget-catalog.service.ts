@@ -34,7 +34,6 @@ const c8yVersion = require('./../../package.json')["@c8y/ngx-components"];
 export class WidgetCatalogService {
 
   C8Y_VERSION = '1016.X.X';
-  C8Y_PREVIOUS_VERSION = '1011.0.0';
   pkgVersion: any;
   private WidgetCatalogPath = '/widgetCatalog/widget-catalog.json';
  // private WidgetCatalogPath = '/widgetCatalog/widget-catalog.json?ref=preprod';
@@ -157,12 +156,6 @@ export class WidgetCatalogService {
     if (!widget || !widget.requiredPlatformVersion) return false;
     const major = '>=' + semver.major(this.C8Y_VERSION) + '.X.X';
     return semver.satisfies(this.C8Y_VERSION, widget.requiredPlatformVersion) || semver.satisfies(widget.requiredPlatformVersion,major);
-  }
-
-  isPreviousCompatiblieVersion(widget: any) {
-    if (!widget || !widget.requiredPlatformVersion) return false;
-    const major = '>=' + semver.major(this.C8Y_PREVIOUS_VERSION) + '.X.X';
-    return semver.satisfies(this.C8Y_PREVIOUS_VERSION, widget.requiredPlatformVersion) || semver.satisfies(widget.requiredPlatformVersion,major);
   }
 
   isNextCompatiblieVersion(nextC8yVersion: any, widget: any) {

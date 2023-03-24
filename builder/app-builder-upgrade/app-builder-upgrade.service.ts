@@ -457,7 +457,7 @@ export class AppBuilderUpgradeService {
         this.progressModal.hide();
         if (nonCompatibleWidgets) {
             const alertMessage = {
-                title: 'Installation Confirmation',
+                title: 'Upgrade Information',
                 description: `Following widgets are not compatible with Application Builder ${appVersion}:
                 ${nonCompatibleWidgets.toLocaleUpperCase()}`,
                 type: 'info',
@@ -466,7 +466,7 @@ export class AppBuilderUpgradeService {
             }
             const confirmNonCompatibleWidgets = this.alertModalDialog(alertMessage);
             confirmNonCompatibleWidgets.content.event.subscribe(async data => {
-                if (data && data.isConfirm) {
+                if (data && !data.isConfirm) {
                     sessionStorage.setItem('isUpgrade', 'false');
                     this.settingService.updateAppBuilderMO();
                     this.showProgressModalDialog('Refreshing...');
@@ -493,11 +493,10 @@ export class AppBuilderUpgradeService {
             appList = appList.filter(app => (app.name && app.name.toLowerCase().includes('widget') || app.contextPath && app.contextPath.includes('widget')) && app.manifest && app.manifest.noAppSwitcher === true);
             forkJoin([this.widgetCatalogService.fetchWidgetCatalog(), this.widgetCatalogService.fetchWidgetForDemoCatalog()])
                 .subscribe(async ([widgetList1, widgetList2]) => {
-                    this.progressIndicatorService.setProgress(15);
                     widgetCatalog = widgetList1;
                     widgetList2.widgets.forEach((widget: WidgetModel) => {
                         const widgetObj = widgetCatalog.widgets.find(widgetObj => widgetObj.contextPath === widget.contextPath);
-                        if (!widgetObj && this.widgetCatalogService.isPreviousCompatiblieVersion(widget)) { widgetCatalog.widgets.push(widget); }
+                        if (!widgetObj) { widgetCatalog.widgets.push(widget); }
                     });
                     appList.forEach(app => {
                         const appWidgetObj = widgetCatalog.widgets.find(widgetObj => widgetObj.contextPath === app.contextPath);
@@ -515,15 +514,12 @@ export class AppBuilderUpgradeService {
                     let plugins = [];
                     if (widgetCatalog && widgetCatalog.widgets && widgetCatalog.widgets.length > 0) {
                         widgetCatalog.widgets.forEach(widget => {
-                            widget.isCompatible = this.widgetCatalogService.isPreviousCompatiblieVersion(widget);
                             const appObj = appList.find(app => app.contextPath === widget.contextPath);
                             widget.installedVersion = (appObj && appObj.manifest && appObj.manifest.version ? appObj.manifest.version : '');
                             widget.installed = appObj && this.findInstalledWidget(widget, widgetCatalog); //(widgetObj != undefined);
                         });
-                        this.progressIndicatorService.setProgress(25);
                         let installedWidgets = widgetCatalog.widgets.filter(widget => widget.installed);
                         let nonCompatibleWidgets = '';
-                        this.progressIndicatorService.setProgress(50);
                         if (installedWidgets && installedWidgets.length > 0) {
                             installedWidgets.forEach(widget => {
                                 const compatiblePlugin = widgetCatalog.widgets.find(plugin => (plugin.oldContextPath ? plugin.oldContextPath === widget.contextPath : plugin.contextPath === widget.contextPath) &&
@@ -537,8 +533,6 @@ export class AppBuilderUpgradeService {
                             });
 
                             if (plugins && plugins.length > 0) {
-                                this.progressIndicatorService.setProgress(75);
-                                this.progressIndicatorService.setMessage('Saving plugins configuration...');
                                 sessionStorage.setItem('isUpgrade', 'true');
                                 await this.updateAppConfigurationForPlugin(plugins, 'true');
                                 await this.uninstallWidgets(plugins);
@@ -588,7 +582,7 @@ export class AppBuilderUpgradeService {
         if (checkWidgetInCatalog && checkWidgetInCatalog.length > 1) {
             const isWidgetInstalled = checkWidgetInCatalog.find(installObj => installObj.installed);
             if (isWidgetInstalled) return false;
-            return widget.isCompatible && this.checkInstalledVersionForDirectInstall(widget);
+            return this.checkInstalledVersionForDirectInstall(widget);
         }
         return true;
     }
