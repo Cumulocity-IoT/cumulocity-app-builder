@@ -387,7 +387,10 @@ export class WidgetCatalogService {
   }
 
  removeVersionFromPluginRemotes(plugins: any) : Array<any>{
-    return Object.keys(plugins).map(key => ({pluginContext: key.split('@')[0], value: plugins[key]}));
+    if(plugins) {
+      return Object.keys(plugins).map(key => ({pluginContext: key.split('@')[0], value: plugins[key]}));
+    }
+    return [];
   }
 
   /**
