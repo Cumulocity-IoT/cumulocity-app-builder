@@ -536,6 +536,7 @@ export class AppBuilderUpgradeService {
                                 sessionStorage.setItem('isUpgrade', 'true');
                                 await this.updateAppConfigurationForPlugin(plugins, 'true');
                                 await this.uninstallWidgets(plugins);
+                                await this.settingService.getAppBuilderConfig();
                                 const appBuilderConfig = (await this.settingService.getAppBuilderConfigs());
                                 await this.appStateService.currentApplication.subscribe(app => {
                                     this.currentApp = app;
