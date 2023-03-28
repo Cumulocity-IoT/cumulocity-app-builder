@@ -490,6 +490,7 @@ export class AppBuilderUpgradeService {
             this.showProgressModalDialog('Verifying plugins! Please wait...');
             let appList = await this.getApplicationList();
             let widgetCatalog: WidgetCatalog;
+            const appRemotes = this.currentApp?.config?.remotes;
             appList = appList.filter(app => (app.name && app.name.toLowerCase().includes('widget') || app.contextPath && app.contextPath.includes('widget')) && app.manifest && app.manifest.noAppSwitcher === true);
             forkJoin([this.widgetCatalogService.fetchWidgetCatalog(), this.widgetCatalogService.fetchWidgetForDemoCatalog()])
                 .subscribe(async ([widgetList1, widgetList2]) => {
@@ -538,11 +539,7 @@ export class AppBuilderUpgradeService {
                                 await this.uninstallWidgets(plugins);
                                 await this.settingService.getAppBuilderConfig();
                                 const appBuilderConfig = (await this.settingService.getAppBuilderConfigs());
-                                await this.appStateService.currentApplication.subscribe(app => {
-                                    this.currentApp = app;
-                                });
-                                const appRemotes = this.currentApp?.config?.remotes;
-                                await this.installPlugins(appBuilderConfig, appRemotes, nonCompatibleWidgets)
+                                await this.installPlugins(appBuilderConfig, appRemotes, nonCompatibleWidgets);
                             }
                         }
                     }
@@ -565,8 +562,8 @@ export class AppBuilderUpgradeService {
     private async uninstallWidgets(plugins: any) {
         const appList = await this.getApplicationList();
         for (const pluginBinary of plugins) {
-            const widgetAppObj = appList.find(app => pluginBinary.oldContextPath ? app.contextPath === pluginBinary.oldContextPath : app.contextPath === pluginBinary.contextPath)
-            if (widgetAppObj) {
+            const widgetAppObj: IApplication = appList.find(app => pluginBinary.oldContextPath ? app.contextPath === pluginBinary.oldContextPath : app.contextPath === pluginBinary.contextPath)
+            if (widgetAppObj && (widgetAppObj.manifest && !widgetAppObj.manifest?.isPackage)) {
                 try {
                     await this.appService.delete(widgetAppObj.id);
                 } catch (e) {
