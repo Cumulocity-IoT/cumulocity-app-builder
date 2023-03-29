@@ -374,11 +374,13 @@ export class WidgetCatalogService {
     }
 
     const currentApp: IApplication =  (await this.getCurrentApp());
+    const appList = await this.pluginsService.listPackages();
     let installedPlugins = currentApp?.config?.remotes;
     installedPlugins = (installedPlugins ? this.removeVersionFromPluginRemotes(installedPlugins) : []);
     for(let widget of widgetCatalog.widgets) {
         const widgetObj = installedPlugins.find( plugin => plugin.pluginContext === widget.contextPath);
-        widget.installed = (widgetObj != undefined && widgetObj);
+        const appObj = appList.find(app => app.contextPath === widget.contextPath);
+        widget.installed = (widgetObj != undefined && widgetObj && appObj != undefined);
         widget.isCompatible = this.isCompatiblieVersion(widget);
         this.actionFlagGetWidgets(widget, userHasAdminRights);
     }
