@@ -96,7 +96,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     dashboardId: any;
     appBuilderDashboards: any[];
     dashboardHierarchy = { id: {}, children: {}, node: {} } as any;
-    defaultListView = '1';
+    defaultListView = '2';
     newDashboards = [];
     appBuilderObject: any;
     expandAllDashboards: boolean = true;
@@ -141,7 +141,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     }
 
     async ngOnInit() {
-        this.defaultListView = '1';
+        this.defaultListView = '2';
         let count = 0;
         this.app.subscribe(app => {
             if (app.applicationBuilder.dashboards.length !== 0) {
