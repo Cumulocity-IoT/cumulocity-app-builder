@@ -521,6 +521,7 @@ export class AppBuilderUpgradeService {
                         });
                         let installedWidgets = widgetCatalog.widgets.filter(widget => widget.installed);
                         let nonCompatibleWidgets = '';
+                        let appConfigUpdated = false;
                         if (installedWidgets && installedWidgets.length > 0) {
                             installedWidgets.forEach(widget => {
                                 const compatiblePlugin = widgetCatalog.widgets.find(plugin => (plugin.oldContextPath ? plugin.oldContextPath === widget.contextPath : plugin.contextPath === widget.contextPath) &&
@@ -540,7 +541,14 @@ export class AppBuilderUpgradeService {
                                 await this.settingService.getAppBuilderConfig();
                                 const appBuilderConfig = (await this.settingService.getAppBuilderConfigs());
                                 await this.installPlugins(appBuilderConfig, appRemotes, nonCompatibleWidgets);
+                                appConfigUpdated = true;
                             }
+                        }
+                        if (!appConfigUpdated) {
+                            await this.settingService.updateAppConfigurationForPlugin(appRemotes);
+                            this.showProgressModalDialog('Refreshing...');
+                            await new Promise(resolve => setTimeout(resolve, 4000));
+                            window.location.reload();
                         }
                     }
                 }, error => {

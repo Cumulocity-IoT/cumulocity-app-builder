@@ -159,7 +159,7 @@ body {
     --page-tabs-actions-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     --page-tabs-actions-color-hover: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     --list-group-actions-color: var(--component-link-color, #000);
-    --dropdown-active-color:${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+    --dropdown-active-color:${this.colorToHex(app.applicationBuilder.branding.colors.active)};
     --tooltip-background: ${this.colorToHex(app.applicationBuilder.branding.colors.active)};/*0b385b*/
     --tooltip-color: ${this.colorToHex(app.applicationBuilder.branding.colors.textOnActive)};
     --link-color: #1776BF;
@@ -317,7 +317,7 @@ body {
     --page-tabs-actions-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     --page-tabs-actions-color-hover: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     --list-group-actions-color: var(--component-link-color, #000);
-    --dropdown-active-color:${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+    --dropdown-active-color:${this.colorToHex(app.applicationBuilder.branding.colors.active)};
     --tooltip-background: ${this.colorToHex(app.applicationBuilder.branding.colors.active)};/*0b385b*/
     --tooltip-color: ${this.colorToHex(app.applicationBuilder.branding.colors.textOnActive)};
     ${app.applicationBuilder.branding.logoHeight != undefined ? '--navigator-platform-logo-height: ' + app.applicationBuilder.branding.logoHeight + 'px;' : ''}
