@@ -39,6 +39,7 @@ import { UpdateableAlert } from '../../builder/utils/UpdateableAlert';
 import { SimulatorWorkerAPI } from '../simulator/mainthread/simulator-worker-api.service';
 import { SimulatorConfigService } from './simulator-config.service';
 import { AlertMessageModalComponent } from '../../builder/utils/alert-message-modal/alert-message-modal.component';
+import { SimulatorManagerService } from '../../builder/simulator/mainthread/simulator-manager.service';
 
 @Component({
     templateUrl: './new-simulator-modal.component.html'
@@ -73,7 +74,8 @@ export class NewSimulatorModalComponent {
         private resolver: ComponentFactoryResolver, private injector: Injector, private inventoryService: InventoryService,
         private appService: ApplicationService, private appIdService: AppIdService, private fetchClient: FetchClient,
         private simulatorNotificationService: SimulatorNotificationService, private fileSimulatorNotificationService: FileSimulatorNotificationService,
-        private simulatorConfigService: SimulatorConfigService,private modalService: BsModalService
+        private simulatorConfigService: SimulatorConfigService,private modalService: BsModalService,
+        private simulatorManagerService: SimulatorManagerService
     ) { }
 
     async openSimulatorConfig() {
@@ -186,6 +188,7 @@ export class NewSimulatorModalComponent {
         }
         // updateDevice
         const simulators = appServiceData.applicationBuilder.simulators || [];
+        const isFirstSimulator = (simulators && simulators.length > 0 ? false: true );
         const simulatorId = Math.floor(Math.random() * 1000000);
         this.newConfig.deviceId = this.deviceId;
         // Added by darpan to sync device id in alternateConfigs
@@ -232,6 +235,10 @@ export class NewSimulatorModalComponent {
                 type: appServiceData.type,
                 simulator: newSimulatorObject
             });
+        }
+
+        if(isFirstSimulator) {
+            this.simulatorManagerService.initialize();
         }
         // We could just wait for them to refresh, but it's nicer to instantly refresh
         await this.simSvc.checkForSimulatorConfigChanges();

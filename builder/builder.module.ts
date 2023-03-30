@@ -68,6 +68,7 @@ import { CollapseModule } from 'ngx-bootstrap/collapse';
 import { DragDropModule } from "@angular/cdk/drag-drop";
 import { BsModalRef, BsModalService } from "ngx-bootstrap/modal";
 import { AlertMessageModalComponent } from "./utils/alert-message-modal/alert-message-modal.component";
+import { AppDataService } from "./app-data.service";
 @NgModule({
     imports: [
         ApplicationModule,
@@ -146,13 +147,12 @@ import { AlertMessageModalComponent } from "./utils/alert-message-modal/alert-me
 })
 export class BuilderModule {
     private renderer: Renderer2;
-    constructor(appStateService: AppStateService, loginService: LoginService, 
+    constructor(appStateService: AppStateService, loginService: LoginService, private appDataService: AppDataService,
         simSvc: SimulatorWorkerAPI, simulatorManagerService: SimulatorManagerService,
         appIdService: AppIdService, private settingService: SettingsService, private appBuilderUpgradeService: AppBuilderUpgradeService,
         rendererFactory: RendererFactory2, @Inject(DOCUMENT) private _document: Document,
         private modalService: BsModalService) {
         
-        simulatorManagerService.initialize();
         const lockStatus$ = new Observable<{ isLocked: boolean, isLockOwned: boolean, lockStatus?: LockStatus }>(subscriber => {
             const listenerId = simSvc
                 .addLockStatusListener(lockStatus => subscriber.next(lockStatus));
@@ -167,7 +167,8 @@ export class BuilderModule {
                     simSvc.unlock();
                 }
             });
-        appStateService.currentTenant
+       
+         appStateService.currentTenant
         .pipe(filter(tenant => !!tenant))
         .pipe(distinctUntilChanged())
         .subscribe(async (tenant) => {
@@ -201,7 +202,17 @@ export class BuilderModule {
         .pipe(distinctUntilChanged())
         .subscribe(async (appId) => 
         {
-            if(appId) {   await simSvc.setAppId(appId) }
+            if(appId) {   
+                this.appDataService.getAppDetails(appId)
+                .pipe(filter(app => !!app))
+                .pipe(distinctUntilChanged()).subscribe( app => {
+                    if(app.applicationBuilder && app.applicationBuilder?.simulators && app.applicationBuilder?.simulators.length > 0){
+                        simulatorManagerService.initialize();                 
+                    }
+                });
+                
+                await simSvc.setAppId(appId) 
+            }
             this.registerAndTrackAnalyticsProvider(false, appId);
         });
     }

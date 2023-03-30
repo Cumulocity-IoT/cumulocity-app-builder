@@ -51,6 +51,7 @@ export class SimulatorConfigComponent implements OnDestroy {
     private _lockStatusListener: number;
     private _simulatorConfigListener: number;
     userHasAdminRights: boolean;
+    isSimulatorsExist: boolean = false;
     constructor(
         private simSvc: SimulatorWorkerAPI, private modalService: BsModalService,
         private appIdService: AppIdService, private appService: ApplicationService,
@@ -80,6 +81,9 @@ export class SimulatorConfigComponent implements OnDestroy {
                 this.renderer.addClass(this.document.body, 'simulator-body-theme');
             } else {
                 this.applyTheme = false;
+            }
+            if(app.applicationBuilder && app.applicationBuilder?.simulators && app.applicationBuilder?.simulators.length > 0){
+                this.isSimulatorsExist = true;
             }
         });
     }
