@@ -150,7 +150,7 @@ export class HomeComponent implements OnInit {
         const installDemoCatalogDialogRef = this.appBuilderUpgradeService.alertModalDialog(alertMessage);
         installDemoCatalogDialogRef.content.event.subscribe(async data => {
             if (data && data.isConfirm) {
-                this.appBuilderUpgradeService.showProgressModalDialog('Installing Demo Catalog...');
+                this.appBuilderUpgradeService.showProgressModalDialog('Downloading Demo Catalog...');
                 await this.appBuilderUpgradeService.downloadAndInstall(dempCatalogApp.binaryLink, dempCatalogApp.fileName, false, 'INSTALL');
                 this.appBuilderUpgradeService.hideProgressModalDialog();
                 if (!this.appBuilderUpgradeService.errorReported) {
