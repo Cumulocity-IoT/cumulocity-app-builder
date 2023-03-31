@@ -42,7 +42,7 @@
     "lodash-es": "^4.0.0",
     "@ng-select/ng-select": "^9.1.0",
     "@ng-reactive/async-input": "0.0.1",
-    "app-builder-external-assets": "file:binary/app-builder-external-assets-3.1.0.tgz",
+    "app-builder-external-assets": "file:binary/app-builder-external-assets-3.2.0.tgz",
     "font-awesome": "^4.7.0",
     "fontawesome": "^4.7.2",
     "jszip": "^3.10.1",
