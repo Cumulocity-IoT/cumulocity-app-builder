@@ -533,7 +533,6 @@ export class AppBuilderUpgradeService {
                                     nonCompatibleWidgets += `${widget.title} \n`;
                                 }
                             });
-                            await this.updateAppConfigurationForPlugin(plugins);
                             if (plugins && plugins.length > 0) {
                                 sessionStorage.setItem('isUpgrade', 'true');
                                 await this.updateAppConfigurationForPlugin(plugins, 'true');
