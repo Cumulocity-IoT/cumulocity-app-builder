@@ -26,11 +26,12 @@ import { DOCUMENT } from "@angular/common";
 import { CustomBrandingComponent } from "./custom-branding.component";
 import { BsModalRef, BsModalService } from "ngx-bootstrap/modal";
 import { cloneDeep } from "lodash-es";
+import { AppDataService } from "../app-data.service";
 
 @Component({
     templateUrl: './branding.component.html'
 })
-export class BrandingComponent implements OnInit, OnDestroy {
+export class BrandingComponent implements OnDestroy {
     app: Observable<any>;
     dirty = false;
     showIcon = true;
@@ -40,7 +41,7 @@ export class BrandingComponent implements OnInit, OnDestroy {
     customTheme: boolean = false;
 
     constructor(private route: ActivatedRoute, private appService: ApplicationService, private brandingService: BrandingService,
-        @Inject(DOCUMENT) private document: Document, private renderer: Renderer2, private modalService: BsModalService) {
+        @Inject(DOCUMENT) private document: Document, private renderer: Renderer2, private modalService: BsModalService, private appDataService: AppDataService) {
         const appId = route.paramMap.pipe(
             map(paramMap => paramMap.get('applicationId'))
         );
@@ -57,9 +58,6 @@ export class BrandingComponent implements OnInit, OnDestroy {
                 }
             })
         )
-    }
-
-    ngOnInit(): void {
         this.app.subscribe((app) => {
             this.themeName = app.applicationBuilder.selectedTheme;
             if (app.applicationBuilder.branding.enabled && (app.applicationBuilder.selectedTheme && app.applicationBuilder.selectedTheme !== 'Default')) {
@@ -86,7 +84,7 @@ export class BrandingComponent implements OnInit, OnDestroy {
             id: app.id,
             applicationBuilder: app.applicationBuilder
         } as any);
-
+        this.appDataService.forceUpdate = true;
         this.brandingService.updateStyleForApp(app);
     }
 

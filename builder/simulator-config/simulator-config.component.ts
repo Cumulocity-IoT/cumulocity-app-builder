@@ -76,7 +76,8 @@ export class SimulatorConfigComponent implements OnDestroy {
             })
         );
         app.subscribe((app) => {
-            if (app && app.applicationBuilder.branding.enabled && (app.applicationBuilder.selectedTheme && app.applicationBuilder.selectedTheme !== 'Default')) {
+            if (app && app.applicationBuilder.branding.enabled && (app.applicationBuilder.selectedTheme && app.applicationBuilder.selectedTheme !== 'Default') &&
+            (app.applicationBuilder.selectedTheme === 'Navy Blue' || app.applicationBuilder.selectedTheme === 'Red' || app.applicationBuilder.selectedTheme === 'Green' || app.applicationBuilder.selectedTheme === "Yellow" || app.applicationBuilder.selectedTheme === 'Dark')) {
                 this.applyTheme = true;
                 this.renderer.addClass(this.document.body, 'simulator-body-theme');
             } else {

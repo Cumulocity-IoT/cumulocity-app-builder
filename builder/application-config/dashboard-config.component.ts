@@ -130,20 +130,15 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
                 // TODO?
                 //this.tabs.refresh();
             });
-        this.app.subscribe((app) => {
-            if (app.applicationBuilder.branding.enabled && (app.applicationBuilder.selectedTheme && app.applicationBuilder.selectedTheme !== 'Default')) {
+        let count = 0;
+        this.app.subscribe(app => {
+            if (app.applicationBuilder.branding.enabled && (app.applicationBuilder.selectedTheme && app.applicationBuilder.selectedTheme !== 'Default') && 
+            (app.applicationBuilder.selectedTheme === 'Navy Blue' || app.applicationBuilder.selectedTheme === 'Red' || app.applicationBuilder.selectedTheme === 'Green' || app.applicationBuilder.selectedTheme === "Yellow" || app.applicationBuilder.selectedTheme === 'Dark')) {
                 this.applyTheme = true;
                 this.renderer.addClass(this.document.body, 'dashboard-body-theme');
             } else {
                 this.applyTheme = false;
             }
-        });
-    }
-
-    async ngOnInit() {
-        this.defaultListView = '2';
-        let count = 0;
-        this.app.subscribe(app => {
             if (app.applicationBuilder.dashboards.length !== 0) {
                 app.applicationBuilder.dashboards.forEach(async (element) => {
                     let c8y_dashboard = (await this.inventoryService.detail(element.id)).data;
@@ -160,9 +155,12 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
             this.filteredDashboardList = app.applicationBuilder.dashboards;
             this.prepareDashboardHierarchy(app);
         });
+    }
 
+    async ngOnInit() {
+        this.defaultListView = '2';
         this.isDashboardCatalogEnabled = await this.settingsService.isDashboardCatalogEnabled();
-        if (this.userService.hasAllRoles(this.appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN","ROLE_APPLICATION_MANAGEMENT_ADMIN"])) {
+        if (this.userService.hasAllRoles(this.appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN", "ROLE_APPLICATION_MANAGEMENT_ADMIN"])) {
             this.showAddDashboard = true;
         } else {
             this.showAddDashboard = false;
@@ -266,14 +264,11 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     async reorderDashboards(app, newDashboardsOrder) {
         this.newDashboardsOrder = newDashboardsOrder;
         this.appBuilderDashboards = app.applicationBuilder.dashboards;
-        if (newDashboardsOrder.length === app.applicationBuilder.dashboards.length) {
-            app.applicationBuilder.dashboards = newDashboardsOrder;
-            this.delayedAppUpdateSubject.next({
-                id: app.id,
-                applicationBuilder: app.applicationBuilder
-            });
-            this.prepareDashboardHierarchy(app);
-        }
+        app.applicationBuilder.dashboards = newDashboardsOrder;
+        this.delayedAppUpdateSubject.next({
+            id: app.id,
+            applicationBuilder: app.applicationBuilder
+        });
     }
 
 
@@ -580,7 +575,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
             } else if (!dashboard.isDashboard && !childDB.isDashboard && childDB.children.length > 0) {
                 childDB.dashboard.name = dashboard.title + '/' + childDB.title;
                 childDB.title = childDB.dashboard.name;
-            } 
+            }
             if (childDB.children.length > 0) {
                 this.setChildDBName(childDB);
             }
