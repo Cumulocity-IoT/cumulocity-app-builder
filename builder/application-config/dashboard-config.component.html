@@ -201,7 +201,7 @@
                                     style="font-size:18px;margin-left:20px"></i>
                             </div>
                         </div>
-                        <bs-sortable [ngModel]="filteredDashboardList" [itemTemplate]="itemTemplate"
+                        <bs-sortable [(ngModel)]="filteredDashboardList" [itemTemplate]="itemTemplate"
                             itemClass="sortable-item" itemActiveClass="sortable-item-active"
                             wrapperClass="sortable-grid" (onChange)="reorderDashboards(app, $event)"></bs-sortable>
                     </ng-container>

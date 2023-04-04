@@ -20,7 +20,7 @@ import { Component, Inject, OnDestroy, OnInit, Renderer2 } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { ApplicationService } from "@c8y/client";
 import { map, switchMap, tap } from "rxjs/operators";
-import { from, Observable } from "rxjs";
+import { from, Observable, Subscription } from "rxjs";
 import { BrandingService } from "./branding.service";
 import { DOCUMENT } from "@angular/common";
 import { CustomBrandingComponent } from "./custom-branding.component";
@@ -39,6 +39,7 @@ export class BrandingComponent implements OnDestroy {
     bsModalRef: BsModalRef;
     themeName = "";
     customTheme: boolean = false;
+    appSubscription: Subscription;
 
     constructor(private route: ActivatedRoute, private appService: ApplicationService, private brandingService: BrandingService,
         @Inject(DOCUMENT) private document: Document, private renderer: Renderer2, private modalService: BsModalService, private appDataService: AppDataService) {
@@ -58,7 +59,7 @@ export class BrandingComponent implements OnDestroy {
                 }
             })
         )
-        this.app.subscribe((app) => {
+        this.appSubscription = this.app.subscribe((app) => {
             this.themeName = app.applicationBuilder.selectedTheme;
             if (app.applicationBuilder.branding.enabled && (app.applicationBuilder.selectedTheme && app.applicationBuilder.selectedTheme !== 'Default')) {
                 if (this.themeName === 'Navy Blue' || this.themeName === 'Red' || this.themeName === 'Green' || this.themeName === "Yellow" || this.themeName === 'Dark') {
@@ -105,6 +106,7 @@ export class BrandingComponent implements OnDestroy {
         const app = ((await this.appService.detail(appId)).data as any);
         this.brandingService.updateStyleForApp(app);
         this.renderer.removeClass(this.document.body, 'body-theme');
+        this.appSubscription.unsubscribe();
     }
 
     async logoChange(app, files: FileList) {

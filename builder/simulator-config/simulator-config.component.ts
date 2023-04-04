@@ -20,7 +20,7 @@ import { Component, Inject, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import { NewSimulatorModalComponent } from "./new-simulator-modal.component";
 import { EditSimulatorModalComponent } from "./edit-simulator-modal.component";
-import { BehaviorSubject, from, of } from "rxjs";
+import { BehaviorSubject, from, of, Subscription } from "rxjs";
 import { switchMap} from "rxjs/operators";
 import * as delay from "delay";
 import { IApplication, ApplicationService, UserService } from "@c8y/client";
@@ -52,6 +52,7 @@ export class SimulatorConfigComponent implements OnDestroy {
     private _simulatorConfigListener: number;
     userHasAdminRights: boolean;
     isSimulatorsExist: boolean = false;
+    appSubscription: Subscription;
     constructor(
         private simSvc: SimulatorWorkerAPI, private modalService: BsModalService,
         private appIdService: AppIdService, private appService: ApplicationService,
@@ -75,7 +76,7 @@ export class SimulatorConfigComponent implements OnDestroy {
                 }
             })
         );
-        app.subscribe((app) => {
+        this.appSubscription = app.subscribe((app) => {
             if (app && app.applicationBuilder.branding.enabled && (app.applicationBuilder.selectedTheme && app.applicationBuilder.selectedTheme !== 'Default') &&
             (app.applicationBuilder.selectedTheme === 'Navy Blue' || app.applicationBuilder.selectedTheme === 'Red' || app.applicationBuilder.selectedTheme === 'Green' || app.applicationBuilder.selectedTheme === "Yellow" || app.applicationBuilder.selectedTheme === 'Dark')) {
                 this.applyTheme = true;
@@ -184,6 +185,7 @@ export class SimulatorConfigComponent implements OnDestroy {
         this.simSvc.removeListener(this._lockStatusListener);
         this.simSvc.removeListener(this._simulatorConfigListener);
         this.renderer.removeClass(this.document.body, 'simulator-body-theme');
+        this.appSubscription.unsubscribe();
     }
 
     // for keyValue pipe
