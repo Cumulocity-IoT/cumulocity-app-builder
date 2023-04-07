@@ -457,7 +457,7 @@ export class AppBuilderUpgradeService {
         this.progressModal.hide();
         if (nonCompatibleWidgets) {
             const alertMessage = {
-                title: 'Upgrade Information',
+                title: 'Information',
                 description: `Following widgets are not compatible with Application Builder ${appVersion}:
                 ${nonCompatibleWidgets.toLocaleUpperCase()}`,
                 type: 'info',
@@ -530,7 +530,9 @@ export class AppBuilderUpgradeService {
                                     widget.isNextVersionAvailable = true;
                                     plugins.push(compatiblePlugin);
                                 } else {
-                                    nonCompatibleWidgets += `${widget.title} \n`;
+                                    if (!this.widgetCatalogService.isCompatiblieVersion(widget)) {
+                                        nonCompatibleWidgets += `${widget.title} \n`;
+                                    }
                                 }
                             });
                             if (plugins && plugins.length > 0) {
@@ -570,7 +572,7 @@ export class AppBuilderUpgradeService {
         const appList = await this.getApplicationList();
         for (const pluginBinary of plugins) {
             const widgetAppObj: IApplication = appList.find(app => pluginBinary.oldContextPath ? app.contextPath === pluginBinary.oldContextPath : app.contextPath === pluginBinary.contextPath)
-            if (widgetAppObj  && (widgetAppObj.manifest &&  !widgetAppObj.manifest?.isPackage)) {
+            if (widgetAppObj && (widgetAppObj.manifest && !widgetAppObj.manifest?.isPackage)) {
                 try {
                     await this.appService.delete(widgetAppObj.id);
                 } catch (e) {
