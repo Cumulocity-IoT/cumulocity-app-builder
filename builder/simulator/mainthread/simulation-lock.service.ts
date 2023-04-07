@@ -48,7 +48,7 @@ export interface LockStatus {
  *     }
  * }
  */
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class SimulationLockService {
     sessionId: number = Math.floor(Math.random() * 1000000000);
 

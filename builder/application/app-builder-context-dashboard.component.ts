@@ -24,7 +24,6 @@ import {last} from "lodash-es";
 import {SMART_RULES_AVAILABILITY_TOKEN} from "./smartrules/smart-rules-availability.upgraded-provider";
 import {IApplicationBuilderApplication} from "../iapplication-builder-application";
 import {AppStateService} from "@c8y/ngx-components";
-import {RuntimeWidgetInstallerModalService} from "cumulocity-runtime-widget-loader";
 import { SettingsService } from "../../builder/settings/settings.service";
 import { AccessRightsService } from "../../builder/access-rights.service";
 import { switchMap, tap } from "rxjs/operators";
@@ -43,21 +42,17 @@ import { DOCUMENT } from "@angular/common";
             <legacy-data-explorer *ngSwitchCase="'data_explorer'"></legacy-data-explorer>
             
             <ng-container *ngSwitchDefault>
-                <c8y-action-bar-item priority="0" placement="more" *ngIf="hasAdminRights()">
-                    <li>
-                        <button (click)="showInstallModal()"><i c8yIcon="upload"></i> Install widget</button>
-                    </li>
-                </c8y-action-bar-item>
                 <ng-container [ngSwitch]="isGroupTemplate">
                     <dashboard-by-id *ngSwitchCase="false" [dashboardId]="dashboardId" [context]="context"
-                                     [disabled]="disabled" style="display:block;" [ngStyle]="tabGroup? '':{'min-height': 'calc(100vh - 100px)'}"></dashboard-by-id>
+                                     [disabled]="disabled" style="display:block;"></dashboard-by-id>
                     <group-template-dashboard *ngSwitchCase="true" style="display:block;" [dashboardId]="dashboardId" [deviceId]="this.deviceId" [context]="context"
                                      [disabled]="disabled"></group-template-dashboard>
                     <ng-container *ngSwitchCase="undefined"><!--Loading--></ng-container>
                 </ng-container>
             </ng-container>
         </ng-container>
-    `
+    `,
+    host: {'class': 'dashboard'}
 })
 export class AppBuilderContextDashboardComponent implements OnDestroy {
     applicationId: string;
@@ -93,7 +88,6 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
         @Inject(SMART_RULES_AVAILABILITY_TOKEN) private c8ySmartRulesAvailability: any,
         private userService: UserService,
         private appStateService: AppStateService,
-        private runtimeWidgetInstallerModalService: RuntimeWidgetInstallerModalService,
         private settingsService: SettingsService,
         private accessRightsService: AccessRightsService,
         private appIdService: AppIdService,
@@ -114,10 +108,7 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
             this.deviceId = paramMap.get('deviceId');
             this.deviceDetail = paramMap.get('deviceDetail');
 
-            this.context = {
-                id: this.deviceId
-            }
-
+            
             this.isGroupTemplate = undefined;
             this.dashboardSmartRulesAlarmsExplorerVisibility = await this.settingsService.isDashboardVisibilitySmartRulesAlarmsExplorer();
 
@@ -158,6 +149,13 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
 
             this.isGroupTemplate = (dashboard && dashboard.groupTemplate) || false;
 
+            if(this.deviceId) {
+                const deviceMO = await (await this.inventoryService.detail(this.deviceId)).data;
+                this.context = {
+                    id: this.deviceId,
+                    name: (deviceMO ? deviceMO.name: '')
+                }
+            }
             if (!dashboard && !this.deviceDetail) {
                 console.warn(`Dashboard: ${this.dashboardId} isn't part of application: ${this.applicationId}`);
                 this.router.navigateByUrl(`/home`);
@@ -256,7 +254,6 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
 
 
     }
-
     ngOnDestroy(): void {
         this.subscriptions.unsubscribe();
     }
@@ -286,9 +283,6 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
         return path;
     }
 
-    showInstallModal() {
-        this.runtimeWidgetInstallerModalService.show();
-    }
 
     hasAdminRights() {
         return this.userService.hasAllRoles(this.appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN", "ROLE_APPLICATION_MANAGEMENT_ADMIN"]);

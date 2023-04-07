@@ -1,0 +1,97 @@
+<div ng-controller="alarmListCtrl as vm">
+  <c8y-ui-action-bar-set>
+    <li class="navbar-form" action-bar-position="left">
+      <div class="btn-group btn-group-sm">
+      <button
+        title="{{ severity.name | lowercase | humanize | translate }}"
+        ng-repeat="severity in vm.severities"
+        type="button"
+        class="btn btn-default btn-sm d-flex a-i-center"
+        ng-model="severity.active"
+        ng-click="severity.toggleActive()"
+        ng-class="{ active: severity.active }"
+      >
+        <i
+          c8y-icon="{{ vm.icon(severity.name) }}"
+          class="status m-r-4 icon-14"
+          ng-class="severity.name | lowercase"
+        ></i>
+        <span
+          class="hidden-md hidden-sm text-truncate m-r-4"
+          ng-bind="severity.name | lowercase | humanize | translate"
+        ></span>
+        <span ng-if="severity.active" class="badge badge-dark flex-no-shrink">
+          <span ng-if="severity.countLoading"
+            ><i c8y-icon="circle-o-notch" class="icon-spin"></i
+          ></span>
+          <span ng-if="!severity.countLoading" ng-bind="severity.count"></span>
+        </span>
+      </button>
+        <!-- @TODO: this is placeholder button to show all alarm types
+        <button type="button" class="btn btn-default">
+          {{'All' | translate}}
+        </button>
+        -->
+      </div>
+    </li>
+
+    <li title="{{ 'Show cleared alarms' | translate }}" class="navbar-form">
+      <label class="c8y-switch">
+        <input
+          type="checkbox"
+          ng-model="vm.unresolved"
+          ng-change="vm.onVmUnresolvedChange()"
+          ng-true-value="false"
+          ng-false-value="true"
+        />
+        <span></span>
+        <span title="{{ 'Show cleared alarms' | translate }}" class="text-truncate">
+          {{ 'Show cleared alarms' | translate }}
+        </span>
+      </label>
+    </li>
+
+    <li>
+      <button
+        title="{{ 'Clear all alarms' | translate }}"
+        type="button"
+        class="btn btn-link d-flex a-i-center"
+        ng-click="vm.resolveAll()"
+      >
+        <i c8y-icon="check-circle" class="m-r-4"></i>
+        <span class="text-truncate" title="{{ 'Clear all`alarms`' | translate }}">
+          {{ 'Clear all`alarms`' | translate }}
+        </span>
+      </button>
+    </li>
+
+    <c8y-realtime-switch class="d-contents" state="vm.realtime"></c8y-realtime-switch>
+
+    <a
+      title="{{ 'Refresh alarm list contents' | translate }}"
+      href=""
+      class="btn btn-link d-flex a-i-center"
+      ng-click="vm.refresh()"
+    >
+      <i c8y-icon="refresh" ng-class="{ 'icon-spin': vm.isRefreshing() }"></i>
+      <span class="m-l-4 text-truncate" translate>Reload</span>
+    </a>
+  </c8y-ui-action-bar-set>
+
+  <c8y-help src="/users-guide/device-management/#alarm-monitoring"></c8y-help>
+
+  <div class="row">
+    <c8y-alarm-list
+      class="col-lg-6 c8y-alarm-list"
+      ng-repeat="severity in vm.severities"
+      ng-if="severity.active"
+      filter="severity.filters"
+      active-severities="{[severity.name]: true}"
+      realtime="vm.realtime"
+      hide-header-actions="true"
+      data-title="{text:(severity.name | humanize), icon:vm.icon(severity.name), class:(severity.name | lowercase)}"
+      refresh-loading="severity.refreshing"
+    >
+    </c8y-alarm-list>
+  </div>
+</div>

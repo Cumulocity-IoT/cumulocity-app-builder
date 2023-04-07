@@ -13,31 +13,39 @@
         <div class="form-group">
             <label for="name"><span>Name</span></label>
             <input type="text" class="form-control" id="name" name="name"
-                placeholder="e.g. My First Simulator (required)" required
-                [(ngModel)]="simulatorConfig.name">
+                placeholder="e.g. My First Simulator (required)" required [(ngModel)]="simulatorConfig.name">
         </div>
-        <div *ngIf="isMSCheckSpin" style="text-align: center;"><c8y-loading></c8y-loading></div>
+        <div *ngIf="isMSCheckSpin" style="text-align: center;">
+            <c8y-loading></c8y-loading>
+        </div>
         <div class="form-group" *ngIf="isMSExist  && !isCSVSimulator">
-                    <label class="c8y-switch">
-                        <input type="checkbox"  [(ngModel)]="simulatorConfig.serverSide"  id="serverSideFlag" name="serverSideFlag" />
-                        <span></span>Run on Server
-                      </label>
+            <label class="c8y-switch">
+                <input type="checkbox" [(ngModel)]="simulatorConfig.serverSide" id="serverSideFlag"
+                    name="serverSideFlag" (change)="toggleRunOnServer($event)" />
+                <span></span>Run on Server
+                </label>
         </div>
-        <div *ngIf="!isMSCheckSpin && !isMSExist && isCSVSimulator" style="margin-bottom: 5px; text-align: center; color:red;">Microservice "csv-simulator-ms" must be subscribed and running!</div>
-          <div class="form-group" *ngIf="simulatorConfig.config.isGroup" style="padding-bottom: 30px;">
-              <label for="deviceName"><span>Group Name</span></label>
-               <device-selector id="deviceName" name="deviceName" [(value)]="simulatorConfig.config.deviceName" [isGroup]='true' [placeHolder]="'Type your Group Name'" [required]="true"
-                  (selectedDevice)= "getSelectedDevice($event)"></device-selector>
-          </div>
-          <div class="form-group" *ngIf="!simulatorConfig.config.isGroup" style="padding-bottom: 30px;">
+        <div *ngIf="!isMSCheckSpin && !isMSExist && isCSVSimulator"
+            style="margin-bottom: 5px; text-align: center; color:red;">Microservice "csv-simulator-ms" must be
+            subscribed and running!</div>
+        <div class="form-group" *ngIf="simulatorConfig.config.isGroup" style="padding-bottom: 30px;">
+            <label for="deviceName"><span>Group Name</span></label>
+            <device-selector id="deviceName" name="deviceName" [(value)]="simulatorConfig.config.deviceName"
+                [isGroup]='true' [placeHolder]="'Type your Group Name'" [required]="true"
+                (selectedDevice)="getSelectedDevice($event)"></device-selector>
+        </div>
+        <div class="form-group" *ngIf="!simulatorConfig.config.isGroup" style="padding-bottom: 30px;">
             <label for="deviceId"><span>Device Name</span></label>
-             <device-selector id="deviceId" name="deviceId" [(value)]="simulatorConfig.config.deviceName" [placeHolder]="'Type your Device Name'" [required]="true"
-                (selectedDevice)= "getSelectedDevice($event)"></device-selector>
+            <device-selector id="deviceId" name="deviceId" [(value)]="simulatorConfig.config.deviceName"
+                [placeHolder]="'Type your Device Name'" [required]="true" (selectedDevice)="getSelectedDevice($event)">
+            </device-selector>
         </div>
-        <ng-container #configWrapper ></ng-container>
+        <ng-container #configWrapper></ng-container>
     </form>
 </div>
 <div class="c8y-wizard-footer">
     <button class="btn btn-default" (click)="cancelEdit()">Cancel</button>
-    <button class="btn btn-primary" [disabled]="busy || !editSimulatorForm.form.valid  || simulatorConfig.config.deviceId === '' " (click)="saveAndClose()">Save</button>
+    <button class="btn btn-primary"
+        [disabled]="busy || !editSimulatorForm.form.valid  || simulatorConfig.config.deviceId === '' "
+        (click)="saveAndClose()">Save</button>
 </div>

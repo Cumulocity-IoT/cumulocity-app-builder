@@ -39,13 +39,13 @@ import { AppListService } from "./app-list.service";
 })
 export class AppListComponent {
     //   applications: Observable<IApplication[]>;
-    applications: IApplication[];
+    applications: IApplication[] = [];
     allApplications: IApplication[];
 
     userHasAdminRights: boolean;
 
     bsModalRef: BsModalRef;
-
+    isBusy = true;
     constructor(private router: Router, private appService: ApplicationService,
         private appStateService: AppStateService, private modalService: BsModalService,
         private userService: UserService, private appListService: AppListService, private realTimeService: Realtime) {
@@ -62,7 +62,6 @@ export class AppListComponent {
                 }
             });
         this.getListOfApplications();
-
     }
 
     private async getListOfApplications() {
@@ -75,10 +74,12 @@ export class AppListComponent {
             }
             this.applications = this.allApplications.filter(app => app.hasOwnProperty('applicationBuilder'));
             this.applications = this.applications.sort((a, b) => a.id > b.id ? 1 : -1);
+            this.isBusy = false;
         } else {
             this.allApplications = (await this.appService.listByUser(this.appStateService.currentUser.value, { pageSize: 2000 })).data;
             this.applications = this.allApplications.filter(app => app.hasOwnProperty('applicationBuilder'));
             this.applications = this.applications.sort((a, b) => a.id > b.id ? 1 : -1);
+            this.isBusy = false;
         }
         /* if(this.userHasAdminRights){
             this.applications = from(new Observable(

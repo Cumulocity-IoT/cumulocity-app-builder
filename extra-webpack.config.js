@@ -1,51 +1,30 @@
 const webpack = require("webpack");
-const WorkerPlugin = require('worker-plugin');
-const URLImportPlugin  = require("webpack-external-import/webpack");
-const CopyWebpackPlugin = require("copy-webpack-plugin");
+const path = require('path');
 
-module.exports = function config() {
-    return {
+module.exports =  {
+   
        output: {
             globalObject: "self"
         },
-        plugins: [
-            new CopyWebpackPlugin(
-            {
-                patterns: [
-                   {
-                      from: "./ui-assets/fonts",
-                      to: "./fonts/",
-                },
+        module: {
+           /*  rules: [
                 {
-                    from: "./ui-assets/img",
-                    to: "./img/",
-                }],
-            }),
-            new webpack.DefinePlugin({
-                __VERSION__: JSON.stringify(require('./package').version),
-                /* Required to be able to run the @c8y/Client inside a Worker */
-                window: '(typeof window !== "undefined" ? window : typeof self !== "undefined" ? self : commonjsGlobal)'
-            }),
-            new WorkerPlugin({
-                plugins: ['AngularCompilerPlugin', 'CumulocityPlugin']
-            }),
-            new URLImportPlugin ({
-                manifestName: "app",
-                provideExternals: {
-                    "@angular/animations": "AngularAnimations",
-                    "@angular/common": "AngularCommon",
-                    "@angular/common/http": "AngularCommonHttp",
-                    "@angular/cdk": "AngularCdk",
-                    "@angular/core": "AngularCore",
-                    "@angular/forms": "AngularForms",
-                    "@angular/http": "AngularHttp",
-                    "@angular/platform-browser": "AngularPlatformBrowser",
-                    "@angular/platform-browser/animations": "AngularPlatformBrowserAnimations",
-                    "@angular/router": "AngularRouter",
-                    "@c8y/client": "C8yClient",
-                    "@c8y/ngx-components": "C8yNgxComponents"
+                    test: /\.html$/,
+                    loader: 'raw-loader',
+                    exclude: /node_modules/,
+                    include: [
+                        path.resolve(__dirname, 'builder/application/alarms'),
+                        path.resolve(__dirname, 'builder/application/dataexplorer'),
+                        path.resolve(__dirname, 'builder/application/smartrules'),
+                    ]
+                      
                 }
+            ] */
+        },
+        plugins: [
+           new webpack.DefinePlugin({
+                __VERSION__: JSON.stringify(require('./package').version),
             })
         ]
     }
-};
+;

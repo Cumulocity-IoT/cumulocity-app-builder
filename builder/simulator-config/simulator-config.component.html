@@ -1,9 +1,8 @@
 <c8y-title>Simulators</c8y-title>
-
 <ng-container *ngIf="simulatorConfigById$ | async as simulatorConfigById">
 <div class="card-group interact-grid" *ngIf="lockStatus$ | async as lockStatus">
     <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3" style="min-height: 165px">
-        <a  *ngIf="userHasAdminRights && lockStatus.isLockOwned else locked" class="card add-card clickable" [ngClass]="{'add-card-color' : applyTheme}" (click)="showCreateSimulatorDialog()">
+        <a  *ngIf="userHasAdminRights && (lockStatus.isLockOwned || !isSimulatorsExist) else locked" class="card add-card clickable" [ngClass]="{'add-card-color' : applyTheme}" (click)="showCreateSimulatorDialog()">
             <i c8yIcon="plus-square"></i><br>
             Add Simulator
         </a>

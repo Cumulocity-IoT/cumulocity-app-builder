@@ -57,15 +57,15 @@
                 </div>
                 <hr />
                 <div class="card-block">
-                    <div class="c8y-empty-state text-center" style="flex-direction: column; align-items: center;"
+                    <div class="c8y-empty-state text-center" style="max-width: 100%; flex-direction: column; align-items: center;"
                         *ngIf="!widgetCatalog?.widgets?.length">
                         <h1 c8yIcon="package" class="c8y-icon-duocolor" style="font-size: 90px;"></h1>
-                        <h3>No Widget to list.</h3>
+                        <h3>No widget to list.</h3>
                         <p>Please Install widgets.</p>
                     </div>
-                    <div class="c8y-empty-state text-center" style="flex-direction: column; align-items: center;"
+                    <div class="c8y-empty-state text-center" style="max-width: 100%; flex-direction: column; align-items: center;"
                         *ngIf="widgetCatalog?.widgets?.length && !filterWidgets?.length">
-                        <h3>No Widget to list.</h3>
+                        <h3>No widget to list.</h3>
                     </div>
                     <div class="table-responsive" *ngIf="filterWidgets?.length" style="margin-top: -15px;">
                         <table class="table table-hover table-striped table-sortable" id="myWidgets" >
@@ -77,6 +77,7 @@
                                     <th class="cursor-pointer" style="text-transform: capitalize;" (click)="sortColumn('installedVersion')" [ngClass]="sortClass('installedVersion')">Current Version</th>
                                     <th class="cursor-pointer" style="text-transform: capitalize;" (click)="sortColumn('license')" [ngClass]="sortClass('license')">License</th>
                                     <th class="cursor-pointer" style="text-transform: capitalize;" (click)="sortColumn('releaseDate')" [ngClass]="sortClass('releaseDate')">Release Date</th>
+                                    <th class="cursor-pointer" style="text-transform: capitalize;" (click)="sortColumn('pluginType')" [ngClass]="sortClass('pluginType')">Type</th>
                                     <th class="cursor-pointer" style="text-transform: capitalize;" (click)="sortColumn('author')" [ngClass]="sortClass('author')">Author</th>
                                     <th></th>
                                 </tr>
@@ -109,6 +110,7 @@
                                     <td style="font-size: 12px;">{{widget.installedVersion ? widget.installedVersion : 'Not Available'}}</td>
                                     <td style="font-size: 12px;">{{widget.license}}</td>
                                     <td style="font-size: 12px;">{{widget.releaseDate | date : "dd-MM-yyyy"}}</td>
+                                    <td style="font-size: 12px;text-transform:capitalize;" [style.visibility]="widget.pluginType && show ? hidden : visible"><span class="label label-info">{{widget.pluginType}}</span></td>
                                     <td style="font-size: 12px;">{{widget.author}}</td>
                                     <td>
                                         <div>
@@ -175,15 +177,15 @@
 
                 </div>
                 <hr />
-                <div class="card-block" *ngIf="!widgetCatalog?.widgets?.length">
-                    <div class="c8y-empty-state text-center" style="flex-direction: column; align-items: center;">
+                <div class="card-block" >
+                    <div *ngIf="!widgetCatalog?.widgets?.length" class="c8y-empty-state text-center" style="max-width: 100%;flex-direction: column; align-items: center;">
                         <h1 c8yIcon="package" class="c8y-icon-duocolor" style="font-size: 90px;"></h1>
-                        <h3>No Widget to list.</h3>
+                        <h3>No widget to list.</h3>
                         <p>Please Install widgets.</p>
                     </div>
-                    <div class="c8y-empty-state text-center" style="flex-direction: column; align-items: center;"
+                    <div class="c8y-empty-state text-center" style="max-width: 100%; flex-direction: column; align-items: center;"
                         *ngIf="widgetCatalog?.widgets?.length && !filterWidgets?.length">
-                        <h3>No Widget to list.</h3>
+                        <h3>No widget to list.</h3>
                     </div>
                 </div>
             </div>
@@ -212,22 +214,24 @@
                     </ul>
                 </div>
                 <div class="card-actions" style="left: 0px !important; top: 10px !important">
-                    <div class="text-warning" [ngSwitch]="widget.actionCode">
-                        <button class="btn btn-clean btn-icon btn-md"
+                    <div class="text-warning" [ngSwitch]="widget.actionCode" style="display:inline-block">
+                        <button class="btn btn-clean btn-icon btn-md" style="margin-right: 5px;"
                             title="Update - Latest version available - {{widget.version}}" *ngSwitchCase="'001'">
                             <i c8yIcon="cloud-upload" class="action-icon" (click)="updateWidget(widget, false)"></i>
                         </button>
-                        <button class="btn btn-clean btn-icon btn-md" title="Update (Not Compatible)"
+                        <button class="btn btn-clean btn-icon btn-md" title="Update (Not Compatible)" style="margin-top: -10px;margin-right: 5px;"
                             *ngSwitchCase="'002'">
                             <i c8yIcon="level-up" class="action-icon" (click)="updateWidget(widget, false)"></i>
                         </button>
-                        <button class="btn btn-clean btn-icon btn-md" title="Refresh" *ngSwitchCase="'003'">
+                        <button class="btn btn-clean btn-icon btn-md" style="margin-top: -10px;margin-right: 5px;" title="Refresh" *ngSwitchCase="'003'">
                             <i c8yIcon="refresh" class="action-icon text-info" (click)="refresh()"></i>
                         </button>
                     </div>
-                    <i *ngIf="!widget.isCompatible || widget.isDeprecated"
+                    <div style="display: inline-block;">
+                        <i *ngIf="!widget.isCompatible || widget.isDeprecated"
                         title="This widget may not compatible or deprecated!" c8yIcon="warning"
                         class="warning-icon-grid text-warning"></i>
+                    </div>
                 </div>
                 <div class="card-block text-center card-column-30">
                     <div style="display:block; width:95%;">
@@ -244,7 +248,10 @@
                             <img class="preview-img" [src]="widget.preview && widget.preview !== '' ? widget.preview : './img/no-image.png'" />
                         </a>
                     </div>
-                    <button class="btn btn-xs btn-default margin-10" (click)="navigateToDetailPage(widget)">
+                    <div style="float:left" class="margin-10">
+                        <span class="label label-info" *ngIf="widget.pluginType" style="text-transform:capitalize;">{{widget.pluginType}}</span>
+                    </div>
+                    <button class="btn btn-xs btn-default margin-10" (click)="navigateToDetailPage(widget)" style="float:right">
                         <i c8yicon="more-details" title="Details" class="dlt-c8y-icon-more-details"></i> Details
                     </button>
                 </div>

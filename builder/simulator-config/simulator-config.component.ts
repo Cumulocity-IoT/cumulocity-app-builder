@@ -20,11 +20,9 @@ import { Component, Inject, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import { NewSimulatorModalComponent } from "./new-simulator-modal.component";
 import { EditSimulatorModalComponent } from "./edit-simulator-modal.component";
-import { LOCK_TIMEOUT, LockStatus } from "../simulator/worker/simulation-lock.service";
-import { BehaviorSubject, from } from "rxjs";
-import { switchMap } from "rxjs/operators";
+import { BehaviorSubject, from, of, Subscription } from "rxjs";
+import { switchMap} from "rxjs/operators";
 import * as delay from "delay";
-import * as Comlink from "comlink";
 import { IApplication, ApplicationService, UserService } from "@c8y/client";
 import { AppIdService } from "../app-id.service";
 import { SimulatorConfig } from "../simulator/simulator-config";
@@ -35,6 +33,9 @@ import * as cloneDeep from "clone-deep";
 import { SimulatorNotificationService } from './simulatorNotification.service';
 import { DOCUMENT } from '@angular/common';
 import { FileSimulatorNotificationService } from './file-simulator.service';
+import { SimulatorWorkerAPI } from '../simulator/mainthread/simulator-worker-api.service';
+import { AppDataService } from './../../builder/app-data.service';
+import { LockStatus, LOCK_TIMEOUT } from './../../builder/simulator/mainthread/simulation-lock.service';
 @Component({
     templateUrl: './simulator-config.component.html',
     styleUrls: ['./simulator-config.component.less']
@@ -47,33 +48,44 @@ export class SimulatorConfigComponent implements OnDestroy {
 
     isUnlocking = false;
     applyTheme = false;
-    private _lockStatusListener: Promise<number>;
-    private _simulatorConfigListener: Promise<number>;
+    private _lockStatusListener: number;
+    private _simulatorConfigListener: number;
     userHasAdminRights: boolean;
+    isSimulatorsExist: boolean = false;
+    appSubscription: Subscription;
     constructor(
-        private simSvc: SimulatorCommunicationService, private modalService: BsModalService,
+        private simSvc: SimulatorWorkerAPI, private modalService: BsModalService,
         private appIdService: AppIdService, private appService: ApplicationService,
         public simulationStrategiesService: SimulationStrategiesService,
         private appStateService: AppStateService, private userService: UserService,
         private simulatorNotificationService: SimulatorNotificationService,
         @Inject(DOCUMENT) private document: Document, private renderer: Renderer2,
-        private fileSimulatorNotificationService: FileSimulatorNotificationService
+        private fileSimulatorNotificationService: FileSimulatorNotificationService,
+        private appDataService: AppDataService
     ) {
-        this._lockStatusListener = simSvc.simulator.addLockStatusListener(Comlink.proxy(lockStatus => this.lockStatus$.next(lockStatus)));
-        this._simulatorConfigListener = simSvc.simulator.addSimulatorConfigListener(Comlink.proxy(simulatorConfigById =>
-            this.simulatorConfigById$.next(simulatorConfigById)));
+        this._lockStatusListener = simSvc.addLockStatusListener(lockStatus => this.lockStatus$.next(lockStatus));
+        this._simulatorConfigListener = simSvc.addSimulatorConfigListener(simulatorConfigById =>
+            this.simulatorConfigById$.next(simulatorConfigById));
         this.userHasAdminRights = userService.hasAllRoles(appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN", "ROLE_APPLICATION_MANAGEMENT_ADMIN"]);
         const app = this.appIdService.appIdDelayedUntilAfterLogin$.pipe(
-            switchMap(appId => from(
-                appService.detail(appId).then(res => res.data as any)
-            ))
+            switchMap(appId =>  {
+                if (appId) {
+                return from(this.appDataService.getAppDetails(appId));
+                } else {
+                return of(null);
+                }
+            })
         );
-        app.subscribe((app) => {
-            if (app.applicationBuilder.branding.enabled && (app.applicationBuilder.selectedTheme && app.applicationBuilder.selectedTheme !== 'Default')) {
+        this.appSubscription = app.subscribe((app) => {
+            if (app && app.applicationBuilder.branding.enabled && (app.applicationBuilder.selectedTheme && app.applicationBuilder.selectedTheme !== 'Default') &&
+            (app.applicationBuilder.selectedTheme === 'Navy Blue' || app.applicationBuilder.selectedTheme === 'Red' || app.applicationBuilder.selectedTheme === 'Green' || app.applicationBuilder.selectedTheme === "Yellow" || app.applicationBuilder.selectedTheme === 'Dark')) {
                 this.applyTheme = true;
                 this.renderer.addClass(this.document.body, 'simulator-body-theme');
             } else {
                 this.applyTheme = false;
+            }
+            if(app.applicationBuilder && app.applicationBuilder?.simulators && app.applicationBuilder?.simulators.length > 0){
+                this.isSimulatorsExist = true;
             }
         });
     }
@@ -104,7 +116,7 @@ export class SimulatorConfigComponent implements OnDestroy {
 
     async forceUnlock() {
         this.isUnlocking = true;
-        await this.simSvc.simulator.forceTakeLock();
+        await this.simSvc.forceTakeLock();
         // Wait a bit extra to allow the UI to realise that we now own the lock
         await delay(LOCK_TIMEOUT / 2);
         this.isUnlocking = false;
@@ -144,7 +156,7 @@ export class SimulatorConfigComponent implements OnDestroy {
             });
         }
         // We could just wait for them to refresh, but it's nicer to instantly refresh
-        await this.simSvc.simulator.checkForSimulatorConfigChanges();
+        await this.simSvc.checkForSimulatorConfigChanges();
     }
 
     async deleteSimulator(simulatorConfig: SimulatorConfig) {
@@ -166,13 +178,14 @@ export class SimulatorConfigComponent implements OnDestroy {
             simulator: simulatorConfig
         });
         // We could just wait for them to refresh, but it's nicer to instantly refresh
-        await this.simSvc.simulator.checkForSimulatorConfigChanges();
+       // await this.simSvc.checkForSimulatorConfigChanges();
     }
 
     ngOnDestroy(): void {
-        this._lockStatusListener.then(id => this.simSvc.simulator.removeListener(id));
-        this._simulatorConfigListener.then(id => this.simSvc.simulator.removeListener(id));
+        this.simSvc.removeListener(this._lockStatusListener);
+        this.simSvc.removeListener(this._simulatorConfigListener);
         this.renderer.removeClass(this.document.body, 'simulator-body-theme');
+        this.appSubscription.unsubscribe();
     }
 
     // for keyValue pipe

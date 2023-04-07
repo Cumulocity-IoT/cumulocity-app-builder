@@ -16,12 +16,12 @@
 * limitations under the License.
  */
 
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, Renderer2, ViewChild } from "@angular/core";
-import { ApplicationService, InventoryService, IApplication, IManagedObject } from "@c8y/client";
-import { Observable, from, Subject, Subscription } from "rxjs";
-import { debounceTime, filter, map, switchMap, tap } from "rxjs/operators";
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, Renderer2 } from "@angular/core";
+import { ApplicationService, InventoryService, IApplication, UserService } from "@c8y/client";
+import { Observable, from, Subject, Subscription, BehaviorSubject, combineLatest } from "rxjs";
+import { debounceTime, first, map, switchMap, tap } from "rxjs/operators";
 import { AppBuilderNavigationService } from "../navigation/app-builder-navigation.service";
-import { AlertService, AppStateService, NavigatorNode } from "@c8y/ngx-components";
+import { AlertService, AppStateService } from "@c8y/ngx-components";
 import { BrandingService } from "../branding/branding.service";
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import { NewDashboardModalComponent } from "./new-dashboard-modal.component";
@@ -37,7 +37,8 @@ import { SettingsService } from './../../builder/settings/settings.service';
 import { AlertMessageModalComponent } from "./../../builder/utils/alert-message-modal/alert-message-modal.component";
 import { AccessRightsService } from "./../../builder/access-rights.service";
 import { DOCUMENT } from "@angular/common";
-import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { AppDataService } from "../app-data.service";
 
 export interface DashboardConfig {
     id: string,
@@ -76,42 +77,44 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     newAppContextPath: string;
     newAppIcon: string;
     isDashboardCatalogEnabled: boolean = true;
+    showAddDashboard: boolean = true;
     private globalRoles = [];
 
     filterValue = '';
     filterValueForTree = '';
 
     app: Observable<any>;
+    refreshApp = new BehaviorSubject<void>(undefined);;
 
     delayedAppUpdateSubject = new Subject<any>();
     delayedAppUpdateSubscription: Subscription;
+    appSubscription: Subscription;
 
     bsModalRef: BsModalRef;
     applyTheme = false;
     autoLockDashboard = true;
     filteredDashboardList: any[];
-    newDashboardsOrder: any[];
     currentDashboardId: any;
     dashboardId: any;
-    appBuilderDashboards: any[];
     dashboardHierarchy = { id: {}, children: {}, node: {} } as any;
-    defaultListView = '1';
+    defaultListView = '2';
     newDashboards = [];
     appBuilderObject: any;
     expandAllDashboards: boolean = true;
-
+    forceUpdate = false;
     expandEventSubject: Subject<void> = new Subject<void>();
 
     constructor(
         private appIdService: AppIdService, private appService: ApplicationService, private appStateService: AppStateService,
         private brandingService: BrandingService, private inventoryService: InventoryService, private navigation: AppBuilderNavigationService,
         private modalService: BsModalService, private alertService: AlertService, private settingsService: SettingsService,
-        private accessRightsService: AccessRightsService,
+        private accessRightsService: AccessRightsService, private userService: UserService, private appDataService: AppDataService,
         @Inject(DOCUMENT) private document: Document, private renderer: Renderer2, private cd: ChangeDetectorRef
     ) {
-        this.app = this.appIdService.appIdDelayedUntilAfterLogin$.pipe(
+        this.app = combineLatest([appIdService.appIdDelayedUntilAfterLogin$,this.refreshApp]).pipe(
+            map(([appId]) => appId),
             switchMap(appId => from(
-                appService.detail(appId).then(res => res.data as any)
+                this.appDataService.getAppDetails(appId)
             )),
             tap((app: IApplication & { applicationBuilder: any }) => { // TODO: do this a nicer way....
                 this.newAppName = app.name;
@@ -121,28 +124,31 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
         );
 
         this.delayedAppUpdateSubscription = this.delayedAppUpdateSubject
-            .pipe(debounceTime(500))
+            .pipe(debounceTime(1000))
             .subscribe(async app => {
+                if(this.forceUpdate) {
+                    this.appDataService.forceUpdate = true;
+                }
                 await this.appService.update(app);
-                await this.prepareDashboardHierarchy(app);
+                this.refreshApp.next();
                 this.navigation.refresh();
                 // TODO?
                 //this.tabs.refresh();
             });
-        this.app.subscribe((app) => {
-            if (app.applicationBuilder.branding.enabled && (app.applicationBuilder.selectedTheme && app.applicationBuilder.selectedTheme !== 'Default')) {
+    }
+
+    async ngOnInit() {
+        this.defaultListView = '2';
+        let count = 0;
+        this.appSubscription = this.app.pipe(first()).
+          subscribe(app => {
+            if (app.applicationBuilder.branding.enabled && (app.applicationBuilder.selectedTheme && app.applicationBuilder.selectedTheme !== 'Default') &&
+                (app.applicationBuilder.selectedTheme === 'Navy Blue' || app.applicationBuilder.selectedTheme === 'Red' || app.applicationBuilder.selectedTheme === 'Green' || app.applicationBuilder.selectedTheme === "Yellow" || app.applicationBuilder.selectedTheme === 'Dark')) {
                 this.applyTheme = true;
                 this.renderer.addClass(this.document.body, 'dashboard-body-theme');
             } else {
                 this.applyTheme = false;
             }
-        });
-    }
-
-    async ngOnInit() {
-        this.defaultListView = '1';
-        let count = 0;
-        this.app.subscribe(app => {
             if (app.applicationBuilder.dashboards.length !== 0) {
                 app.applicationBuilder.dashboards.forEach(async (element) => {
                     let c8y_dashboard = (await this.inventoryService.detail(element.id)).data;
@@ -156,11 +162,16 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
             } else {
                 this.autoLockDashboard = false;
             }
-            this.filteredDashboardList = app.applicationBuilder.dashboards;
-            this.prepareDashboardHierarchy(app);
+           this.filteredDashboardList = [...app.applicationBuilder.dashboards];
+           this.prepareDashboardHierarchy(app);
+           this.forceUpdate = true;
         });
-
         this.isDashboardCatalogEnabled = await this.settingsService.isDashboardCatalogEnabled();
+        if (this.userService.hasAllRoles(this.appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN", "ROLE_APPLICATION_MANAGEMENT_ADMIN"])) {
+            this.showAddDashboard = true;
+        } else {
+            this.showAddDashboard = false;
+        }
         this.globalRoles = await this.accessRightsService.getAllGlobalRoles();
     }
 
@@ -194,7 +205,6 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
         });
         this.dashboardHierarchy.children = Object.values(this.dashboardHierarchy.children);
         this.dashboardHierarchy.children = this.convertToArray(this.dashboardHierarchy.children);
-        this.cd.detectChanges();
     }
 
     convertToArray(dashboards) {
@@ -228,7 +238,6 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
                             dashboardIDToDelete = element.id;
                         }
                     });
-                    this.filteredDashboardList.splice(i, 1);
                     dashboards = [...application.applicationBuilder.dashboards];
                     dashboards.forEach((element, index) => {
                         if (element.id === dashboardIDToDelete) {
@@ -238,19 +247,19 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
                     });
                 } else {
                     dashboards.splice(i, 1);
-                    this.filteredDashboardList.splice(i, 1);
                     application.applicationBuilder.dashboards = [...dashboards];
                 }
-                await this.appService.update({
+                this.filteredDashboardList = application.applicationBuilder.dashboards;
+                this.prepareDashboardHierarchy(application);
+                this.delayedAppUpdateSubject.next({
                     id: application.id,
                     applicationBuilder: application.applicationBuilder
                 } as any);
-                this.filteredDashboardList = [...application.applicationBuilder.dashboards];
-                this.prepareDashboardHierarchy(application);
+                
                 if (application.applicationBuilder.dashboards.length === 0) {
                     this.autoLockDashboard = false;
                 }
-                this.navigation.refresh();
+                this.cd.detectChanges();
                 // TODO?
                 // this.tabs.refresh();
             }
@@ -258,24 +267,19 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     }
 
     async reorderDashboards(app, newDashboardsOrder) {
-        this.newDashboardsOrder = newDashboardsOrder;
-        this.appBuilderDashboards = app.applicationBuilder.dashboards;
-        if (newDashboardsOrder.length === app.applicationBuilder.dashboards.length) {
+        if (newDashboardsOrder.length !== 0) {
             app.applicationBuilder.dashboards = newDashboardsOrder;
             this.delayedAppUpdateSubject.next({
                 id: app.id,
                 applicationBuilder: app.applicationBuilder
             });
-            this.prepareDashboardHierarchy(app);
         }
     }
 
 
     async saveAppChanges(app) {
         const savingAlert = new UpdateableAlert(this.alertService);
-
         savingAlert.update('Saving application...');
-
         try {
             app.name = this.newAppName;
             app.applicationBuilder.icon = this.newAppIcon;
@@ -333,22 +337,20 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
         this.bsModalRef.content.onSave.subscribe((isReloadRequired: boolean) => {
             if (isReloadRequired) {
                 let count = 0;
-                this.app.subscribe((app) => {
-                    this.autoLockDashboard = true;
-                    //this.filteredDashboardList = [...app.applicationBuilder.dashboards];
-                    app.applicationBuilder.dashboards.forEach(async (element) => {
-                        let c8y_dashboard = (await this.inventoryService.detail(element.id)).data;
-                        if (c8y_dashboard.c8y_Dashboard.isFrozen === false) {
-                            count++;
-                            if (count > 0) {
-                                this.autoLockDashboard = false;
-                            }
+                this.autoLockDashboard = true;
+                this.refreshApp.next();
+                this.prepareDashboardHierarchy(this.bsModalRef.content.app);
+                this.filteredDashboardList = [...this.bsModalRef.content.app.applicationBuilder.dashboards];
+                this.bsModalRef.content.app.applicationBuilder.dashboards.forEach(async (element) => {
+                    let c8y_dashboard = (await this.inventoryService.detail(element.id)).data;
+                    if (c8y_dashboard.c8y_Dashboard.isFrozen === false) {
+                        count++;
+                        if (count > 0) {
+                            this.autoLockDashboard = false;
                         }
-                    });
-                    this.prepareDashboardHierarchy(app);
-                    this.filteredDashboardList = [...app.applicationBuilder.dashboards];
-                    this.cd.detectChanges();
+                    }
                 });
+                this.cd.detectChanges();
             }
         });
     }
@@ -391,8 +393,8 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
             });
             this.bsModalRef.content.onSave.subscribe((isReloadRequired: boolean) => {
                 if (isReloadRequired) {
-                    this.prepareDashboardHierarchy(this.bsModalRef.content.app);
-                    this.filteredDashboardList = [...this.bsModalRef.content.app.applicationBuilder.dashboards];
+                   this.prepareDashboardHierarchy(this.bsModalRef.content.app);
+                   this.filteredDashboardList = [...this.bsModalRef.content.app.applicationBuilder.dashboards];
                 }
             });
         }
@@ -417,6 +419,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     ngOnDestroy(): void {
         this.renderer.removeClass(this.document.body, 'dashboard-body-theme');
         this.delayedAppUpdateSubscription.unsubscribe();
+        this.appSubscription.unsubscribe();
     }
 
     searchDashboard(app) {
@@ -526,7 +529,6 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
 
     // Tree List View
     displayList(value, app) {
-        this.cd.detectChanges();
         this.defaultListView = value;
         if (this.defaultListView === '1') {
             this.prepareDashboardHierarchy(app);
@@ -543,9 +545,8 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
             applicationBuilder: this.appBuilderObject.applicationBuilder
         });
         this.prepareDashboardHierarchy(this.appBuilderObject);
-        this.filteredDashboardList = this.appBuilderObject.applicationBuilder.dashboards;
+        this.filteredDashboardList = [...this.appBuilderObject.applicationBuilder.dashboards];
         this.navigation.refresh();
-        this.cd.detectChanges();
     }
 
     setDBName(dashboards) {
@@ -573,7 +574,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
             } else if (!dashboard.isDashboard && !childDB.isDashboard && childDB.children.length > 0) {
                 childDB.dashboard.name = dashboard.title + '/' + childDB.title;
                 childDB.title = childDB.dashboard.name;
-            } 
+            }
             if (childDB.children.length > 0) {
                 this.setChildDBName(childDB);
             }
@@ -588,30 +589,32 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
         index = this.newDashboards.findIndex(db => db.id === dashboard.id);
         if (dashboard.templateDashboard) {
             this.showTemplateDashboardEditModalDialog(this.appBuilderObject, dashboard, index);
+        } else {
+            this.bsModalRef = this.modalService.show(EditDashboardModalComponent, {
+                class: 'c8y-wizard',
+                initialState: {
+                    app: this.appBuilderObject,
+                    globalRoles: this.globalRoles,
+                    dashboardID: dashboard.id,
+                    dashboardName: dashboard.name,
+                    dashboardVisibility: dashboard.visibility || '',
+                    dashboardIcon: dashboard.icon,
+                    deviceId: dashboard.deviceId,
+                    tabGroup: dashboard.tabGroup,
+                    roles: dashboard.roles,
+                    ...(dashboard.groupTemplate ? {
+                        dashboardType: 'group-template'
+                    } : {
+                        dashboardType: 'standard'
+                    })
+                }
+            });
         }
-        this.bsModalRef = this.modalService.show(EditDashboardModalComponent, {
-            class: 'c8y-wizard',
-            initialState: {
-                app: this.appBuilderObject,
-                globalRoles: this.globalRoles,
-                dashboardID: dashboard.id,
-                dashboardName: dashboard.name,
-                dashboardVisibility: dashboard.visibility || '',
-                dashboardIcon: dashboard.icon,
-                deviceId: dashboard.deviceId,
-                tabGroup: dashboard.tabGroup,
-                roles: dashboard.roles,
-                ...(dashboard.groupTemplate ? {
-                    dashboardType: 'group-template'
-                } : {
-                    dashboardType: 'standard'
-                })
-            }
-        });
         this.bsModalRef.content.onSave.subscribe((isReloadRequired: boolean) => {
             if (isReloadRequired) {
                 this.prepareDashboardHierarchy(this.bsModalRef.content.app);
                 this.filteredDashboardList = [...this.bsModalRef.content.app.applicationBuilder.dashboards];
+                this.cd.detectChanges();
             }
         });
     }
@@ -632,17 +635,15 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
                 let index = this.newDashboards.findIndex(db => db.id === dashboard.id);
                 this.newDashboards.splice(index, 1);
                 this.appBuilderObject.applicationBuilder.dashboards = [...this.newDashboards];
-                await this.appService.update({
+                this.prepareDashboardHierarchy(this.appBuilderObject);
+                this.filteredDashboardList = [...this.newDashboards];
+                this.delayedAppUpdateSubject.next({
                     id: this.appBuilderObject.id,
                     applicationBuilder: this.appBuilderObject.applicationBuilder
                 } as any);
                 if (this.appBuilderObject.applicationBuilder.dashboards.length === 0) {
                     this.autoLockDashboard = false;
                 }
-                this.navigation.refresh();
-                this.prepareDashboardHierarchy(this.appBuilderObject);
-                this.filteredDashboardList = [...this.newDashboards];
-                this.navigation.refresh();
                 this.cd.detectChanges();
                 // TODO?
                 // this.tabs.refresh();

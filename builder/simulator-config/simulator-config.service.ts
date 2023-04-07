@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2019 Software AG, Darmstadt, Germany and/or its licensors
+* Copyright (c) 2021 Software AG, Darmstadt, Germany and/or its licensors
 *
 * SPDX-License-Identifier: Apache-2.0
 *
@@ -15,16 +15,19 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
  */
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
 
-import { Injectable } from "@angular/core";
-import {BehaviorSubject} from "rxjs";
-import { ICurrentTenant, IUser } from "@c8y/client";
-
-/**
- * There's not really the concept of a currentTenant and currentUser when inside a worker so we stub it and manually pass the values from the main thread.
- */
 @Injectable()
-export class WorkerAppStateService {
-    currentTenant = new BehaviorSubject<ICurrentTenant | null>(null);
-    currentUser = new BehaviorSubject<IUser | null>(null);
+export class SimulatorConfigService {  
+
+  constructor() {             
+  }
+
+  runOnServerSource: BehaviorSubject<any> = new BehaviorSubject(null);
+  runOnServer$: Observable<any> = this.runOnServerSource.asObservable();
+
+  setRunOnServer(runOnServer: any) {
+    this.runOnServerSource.next(runOnServer);
+  }
 }

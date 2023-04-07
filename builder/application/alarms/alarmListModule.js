@@ -1,6 +1,6 @@
 angular.module("c8y.parts.alarmList", [])
     .controller('alarmListCtrl', alarmListCtrl)
-    .component('legacyAlarms', { template: require("@c8y/ng1-modules/devicemanagement-alarmList/views/index.html").default });
+    .component('legacyAlarms', { template: require("./devicemanagement-alarmList.html").default });
 
 // Angular JS controller
 function alarmListCtrl(

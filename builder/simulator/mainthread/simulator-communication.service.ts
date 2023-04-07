@@ -15,8 +15,6 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
  */
-import * as Comlink from "comlink";
-import {SimulatorWorkerAPI} from "../worker/simulator-worker-api.service";
 import {Injectable} from "@angular/core";
 import {AppIdService} from "../../app-id.service";
 import {filter} from "rxjs/operators";
@@ -28,10 +26,9 @@ import {AlertService} from "@c8y/ngx-components";
  */
 @Injectable({providedIn: 'root'})
 export class SimulatorCommunicationService {
-    // @ts-ignore
-    simulator: Comlink.Remote<SimulatorWorkerAPI> = Comlink.wrap(new Worker('../worker/index.ts', {type: 'module'}));
-
-    constructor(private appIdService: AppIdService, private applicationService: ApplicationService, private alertService: AlertService, private userService: UserService) {
+    constructor(private appIdService: AppIdService, private applicationService: ApplicationService, 
+        private alertService: AlertService, 
+        private userService: UserService) {
         appIdService.appIdDelayedUntilAfterLogin$.pipe(filter(appId => appId != null)).subscribe((appId) => this.checkUserPermissions(appId));
     }
 
