@@ -17,7 +17,7 @@
  */
 
 import { Component, isDevMode, OnInit } from "@angular/core";
-import { ApplicationService, UserService } from "@c8y/client";
+import { ApplicationService, IApplication, UserService } from "@c8y/client";
 import { BsModalRef, BsModalService } from "ngx-bootstrap/modal";
 import { WidgetCatalog, WidgetModel } from "../widget-catalog.model";
 import { WidgetCatalogService } from "../widget-catalog.service";
@@ -25,8 +25,9 @@ import { AlertMessageModalComponent } from "../../utils/alert-message-modal/aler
 import { previewModalComponent } from "../preview-modal/preview-modal.component";
 import { AlertService, AppStateService } from "@c8y/ngx-components";
 import { ProgressIndicatorModalComponent } from '../../utils/progress-indicator-modal/progress-indicator-modal.component';
-import { forkJoin } from 'rxjs';
+import { forkJoin, interval } from 'rxjs';
 import { ActivatedRoute, Router } from "@angular/router";
+import { ProgressIndicatorService } from "../../utils/progress-indicator-modal/progress-indicator.service";
 
 @Component({
     selector: 'widget-details',
@@ -41,35 +42,52 @@ export class WidgetDetailsComponent implements OnInit {
     userHasAdminRights: boolean;
     widgetCatalog: WidgetCatalog;
     widgetID: string;
-    filterWidgets: any = [];
     description: any;
     getMoreWidgetsFlag: boolean = false;
+    searchWidget: any;
 
 
     constructor(private widgetCatalogService: WidgetCatalogService, private router: Router,
         private modalService: BsModalService, private appService: ApplicationService, private route: ActivatedRoute,
-        private alertService: AlertService, private userService: UserService, private appStateService: AppStateService) {
+        private alertService: AlertService, private userService: UserService, private appStateService: AppStateService,
+        private progressIndicatorService: ProgressIndicatorService) {
         this.extractURL();
         this.userHasAdminRights = userService.hasAllRoles(appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN", "ROLE_APPLICATION_MANAGEMENT_ADMIN"]);
     }
 
     async ngOnInit() {
         this.getWidgetID();
-        this.widgetCatalogService.widgetDetails$.subscribe(widget => {
-            this.widgetDetails = widget;
-            if (widget && widget.repository) {
-                let repoURL = widget.repository.split('SoftwareAG')[1];
-                let repoName = repoURL.substring(
-                    repoURL.indexOf("/") + 0,
-                    repoURL.lastIndexOf("#")
-                );
-                this.widgetCatalogService.getWidgetDetailsFromRepo(repoName).subscribe((data) => {
-                    let widgetdata = JSON.stringify(data);
-                    this.fetchWidgetDescription(widgetdata);
-                });
+        this.widgetCatalogService.widgetDetails$.subscribe((widget) => {
+            if (widget) {
+                this.widgetDetails = widget;
+                if (widget && widget.repository) {
+                    let repoURL = widget.repository.split('SoftwareAG')[1];
+                    let repoName = repoURL.substring(
+                        repoURL.indexOf("/") + 0,
+                        repoURL.lastIndexOf("#")
+                    );
+                    this.widgetCatalogService.getWidgetDetailsFromRepo(repoName).subscribe((data) => {
+                        let widgetdata = JSON.stringify(data);
+                        this.fetchWidgetDescription(widgetdata);
+                    });
+                }
+            } else {
+                this.navigateToGridView();
             }
+            
         });
-        await this.loadWidgetsFromCatalog();
+        if (this.widgetCatalogService.runtimeLoadingCompleted) {
+            this.loadWidgetsFromCatalog();
+        } else {
+            const waitForWidgetLoaderInt = interval(1000);
+            const waitForWidgetLoaderSub = waitForWidgetLoaderInt.subscribe(async val => {
+                if (this.widgetCatalogService.runtimeLoadingCompleted) {
+                    waitForWidgetLoaderSub.unsubscribe();
+                    this.loadWidgetsFromCatalog();
+                }
+            });
+        }
+
     }
 
     fetchWidgetDescription(widgetData) {
@@ -152,49 +170,10 @@ export class WidgetDetailsComponent implements OnInit {
     private async loadWidgetsFromCatalog() {
         this.appList = (await this.appService.list({ pageSize: 2000 })).data;
         this.appList = this.appList.filter(app => (app.name && app.name.toLowerCase().includes('widget') || app.contextPath && app.contextPath.includes('widget')) && app.manifest && app.manifest.noAppSwitcher === true);
-        forkJoin([this.widgetCatalogService.fetchWidgetCatalog(), this.widgetCatalogService.fetchWidgetForDemoCatalog()])
-            .subscribe(async ([widgetList1, widgetList2]) => {
-                this.widgetCatalog = widgetList1;
-                widgetList2.widgets.forEach((widget: WidgetModel) => {
-                    const widgetObj = this.widgetCatalog.widgets.find(widgetObj => widgetObj.contextPath === widget.contextPath);
-                    if (!widgetObj && this.widgetCatalogService.isCompatiblieVersion(widget)) {
-                        this.widgetCatalog.widgets.push(widget);
-                    }
-                });
-                this.appList.forEach(async app => {
-                    const appWidgetObj = this.widgetCatalog.widgets.find(widgetObj => widgetObj.contextPath === app.contextPath);
-                    if (!appWidgetObj) {
-                        appWidgetObj
-                        this.widgetCatalog.widgets.push({
-                            contextPath: app.contextPath,
-                            title: app.name,
-                            icon: (app.icon && app.icon.class ? app.icon.class : 'delete-document'),
-                            author: (app.manifest && app.manifest.author ? app.manifest.author : ''),
-                            license: (app.manifest && app.manifest.license ? app.manifest.license : ''),
-                            requiredPlatformVersion: (app.manifest && app.manifest.requiredPlatformVersion ? app.manifest.requiredPlatformVersion : ''),
-                            version: (app.manifest && app.manifest.version ? app.manifest.version : ''),
-                            releaseDate: (app.manifest && app.manifest.releaseDate ? app.manifest.releaseDate : '')
-                        });
-                    }
-                    await this.filterInstalledWidgets();
-                    this.filterWidgets = (this.widgetCatalog ? this.widgetCatalog.widgets : []);
-                    this.filterWidgets.forEach((widget) => {
-                        if (this.widgetID === widget.contextPath) {
-                            this.widgetCatalogService.setWidgetDetails(widget);
-                            if (widget && widget.repository) {
-                                let repoURL = widget.repository.split('SoftwareAG')[1];
-                                let repoName = repoURL.substring(
-                                    repoURL.indexOf("/") + 0,
-                                    repoURL.lastIndexOf("#")
-                                );
-                                this.widgetCatalogService.getWidgetDetailsFromRepo(repoName).subscribe((data) => {
-                                    let widgetdata = JSON.stringify(data);
-                                    this.fetchWidgetDescription(widgetdata);
-                                });
-                            }
-                        }
-                    });
-                });
+        await this.widgetCatalogService.fetchWidgetCatalog()
+            .subscribe(async (widgetCatalog: WidgetCatalog) => {
+                this.widgetCatalog = widgetCatalog;
+                await this.filterInstalledWidgets();
             }, error => {
                 this.alertService.danger("There is some technical error! Please try after sometime.");
             });
@@ -205,15 +184,36 @@ export class WidgetDetailsComponent implements OnInit {
             return;
         }
 
-        await this.widgetCatalog.widgets.forEach(async widget => {
+        const currentApp: IApplication = (await this.widgetCatalogService.getCurrentApp());
+        const installedPlugins = currentApp?.manifest?.remotes;
+        for (let widget of this.widgetCatalog.widgets) {
             widget.isCompatible = this.widgetCatalogService.isCompatiblieVersion(widget);
             const appObj = this.appList.find(app => app.contextPath === widget.contextPath);
-            widget.installedVersion = (appObj && appObj.manifest && appObj.manifest.version ? appObj.manifest.version : '');
-            widget.installed = appObj && this.findInstalledWidget(widget); //(widgetObj != undefined);
+            const widgetObj = (installedPlugins && installedPlugins[widget.contextPath] && installedPlugins[widget.contextPath].length > 0);
+            widget.installedVersion = (widgetObj && appObj && appObj.manifest && appObj.manifest.version ? appObj.manifest.version : '');
+            widget.installed = widgetObj && this.findInstalledWidget(widget); //(widgetObj != undefined);
             this.actionFlag(widget);
-        });
-        this.widgetCatalog.widgets = this.widgetCatalog.widgets.filter(widget => widget.installed);
+        }
+
+        this.widgetCatalog.widgets = this.widgetCatalog.widgets.filter(widget => !widget.installed);
+        /*this.widgetCatalog.widgets.forEach((widget) => {
+            if (this.widgetID === widget.contextPath) {
+                this.widgetCatalogService.setWidgetDetails(widget);
+                if (widget && widget.repository) {
+                    let repoURL = widget.repository.split('SoftwareAG')[1];
+                    let repoName = repoURL.substring(
+                        repoURL.indexOf("/") + 0,
+                        repoURL.lastIndexOf("#")
+                    );
+                    this.widgetCatalogService.getWidgetDetailsFromRepo(repoName).subscribe((data) => {
+                        let widgetdata = JSON.stringify(data);
+                        this.fetchWidgetDescription(widgetdata);
+                    });
+                }
+            }
+        });*/
     }
+
     // if same widget exists in widget catalog json more than one time with different version
     private findInstalledWidget(widget: WidgetModel) {
         const checkWidgetInCatalog = this.widgetCatalog.widgets.filter(widgetCatalogWidget => widgetCatalogWidget.contextPath === widget.contextPath);
@@ -224,6 +224,7 @@ export class WidgetDetailsComponent implements OnInit {
         }
         return true;
     }
+
     async uninstallWidget(widget: WidgetModel) {
         const alertMessage = {
             title: 'Uninstall widget',
@@ -236,9 +237,16 @@ export class WidgetDetailsComponent implements OnInit {
         const installDemoDialogRef = this.alertModalDialog(alertMessage);
         await installDemoDialogRef.content.event.subscribe(async data => {
             if (data && data.isConfirm) {
+                this.showProgressModalDialog(`Uninstalling ${widget.title}`);
+                this.progressIndicatorService.setProgress(15);
                 const widgetAppObj = this.appList.find(app => app.contextPath === widget.contextPath)
                 if (widgetAppObj) {
-                    await this.appService.delete(widgetAppObj.id);
+                    this.progressIndicatorService.setProgress(30);
+                    const updatedAppRemotes = await this.widgetCatalogService.removePlugins(widgetAppObj);
+                    this.progressIndicatorService.setProgress(70);
+                    await this.widgetCatalogService.updateAppConfigRemotes(updatedAppRemotes);
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    this.hideProgressModalDialog();
                     widget.actionCode = '003';
                 }
             }
@@ -248,14 +256,14 @@ export class WidgetDetailsComponent implements OnInit {
         this.modalService.show(previewModalComponent, { class: 'modal-lg', initialState: { imageURL } });
     }
 
-    async updateWidget(widget: WidgetModel, bulkUpdate: boolean): Promise<void> {
+    async updateWidget(widget: WidgetModel): Promise<void> {
         const currentHost = window.location.host.split(':')[0];
-        if (currentHost === 'localhost' || currentHost === '127.0.0.1' || isDevMode()) {
+        if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
             this.alertService.warning("Runtime widget installation isn't supported when running Application Builder on localhost or in development mode.");
             return;
         }
 
-        if (!bulkUpdate && widget.actionCode === '002') {
+        if (widget.actionCode === '002') {
             const alertMessage = {
                 title: 'Update Confirmation',
                 description: `${widget.title} is not supported by current version of application builder and may not work properly.
@@ -267,19 +275,26 @@ export class WidgetDetailsComponent implements OnInit {
             const installDemoDialogRef = this.alertModalDialog(alertMessage);
             await installDemoDialogRef.content.event.subscribe(async data => {
                 if (data && data.isConfirm) {
+                    this.progressIndicatorService.setProgress(5);
                     await this.initiateUpdateWidgetProcess(widget);
                 }
             });
 
-        } else { await this.initiateUpdateWidgetProcess(widget); }
+        } else { 
+            this.progressIndicatorService.setProgress(5);
+            await this.initiateUpdateWidgetProcess(widget);
+         }
 
     }
 
     private async initiateUpdateWidgetProcess(widget: WidgetModel) {
-        this.showProgressModalDialog(`Updating ${widget.title}`)
+        this.showProgressModalDialog(`Updating ${widget.title}`);
+        this.progressIndicatorService.setProgress(10);
         let blob: any;
         let fileName = "";
         if (widget.binaryLink && widget.binaryLink !== '') {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            this.progressIndicatorService.setProgress(15);
             blob = await new Promise<any>((resolve) => {
                 this.widgetCatalogService.downloadBinary(widget.binaryLink)
                     .subscribe(data => {
@@ -291,6 +306,8 @@ export class WidgetDetailsComponent implements OnInit {
             });
             fileName = widget.binaryLink.replace(/^.*[\\\/]/, '');
         } else {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            this.progressIndicatorService.setProgress(15);
             blob = await new Promise<any>((resolve) => {
                 this.widgetCatalogService.downloadBinaryFromLabcase(widget.link)
                     .subscribe(data => {
@@ -302,13 +319,14 @@ export class WidgetDetailsComponent implements OnInit {
             });
             fileName = widget.fileName;
         }
-
         const fileOfBlob = new File([blob], fileName);
+        this.progressIndicatorService.setProgress(30);
         await new Promise<any>((resolve) => {
-            this.widgetCatalogService.installWidget(fileOfBlob, widget).then(() => {
+            this.widgetCatalogService.installPackage(fileOfBlob).then(async () => {
                 widget.isReloadRequired = true;
                 widget.installedVersion = widget.version;
                 this.actionFlag(widget);
+                await new Promise(resolve => setTimeout(resolve, 5000));
                 this.hideProgressModalDialog();
                 resolve(true);
             });
@@ -336,7 +354,7 @@ export class WidgetDetailsComponent implements OnInit {
                 else if (!widget.isCompatible && !widget.installed) { widget.actionCode = '002'; }
                 else if (widget.isReloadRequired && widget.installed) { widget.actionCode = '003'; }
                 else { widget.actionCode = '000'; }
-            } 
+            }
         } else {
             widget.actionCode = '000';
         }
@@ -349,19 +367,16 @@ export class WidgetDetailsComponent implements OnInit {
         }
         return this.widgetCatalogService.isLatestVersionAvailable(widget);
     }
+
     async installWidget(widget: WidgetModel): Promise<void> {
         const currentHost = window.location.host.split(':')[0];
-        if (currentHost === 'localhost' || currentHost === '127.0.0.1' || isDevMode()) {
+        if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
             this.alertService.warning("Runtime widget installation isn't supported when running Application Builder on localhost or in development mode.");
             return;
         }
 
-        const appFound = this.appList.find(app => app.name.toLowerCase() === widget.title?.toLowerCase() ||
-            (app.contextPath && app.contextPath?.toLowerCase() === widget.contextPath.toLowerCase()))
-        if (appFound) {
-            this.alertService.danger(" Widget name or context path already exists!");
-            return;
-        }
+        const widgetBinaryFound = this.appList.find(app => app.manifest?.isPackage && (app.name.toLowerCase() === widget.title?.toLowerCase() ||
+            (app.contextPath && app.contextPath?.toLowerCase() === widget.contextPath.toLowerCase())))
 
         if (widget.actionCode === '002' || widget.isDeprecated) {
             let alertMessage = {};
@@ -388,31 +403,57 @@ export class WidgetDetailsComponent implements OnInit {
             const installDemoDialogRef = this.alertModalDialog(alertMessage);
             await installDemoDialogRef.content.event.subscribe(async data => {
                 if (data && data.isConfirm) {
-                    await this.initiateInstallWidgetProcess(widget);
+                    this.progressIndicatorService.setProgress(5);
+                    await this.initiateInstallWidgetProcess(widget, widgetBinaryFound);
                 }
             });
 
-        } else { await this.initiateInstallWidgetProcess(widget); }
+        } else { 
+            this.progressIndicatorService.setProgress(5);
+            await this.initiateInstallWidgetProcess(widget, widgetBinaryFound); 
+        }
 
     }
-    private async initiateInstallWidgetProcess(widget: WidgetModel) {
-        this.showProgressModalDialog(`Installing ${widget.title}`)
-
-        this.widgetCatalogService.downloadBinary(widget.binaryLink)
-            .subscribe(data => {
-
-                const blob = new Blob([data], {
-                    type: 'application/zip'
-                });
-                const fileName = widget.binaryLink.replace(/^.*[\\\/]/, '');
-                const fileOfBlob = new File([blob], fileName);
-                this.widgetCatalogService.installWidget(fileOfBlob, widget).then(() => {
-                    widget.installed = true;
-                    widget.isReloadRequired = true;
-                    this.actionFlag(widget);
-                    this.hideProgressModalDialog();
-                });
+    private async initiateInstallWidgetProcess(widget: WidgetModel, widgetBinary) {
+        this.showProgressModalDialog(`Installing ${widget.title}`);
+        this.progressIndicatorService.setProgress(10);
+        if (widgetBinary) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            this.progressIndicatorService.setProgress(30);
+            this.widgetCatalogService.updateRemotesInCumulocityJson(widgetBinary).then(async () => {
+                widget.installed = true;
+                widget.isReloadRequired = true;
+                this.actionFlag(widget);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                this.hideProgressModalDialog();
+            }, error => {
+                this.alertService.danger("There is some technical error! Please try after sometime.");
+                console.error(error);
             });
+        } else {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            this.progressIndicatorService.setProgress(15);
+            this.widgetCatalogService.downloadBinary(widget.binaryLink)
+                .subscribe(data => {
+                    this.progressIndicatorService.setProgress(20);
+                    const blob = new Blob([data], {
+                        type: 'application/zip'
+                    });
+                    const fileName = widget.binaryLink.replace(/^.*[\\\/]/, '');
+                    const fileOfBlob = new File([blob], fileName);
+                    this.widgetCatalogService.installPackage(fileOfBlob).then(async () => {
+                        this.progressIndicatorService.setProgress(25);
+                        widget.installed = true;
+                        widget.isReloadRequired = true;
+                        this.actionFlag(widget);
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                        this.hideProgressModalDialog();
+                    }, error => {
+                        this.alertService.danger("There is some technical error! Please try after sometime.");
+                        console.error(error);
+                    });
+                });
+        }
     }
 
     navigateToGridView() {
