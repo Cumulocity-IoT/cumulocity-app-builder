@@ -457,7 +457,7 @@ export class AppBuilderUpgradeService {
         this.progressModal.hide();
         if (nonCompatibleWidgets) {
             const alertMessage = {
-                title: 'Upgrade Information',
+                title: 'Information',
                 description: `Following widgets are not compatible with Application Builder ${appVersion}:
                 ${nonCompatibleWidgets.toLocaleUpperCase()}`,
                 type: 'info',
