@@ -396,7 +396,17 @@ export class AppBuilderUpgradeService {
             } else if (this.userHasAdminRights) {
                 if (appVersion !== appBuilderConfig?.appBuilderVersion) {
                     this.showProgressModalDialog('Verifying plugins! Please wait...');
-                    await this.installPlugins(appBuilderConfig, appRemotes);
+                    let widgetCatalog: WidgetCatalog;
+                    forkJoin([this.widgetCatalogService.fetchWidgetCatalog(), this.widgetCatalogService.fetchWidgetForDemoCatalog()])
+                        .subscribe(async ([widgetList1, widgetList2]) => {
+                            const widgetCatalogWidgets = [...widgetList1.widgets];
+                            widgetCatalog = widgetList1;
+                            widgetList2.widgets.forEach((widget: WidgetModel) => {
+                                const widgetObj = widgetCatalogWidgets.find(widgetObj => widgetObj.contextPath === widget.contextPath);
+                                if (!widgetObj) { widgetCatalog.widgets.push(widget); }
+                            });
+                            await this.installPlugins(appBuilderConfig, appRemotes, widgetCatalog);
+                    });
                 }
                 else {
                     this.showProgressModalDialog('Verifying plugins! Please wait...');
@@ -417,12 +427,7 @@ export class AppBuilderUpgradeService {
         }
     }
 
-    async installPlugins(appBuilderConfig, appRemotes, nonCompatibleWidgets?: any) {
-        const widgetCatalog: WidgetCatalog = await new Promise(resolve => this.widgetCatalogService.fetchWidgetCatalog()
-            .subscribe(widgets => resolve(widgets),
-                error => {
-                    this.logError();
-                })) as any;
+    async installPlugins(appBuilderConfig, appRemotes, widgetCatalog: any, nonCompatibleWidgets?: any) {
         widgetCatalog.widgets = await this.widgetCatalogService.filterInstalledWidgets(widgetCatalog, this.userHasAdminRights);
         const totalRemotes = (appBuilderConfig?.configs?.remotes ? Object.keys(appBuilderConfig?.configs?.remotes).length : 0);
         const eachRemoteProgress: number = Math.floor((totalRemotes > 1 ? (90 / totalRemotes) : 0));
@@ -436,14 +441,24 @@ export class AppBuilderUpgradeService {
                 this.progressIndicatorService.setProgress(0);
                 this.progressIndicatorService.setMessage(`Installing ${pluginBinary.title}`);
                 this.progressIndicatorService.setProgress(10);
-                const binary = await new Promise(resolve => this.widgetCatalogService.downloadBinary(pluginBinary.binaryLink)
+                let binary = null;
+                let fileName = '';
+                if (pluginBinary.binaryLink && pluginBinary.binaryLink !== '') {
+                    binary = await new Promise(resolve => this.widgetCatalogService.downloadBinary(pluginBinary.binaryLink)
                     .subscribe(binaryData => resolve(binaryData), error => {
                         this.logError();
                     })) as any;
+                    fileName = pluginBinary.binaryLink.replace(/^.*[\\\/]/, '');
+                } else {
+                    binary = await new Promise(resolve => this.widgetCatalogService.downloadBinaryFromLabcase(pluginBinary.link)
+                    .subscribe(binaryData => resolve(binaryData), error => {
+                        this.logError();
+                    })) as any;
+                    fileName = pluginBinary.fileName;
+                }
                 const blob = new Blob([binary], {
                     type: 'application/zip'
                 });
-                const fileName = pluginBinary.binaryLink.replace(/^.*[\\\/]/, '');
                 const fileOfBlob = new File([blob], fileName);
                 await this.widgetCatalogService.installPackage(fileOfBlob);
                 appConfigUpdated = true;
@@ -494,15 +509,15 @@ export class AppBuilderUpgradeService {
             appList = appList.filter(app => (app.name && app.name.toLowerCase().includes('widget') || app.contextPath && app.contextPath.includes('widget')) && app.manifest && app.manifest.noAppSwitcher === true);
             forkJoin([this.widgetCatalogService.fetchWidgetCatalog(), this.widgetCatalogService.fetchWidgetForDemoCatalog()])
                 .subscribe(async ([widgetList1, widgetList2]) => {
+                    const widgetCatalogWidgets = [...widgetList1.widgets];
                     widgetCatalog = widgetList1;
                     widgetList2.widgets.forEach((widget: WidgetModel) => {
-                        const widgetObj = widgetCatalog.widgets.find(widgetObj => widgetObj.contextPath === widget.contextPath);
+                        const widgetObj = widgetCatalogWidgets.find(widgetObj => widgetObj.contextPath === widget.contextPath);
                         if (!widgetObj) { widgetCatalog.widgets.push(widget); }
                     });
                     appList.forEach(app => {
                         const appWidgetObj = widgetCatalog.widgets.find(widgetObj => widgetObj.contextPath === app.contextPath);
                         if (!appWidgetObj) {
-                            appWidgetObj
                             widgetCatalog.widgets.push({
                                 contextPath: app.contextPath,
                                 title: app.name,
@@ -541,7 +556,7 @@ export class AppBuilderUpgradeService {
                                 await this.uninstallWidgets(plugins);
                                 await this.settingService.getAppBuilderConfig();
                                 const appBuilderConfig = (await this.settingService.getAppBuilderConfigs());
-                                await this.installPlugins(appBuilderConfig, appRemotes, nonCompatibleWidgets);
+                                await this.installPlugins(appBuilderConfig, appRemotes, widgetCatalog, nonCompatibleWidgets);
                                 appConfigUpdated = true;
                             }
                         }
