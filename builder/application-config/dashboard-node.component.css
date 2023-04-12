@@ -33,14 +33,14 @@
 .item {
     position: relative;
     cursor: pointer;
-    background-color: var(--brand-light);
+    background-color: unset;
     margin-top: 15px;
     margin-bottom: 15px;
     padding-top: 15px;
     padding-bottom: 15px;
     display: block;
-    border: 1px solid rgba(88, 101, 109, 0.1);
-    color: var(--navigator-text-color);
+    border: 1px solid var(--brand-dark);
+    color: var(--brand-dark);
 }
 
 .item a {
