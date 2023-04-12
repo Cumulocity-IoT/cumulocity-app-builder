@@ -482,12 +482,11 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
             autoLockDialogRef.content.event.subscribe(async data => {
                 if (data && data.isConfirm) {
                     app.applicationBuilder.dashboards.forEach(async element => {
-                        let c8y_dashboard = (await this.inventoryService.detail(element.id)).data;
+                        let dashboard = (await this.inventoryService.detail(element.id)).data;
+                        let c8y_Dashboard = dashboard.c8y_Dashboard
+                        c8y_Dashboard.isFrozen = true;
                         let dashboardObject = {
-                            c8y_Dashboard: {
-                                children: c8y_dashboard.c8y_Dashboard.children,
-                                isFrozen: true
-                            },
+                            c8y_Dashboard,
                             id: element.id
                         };
                         this.inventoryService.update(dashboardObject);
@@ -509,14 +508,14 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
             autoLockDialogRef.content.event.subscribe(async data => {
                 if (data && data.isConfirm) {
                     app.applicationBuilder.dashboards.forEach(async element => {
-                        let c8y_dashboard = (await this.inventoryService.detail(element.id)).data;
+                        let dashboard = (await this.inventoryService.detail(element.id)).data;
+                        let c8y_Dashboard = dashboard?.c8y_Dashboard
+                        c8y_Dashboard.isFrozen = false;
                         let dashboardObject = {
-                            c8y_Dashboard: {
-                                children: c8y_dashboard.c8y_Dashboard.children,
-                                isFrozen: false
-                            },
+                            c8y_Dashboard,
                             id: element.id
                         };
+                        
                         this.inventoryService.update(dashboardObject);
                     });
                 } else {

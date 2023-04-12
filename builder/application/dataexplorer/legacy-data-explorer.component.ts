@@ -21,12 +21,17 @@ import { UpgradeComponent } from '@angular/upgrade/static';
 declare const angular: any;
 
 import './cumulocity.json';
-
-angular.module("c8y.cockpit.dataPointExplorerUI", ["c8y.cockpit.dataPointExplorer"])
+import './dataPointExplorer.js';
+/* angular.module("c8y.cockpit.dataPointExplorerUI", ["c8y.cockpit.dataPointExplorer"])
     .component('legacyDataExplorer', {
         template: require("./explorer.html").default,
         controller: "c8yDataPointExplorerCtrl"
-    });
+       /* controller: ['c8yTitle', 'gettext', function (c8yTitle: any, gettext: any) {
+        c8yTitle.changeTitle({
+            title: gettext('Data explorer')
+        });
+    }] 
+    }); */
 
 @Directive({
     selector: 'legacy-data-explorer'
