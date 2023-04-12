@@ -33,18 +33,22 @@
 .item {
     position: relative;
     cursor: pointer;
-    background-color: var(--navigator-text-color);
+    background-color: var(--brand-light);
     margin-top: 15px;
     margin-bottom: 15px;
     padding-top: 15px;
     padding-bottom: 15px;
     display: block;
     border: 1px solid rgba(88, 101, 109, 0.1);
-    color: #000;
+    color: var(--navigator-text-color);
+}
+
+.item a {
+    color: var(--navigator-text-color);
 }
 
 .cdk-drop-list-dragging {
-    border: 1px double var(--brand-dark);
+    border: 1px double var(--navigator-text-color);
 }
 
 .empty-space {

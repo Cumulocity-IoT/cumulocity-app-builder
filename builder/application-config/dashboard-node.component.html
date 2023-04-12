@@ -11,7 +11,7 @@
           <span title={{node.title}} style="margin-left:20px;">{{ node.title | translate }}</span>
         </div>
         <div class="col-sm-2 column-overflow" title={{node.dashboard.id}} id="dashboard-id-{{node.title}}" *ngIf="node.isDashboard">
-          {{ node.dashboard.id }}
+          {{ node.dashboard.id }} <a class="copy-dashboard" title="Copy Dashboard ID" (click)="copyDashboardID(node.dashboard.id)"><i c8yIcon="copy"></i></a>
         </div>
         <div class="col-sm-1 column-overflow" *ngIf="node.isDashboard" 
         title="{{node.dashboard.visibility === 'no-nav' ? 'Tabs Only' : node.dashboard.visibility === 'hidden' ? 'Hidden': node.dashboard.visibility}}">

@@ -97,8 +97,7 @@
                         (click)="setTheme(app, '#243138', '#13202a', '#ffffff', '#ffffff', '#ffffff','#ffffff', '#334650','#334650', '#334650', 'Dark')">Dark</button>
                     <div *ngIf="app.applicationBuilder.customBranding"
                         style="width: 20%;display: inline-block;position: absolute;margin-left: 20px;">
-                        <select id="custom-branding" [(ngModel)]="themeName"
-                            (change)="onThemeChange($event.target.value, app)">
+                        <select id="custom-branding" [(ngModel)]="themeName" (change)="onThemeChange($event.target.value, app)" *ngIf="app.applicationBuilder.customBranding.length > 0">
                             <option value="" disabled selected hidden>Choose Custom Theme</option>
                             <option *ngFor="let theme of app.applicationBuilder.customBranding"
                                 [value]="theme.themeName">

@@ -39,6 +39,7 @@ import { AccessRightsService } from "./../../builder/access-rights.service";
 import { DOCUMENT } from "@angular/common";
 import { moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { AppDataService } from "../app-data.service";
+import { Clipboard } from '@angular/cdk/clipboard';
 
 export interface DashboardConfig {
     id: string,
@@ -109,7 +110,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
         private brandingService: BrandingService, private inventoryService: InventoryService, private navigation: AppBuilderNavigationService,
         private modalService: BsModalService, private alertService: AlertService, private settingsService: SettingsService,
         private accessRightsService: AccessRightsService, private userService: UserService, private appDataService: AppDataService,
-        @Inject(DOCUMENT) private document: Document, private renderer: Renderer2, private cd: ChangeDetectorRef
+        @Inject(DOCUMENT) private document: Document, private renderer: Renderer2, private cd: ChangeDetectorRef,private clipboard: Clipboard
     ) {
         this.app = combineLatest([appIdService.appIdDelayedUntilAfterLogin$,this.refreshApp]).pipe(
             map(([appId]) => appId),
@@ -142,8 +143,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
         let count = 0;
         this.appSubscription = this.app.pipe(first()).
           subscribe(app => {
-            if (app.applicationBuilder.branding.enabled && (app.applicationBuilder.selectedTheme && app.applicationBuilder.selectedTheme !== 'Default') &&
-                (app.applicationBuilder.selectedTheme === 'Navy Blue' || app.applicationBuilder.selectedTheme === 'Red' || app.applicationBuilder.selectedTheme === 'Green' || app.applicationBuilder.selectedTheme === "Yellow" || app.applicationBuilder.selectedTheme === 'Dark')) {
+            if (app.applicationBuilder.branding.enabled && (app.applicationBuilder.selectedTheme && app.applicationBuilder.selectedTheme !== 'Default')) {
                 this.applyTheme = true;
                 this.renderer.addClass(this.document.body, 'dashboard-body-theme');
             } else {
@@ -362,15 +362,13 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
         if (dashboard.templateDashboard) {
             this.showTemplateDashboardEditModalDialog(app, dashboard, index);
         } else {
-            if (this.filterValue !== '') {
-                let dashboardIDToEdit = dashboard.id;
-                dashboards = [...app.applicationBuilder.dashboards];
-                dashboards.forEach((element, i) => {
-                    if (element.id === dashboardIDToEdit) {
-                        index = i;
-                    }
-                });
-            }
+            let dashboardIDToEdit = dashboard.id;
+            dashboards = [...app.applicationBuilder.dashboards];
+            dashboards.forEach((element, i) => {
+                if (element.id === dashboardIDToEdit) {
+                    index = i;
+                }
+            });
             this.bsModalRef = this.modalService.show(EditDashboardModalComponent, {
                 class: 'c8y-wizard',
                 initialState: {
@@ -395,6 +393,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
                 if (isReloadRequired) {
                    this.prepareDashboardHierarchy(this.bsModalRef.content.app);
                    this.filteredDashboardList = [...this.bsModalRef.content.app.applicationBuilder.dashboards];
+                   this.cd.detectChanges();
                 }
             });
         }
@@ -707,5 +706,9 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     expandAllNodes() {
         this.expandAllDashboards = !this.expandAllDashboards;
         this.expandEventSubject.next();
+    }
+
+    copyDashboardID(dashboardId: string) {
+        this.clipboard.copy(dashboardId);
     }
 }

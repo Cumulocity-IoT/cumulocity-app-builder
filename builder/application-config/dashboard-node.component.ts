@@ -20,6 +20,7 @@ import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { DOCUMENT } from '@angular/common';
 import { Component, Input, OnInit, Output, EventEmitter, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { Observable, Subject, Subscription } from 'rxjs';
+import { Clipboard } from '@angular/cdk/clipboard';
 
 @Component({
   selector: 'c8y-dashboard-node',
@@ -38,7 +39,8 @@ export class DashboardNodeComponent implements OnInit {
   private expandEventsSubscription: Subscription;
   
   expandEventSubject: Subject<void> = new Subject<void>();
-  constructor(@Inject(DOCUMENT) private document: Document) { this.itemDrop = new EventEmitter(); }
+  constructor(@Inject(DOCUMENT) private document: Document,
+  private clipboard: Clipboard) { this.itemDrop = new EventEmitter(); }
 
   objectKeys = Object.keys;
   isCollapsed = true;
@@ -70,6 +72,10 @@ export class DashboardNodeComponent implements OnInit {
     this.isCollapsed = !this.isCollapsed;
     this.expandEventSubject.next();
   }
+
+  copyDashboardID(dashboardId: string) {
+    this.clipboard.copy(dashboardId);
+}
 
   ngOnDestroy() {
     this.expandEventsSubscription.unsubscribe();

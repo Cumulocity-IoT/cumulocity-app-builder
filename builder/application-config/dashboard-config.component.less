@@ -34,10 +34,13 @@
   // }
 
   &:hover {
-    background-color: #EFF1F3;
-    color: #000;
+    background-color: var(--brand-dark,#EFF1F3);
+    color: var(--component-color, #000);
   }
-
+  &:hover a {
+    color: var(--component-color, #000);
+  }
+  
   .drag-handle {
     cursor: grab;
     margin-right: 10px;
@@ -51,29 +54,39 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
+  a {
+    color: var(--component-color, #fff);
+  }
+  a:hover {
+    color: var(--component-color, #000);
+  }
 }
 
 .dashboardInputTheme {
-  color: var(--card-color, #000);
+  color: #000;
 }
 
 .dashboardInputTheme:focus {
   color: #000;
 }
 
-tr:hover {
-  background-color: #EFF1F3;
-  color: #000;
-}
-
-.table-hover>tbody>tr:hover {
-  background-color: #EFF1F3;
-  color: #000;
-}
-
 .table>tbody>tr>td {
-  padding: 3px 8px 6px;
+  padding: 3px 10px 6px;
 }
+
+
+.listViewTable th {
+  color: var(--brand-dark, #333) !important;
+}
+
+.listViewTable td {
+  color: var(--brand-dark, #000) !important;
+}
+
+.listViewTable td a{
+  color: var(--brand-dark, #000) !important;
+}
+
 
 .font-bold {
   font-weight: bold;
@@ -132,4 +145,12 @@ tr:hover {
 
 .pl-30 {
   padding-left: 30px;
+}
+
+.copy-dashboard {
+  margin-left: 5px;
+  cursor: pointer;
+}
+.listTable .listViewTable {
+  background-color: var(--brand-primary, #fff);
 }

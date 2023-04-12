@@ -24,7 +24,7 @@ import { Subject } from 'rxjs';
 
 @Component({
     template: `
-    <div class="modal-header text-center bg-primary">
+    <div class="modal-header text-center bg-primary" style="color: var(--navigator-text-color, #000);">
         <h4 *ngIf="config === 'save'" style="margin:0; letter-spacing: 0.15em;">Save Theme</h4>
         <h4 *ngIf="config === 'edit'" style="margin:0; letter-spacing: 0.15em;">Edit Theme</h4>
     </div>

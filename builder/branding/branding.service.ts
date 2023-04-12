@@ -229,13 +229,13 @@ a, a:hover {
     color: var(--navigator-active-color, #000);
 }
 .nav-tabs > li > button {
-    color: var(--navigator-active-bg,#0b385b);
+    color: var(--navigator-active-bg,#0b385b) !important;
 }
 .nav-tabs > li > button:hover:not([disabled]) {
-    color: var(--brand-primary,#1776bf);
+    color: var(--brand-primary,#1776bf) !important;
 }
 select.form-control:focus, select:focus {
-    color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+    color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)} !important;
 }
 label.c8y-checkbox input[type='checkbox']:checked + span::after, label.c8y-radio input[type='checkbox']:checked + span::after {
     color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
@@ -365,13 +365,13 @@ body {
     color: var(--navigator-active-color, #000);
 }
 .nav-tabs > li > button {
-    color: var(--navigator-active-bg,#0b385b);
+    color: var(--navigator-active-bg,#0b385b) !important;
 }
 .nav-tabs > li > button:hover:not([disabled]) {
-    color: var(--brand-primary,#1776bf);
+    color: var(--brand-primary,#1776bf) !important;
 }
 select.form-control:focus, select:focus {
-    color: ${this.colorToHex(app.applicationBuilder.branding.colors.primary)};
+    color: ${this.colorToHex(app.applicationBuilder.branding.colors.primary)} !important;
 }
 `;
             } else {
