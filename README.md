@@ -155,19 +155,18 @@ A more detailed user guide and quick start videos are available in the Home sect
 **NOTE:** This is only shown in the main page of the Application Builder, not when editing an individual application
 
 #### How to convert existing widget into plugin
-Please go through this video to find detailed instructions about converting your exisitng widget into plugin
+Please go through this video to find detailed instructions about converting your existing widget into plugin.
 
 #### How to upgrade Application Builder to 2.0
-Application Buider 2.0 is based on micro-frontend architecture and its work on module federeation plugins.
-Existing Custom Widgets/Runtime widgets are no longer compatible.
+Application Builder 2.0 is based on micro-frontend architecture and existing Custom Widgets/Runtime widgets are no longer compatible.
 For seamless upgrade experience, please follow below steps:
- 1. Upgrade your Appliciation Builder to 1.3.4(In case if you are using earlier version).
+ 1. Upgrade your Application Builder to 1.3.4 (In case if you are using earlier version).
  2. Upgrade your Application Builder to 2.0 using upgrade option in bottom of your page(Available only to admin user).
  
-Please note that if your widgets are part of Widget Catalog(maintained by community), then Application Builder will automatically delete exiisting widget and install corresponding plugin. In case if custom widget please see [How to convert existing widget into plugin](#how-to-convert-existing-widget-into-plugin)
+Please note that if your widgets are part of Widget Catalog(maintained by community), then Application Builder will automatically delete existing widget and install corresponding plugin. In case if custom widget please see [How to convert existing widget into plugin](#how-to-convert-existing-widget-into-plugin)
 
 #### How to upgrade Context Path Application to 2.0
-If your existing application is created with providing context path then it will not going to upgrade using Application Builder upgrade functionality since it is running in its own application context.
+If your existing application is created with providing context path, then it will not be going to upgrade using Application Builder upgrade functionality since it is running in its own application context.
 
 Here are steps to upgrade Context Path application. Please note that this action is **non-reversible**:
 
@@ -176,24 +175,24 @@ Here are steps to upgrade Context Path application. Please note that this action
  3. Do not provide any context path.
  4. Select your existing application from "Clone Existing Application".
  5. This will clone your app and bring it into Application Builder context.
- 6. Verify your newly created application for all funtionalties
- 7. Delete exisitng application
- 8. If all functionalites are working fine then clone application again with context path
- 9. Congratulations, you have upgraded your app to 2.0
+ 6. Verify your newly created application for all functionalities.
+ 7. Delete existing application.
+ 8. If all functionalities are working as expected, then clone application again with context path
+ 9. Congratulations, you have upgraded your app to 2.0.
 
 #### How to downgrade Application Builder to 1.3.x
 If you already upgraded Application Builder to 2.0 and wanted to downgrade back to 1.3.x for any reason, you can follow below steps:
 
 1. Download Application Builder 1.3.x binary from release section.
-2. Go to Adminstration -> Ecosystem -> All Applications.
+2. Go to Administration -> Ecosystem -> All Applications.
 3. Click  "Application Builder"
-4. Click "Upload a *.zip file"
-5. Uplaod 1.3.4 binary
-6. Go to Application Builder from app switcher
+4. Click "Upload a *.zip file".
+5. Upload 1.3.4 binary
+6. Go to Application Builder from app switcher.
 7. Click on "Widget Catalog"
-8. Click on "Unintstall All" button.
-9. This will delete all widgets
-10. Install required widget again
+8. Click on "Uninstall All" button.
+9. This will delete all widgets.
+10. Install required widget again.
 11. Congratulations, you have downgraded your app to 1.3.x
 
 
