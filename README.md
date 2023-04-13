@@ -150,14 +150,11 @@ This guide will teach you how to create your first application using the Applica
 Congratulations! You have created an application and added your first screen.
 
 ## User Guide
-A more detailed user guide and quick start videos are available in the Home section of the Application Builder app.
 
-**NOTE:** This is only shown in the main page of the Application Builder, not when editing an individual application
-
-#### How to convert existing widget into plugin
+### How to convert existing widget into plugin
 Please go through this video to find detailed instructions about converting your existing widget into plugin.
 
-#### How to upgrade Application Builder to 2.0
+### How to upgrade Application Builder to 2.0
 Application Builder 2.0 is based on micro-frontend architecture and existing Custom Widgets/Runtime widgets are no longer compatible.
 For seamless upgrade experience, please follow below steps:
  1. Upgrade your Application Builder to 1.3.4 (In case if you are using earlier version).
@@ -165,7 +162,7 @@ For seamless upgrade experience, please follow below steps:
  
 Please note that if your widgets are part of Widget Catalog(maintained by community), then Application Builder will automatically delete existing widget and install corresponding plugin. In case if custom widget please see [How to convert existing widget into plugin](#how-to-convert-existing-widget-into-plugin)
 
-#### How to upgrade Context Path Application to 2.0
+### How to upgrade Context Path Application to 2.0
 If your existing application is created with providing context path, then it will not be going to upgrade using Application Builder upgrade functionality since it is running in its own application context.
 
 Here are steps to upgrade Context Path application. Please note that this action is **non-reversible**:
@@ -180,7 +177,7 @@ Here are steps to upgrade Context Path application. Please note that this action
  8. If all functionalities are working as expected, then clone application again with context path
  9. Congratulations, you have upgraded your app to 2.0.
 
-#### How to downgrade Application Builder to 1.3.x
+### How to downgrade Application Builder to 1.3.x
 If you already upgraded Application Builder to 2.0 and wanted to downgrade back to 1.3.x for any reason, you can follow below steps:
 
 1. Download Application Builder 1.3.x binary from release section.
@@ -195,6 +192,10 @@ If you already upgraded Application Builder to 2.0 and wanted to downgrade back 
 10. Install required widget again.
 11. Congratulations, you have downgraded your app to 1.3.x
 
+
+A more detailed user guide and quick start videos are available in the Home section of the Application Builder app.
+
+**NOTE:** This is only shown in the main page of the Application Builder, not when editing an individual application.
 
 ## Runtime Widgets
 
