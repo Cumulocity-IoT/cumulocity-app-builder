@@ -6,10 +6,12 @@ Application Builder is an open-source tool for you to create web applications 
 
 ## What's new?
 
-* **Dashboard Tree view:** Dashboard Tree view provides hierarchical view for quicker and easier access to a dashboard.
-* **Dashboard Locking:** User can now lock/unlock all dashboards by just one click.
-* **Dashboard Search:** Smart search introduced to quickly search your dashboard.
+* **Widgets turned plugins:** Application builder now support micro-frontend plugins. Standard widgets are already available as plugin in widget catalog.
+* **Optimized Performance:** Application builder now provide faster response times, reduced resource usage, and improved user experience.
+* **Custom Branding:** Provides flexibility and control over application’s look and feel.
+* **Dashboards:** Simplified the dashboard navigation by introducing path while creating dashboard.
 * **Seamless upgrade experience:** Upgrade of application builder made simpler.
+* **Cumulocity upgrade:** Application Builder is now based on Cumulocity 1016.0.170
 * **Various bug fixes**
 
 ## Features
