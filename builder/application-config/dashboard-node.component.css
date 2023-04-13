@@ -39,12 +39,12 @@
     padding-top: 15px;
     padding-bottom: 15px;
     display: block;
-    border: 1px solid var(--brand-dark);
+    border: 1px solid #ccd2d6;
     color: var(--brand-dark);
 }
 
 .item a {
-    color: var(--navigator-text-color);
+    color: var(--brand-dark, #000) !important;
 }
 
 .cdk-drop-list-dragging {

@@ -62,6 +62,7 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
     deviceDetail?: string
     dashboardSmartRulesAlarmsExplorerVisibility = true;
 
+    appSubscription = new Subscription();
     isGroupTemplate?: boolean;
     app: Observable<any>;
     context: Partial<{
@@ -222,13 +223,13 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
                             tab.classList.remove('active');
                         }
                         if (tabName === 'Smart rules' || tabName === 'Alarms' || tabName === 'Data explorer') {
-                            this.app.subscribe((app) => {
+                            this.appSubscription = this.app.subscribe((app) => {
                                 if (app.applicationBuilder.branding.enabled && (app.applicationBuilder.selectedTheme && app.applicationBuilder.selectedTheme !== 'Default')) {
                                     this.renderer.addClass(this.document.body, 'dashboard-body-theme');
                                 } else {
                                     this.renderer.removeClass(this.document.body, 'dashboard-body-theme');
                                 }
-                            }).unsubscribe();
+                            });
                         } else {
                             this.renderer.removeClass(this.document.body, 'dashboard-body-theme');
                         }
@@ -237,13 +238,13 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
                     activeTabs.forEach(tab => {
                         const tabName = (tab.textContent ? tab.textContent.trim() : '');
                         if (tabName === 'Smart rules' || tabName === 'Alarms' || tabName === 'Data explorer') {
-                            this.app.subscribe((app) => {
+                            this.appSubscription = this.app.subscribe((app) => {
                                 if (app.applicationBuilder.branding.enabled && (app.applicationBuilder.selectedTheme && app.applicationBuilder.selectedTheme !== 'Default')) {
                                     this.renderer.addClass(this.document.body, 'dashboard-body-theme');
                                 } else {
                                     this.renderer.removeClass(this.document.body, 'dashboard-body-theme');
                                 }
-                            }).unsubscribe();
+                            });
                         } else {
                             this.renderer.removeClass(this.document.body, 'dashboard-body-theme');
                         }
@@ -258,6 +259,7 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
     }
     ngOnDestroy(): void {
         this.subscriptions.unsubscribe();
+        this.appSubscription.unsubscribe();
     }
 
     createDeviceTabPath(dashboardId: string, deviceDetail?: string) {
