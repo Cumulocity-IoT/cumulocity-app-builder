@@ -182,8 +182,20 @@ Here are steps to upgrade Context Path application. Please note that this action
  9. Congratulations, you have upgraded your app to 2.0
 
 #### How to downgrade Application Builder to 1.3.x
+If you already upgraded Application Builder to 2.0 and wanted to downgrade back to 1.3.x for any reason, you can follow below steps:
 
-#### How to downgrade Context Path Application to 1.3.x
+1. Download Application Builder 1.3.x binary from release section.
+2. Go to Adminstration -> Ecosystem -> All Applications.
+3. Click  "Application Builder"
+4. Click "Upload a *.zip file"
+5. Uplaod 1.3.4 binary
+6. Go to Application Builder from app switcher
+7. Click on "Widget Catalog"
+8. Click on "Unintstall All" button.
+9. This will delete all widgets
+10. Install required widget again
+11. Congratulations, you have downgraded your app to 1.3.x
+
 
 ## Runtime Widgets
 
