@@ -168,8 +168,18 @@ Please note that if your widgets are part of Widget Catalog(maintained by commun
 
 #### How to upgrade Context Path Application to 2.0
 If your existing application is created with providing context path then it will not going to upgrade using Application Builder upgrade functionality since it is running in its own application context.
+
 Here are steps to upgrade Context Path application. Please note that this action is **non-reversible**:
- 1. 
+
+ 1. Go to Application Builder -> Add Application.
+ 2. Give name of your application.
+ 3. Do not provide any context path.
+ 4. Select your existing application from "Clone Existing Application".
+ 5. This will clone your app and bring it into Application Builder context.
+ 6. Verify your newly created application for all funtionalties
+ 7. Delete exisitng application
+ 8. If all functionalites are working fine then clone application again with context path
+ 9. Congratulations, you have upgraded your app to 2.0
 
 #### How to downgrade Application Builder to 1.3.x
 
