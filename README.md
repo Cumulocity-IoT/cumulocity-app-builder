@@ -6,27 +6,29 @@ Application Builder is an open-source tool for you to create web applications 
 
 ## What's new?
 
-* **Dashboard Tree view:** Dashboard Tree view provides hierarchical view for quicker and easier access to a dashboard.
-* **Dashboard Locking:** User can now lock/unlock all dashboards by just one click.
-* **Dashboard Search:** Smart search introduced to quickly search your dashboard.
+* **Widgets turned plugins:** Application builder now support micro-frontend plugins. Standard widgets are already available as plugin in widget catalog.
+* **Optimized Performance:** Application builder now provide faster response times, reduced resource usage, and improved user experience.
+* **Custom Branding:** Provides flexibility and control over application’s look and feel.
+* **Dashboards:** Simplified the dashboard navigation by introducing path while creating dashboard.
 * **Seamless upgrade experience:** Upgrade of application builder made simpler.
+* **Cumulocity upgrade:** Application Builder is now based on Cumulocity 1016.0.170
 * **Various bug fixes**
 
 ## Features
 * **Browser-based Device Simulators:** Create device simulators that run directly in your browser.
 * **DTDL Simulator:** User can now create simulator based on [DTDL](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md)(Digital Twins Definition Language).
 * **Group Simulator:** User can create simulator for existing device group or new device group.
-* **Runtime widget loading:** Install widgets without re-compiling. Please refer our [Demo Widget](https://github.com/SoftwareAG/cumulocity-demo-widget).
+* **Runtime widgets plugin:** Install widgets without re-compiling. Please refer our [Demo Widget](https://github.com/SoftwareAG/cumulocity-demo-widget-plugin).
 * **Group template dashboards:** Give every device in a group an identical dashboard (but customized to the device).
 * **Create an App with a custom contextPath:** Change the URL used to access a particular app.
 * **Application Clone**: User can now clone existing application while creating new one.
 * **GainSight Integration:** Gainsight is integrated with app builder and user can control it from settings page.
-* **New Home Page:** New Home Page with quick start videos, help and support information.
+* **Home Page:** User can find quick start videos, help and support information on home page.
 * **Tabs:** Group your dashboards into tabs.
 * **Dashboard Catalog:** User can select any pre-designed template for dashboard and ability to install dependent runtime widgets.
-* **Widget Catalog:** Now user has ability to install/update runtime widgets directly from Widget Catalog. This is single place where user can also find widget details such as documentation, preview, license and author details.
+* **Widget Catalog:** Now user has ability to install/update widgets directly from Widget Catalog. This is single place where user can also find widget details such as documentation, preview, license and author details.
 *  **Branding:** Now user can use color picker to choose millions of colors to customize branding. Header, Action bar and tab bar are also customizable.
-*  **Theme:** Application builder now support one clicks theme selection.
+*  **Theme:** Application builder now support one clicks theme selection and custom theme creation.
 *  **Server-Side Simulators:** Application Builder now supports Server-side simulators. User just need to install micro-service from [here](https://github.com/SoftwareAG/cumulocity-app-builder/releases/download/v1.3.1/simulator-app-builder.zip) and you will get option while creating simulator to "Run on Server".
 * **Role Based Access:** User can now control dashboard visibility in application builder by assigning global role(s) to a dashboard.
 * **File(CSV/JSON) Based Simulator:** Application Builder now supports File Based Simulators(Server-side). User just need to install micro-service from [here](https://github.com/SoftwareAG/cumulocity-app-builder/releases/download/v1.3.1/csv-simulator-ms.zip) and use simulator type as File(CSV/JSON). User can import CSV/JSON file to create measurements/events to simulate use cases.
@@ -112,7 +114,7 @@ cd cumulocity-app-builder
 ```
 2. (Optional) Checkout a specific version: 
 ```
-git checkout v1.3.2
+git checkout v2.0.0
 ```
 3. Install the dependencies: 
 ```
@@ -152,12 +154,54 @@ A more detailed user guide and quick start videos are available in the Home sect
 
 **NOTE:** This is only shown in the main page of the Application Builder, not when editing an individual application
 
+#### How to convert existing widget into plugin
+Please go through this video to find detailed instructions about converting your existing widget into plugin.
+
+#### How to upgrade Application Builder to 2.0
+Application Builder 2.0 is based on micro-frontend architecture and existing Custom Widgets/Runtime widgets are no longer compatible.
+For seamless upgrade experience, please follow below steps:
+ 1. Upgrade your Application Builder to 1.3.4 (In case if you are using earlier version).
+ 2. Upgrade your Application Builder to 2.0 using upgrade option in bottom of your page(Available only to admin user).
+ 
+Please note that if your widgets are part of Widget Catalog(maintained by community), then Application Builder will automatically delete existing widget and install corresponding plugin. In case if custom widget please see [How to convert existing widget into plugin](#how-to-convert-existing-widget-into-plugin)
+
+#### How to upgrade Context Path Application to 2.0
+If your existing application is created with providing context path, then it will not be going to upgrade using Application Builder upgrade functionality since it is running in its own application context.
+
+Here are steps to upgrade Context Path application. Please note that this action is **non-reversible**:
+
+ 1. Go to Application Builder -> Add Application.
+ 2. Give name of your application.
+ 3. Do not provide any context path.
+ 4. Select your existing application from "Clone Existing Application".
+ 5. This will clone your app and bring it into Application Builder context.
+ 6. Verify your newly created application for all functionalities.
+ 7. Delete existing application.
+ 8. If all functionalities are working as expected, then clone application again with context path
+ 9. Congratulations, you have upgraded your app to 2.0.
+
+#### How to downgrade Application Builder to 1.3.x
+If you already upgraded Application Builder to 2.0 and wanted to downgrade back to 1.3.x for any reason, you can follow below steps:
+
+1. Download Application Builder 1.3.x binary from release section.
+2. Go to Administration -> Ecosystem -> All Applications.
+3. Click  "Application Builder"
+4. Click "Upload a *.zip file".
+5. Upload 1.3.4 binary
+6. Go to Application Builder from app switcher.
+7. Click on "Widget Catalog"
+8. Click on "Uninstall All" button.
+9. This will delete all widgets.
+10. Install required widget again.
+11. Congratulations, you have downgraded your app to 1.3.x
+
+
 ## Runtime Widgets
 
-Application Builder supports runtime widgets deployment. Some of the runtime widgets are already available in widget catalog.
-You can find runtime widgets at [Software AG Open Source](https://open-source.softwareag.com/?search=widget&topic=cumulocity-iot)
+Application Builder supports  widget deployment. Some of the  widget plugins are already available in widget catalog.
+You can find widgets at [Software AG Open Source](https://open-source.softwareag.com/?search=plugin&topic=cumulocity-iot)
 
-Would you like to create your own Custom Runtime widget? Please refer our [Demo Widget](https://github.com/SoftwareAG/cumulocity-demo-widget).
+Would you like to create your own Custom Runtime widget? Please refer our [Demo Widget](https://github.com/SoftwareAG/cumulocity-demo-widget-plugin).
 
 
 ## Troubleshooting
