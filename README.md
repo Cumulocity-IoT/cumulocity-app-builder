@@ -206,6 +206,18 @@ Would you like to create your own Custom Runtime widget? Please refer our [Demo 
 
 
 ## Troubleshooting
+
+ ### Application Builder 2.0.0 and later
+ 
+ *  **Widget/plugins are not installed after upgrade:**
+ There are multiple reasons that your widgets/plugins might not installed such as browser page refreshed, network error, etc.
+ In this scenario you can follow any of the below approach:
+   1. If you have installed many widgets in earlier version of application builder then you can downgrade application builder by following [How to downgrade Application Builder to 1.3.x](https://github.com/SoftwareAG/cumulocity-app-builder/edit/2.0.0-dev-1/README.md#how-to-downgrade-application-builder-to-13x) and try again.
+   2. If you have few widgets installed in earlier version of application builder, then you can just uninstall those widgets manually from Administration -> Ecosystem -> All Applications and install corresponding plugin either from Widget Catalog or from Administration -> Ecosystem -> Packages.
+ 
+ 
+ ### Application Builder 1.3.x and earlier
+ 
  *  **Failed to load a runtime custom widget:**
  ```
  	Failed to load a runtime custom widget, it may have been compiled for a different Cumulocity version
