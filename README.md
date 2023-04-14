@@ -14,6 +14,7 @@ Application Builder is an open-source tool for you to create web applications 
 * **Cumulocity upgrade:** Application Builder is now based on Cumulocity 1016.0.170
 * **Various bug fixes**
 
+
 ## Features
 * **Browser-based Device Simulators:** Create device simulators that run directly in your browser.
 * **DTDL Simulator:** User can now create simulator based on [DTDL](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md)(Digital Twins Definition Language).
@@ -36,6 +37,10 @@ Application Builder is an open-source tool for you to create web applications 
 *  **Demo Catalog:** User now able to try out pre-built cumulocity demos by installing Demo Catalog which is available in your home page.
 *  **Auto Upgrade Notification:** From Application Builder 1.3.0 onwards user will get notification whenever new version of app builder available and ability to seamless upgrade by single click.
 *  **Settings:** Now user has abilities to control various features such as hide logo, disable auto upgrade, hide tabs for device specific dashboards, etc.
+* **Dashboard Tree view:** Dashboard Tree view provides hierarchical view for quicker and easier access to a dashboard.
+* **Dashboard Locking:** User can now lock/unlock all dashboards by just one click.
+* **Dashboard Search:** Smart search introduced to quickly search your dashboard.
+* **Seamless upgrade experience:** Upgrade of application builder made simpler.
 
 ## Installation
 
@@ -114,7 +119,9 @@ cd cumulocity-app-builder
 ```
 2. (Optional) Checkout a specific version: 
 ```
+
 git checkout v2.0.0
+
 ```
 3. Install the dependencies: 
 ```

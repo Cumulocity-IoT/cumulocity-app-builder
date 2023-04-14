@@ -33,8 +33,6 @@ const packageJson = require('./../../package.json');
 @Injectable()
 export class TemplateCatalogService {
 
- //   private GATEWAY_URL = '';
- //   private CATALOG_LABCASE_ID = '';
     private GATEWAY_URL_GitHubAsset = '';
     private GATEWAY_URL_GitHubAPI = '';
     private GATEWAY_URL_GitHubAsset_FallBack = '';

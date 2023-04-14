@@ -19,8 +19,8 @@ import { Injector, NgModule } from '@angular/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NavigationError, Router, RouterModule as NgRouterModule } from '@angular/router';
 import { UpgradeModule as NgUpgradeModule } from '@angular/upgrade/static';
-import { AppStateService, CoreModule, RouterModule, PluginsModule, SearchModule } from '@c8y/ngx-components';
-import { DashboardUpgradeModule, UpgradeModule, HybridAppModule, UPGRADE_ROUTES } from '@c8y/ngx-components/upgrade';
+import { AppStateService, CoreModule, RouterModule} from '@c8y/ngx-components';
+import { DashboardUpgradeModule, UpgradeModule, HybridAppModule } from '@c8y/ngx-components/upgrade';
 import { BuilderModule } from "./builder/builder.module";
 import { filter, first, map, startWith, tap, withLatestFrom } from "rxjs/operators";
 import { IUser } from '@c8y/client';
@@ -76,7 +76,6 @@ export class AppModule extends HybridAppModule {
     ngDoBootstrap(): void {
         super.ngDoBootstrap();
         // Only do this after bootstrapping so that angularJs is loaded
-      //  this.runtimeWidgetLoaderService.loadRuntimeWidgets();
         // A hack to get href hash changes to always trigger an Angular Router update... There seems to be an AngularUpgrade/AngularJS/Cumulocity bug somewhere that stops the hashchange event firing.
         // This bug is apparent when trying to use the AppSwitcher to change to another AppBuilder App, sometimes it works, sometimes it doesn't
         const $injector = this.injector.get('$injector');
