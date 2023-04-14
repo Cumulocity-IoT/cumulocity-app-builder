@@ -68,6 +68,8 @@ export class BrandingComponent implements OnDestroy {
                     this.renderer.addClass(this.document.body, 'body-theme');
                     this.customTheme = false;
                 } else {
+                    this.applyTheme = true;
+                    this.renderer.addClass(this.document.body, 'body-theme');
                     this.customTheme = true;
                 }
             } else {
@@ -173,8 +175,9 @@ export class BrandingComponent implements OnDestroy {
                 this.applyTheme = true;
                 this.renderer.addClass(this.document.body, 'body-theme');
             } else if (selectedTheme === this.themeName) {
-                this.applyTheme = false;
-                this.renderer.removeClass(this.document.body, 'body-theme');
+                this.customTheme = true;
+                this.applyTheme = true;
+                this.renderer.addClass(this.document.body, 'body-theme');
             }
             this.showBrandingChange(app);
         }
@@ -189,6 +192,9 @@ export class BrandingComponent implements OnDestroy {
             this.themeName = this.bsModalRef.content.themeName;
             const appId = this.route.snapshot.paramMap.get('applicationId');
             this.app = from(this.appService.detail(appId).then(res => res.data as any));
+            this.customTheme = true;
+            this.applyTheme = true;
+            this.renderer.addClass(this.document.body, 'body-theme');
         });
     }
 
@@ -196,7 +202,7 @@ export class BrandingComponent implements OnDestroy {
         let finalApp = app.applicationBuilder.customBranding.filter((theme) => theme.themeName !== this.themeName);
         app.applicationBuilder.customBranding = finalApp;
         app.applicationBuilder.selectedTheme = 'Default';
-        this.setTheme(app, '#1776bf', '#14629F', '#0b385b', '#ffffff', '#ffffff','#14629F', '#ffffff', '#ffffff', '#ffffff','Default');
+        this.setTheme(app, '#1776bf', '#14629F', '#0b385b', '#ffffff', '#ffffff', '#14629F', '#ffffff', '#ffffff', '#ffffff', 'Default');
         await this.appService.update({
             id: app.id,
             applicationBuilder: app.applicationBuilder

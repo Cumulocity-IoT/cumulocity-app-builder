@@ -132,7 +132,6 @@ export class MyWidgetsComponent implements OnInit {
                 this.appList.forEach(app => {
                     const appWidgetObj = this.widgetCatalog.widgets.find(widgetObj => widgetObj.contextPath === app.contextPath);
                     if (!appWidgetObj) {
-                        appWidgetObj
                         this.widgetCatalog.widgets.push({
                             contextPath: app.contextPath,
                             title: app.name,

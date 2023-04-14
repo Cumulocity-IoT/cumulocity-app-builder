@@ -62,6 +62,7 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
     deviceDetail?: string
     dashboardSmartRulesAlarmsExplorerVisibility = true;
 
+    appSubscription = new Subscription();
     isGroupTemplate?: boolean;
     app: Observable<any>;
     context: Partial<{
@@ -217,11 +218,12 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
                 const activeTabs = document.querySelectorAll('c8y-tabs-outlet li.active') as any;
                 if (activeTabs.length > 1) {
                     activeTabs.forEach(tab => {
-                        if (tab.textContent !== 'Smart rules' && tab.textContent !== 'Alarms' && tab.textContent !== 'Data explorer') {
+                        const tabName = (tab.textContent ? tab.textContent.trim() : '');
+                        if (tabName !== 'Smart rules' && tabName !== 'Alarms' && tabName !== 'Data explorer') {
                             tab.classList.remove('active');
                         }
-                        if (tab.textContent === 'Smart rules' || tab.textContent === 'Alarms' || tab.textContent === 'Data explorer') {
-                            this.app.subscribe((app) => {
+                        if (tabName === 'Smart rules' || tabName === 'Alarms' || tabName === 'Data explorer') {
+                            this.appSubscription = this.app.subscribe((app) => {
                                 if (app.applicationBuilder.branding.enabled && (app.applicationBuilder.selectedTheme && app.applicationBuilder.selectedTheme !== 'Default')) {
                                     this.renderer.addClass(this.document.body, 'dashboard-body-theme');
                                 } else {
@@ -234,8 +236,9 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
                     });
                 } else {
                     activeTabs.forEach(tab => {
-                        if (tab.textContent === 'Smart rules' || tab.textContent === 'Alarms' || tab.textContent === 'Data explorer') {
-                            this.app.subscribe((app) => {
+                        const tabName = (tab.textContent ? tab.textContent.trim() : '');
+                        if (tabName === 'Smart rules' || tabName === 'Alarms' || tabName === 'Data explorer') {
+                            this.appSubscription = this.app.subscribe((app) => {
                                 if (app.applicationBuilder.branding.enabled && (app.applicationBuilder.selectedTheme && app.applicationBuilder.selectedTheme !== 'Default')) {
                                     this.renderer.addClass(this.document.body, 'dashboard-body-theme');
                                 } else {
@@ -256,6 +259,7 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
     }
     ngOnDestroy(): void {
         this.subscriptions.unsubscribe();
+        this.appSubscription.unsubscribe();
     }
 
     createDeviceTabPath(dashboardId: string, deviceDetail?: string) {

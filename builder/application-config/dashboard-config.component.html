@@ -60,7 +60,8 @@
         <div *ngIf="filterValue === ''" class="drag-handle"><i class="fa custom-icon-drag-handle"></i></div>
         <div class="col col-overflow" title="{{item.value.name}}">{{item.value.name}}</div>
         <div class="col col-overflow" title="{{item.value.id}}" id="dashboard-id-{{item.value.name}}-{{index}}">
-            {{item.value.id}}</div>
+            {{item.value.id}}<a class="copy-dashboard" title="Copy Dashboard ID" (click)="copyDashboardID(item.value.id)"><i c8yIcon="copy"></i></a>
+        </div>
         <div class="col col-overflow">{{item.value.visibility === 'no-nav' ? 'Tabs Only' :
             item.value.visibility === 'hidden' ? 'Hidden': item.value.visibility}}</div>
         <div class="col col-overflow" title="{{item.value.tabGroup}}">{{item.value.tabGroup}}</div>
@@ -207,7 +208,7 @@
                     </ng-container>
                     <ng-container *ngIf="filterValue !== '' && defaultListView === '2'">
                         <div class="table-responsive listTable">
-                            <table class="table">
+                            <table class="table listViewTable">
                                 <thead>
                                     <tr>
                                         <th class="font-bold pl-30">Path</th>
@@ -227,7 +228,7 @@
                                 <tbody>
                                     <tr *ngFor="let item of filteredDashboardList;let i=index;">
                                         <td class="pl-30" title="{{item.name}}">{{item.name}}</td>
-                                        <td title="{{item.id}}">{{item.id}}</td>
+                                        <td title="{{item.id}}">{{item.id}}<a class="copy-dashboard" title="Copy Dashboard ID" (click)="copyDashboardID(item.value.id)"><i c8yIcon="copy"></i></a></td>
                                         <td title="{{item.visibility === 'no-nav' ? 'Tabs Only' :
                                         item.visibility === 'hidden' ? 'Hidden': item.visibility}}">{{item.visibility
                                             === 'no-nav' ? 'Tabs Only' :
