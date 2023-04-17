@@ -55,23 +55,6 @@
   color: #000;
 }
 
-.table>tbody>tr>td {
-  padding: 3px 10px 6px;
-}
-
-
-.listViewTable th {
-  color: var(--brand-dark, #333) !important;
-}
-
-.listViewTable td {
-  color: var(--brand-dark, #000) !important;
-}
-
-.listViewTable td a{
-  color: var(--brand-dark, #000) !important;
-}
-
 
 .font-bold {
   font-weight: bold;
@@ -136,6 +119,36 @@
   margin-left: 5px;
   cursor: pointer;
 }
-.listTable .listViewTable {
-  background-color: var(--brand-primary, #fff);
+.listTable .applyDark {
+  background-color: var(--brand-primary, #ffffff);
+}
+.listTable .applyLight {
+  background-color: #ffffff;
+}
+
+.applyLight th {
+  color: rgb(51, 51, 51) !important;
+  text-transform: capitalize !important;
+  font-size: 14px !important;
+}
+
+.applyLight td {
+  color: rgb(51, 51, 51) !important;
+}
+
+.applyLight td a{
+  color: rgb(51, 51, 51) !important;
+}
+.applyDark th {
+  color: var(--brand-dark, #333) !important;
+  text-transform: capitalize;
+  font-size: 14px;
+}
+
+.applyDark td {
+  color: var(--brand-dark, #000) !important;
+}
+
+.applyDark td a{
+  color: var(--brand-dark, #000) !important;
 }
