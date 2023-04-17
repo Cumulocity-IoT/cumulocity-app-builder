@@ -208,7 +208,7 @@
                     </ng-container>
                     <ng-container *ngIf="filterValue !== '' && defaultListView === '2'">
                         <div class="table-responsive listTable">
-                            <table class="table listViewTable">
+                            <table class="table listViewTable" [ngClass]="getTableTheme()">
                                 <thead>
                                     <tr>
                                         <th class="font-bold pl-30">Path</th>
@@ -228,7 +228,7 @@
                                 <tbody>
                                     <tr *ngFor="let item of filteredDashboardList;let i=index;">
                                         <td class="pl-30" title="{{item.name}}">{{item.name}}</td>
-                                        <td title="{{item.id}}">{{item.id}}<a class="copy-dashboard" title="Copy Dashboard ID" (click)="copyDashboardID(item.value.id)"><i c8yIcon="copy"></i></a></td>
+                                        <td title="{{item.id}}">{{item.id}}<a class="copy-dashboard" title="Copy Dashboard ID" (click)="copyDashboardID(item.id)"><i c8yIcon="copy"></i></a></td>
                                         <td title="{{item.visibility === 'no-nav' ? 'Tabs Only' :
                                         item.visibility === 'hidden' ? 'Hidden': item.visibility}}">{{item.visibility
                                             === 'no-nav' ? 'Tabs Only' :

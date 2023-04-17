@@ -222,11 +222,11 @@ a, a:hover {
     --body-background-color: var(--brand-dark,#f2f3f4);
 }
 .label-color {
-    color: var(--navigator-active-color, #000);
+    color: var(--navigator-active-bg, #000);
 }
 .card-color {
     background: var(--brand-primary, #fff);
-    color: var(--navigator-active-color, #000);
+    color: var(--navigator-active-bg, #000);
 }
 .nav-tabs > li > button {
     color: var(--navigator-active-bg,#0b385b) !important;

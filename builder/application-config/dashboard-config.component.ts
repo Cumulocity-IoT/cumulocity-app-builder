@@ -104,15 +104,16 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     expandAllDashboards: boolean = true;
     forceUpdate = false;
     expandEventSubject: Subject<void> = new Subject<void>();
+    isFilterActive: boolean = false;
 
     constructor(
         private appIdService: AppIdService, private appService: ApplicationService, private appStateService: AppStateService,
         private brandingService: BrandingService, private inventoryService: InventoryService, private navigation: AppBuilderNavigationService,
         private modalService: BsModalService, private alertService: AlertService, private settingsService: SettingsService,
         private accessRightsService: AccessRightsService, private userService: UserService, private appDataService: AppDataService,
-        @Inject(DOCUMENT) private document: Document, private renderer: Renderer2, private cd: ChangeDetectorRef,private clipboard: Clipboard
+        @Inject(DOCUMENT) private document: Document, private renderer: Renderer2, private cd: ChangeDetectorRef, private clipboard: Clipboard
     ) {
-        this.app = combineLatest([appIdService.appIdDelayedUntilAfterLogin$,this.refreshApp]).pipe(
+        this.app = combineLatest([appIdService.appIdDelayedUntilAfterLogin$, this.refreshApp]).pipe(
             map(([appId]) => appId),
             switchMap(appId => from(
                 this.appDataService.getAppDetails(appId)
@@ -127,7 +128,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
         this.delayedAppUpdateSubscription = this.delayedAppUpdateSubject
             .pipe(debounceTime(1000))
             .subscribe(async app => {
-                if(this.forceUpdate) {
+                if (this.forceUpdate) {
                     this.appDataService.forceUpdate = true;
                 }
                 await this.appService.update(app);
@@ -142,30 +143,30 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
         this.defaultListView = '2';
         let count = 0;
         this.appSubscription = this.app.pipe(first()).
-          subscribe(app => {
-            if (app.applicationBuilder.branding.enabled && (app.applicationBuilder.selectedTheme && app.applicationBuilder.selectedTheme !== 'Default')) {
-                this.applyTheme = true;
-                this.renderer.addClass(this.document.body, 'dashboard-body-theme');
-            } else {
-                this.applyTheme = false;
-            }
-            if (app.applicationBuilder.dashboards.length !== 0) {
-                app.applicationBuilder.dashboards.forEach(async (element) => {
-                    let c8y_dashboard = (await this.inventoryService.detail(element.id)).data;
-                    if (c8y_dashboard.c8y_Dashboard.isFrozen === false) {
-                        count++;
-                        if (count > 0) {
-                            this.autoLockDashboard = false;
+            subscribe(app => {
+                if (app.applicationBuilder.branding.enabled && (app.applicationBuilder.selectedTheme && app.applicationBuilder.selectedTheme !== 'Default')) {
+                    this.applyTheme = true;
+                    this.renderer.addClass(this.document.body, 'dashboard-body-theme');
+                } else {
+                    this.applyTheme = false;
+                }
+                if (app.applicationBuilder.dashboards.length !== 0) {
+                    app.applicationBuilder.dashboards.forEach(async (element) => {
+                        let c8y_dashboard = (await this.inventoryService.detail(element.id)).data;
+                        if (c8y_dashboard.c8y_Dashboard.isFrozen === false) {
+                            count++;
+                            if (count > 0) {
+                                this.autoLockDashboard = false;
+                            }
                         }
-                    }
-                });
-            } else {
-                this.autoLockDashboard = false;
-            }
-           this.filteredDashboardList = [...app.applicationBuilder.dashboards];
-           this.prepareDashboardHierarchy(app);
-           this.forceUpdate = true;
-        });
+                    });
+                } else {
+                    this.autoLockDashboard = false;
+                }
+                this.filteredDashboardList = [...app.applicationBuilder.dashboards];
+                this.prepareDashboardHierarchy(app);
+                this.forceUpdate = true;
+            });
         this.isDashboardCatalogEnabled = await this.settingsService.isDashboardCatalogEnabled();
         if (this.userService.hasAllRoles(this.appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN", "ROLE_APPLICATION_MANAGEMENT_ADMIN"])) {
             this.showAddDashboard = true;
@@ -255,7 +256,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
                     id: application.id,
                     applicationBuilder: application.applicationBuilder
                 } as any);
-                
+
                 if (application.applicationBuilder.dashboards.length === 0) {
                     this.autoLockDashboard = false;
                 }
@@ -267,12 +268,14 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     }
 
     async reorderDashboards(app, newDashboardsOrder) {
-        if (newDashboardsOrder.length !== 0) {
-            app.applicationBuilder.dashboards = newDashboardsOrder;
-            this.delayedAppUpdateSubject.next({
-                id: app.id,
-                applicationBuilder: app.applicationBuilder
-            });
+        if (!this.isFilterActive) {
+            if (newDashboardsOrder.length !== 0) {
+                app.applicationBuilder.dashboards = newDashboardsOrder;
+                this.delayedAppUpdateSubject.next({
+                    id: app.id,
+                    applicationBuilder: app.applicationBuilder
+                });
+            }
         }
     }
 
@@ -391,9 +394,9 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
             });
             this.bsModalRef.content.onSave.subscribe((isReloadRequired: boolean) => {
                 if (isReloadRequired) {
-                   this.prepareDashboardHierarchy(this.bsModalRef.content.app);
-                   this.filteredDashboardList = [...this.bsModalRef.content.app.applicationBuilder.dashboards];
-                   this.cd.detectChanges();
+                    this.prepareDashboardHierarchy(this.bsModalRef.content.app);
+                    this.filteredDashboardList = [...this.bsModalRef.content.app.applicationBuilder.dashboards];
+                    this.cd.detectChanges();
                 }
             });
         }
@@ -422,6 +425,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     }
 
     searchDashboard(app) {
+        this.isFilterActive = true;
         if (this.filterValue) {
             this.filteredDashboardList = [...app.applicationBuilder.dashboards];
             this.filteredDashboardList = this.filteredDashboardList.filter(x => {
@@ -437,6 +441,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
             });
         } else {
             this.filteredDashboardList = [...app.applicationBuilder.dashboards];
+            this.isFilterActive = false;
         }
     }
 
@@ -514,7 +519,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
                             c8y_Dashboard,
                             id: element.id
                         };
-                        
+
                         this.inventoryService.update(dashboardObject);
                     });
                 } else {
@@ -709,5 +714,13 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
 
     copyDashboardID(dashboardId: string) {
         this.clipboard.copy(dashboardId);
+    }
+
+    getTableTheme() {
+        if(this.applyTheme) {
+            return 'applyDark';
+        } else {
+            return 'applyLight';
+        }
     }
 }
