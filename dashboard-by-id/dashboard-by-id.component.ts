@@ -19,8 +19,6 @@ import {Component, Inject, Input, OnChanges, OnInit, Renderer2, SimpleChanges} f
 import {InventoryService} from "@c8y/client";
 import {ActionBarService, AlertService, DashboardChange, DashboardChildChange, GainsightService, ModalService} from "@c8y/ngx-components";
 import {BsModalService} from "ngx-bootstrap/modal";
-// import {ContextDashboardComponent} from "./context-dashboard.component";
-// import {WidgetService} from "./widget.service";
 import {
     CONTEXT_DASHBOARD_CONFIG,
     ContextDashboardService,

@@ -14,6 +14,7 @@ Application Builder is an open-source tool for you to create web applications 
 * **Cumulocity upgrade:** Application Builder is now based on Cumulocity 1016.0.170
 * **Various bug fixes**
 
+
 ## Features
 * **Browser-based Device Simulators:** Create device simulators that run directly in your browser.
 * **DTDL Simulator:** User can now create simulator based on [DTDL](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md)(Digital Twins Definition Language).
@@ -36,6 +37,10 @@ Application Builder is an open-source tool for you to create web applications 
 *  **Demo Catalog:** User now able to try out pre-built cumulocity demos by installing Demo Catalog which is available in your home page.
 *  **Auto Upgrade Notification:** From Application Builder 1.3.0 onwards user will get notification whenever new version of app builder available and ability to seamless upgrade by single click.
 *  **Settings:** Now user has abilities to control various features such as hide logo, disable auto upgrade, hide tabs for device specific dashboards, etc.
+* **Dashboard Tree view:** Dashboard Tree view provides hierarchical view for quicker and easier access to a dashboard.
+* **Dashboard Locking:** User can now lock/unlock all dashboards by just one click.
+* **Dashboard Search:** Smart search introduced to quickly search your dashboard.
+* **Seamless upgrade experience:** Upgrade of application builder made simpler.
 
 ## Installation
 
@@ -114,7 +119,9 @@ cd cumulocity-app-builder
 ```
 2. (Optional) Checkout a specific version: 
 ```
+
 git checkout v2.0.0
+
 ```
 3. Install the dependencies: 
 ```
@@ -150,14 +157,11 @@ This guide will teach you how to create your first application using the Applica
 Congratulations! You have created an application and added your first screen.
 
 ## User Guide
-A more detailed user guide and quick start videos are available in the Home section of the Application Builder app.
 
-**NOTE:** This is only shown in the main page of the Application Builder, not when editing an individual application
+### How to convert existing widget into plugin
+We are going to publish video tutorial where you will find detailed instructions about converting your existing widget into plugin.
 
-#### How to convert existing widget into plugin
-Please go through this video to find detailed instructions about converting your existing widget into plugin.
-
-#### How to upgrade Application Builder to 2.0
+### How to upgrade Application Builder to 2.0
 Application Builder 2.0 is based on micro-frontend architecture and existing Custom Widgets/Runtime widgets are no longer compatible.
 For seamless upgrade experience, please follow below steps:
  1. Upgrade your Application Builder to 1.3.4 (In case if you are using earlier version).
@@ -165,7 +169,7 @@ For seamless upgrade experience, please follow below steps:
  
 Please note that if your widgets are part of Widget Catalog(maintained by community), then Application Builder will automatically delete existing widget and install corresponding plugin. In case if custom widget please see [How to convert existing widget into plugin](#how-to-convert-existing-widget-into-plugin)
 
-#### How to upgrade Context Path Application to 2.0
+### How to upgrade Context Path Application to 2.0
 If your existing application is created with providing context path, then it will not be going to upgrade using Application Builder upgrade functionality since it is running in its own application context.
 
 Here are steps to upgrade Context Path application. Please note that this action is **non-reversible**:
@@ -180,7 +184,7 @@ Here are steps to upgrade Context Path application. Please note that this action
  8. If all functionalities are working as expected, then clone application again with context path
  9. Congratulations, you have upgraded your app to 2.0.
 
-#### How to downgrade Application Builder to 1.3.x
+### How to downgrade Application Builder to 1.3.x
 If you already upgraded Application Builder to 2.0 and wanted to downgrade back to 1.3.x for any reason, you can follow below steps:
 
 1. Download Application Builder 1.3.x binary from release section.
@@ -196,6 +200,10 @@ If you already upgraded Application Builder to 2.0 and wanted to downgrade back 
 11. Congratulations, you have downgraded your app to 1.3.x
 
 
+A more detailed user guide and quick start videos are available in the Home section of the Application Builder app.
+
+**NOTE:** This is only shown in the main page of the Application Builder, not when editing an individual application.
+
 ## Runtime Widgets
 
 Application Builder supports  widget deployment. Some of the  widget plugins are already available in widget catalog.
@@ -205,6 +213,18 @@ Would you like to create your own Custom Runtime widget? Please refer our [Demo 
 
 
 ## Troubleshooting
+
+ ### Application Builder 2.0.0 and later
+ 
+ *  **Widget/plugins are not installed after upgrade:**
+ There are multiple reasons that your widgets/plugins might not installed such as browser page refreshed, network error, etc.
+ In this scenario you can follow any of the below approach:
+   1. If you have installed many widgets in earlier version of application builder then you can downgrade application builder by following [How to downgrade Application Builder to 1.3.x](https://github.com/SoftwareAG/cumulocity-app-builder/edit/2.0.0-dev-1/README.md#how-to-downgrade-application-builder-to-13x) and try again.
+   2. If you have few widgets installed in earlier version of application builder, then you can just uninstall those widgets manually from Administration -> Ecosystem -> All Applications and install corresponding plugin either from Widget Catalog or from Administration -> Ecosystem -> Packages.
+ 
+ 
+ ### Application Builder 1.3.x and earlier
+ 
  *  **Failed to load a runtime custom widget:**
  ```
  	Failed to load a runtime custom widget, it may have been compiled for a different Cumulocity version
