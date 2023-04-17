@@ -519,7 +519,6 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
                             c8y_Dashboard,
                             id: element.id
                         };
-
                         this.inventoryService.update(dashboardObject);
                     });
                 } else {
