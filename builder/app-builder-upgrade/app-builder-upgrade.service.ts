@@ -437,7 +437,7 @@ export class AppBuilderUpgradeService {
         let appConfigUpdated = false;
         for (let remote of appBuilderConfigRemotes) {
             let pluginBinary = widgetCatalog.widgets.find(widget => widget.contextPath === remote?.pluginContext && widget.isCompatible);
-            if (pluginBinary) {
+            if (pluginBinary && (pluginBinary.binaryLink && pluginBinary.binaryLink !== '' || pluginBinary.link && pluginBinary.link !=="")) {
                 this.progressIndicatorService.setProgress(0);
                 this.progressIndicatorService.setMessage(`Installing ${pluginBinary.title}`);
                 this.progressIndicatorService.setProgress(10);
