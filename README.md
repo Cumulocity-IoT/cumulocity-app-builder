@@ -10,7 +10,7 @@ Application Builder is an open-source tool for you to create web applications 
 * **Optimized Performance:** Application builder now provide faster response times, reduced resource usage, and improved user experience.
 * **Custom Branding:** Provides flexibility and control over application’s look and feel.
 * **Dashboards:** Simplified the dashboard navigation by introducing path while creating dashboard.
-* **Seamless upgrade experience:** Upgrade of application builder made simpler.
+* **Seamless upgrade experience:** Upgrade of application builder made simpler. [Click here for more detail.](#how-to-upgrade-application-builder-to-20)
 * **Cumulocity upgrade:** Application Builder is now based on Cumulocity 1016.0.170
 * **Various bug fixes**
 
@@ -163,6 +163,18 @@ We are going to publish video tutorial where you will find detailed instructions
 
 ### How to upgrade Application Builder to 2.0
 Application Builder 2.0 is based on micro-frontend architecture and existing Custom Widgets/Runtime widgets are no longer compatible.
+
+#### When should you upgrade?
+- If you are Admin of the tenant
+- You are using custom application builder (not subscribed one). If you are using subscribed application builder, then consider impact on sub-tenants before upgrade.
+- Your custom widgets(if any) are converted into plugins or corresponding plugins are available.
+
+#### When should you not upgrade?
+- When your application builder is subscribed to one or more tenants, and you are not aware the impact of those tenants.
+- You have custom widgets which are not supported plugins or not yet converted to plugins.
+	
+#### How to upgrade
+
 For seamless upgrade experience, please follow below steps:
  1. Upgrade your Application Builder to 1.3.4 (In case if you are using earlier version).
  2. Upgrade your Application Builder to 2.0 using upgrade option in bottom of your page(Available only to admin user).
@@ -199,6 +211,7 @@ If you already upgraded Application Builder to 2.0 and wanted to downgrade back 
 10. Install required widget again.
 11. Congratulations, you have downgraded your app to 1.3.x
 
+-----
 
 A more detailed user guide and quick start videos are available in the Home section of the Application Builder app.
 
