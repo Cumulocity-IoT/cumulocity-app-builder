@@ -165,7 +165,7 @@ We are going to publish video tutorial where you will find detailed instructions
 Application Builder 2.0 is based on micro-frontend architecture and existing Custom Widgets/Runtime widgets are no longer compatible.
 
 #### When should you upgrade?
-- If you are Admin of the tenant
+- If you are Admin of the tenant.
 - You are using custom application builder (not subscribed one). If you are using subscribed application builder, then consider impact on sub-tenants before upgrade.
 - Your custom widgets(if any) are converted into plugins or corresponding plugins are available.
 
