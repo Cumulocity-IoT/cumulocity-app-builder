@@ -11,7 +11,7 @@ export class AlertMessageModalComponent {
 
     message: any;
     public event: EventEmitter<any> = new EventEmitter();
-    constructor(public bsModalRef: BsModalRef,private loginService: LoginService) {}
+    constructor(public bsModalRef: BsModalRef, private loginService: LoginService) { }
     colorStatusClass() {
         switch (this.message.type) {
             case 'danger':
@@ -24,12 +24,12 @@ export class AlertMessageModalComponent {
     }
 
     confirm() {
-        this.event.emit({isConfirm: true});
+        this.event.emit({ isConfirm: true });
         this.bsModalRef.hide();
     }
 
     dismiss() {
-        this.event.emit({isConfirm: false});
+        this.event.emit({ isConfirm: false });
         this.bsModalRef.hide();
     }
 

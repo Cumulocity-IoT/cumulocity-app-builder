@@ -21,10 +21,10 @@ import { ApplicationService, InventoryService, ICurrentTenant, IApplication, Use
 import { AlertService, AppStateService } from '@c8y/ngx-components';
 import { AppBuilderExternalAssetsService } from 'app-builder-external-assets';
 import { AppIdService } from '../app-id.service';
-import { from, of, Subject } from 'rxjs';
+import { from, Subject } from 'rxjs';
 import { contextPathFromURL } from '../utils/contextPathFromURL';
 import {UpdateableAlert} from "../utils/UpdateableAlert";
-import { distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { switchMap, take } from 'rxjs/operators';
 import * as delay from "delay";
 
 @Injectable({providedIn: 'root'})
@@ -53,7 +53,7 @@ export class SettingsService {
             const providerList = this.externalAssetService.getAssetsList('ANALYTICS')
             this.analyticsProvider = providerList.find( provider => provider.key === 'gainsight');
             this.analyticsProvider.providerURL = this.externalAssetService.getURL('ANALYTICS','gainsight');
-            appIdService.appIdDelayedUntilAfterLogin$.pipe(distinctUntilChanged()).pipe(switchMap(appId => {
+            appIdService.appIdDelayedUntilAfterLogin$.pipe(take(1)).pipe(switchMap(appId => {
                 return from(this.getAppBuilderConfig());
               
             }))
@@ -84,7 +84,7 @@ export class SettingsService {
             return this.appbuilderId;
         }
     }
-    private async getAppBuilderConfig() {
+    async getAppBuilderConfig() {
         const appBuilderId = await this.getAPPBuilderId();
         const AppBuilderConfigList = (await this.inventoryService.list( {pageSize: 100, query: `type eq AppBuilder-Configuration and appBuilderId eq '${appBuilderId}'`})).data;
         this.appBuilderConfig = (AppBuilderConfigList.length > 0 ? AppBuilderConfigList[0] : null);
@@ -105,7 +105,7 @@ export class SettingsService {
 
     async getAppBuilderMaintenanceStatus() {
         if(this.appBuilderConfig) {
-            return (this.appBuilderConfig?.underMaintenance ? this.appBuilderConfig?.underMaintenance : 'false');
+            return (this.appBuilderConfig.underMaintenance ? this.appBuilderConfig.underMaintenance : 'false');
         }
         else {
             await delay(500);
@@ -126,6 +126,7 @@ export class SettingsService {
         const creationAlert = new UpdateableAlert(this.alertService);
         creationAlert.update('Updating Custom Properties...');
         const appBuilderId = await this.getAPPBuilderId();
+        await delay(500);
         if(this.appBuilderConfig) {
             await this.inventoryService.update({
                 id: this.appBuilderConfig.id,
@@ -144,6 +145,7 @@ export class SettingsService {
         await creationAlert.close(3000);
         location.reload();
     }
+
 
     setTenant(tenant: ICurrentTenant | null) {
         this.currentTenant = tenant;
@@ -164,17 +166,13 @@ export class SettingsService {
     }
 
     private async isAnalyticsProviderActive() {
-        if(this.appBuilderConfig && this.appBuilderConfig.customProperties) {
-            const customProperties = this.appBuilderConfig.customProperties;
+        if(this.appBuilderConfig) {
+            const customProperties = this.appBuilderConfig?.customProperties;
             return (customProperties && customProperties.gainsightEnabled === 'true')
         }
         else {
-            await this.getAppBuilderConfig();
-            if(this.appBuilderConfig && this.appBuilderConfig.customProperties) {
-                const customProperties = this.appBuilderConfig.customProperties;
-                return (customProperties && customProperties.gainsightEnabled === 'true')
-            }
-            return false;
+            await new Promise(resolve => setTimeout(resolve, 500));
+            return await this.isAnalyticsProviderActive();
         }  
     }
 
@@ -215,6 +213,17 @@ export class SettingsService {
         return (!customProp || (customProp  && ( !customProp.appUpgradeNotification || customProp.appUpgradeNotification === "true")));
     }
 
+    async getAppBuilderConfigs() {
+        if(this.appBuilderConfig) {
+            return this.appBuilderConfig;
+        } else if(this.isAppConfigNotFound) {
+            return null;
+        }
+        else {
+            await delay(500);
+            return await this.getAppBuilderConfigs();
+        }
+    }
     async updateAppConfigurationForPlugin(remotes: any, underMaintenance?: any){
         
         if(this.appBuilderConfig) {
@@ -246,5 +255,4 @@ export class SettingsService {
             underMaintenance: 'false'
         })
     }
-
 }

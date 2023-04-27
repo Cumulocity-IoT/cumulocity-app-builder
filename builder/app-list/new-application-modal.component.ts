@@ -38,7 +38,7 @@ import { AppListService } from './app-list.service';
         <form name="newAppBuilderAppForm" #newAppBuilderAppForm="ngForm" class="c8y-wizard-form">
             <div class="form-group">
                 <label for="name"><span>Name</span></label>
-                <input type="text" class="form-control" id="name" name="name" placeholder="e.g. My First Application (required)" required [(ngModel)]="appName">
+                <input type="text" class="form-control" id="name" name="name" placeholder="e.g. My First Application (required)" required [(ngModel)]="appName" (ngModelChange)="validateAppName(newAppBuilderAppForm)">
             </div>
             
             <div class="form-group">
@@ -94,6 +94,16 @@ export class NewApplicationModalComponent implements OnInit {
 
     ngOnInit() {
         this.loadApplicationsForClone();
+    }
+
+    validateAppName(newAppBuilderAppForm) {
+        const appFound = this.allApplications.find(app => app.name.toLowerCase() === this.appName.toLowerCase() ||
+        (this.appPath && this.appPath.length > 0 && (app.contextPath && app.contextPath?.toLowerCase() === this.appPath.toLowerCase())))
+        if (appFound) {
+            newAppBuilderAppForm.form.setErrors({ 'invalid': true });
+            this.alertService.danger(" Application name or context path already exists!");
+            return;
+        }
     }
 
     async createApplication() {
@@ -290,6 +300,12 @@ export class NewApplicationModalComponent implements OnInit {
                     ...defaultAppBuilderData
                 } as any);
 
+                
+                // update manifest
+                await this.appService.storeAppManifest(app.id, {
+                    ...appBuilder.manifest,
+                    icon: defaultAppBuilderData.icon
+                });
                 // Update App Builder Custom Properties
                 await this.updateAppBuilderConfiguration(existingAppBuilderId, appId);
 

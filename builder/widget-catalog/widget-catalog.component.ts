@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2019 Software AG, Darmstadt, Germany and/or its licensors
+* Copyright (c) 2022 Software AG, Darmstadt, Germany and/or its licensors
 *
 * SPDX-License-Identifier: Apache-2.0
 *
@@ -19,19 +19,19 @@
 import { Component, isDevMode, OnDestroy, OnInit } from "@angular/core";
 import {
     ApplicationService,
+    IApplication,
     UserService
 } from "@c8y/client";
-import { AlertService, AppStateService, DynamicComponentService } from "@c8y/ngx-components";
+import { AlertService, AppStateService, DynamicComponentService, PluginsService } from "@c8y/ngx-components";
 import { ProgressIndicatorModalComponent } from '../utils/progress-indicator-modal/progress-indicator-modal.component';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { interval, Subscription } from 'rxjs';
 import { previewModalComponent } from './preview-modal/preview-modal.component';
 import { WidgetCatalog, WidgetModel } from './widget-catalog.model';
 import { WidgetCatalogService } from './widget-catalog.service';
-import { RuntimeWidgetLoaderService } from 'cumulocity-runtime-widget-loader';
 import { AlertMessageModalComponent } from "../utils/alert-message-modal/alert-message-modal.component";
-import { catchError } from "rxjs/operators";
 import { Router, ActivatedRoute } from "@angular/router";
+import { ProgressIndicatorService } from "../utils/progress-indicator-modal/progress-indicator.service";
 
 @Component({
     templateUrl: './widget-catalog.component.html',
@@ -57,12 +57,11 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
     displayListValue: any;
     constructor(private appStateService: AppStateService, private modalService: BsModalService,
         private userService: UserService, private widgetCatalogService: WidgetCatalogService,
-        private alertService: AlertService, private componentService: DynamicComponentService, private appService: ApplicationService,
-        private runtimeWidgetLoaderService: RuntimeWidgetLoaderService,private router: Router, private route: ActivatedRoute) {
+        private alertService: AlertService, private componentService: DynamicComponentService, 
+        private appService: ApplicationService, private pluginsService: PluginsService,
+        private router: Router, private route: ActivatedRoute,
+        private progressIndicatorService: ProgressIndicatorService) {
         this.userHasAdminRights = userService.hasAllRoles(appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN", "ROLE_APPLICATION_MANAGEMENT_ADMIN"]);
-        this.runtimeWidgetLoaderService.isLoaded$.subscribe(isLoaded => {
-            this.widgetCatalogService.runtimeLoadingCompleted = isLoaded;
-        });
 
         this.widgetCatalogService.displayListValueMoreWidgets$.subscribe((value) => {
             if (value) {
@@ -74,8 +73,30 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
     }
 
 
-    ngOnInit() {
-        if (this.widgetCatalogService.runtimeLoadingCompleted) {
+    async ngOnInit() {
+        const ownAppBuilder = (await this.widgetCatalogService.isOwnAppBuilder());
+        if (!ownAppBuilder) {
+            const alertMessage = {
+                title: 'Application Builder',
+                description: `It looks like you are currently using a subscribed Application Builder in this tenant. To use the Widget Catalog, you’ll need to install an instance of the Application Builder.
+                
+                Please confirm if you wish to install the Application Builder.`,
+                type: 'warning',
+                alertType: 'confirm', //info|confirm
+                confirmPrimary: true //confirm Button is primary
+            }
+            const installDemoDialogRef = this.alertModalDialog(alertMessage);
+            await installDemoDialogRef.content.event.subscribe(async data => {
+                if (data && data.isConfirm) {
+                    this.showProgressModalDialog('Please wait...');
+                    await this.widgetCatalogService.cloneAppBuilder();
+                    window.location.reload();
+                } else {
+                    this.router.navigateByUrl(`/home`);
+                }
+            });
+        }
+        else if (this.widgetCatalogService.runtimeLoadingCompleted) {
             this.loadWidgetsFromCatalog();
         } else {
             this.isBusy = true;
@@ -99,12 +120,11 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
     private async loadWidgetsFromCatalog() {
 
         this.isBusy = true;
-        this.appList = (await this.appService.list({ pageSize: 2000 })).data;
+        this.appList = await this.pluginsService.listPackages(); 
         await this.widgetCatalogService.fetchWidgetCatalog()
             .subscribe(async (widgetCatalog: WidgetCatalog) => {
                 this.widgetCatalog = widgetCatalog;
-                await this.filterInstalledWidgets();
-                // this.filterWidgets = (this.widgetCatalog ? this.widgetCatalog.widgets : []);
+                this.widgetCatalog.widgets = await this.widgetCatalogService.filterInstalledWidgets(this.widgetCatalog, this.userHasAdminRights);
                 this.applyFilter();
                 this.isBusy = false;
             }, error => {
@@ -122,6 +142,7 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
     }
 
     applyFilter() {
+        this.filterWidgets = [];
         if (this.widgetCatalog && this.widgetCatalog.widgets.length > 0) {
             if (!this.showAllWidgets) {
                 this.filterWidgets = this.widgetCatalog.widgets.filter((widget => widget.title.toLowerCase().includes(this.searchWidget.toLowerCase()) && widget.isCompatible));
@@ -147,13 +168,9 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
             return;
         }
 
-        const appFound = this.appList.find(app => app.name.toLowerCase() === widget.title?.toLowerCase() ||
-            (app.contextPath && app.contextPath?.toLowerCase() === widget.contextPath.toLowerCase()))
-        if (appFound) {
-            this.alertService.danger(" Widget name or context path already exists!");
-            return;
-        }
-
+        const widgetBinaryFound = this.appList.find(app => (app.name.toLowerCase() === widget.title?.toLowerCase() ||
+            (app.contextPath && app.contextPath?.toLowerCase() === widget.contextPath.toLowerCase())))
+      
         if (widget.actionCode === '002' || widget.isDeprecated) {
             let alertMessage = {};
             if (widget.actionCode === '002') {
@@ -179,11 +196,15 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
             const installDemoDialogRef = this.alertModalDialog(alertMessage);
             await installDemoDialogRef.content.event.subscribe(async data => {
                 if (data && data.isConfirm) {
-                    await this.initiateInstallWidgetProcess(widget);
+                    this.progressIndicatorService.setProgress(5);
+                    await this.initiateInstallWidgetProcess(widget, widgetBinaryFound);
                 }
             });
 
-        } else { await this.initiateInstallWidgetProcess(widget); }
+        } else { 
+            this.progressIndicatorService.setProgress(5);
+            await this.initiateInstallWidgetProcess(widget, widgetBinaryFound); 
+        }
 
     }
 
@@ -191,72 +212,58 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
         return this.modalService.show(AlertMessageModalComponent, { class: 'c8y-wizard', initialState: { message } });
     }
 
-    private async initiateInstallWidgetProcess(widget: WidgetModel) {
+    private async initiateInstallWidgetProcess(widget: WidgetModel, widgetBinary: any) {
         this.showProgressModalDialog(`Installing ${widget.title}`)
-
-        this.widgetCatalogService.downloadBinary(widget.binaryLink)
+        this.progressIndicatorService.setProgress(10);
+        if(widgetBinary) {
+            this.progressIndicatorService.setProgress(30);
+            this.widgetCatalogService.updateRemotesInCumulocityJson(widgetBinary).then(async () => {
+                widget.installed = true;
+                widget.isReloadRequired = true;
+                this.widgetCatalogService.actionFlagGetWidgets(widget, this.userHasAdminRights);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                this.hideProgressModalDialog();
+            }, error => {
+                this.alertService.danger("There is some technical error! Please try after sometime.");
+                console.error(error);
+            });
+        } else {
+            this.progressIndicatorService.setProgress(15);
+            this.widgetCatalogService.downloadBinary(widget.binaryLink)
             .subscribe(data => {
-
+                this.progressIndicatorService.setProgress(20);
                 const blob = new Blob([data], {
                     type: 'application/zip'
                 });
                 const fileName = widget.binaryLink.replace(/^.*[\\\/]/, '');
                 const fileOfBlob = new File([blob], fileName);
-                this.widgetCatalogService.installWidget(fileOfBlob, widget).then(() => {
+                this.widgetCatalogService.installPackage(fileOfBlob).then(async () => {
                     widget.installed = true;
                     widget.isReloadRequired = true;
-                    this.actionFlag(widget);
+                    this.widgetCatalogService.actionFlagGetWidgets(widget, this.userHasAdminRights);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
                     this.hideProgressModalDialog();
+                }, error => {
+                    this.alertService.danger("There is some technical error! Please try after sometime.");
+                    console.error(error);
                 });
             });
+        } 
+        
     }
 
     // TODO: For phase II of widget catalog
     /* async installMultiple() {
         const selectedWidgets = this.filterWidgets.filter( (widget: WidgetModel) => widget.selected);
     } */
-    private async filterInstalledWidgets() {
-        if (!this.widgetCatalog || !this.widgetCatalog.widgets
-            || this.widgetCatalog.widgets.length === 0) {
-            return;
-        }
-
-        await this.widgetCatalog.widgets.forEach(async widget => {
-            const widgetObj = await new Promise<any>((resolve) => {
-                this.componentService.getById$(widget.id).subscribe(widgetObj => {
-                    resolve(widgetObj);
-                });
-            });
-            widget.installed = (widgetObj != undefined);
-            widget.isCompatible = this.widgetCatalogService.isCompatiblieVersion(widget);
-            this.actionFlag(widget);
-        });
-        this.widgetCatalog.widgets = this.widgetCatalog.widgets.filter(widget => !widget.installed);
-    }
+    
 
     toggleCompatible() {
         //   this.onlyCompatibleWidgets = !this.onlyCompatibleWidgets
         this.applyFilter();
     }
 
-    /**
-     * compatible: 001
-     * non compatible: 002
-     * refresh: 003
-     * force upgrade 004 (my widget)
-     * invisible 000
-     */
-    private actionFlag(widget: WidgetModel) {
-
-        if (this.userHasAdminRights) {
-            if (widget.isCompatible && !widget.installed) { widget.actionCode = '001'; }
-            else if (!widget.isCompatible && !widget.installed) { widget.actionCode = '002'; }
-            else if (widget.isReloadRequired && widget.installed) { widget.actionCode = '003'; }
-            else { widget.actionCode = '000'; }
-        } else {
-            widget.actionCode = '000';
-        }
-    }
+    
 
     ngOnDestroy() {
     }

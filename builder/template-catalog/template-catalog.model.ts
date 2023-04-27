@@ -80,6 +80,7 @@ export interface DependencyDescription {
     requiredPlatformVersion?: string;
     isSupported?: boolean;
     visible?: boolean;
+    contextPath?: string;
 }
 
 export interface CumulocityDashboard {

@@ -1,5 +1,4 @@
 @import '~font-awesome/less/font-awesome.less';
-@import '~@c8y/style/main.less';
 @import '~@c8y/style/extend.less';
 @import "~@ng-select/ng-select/themes/default.theme.css";
 @import "./dashboard-node.hierarchy.less";
@@ -14,6 +13,33 @@
 
 .clickable {
   cursor: pointer;
+}
+
+.dashboard {
+  display: block;
+}
+
+.mcontainer>.container-fluid .dashboard {
+  margin: -24px -16px 0;
+  min-height: calc(100vh - 58px);
+  padding: 24px 16px 12px
+}
+
+@media (min-width: 768px) {
+  .mcontainer>.container-fluid .dashboard {
+      margin:-24px -24px;
+      min-height: calc(100vh - 112px);
+      padding: 24px 24px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .mcontainer>.container-fluid .dashboard {
+      margin-bottom:-24px;
+      margin-top: -24px;
+      min-height: calc(100vh - 112px);
+      padding-top: 24px
+  }
 }
 
 .navigator {
@@ -54,4 +80,23 @@
   50% {
       opacity: 0;
   }
+}
+.dropdown-item {
+  display: block;
+  width: 100%;
+  clear: both;
+  font-weight: 400;
+  color: var(--dropdown-active-color,var(--component-active-color,var(--root-component-active-color,var(--brand-primary,#1776bf))))!important;
+  text-align: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+  background-color: #fff;
+  border: 0;
+  padding: 9px 15px 10px;
+  height: auto;
+  font-size: var(--font-size-base,14px);
+  border-top: 1px solid var(--dropdown-border,var(--component-border,var(--root-component-border,rgba(0,0,0,.05))));
+}
+typeahead-container.dropdown {
+  z-index: 1060 !important;
 }

@@ -18,7 +18,7 @@
 
 import { DOCUMENT } from "@angular/common";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-import { Inject, Injectable, isDevMode, Renderer2, RendererFactory2 } from "@angular/core";
+import { Inject, Injectable, Renderer2, RendererFactory2 } from "@angular/core";
 import { AlertService, AppStateService } from "@c8y/ngx-components";
 import { ApplicationService, UserService } from "@c8y/ngx-components/api";
 import { AppBuilderExternalAssetsService } from "app-builder-external-assets";
@@ -30,15 +30,16 @@ import * as JSZip from "jszip";
 import { BsModalRef, BsModalService } from "ngx-bootstrap/modal";
 import { forkJoin, Observable } from "rxjs";
 import { AppBuilderConfig, VersionInfo } from "./app-builder-upgrade.model";
-import { version } from '../../package.json';
 import { AppIdService } from "../app-id.service";
-import { catchError } from "rxjs/operators";
+import { catchError, delay, first } from "rxjs/operators";
 import * as semver from "semver";
+import { IApplication } from "@c8y/client";
+import * as _ from 'lodash';
 import { WidgetCatalogService } from "./../widget-catalog/widget-catalog.service";
-import { contextPathFromURL } from "../utils/contextPathFromURL";
-import { WidgetCatalog, WidgetModel } from "builder/widget-catalog/widget-catalog.model";
+import { WidgetCatalog, WidgetModel } from "./../widget-catalog/widget-catalog.model";
+import { contextPathFromURL } from "./../utils/contextPathFromURL";
 
-
+const appVersion = require('../../package.json').version;
 @Injectable({ providedIn: 'root' })
 export class AppBuilderUpgradeService {
     private renderer: Renderer2;
@@ -49,34 +50,37 @@ export class AppBuilderUpgradeService {
     private GATEWAY_URL_GitHubAPI_FallBack = '';
     private GATEWAY_URL_Labcase_FallBack = '';
     private GATEWAY_URL_GitHubAsset_FallBack = '';
+    //  private appBuilderConfigPath = '/appbuilderConfig/app-builder-config.json';
     private appBuilderConfigPath = '/appbuilderConfig/app-builder-config.json';
     private devBranchPath = "?ref=development";
     private preprodBranchPath = "?ref=preprod";
     private appBuilderConfigModel: AppBuilderConfig;
     private versionInfo: VersionInfo;
     private applicationsList = [];
+    private currentApp: IApplication;
     userHasAdminRights: boolean;
-
-    public appVersion: string = version;
+    public appVersion: string = appVersion;
     public newVersion: boolean = false;
     public errorReported = false;
-    appBuilderApp: any;
 
     constructor(private http: HttpClient, public rendererFactory: RendererFactory2, @Inject(DOCUMENT) private _document: Document,
         private modalService: BsModalService, private progressIndicatorService: ProgressIndicatorService,
         private appService: ApplicationService, private externalService: AppBuilderExternalAssetsService,
-        private widgetCatalogService: WidgetCatalogService,
         private settingService: SettingsService, private userService: UserService, private appStateService: AppStateService,
-        appIdService: AppIdService, private alertService: AlertService) {
+        appIdService: AppIdService, private alertService: AlertService, private widgetCatalogService: WidgetCatalogService) {
         this.GATEWAY_URL_GitHubAsset = this.externalService.getURL('GITHUB', 'gatewayURL_GitHubAsset');
         this.GATEWAY_URL_GitHubAPI = this.externalService.getURL('GITHUB', 'gatewayURL_Github');
         this.GATEWAY_URL_Labcase = this.externalService.getURL('DBCATALOG', 'gatewayURL');
-        this.GATEWAY_URL_GitHubAPI_FallBack = this.externalService.getURL('GITHUB','gatewayURL_Github_Fallback');
-        this.GATEWAY_URL_GitHubAsset_FallBack =  this.externalService.getURL('GITHUB','gatewayURL_GitHubAsset_Fallback');
+        this.GATEWAY_URL_GitHubAPI_FallBack = this.externalService.getURL('GITHUB', 'gatewayURL_Github_Fallback');
+        this.GATEWAY_URL_GitHubAsset_FallBack = this.externalService.getURL('GITHUB', 'gatewayURL_GitHubAsset_Fallback');
         this.GATEWAY_URL_Labcase_FallBack = this.externalService.getURL('DBCATALOG', 'gatewayURL_Fallback');
 
-        appIdService.appIdDelayedUntilAfterLogin$.subscribe(() => {
+        appIdService.appIdDelayedUntilAfterLogin$.pipe(first()).subscribe(() => {
             this.userHasAdminRights = userService.hasRole(appStateService.currentUser.value, "ROLE_APPLICATION_MANAGEMENT_ADMIN")
+            this.appStateService.currentApplication.subscribe(app => {
+                this.currentApp = app;
+                this.verifyPlugins();
+            });
         });
     }
 
@@ -88,7 +92,7 @@ export class AppBuilderUpgradeService {
     };
 
     async loadUpgradeBanner() {
-        if(contextPathFromURL() == 'app-builder') {
+        if (contextPathFromURL() == 'app-builder') {
             const isAppBuilderUpgradeNotification = await this.settingService.isAppUpgradeNotification();
             if (this.userHasAdminRights && isAppBuilderUpgradeNotification) {
                 await this.getAppBuilderConfig();
@@ -112,39 +116,43 @@ export class AppBuilderUpgradeService {
 
     private async getAppBuilderConfig() {
         await this.fetchAppBuilderConfig()
-        .subscribe(async appBuilderConfig => {
-            this.appBuilderConfigModel = appBuilderConfig;
-            let isValidContextPath = false;
-            if (this.appBuilderConfigModel && this.appBuilderConfigModel.upgradeInfo) {
-                this.versionInfo = this.appBuilderConfigModel.upgradeInfo.find( info => info.currentVersion === this.appVersion);
-                if(this.versionInfo) {
-                    if (this.isLatestVersionAvailable(this.appVersion,this.versionInfo.updateAvailable)) {
-                        this.newVersion = true;
-                    } else {
-                        this.newVersion = false;
+            .subscribe(async appBuilderConfig => {
+                this.appBuilderConfigModel = appBuilderConfig;
+                let isValidContextPath = false;
+                if (this.appBuilderConfigModel && this.appBuilderConfigModel.upgradeInfo) {
+                    this.versionInfo = this.appBuilderConfigModel.upgradeInfo.find(info => info.currentVersion === this.appVersion);
+                    if (this.versionInfo) {
+                        if (this.isLatestVersionAvailable(this.appVersion, this.versionInfo.updateAvailable)) {
+                            this.newVersion = true;
+                        } else {
+                            this.newVersion = false;
+                        }
+                        const appList = await this.getApplicationList();
+                        const currentTenantId = this.settingService.getTenantName();
+                        let appBuilderApp = appList.find(
+                            app => this.versionInfo.contextPath && app.contextPath === this.versionInfo.contextPath && (String(app.availability) === 'PRIVATE'));
+                        if (!appBuilderApp) {
+                            // Checking app builder subscribed one..
+                            appBuilderApp = appList.find(
+                                app => this.versionInfo.contextPath && app.contextPath === this.versionInfo.contextPath);
+                        }
+                        const appBuilderTenantId = (appBuilderApp && appBuilderApp.owner && appBuilderApp.owner.tenant ? appBuilderApp.owner.tenant.id : undefined);
+                        if (appBuilderApp && currentTenantId === appBuilderTenantId) { isValidContextPath = true; }
+                        /* else {
+                            this.alertService.warning("Unable to detect valid Application Builder", 
+                            "Context Path of installed version of application builder is not matching with server");
+                        } */
                     }
-                    const appList = await this.getApplicationList();
-                    const currentTenantId = this.settingService.getTenantName();
-                    this.appBuilderApp = appList.find( 
-                        app => this.versionInfo.contextPath && app.contextPath === this.versionInfo.contextPath &&  (String(app.availability) === 'PRIVATE'));
-                    if(!this.appBuilderApp) {
-                        // Checking app builder subscribed one..
-                        this.appBuilderApp = appList.find( 
-                            app => this.versionInfo.contextPath && app.contextPath === this.versionInfo.contextPath );
-                    }
-                    const appBuilderTenantId = (this.appBuilderApp && this.appBuilderApp.owner && this.appBuilderApp.owner.tenant ? this.appBuilderApp.owner.tenant.id : undefined);
-                    if(this.appBuilderApp && currentTenantId === appBuilderTenantId) { isValidContextPath = true;} 
+
                 }
-                
-            }
-            if (this.newVersion && isValidContextPath) {
-                this.createAndRenderBanner();
-            }
-        });
+                if (this.newVersion && isValidContextPath) {
+                    this.createAndRenderBanner();
+                }
+            });
     }
 
     private isLatestVersionAvailable(currentVersion: string, availableVersion: string) {
-       return semver.lt(currentVersion, availableVersion);
+        return semver.lt(currentVersion, availableVersion);
     }
 
     private initiateUpgrade(event: any) {
@@ -156,7 +164,7 @@ export class AppBuilderUpgradeService {
         const confirmMsg = this.versionInfo?.confirmMsg;
         const alertMessage = {
             title: 'Installation Confirmation',
-            description: (confirmMsg ? confirmMsg: `You are about to upgrade Application Builder.
+            description: (confirmMsg ? confirmMsg : `You are about to upgrade Application Builder.
             Do you want to proceed?`),
             type: 'info',
             externalLink: (this.versionInfo?.releaseLink ? this.versionInfo?.releaseLink : ''),
@@ -167,31 +175,18 @@ export class AppBuilderUpgradeService {
         const upgradeAppBuilderDialogRef = this.alertModalDialog(alertMessage);
         upgradeAppBuilderDialogRef.content.event.subscribe(async data => {
             if (data && data.isConfirm) {
-                if(this.versionInfo.verifyPlugins){
-                    if (this.appBuilderApp && this.appBuilderApp.availability === 'MARKET') {
-                        const alertMessage = {
-                            title: 'Installation Confirmation',
-                            description: `You are about to upgrade the subscribed application. If any sub-tenant is subscribing to this application, it could be affected. 
-                            Do you wish to proceed?`,
-                            type: 'warning',
-                            alertType: 'confirm', //info|confirm
-                            confirmPrimary: true //confirm Button is primary
-                        }
-                        const upgradeAppBuilderDialogRef = this.alertModalDialog(alertMessage);
-                        upgradeAppBuilderDialogRef.content.event.subscribe(async data => {
-                            if (data && data.isConfirm) {
-                                this.showProgressModalDialog('Verifying existing widgets...');
-                                await this.verifyWidgetCompatibilityWithPlugin();
-                            }
-                        });
-                    } else {
-                        this.showProgressModalDialog('Verifying existing widgets...');
-                        await this.verifyWidgetCompatibilityWithPlugin();
-                    }
+                this.showProgressModalDialog('Downloading Application Builder...');
+                await this.downlaodAndUpgradeAppBuilder();
+
+                // TODO: To be removed since plugin verification not required for future release
+                /* if(this.versionInfo.verifyPlugins){
+                    this.showProgressModalDialog('Verifying existing widgets...');
+                    await this.verifyWidgetCompatibilityWithPlugin();
                 } else {
                     this.showProgressModalDialog('Downloading Application Builder...');
                     await this.downlaodAndUpgradeAppBuilder();
-                }
+                } */
+
             }
         });
     }
@@ -232,7 +227,6 @@ export class AppBuilderUpgradeService {
         return this.modalService.show(AlertMessageModalComponent, { class: 'c8y-wizard', initialState: { message } });
     }
 
-
     async downloadAndInstall(binaryLocation: string, fileName: string, isGithub: boolean, installationType: 'INSTALL' | 'UPGRADE' | 'ANY') {
         this.errorReported = false;
         if (!binaryLocation) {
@@ -268,6 +262,7 @@ export class AppBuilderUpgradeService {
             this.progressModal.hide();
             throw Error("Not a Binary");
         }
+
         await this.upgradeApp(binaryFile, appC8yJson, installationType);
     }
 
@@ -276,13 +271,13 @@ export class AppBuilderUpgradeService {
         if (installationType !== "INSTALL") {
             const appList = await this.getApplicationList();
             const appName = appList.find(app => app.contextPath === appC8yJson.contextPath && app.availability === 'PRIVATE');
-            if(appName) {
+            if (appName) {
                 await this.uploadApp(appName, binaryFile, appC8yJson);
-            } 
-            else{
+            }
+            else {
                 const appName = appList.find(app => app.contextPath === appC8yJson.contextPath);
                 const appTenantId = (appName && appName.owner && appName.owner.tenant ? appName.owner.tenant.id : undefined);
-                if(appName && (String(appName.availability) === 'PRIVATE' || appTenantId === this.settingService.getTenantName())) {
+                if (appName && (String(appName.availability) === 'PRIVATE' || appTenantId === this.settingService.getTenantName())) {
                     await this.uploadApp(appName, binaryFile, appC8yJson);
                 }
                 else {
@@ -291,7 +286,7 @@ export class AppBuilderUpgradeService {
                     return;
                 }
             }
-        } else if(installationType !== "UPGRADE") {
+        } else if (installationType !== "UPGRADE") {
             // Create the custom App
             this.progressIndicatorService.setProgress(70);
             const custmApp = (await this.appService.create({
@@ -322,24 +317,23 @@ export class AppBuilderUpgradeService {
         this.progressIndicatorService.setProgress(90);
     }
 
-    private async uploadApp(appName: any, binaryFile: any, appC8yJson: any){
+    private async uploadApp(appName: any, binaryFile: any, appC8yJson: any) {
         this.progressIndicatorService.setProgress(70);
-                // Upload the binary
-                const appBinary = (await this.appService.binary(appName).upload(binaryFile)).data;
-                // Update the app
-                this.progressIndicatorService.setProgress(80);
-                await this.appService.update({
-                    ...appC8yJson,
-                    id: appName.id,
-                    activeVersionId: appBinary.id.toString(),
-                    config: {remotes:{}}
-                });
-                if (window && window['aptrinsic']) {
-                    window['aptrinsic']('track', 'gp_application_updated', {
-                        "appBuilder": appName.name,
-                        "tenantId": this.settingService.getTenantName(),
-                    });
-                }
+        // Upload the binary
+        const appBinary = (await this.appService.binary(appName).upload(binaryFile)).data;
+        // Update the app
+        this.progressIndicatorService.setProgress(80);
+        await this.appService.update({
+            ...appC8yJson,
+            id: appName.id,
+            activeVersionId: appBinary.id.toString()
+        });
+        if (window && window['aptrinsic']) {
+            window['aptrinsic']('track', 'gp_application_updated', {
+                "appBuilder": appName.name,
+                "tenantId": this.settingService.getTenantName(),
+            });
+        }
     }
     private downloadBinary(binaryId: string, isGithub: boolean): Promise<ArrayBuffer> {
         let url = `${this.GATEWAY_URL_GitHubAsset}${binaryId}`;
@@ -349,17 +343,17 @@ export class AppBuilderUpgradeService {
         return this.http.get(url, {
             responseType: 'arraybuffer'
         })
-        .pipe(catchError(err => {
-            console.log('App Builder Upgrade Binary: Error in primary endpoint! using fallback...');
-            let url = `${this.GATEWAY_URL_GitHubAsset_FallBack}${binaryId}`;
-            if (!isGithub) {
-                url = `${this.GATEWAY_URL_Labcase_FallBack}${binaryId}`
-            }
-            return this.http.get(url, {
-                responseType: 'arraybuffer'
-            })
-          }))        
-        .toPromise();
+            .pipe(catchError(err => {
+                console.log('App Builder Upgrade Binary: Error in primary endpoint! using fallback...');
+                let url = `${this.GATEWAY_URL_GitHubAsset_FallBack}${binaryId}`;
+                if (!isGithub) {
+                    url = `${this.GATEWAY_URL_Labcase_FallBack}${binaryId}`
+                }
+                return this.http.get(url, {
+                    responseType: 'arraybuffer'
+                })
+            }))
+            .toPromise();
     }
 
     fetchAppBuilderConfig(): Observable<AppBuilderConfig> {
@@ -367,157 +361,260 @@ export class AppBuilderUpgradeService {
         const urlFallBack = `${this.GATEWAY_URL_GitHubAPI_FallBack}${this.appBuilderConfigPath}`;
         if (this.appVersion.includes('dev')) {
             return this.http.get<AppBuilderConfig>(`${url}${this.devBranchPath}`, this.HTTP_HEADERS)
-          .pipe(catchError(err => {
-            console.log('App Builder Config: Error in primary endpoint! using fallback...');
-            return this.http.get<AppBuilderConfig>(`${urlFallBack}${this.devBranchPath}`, this.HTTP_HEADERS)
-          }));
+                .pipe(catchError(err => {
+                    console.log('App Builder Config: Error in primary endpoint! using fallback...');
+                    return this.http.get<AppBuilderConfig>(`${urlFallBack}${this.devBranchPath}`, this.HTTP_HEADERS)
+                }));
         } else if (this.appVersion.includes('rc')) {
             return this.http.get<AppBuilderConfig>(`${url}${this.preprodBranchPath}`, this.HTTP_HEADERS)
-        .pipe(catchError(err => {
-            console.log('App Builder Config: Error in primary endpoint! using fallback...');
-            return this.http.get<AppBuilderConfig>(`${urlFallBack}${this.preprodBranchPath}`, this.HTTP_HEADERS)
-          }));
+                .pipe(catchError(err => {
+                    console.log('App Builder Config: Error in primary endpoint! using fallback...');
+                    return this.http.get<AppBuilderConfig>(`${urlFallBack}${this.preprodBranchPath}`, this.HTTP_HEADERS)
+                }));
         } else {
             return this.http.get<AppBuilderConfig>(`${url}`, this.HTTP_HEADERS)
-            .pipe(catchError(err => {
-                console.log('App Builder Config: Error in primary endpoint! using fallback...');
-                return this.http.get<AppBuilderConfig>(`${urlFallBack}`, this.HTTP_HEADERS)
-              }));
+                .pipe(catchError(err => {
+                    console.log('App Builder Config: Error in primary endpoint! using fallback...');
+                    return this.http.get<AppBuilderConfig>(`${urlFallBack}`, this.HTTP_HEADERS)
+                }));
         }
     }
 
     async getApplicationList() {
-        if(this.applicationsList && this.applicationsList.length > 0) { return this.applicationsList; }
-        this.applicationsList = (await this.appService.list({ pageSize: 2000, withTotalPages: true }) as any).data ;
+        if (this.applicationsList && this.applicationsList.length > 0) { return this.applicationsList; }
+        this.applicationsList = (await this.appService.list({ pageSize: 2000, withTotalPages: true }) as any).data;
         return this.applicationsList;
     }
 
-    private async verifyWidgetCompatibilityWithPlugin() {
-        let widgetCatalog: WidgetCatalog ;
-        let appList = await this.getApplicationList();
-        this.progressIndicatorService.setProgress(10);
-        appList = appList.filter(app => (app.name && app.name.toLowerCase().includes('widget') || app.contextPath && app.contextPath.includes('widget')) && app.manifest && app.manifest.noAppSwitcher === true);
-        forkJoin([this.widgetCatalogService.fetchWidgetCatalog(), this.widgetCatalogService.fetchWidgetForDemoCatalog()])
-            .subscribe(async ([widgetList1, widgetList2]) => {
-                this.progressIndicatorService.setProgress(15);
-                widgetCatalog = widgetList1;
-                widgetList2.widgets.forEach((widget: WidgetModel) => {
-                    const widgetObj = widgetCatalog.widgets.find(widgetObj => widgetObj.contextPath === widget.contextPath);
-                    if (!widgetObj && this.widgetCatalogService.isNextCompatiblieVersion(widget)) {  widgetCatalog.widgets.push(widget);  }
-                });
-                appList.forEach(app => {
-                    const appWidgetObj = widgetCatalog.widgets.find(widgetObj => widgetObj.contextPath === app.contextPath);
-                    if (!appWidgetObj) {
-                        appWidgetObj
-                        widgetCatalog.widgets.push({
-                            contextPath: app.contextPath,
-                            title: app.name,
-                            requiredPlatformVersion: (app.manifest && app.manifest.requiredPlatformVersion ? app.manifest.requiredPlatformVersion : ''),
-                            version: (app.manifest && app.manifest.version ? app.manifest.version : '')
-                        });
-                    }
-
-                });
-                let isDownloadUpgrade = true;
-                let plugins = [];
-                if (widgetCatalog && widgetCatalog.widgets && widgetCatalog.widgets.length > 0) {
-                    widgetCatalog.widgets.forEach(widget => {
-                        widget.isCompatible = this.widgetCatalogService.isCompatiblieVersion(widget);
-                        const appObj = appList.find(app => app.contextPath === widget.contextPath);
-                        widget.installedVersion = (appObj && appObj.manifest && appObj.manifest.version ? appObj.manifest.version : '');
-                        widget.installed = appObj && this.findInstalledWidget(widget, widgetCatalog); //(widgetObj != undefined);
+    private async verifyPlugins() {
+        const appVersion = this.currentApp?.manifest?.version;
+        const appRemotes = this.currentApp?.config?.remotes;
+        const appBuilderConfig = (await this.settingService.getAppBuilderConfigs());
+        if (appBuilderConfig?.configs?.remotes && Object.keys(appBuilderConfig?.configs?.remotes).length > 0) {
+            if (appVersion === appBuilderConfig?.appBuilderVersion && _.isEqual(appRemotes, appBuilderConfig?.configs.remotes)) {
+                console.info('All plugins are installed!');
+            } else if (this.userHasAdminRights) {
+                if (appVersion !== appBuilderConfig?.appBuilderVersion) {
+                    this.showProgressModalDialog('Verifying plugins! Please wait...');
+                    let widgetCatalog: WidgetCatalog;
+                    forkJoin([this.widgetCatalogService.fetchWidgetCatalog(), this.widgetCatalogService.fetchWidgetForDemoCatalog()])
+                        .subscribe(async ([widgetList1, widgetList2]) => {
+                            const widgetCatalogWidgets = [...widgetList1.widgets];
+                            widgetCatalog = widgetList1;
+                            widgetList2.widgets.forEach((widget: WidgetModel) => {
+                                const widgetObj = widgetCatalogWidgets.find(widgetObj => widgetObj.contextPath === widget.contextPath);
+                                if (!widgetObj) { widgetCatalog.widgets.push(widget); }
+                            });
+                            await this.installPlugins(appBuilderConfig, appRemotes, widgetCatalog);
                     });
-                    this.progressIndicatorService.setProgress(25);
-                    let installedWidgets = widgetCatalog.widgets.filter(widget => widget.installed);
-                    let nonCompatibleWidgets = '';
-                    if(installedWidgets && installedWidgets.length > 0){
-                        installedWidgets.forEach( widget => {
-                            const compatiblePlugin = widgetCatalog.widgets.find( plugin =>  (plugin.oldContextPath ? plugin.oldContextPath === widget.contextPath : plugin.contextPath === widget.contextPath) && 
-                                this.widgetCatalogService.isNextCompatiblieVersion(plugin));
-                            if(compatiblePlugin) {
-                                widget.isNextVersionAvailable = true;
-                                plugins.push(compatiblePlugin);
-                            } else {
-                                nonCompatibleWidgets += `${widget.title} \n`;
-                            }
-                        }); 
-                        
-                        if(nonCompatibleWidgets) {
-                            isDownloadUpgrade = false;
-                            this.progressModal.hide();
-                            const alertMessage = {
-                                title: 'Installation Confirmation',
-                                description: `Following widgets are not compatible with Application Builder ${this.versionInfo.updateAvailable}:
-                                ${nonCompatibleWidgets.toLocaleUpperCase()} 
-                                Do you want to proceed?`,
-                                type: 'info',
-                                alertType: 'confirm', //info|confirm
-                                confirmPrimary: true //confirm Button is primary
-                            }
-                            const confirmNonCompatibleWidgets = this.alertModalDialog(alertMessage);
-                            confirmNonCompatibleWidgets.content.event.subscribe(async data => {
-                                if (data && data.isConfirm) {
-                                    this.showProgressModalDialog('Saving plugins configuration...');
-                                    this.progressIndicatorService.setProgress(26);
-                                    await this.updateAppConfigurationForPlugin(plugins);
-                                    this.progressIndicatorService.setProgress(28);
-                                    await this.downlaodAndUpgradeAppBuilder();
-                                    if(plugins && plugins.length > 0) {
-                                        await this.uninstallWidgets(plugins);
+                }
+                else {
+                    this.showProgressModalDialog('Verifying plugins! Please wait...');
+                    await this.widgetCatalogService.updateRemotesToAppBuilderConfig();
+                    this.progressModal.hide();
+                    this.showProgressModalDialog('Refreshing...');
+                    await new Promise(resolve => setTimeout(resolve, 4000));
+                    window.location.reload();
+                }
+            }
+            else {
+                this.alertService.danger('Plugin verification required! Please login with Admin permission and refresh this page.')
+            }
+        } else {
+            if (appVersion !== appBuilderConfig?.appBuilderVersion) {
+                this.verifyPluginsOnDirectInstall();
+            }
+        }
+    }
+
+    async installPlugins(appBuilderConfig, appRemotes, widgetCatalog: any, nonCompatibleWidgets?: any) {
+        widgetCatalog.widgets = await this.widgetCatalogService.filterInstalledWidgets(widgetCatalog, this.userHasAdminRights);
+        const totalRemotes = (appBuilderConfig?.configs?.remotes ? Object.keys(appBuilderConfig?.configs?.remotes).length : 0);
+        const eachRemoteProgress: number = Math.floor((totalRemotes > 1 ? (90 / totalRemotes) : 0));
+        let overallProgress = 0;
+        if (totalRemotes > 1) { this.progressIndicatorService.setOverallProgress(overallProgress); }
+        const appBuilderConfigRemotes = this.widgetCatalogService.removeVersionFromPluginRemotes(appBuilderConfig?.configs?.remotes);
+        let appConfigUpdated = false;
+        for (let remote of appBuilderConfigRemotes) {
+            let pluginBinary = widgetCatalog.widgets.find(widget => widget.contextPath === remote?.pluginContext && widget.isCompatible);
+            if (pluginBinary && (pluginBinary.binaryLink && pluginBinary.binaryLink !== '' || pluginBinary.link && pluginBinary.link !=="")) {
+                this.progressIndicatorService.setProgress(0);
+                this.progressIndicatorService.setMessage(`Installing ${pluginBinary.title}`);
+                this.progressIndicatorService.setProgress(10);
+                let binary = null;
+                let fileName = '';
+                if (pluginBinary.binaryLink && pluginBinary.binaryLink !== '') {
+                    binary = await new Promise(resolve => this.widgetCatalogService.downloadBinary(pluginBinary.binaryLink)
+                    .subscribe(binaryData => resolve(binaryData), error => {
+                        this.logError();
+                    })) as any;
+                    fileName = pluginBinary.binaryLink.replace(/^.*[\\\/]/, '');
+                } else {
+                    binary = await new Promise(resolve => this.widgetCatalogService.downloadBinaryFromLabcase(pluginBinary.link)
+                    .subscribe(binaryData => resolve(binaryData), error => {
+                        this.logError();
+                    })) as any;
+                    fileName = pluginBinary.fileName;
+                }
+                const blob = new Blob([binary], {
+                    type: 'application/zip'
+                });
+                const fileOfBlob = new File([blob], fileName);
+                await this.widgetCatalogService.installPackage(fileOfBlob);
+                appConfigUpdated = true;
+            }
+            overallProgress = overallProgress + eachRemoteProgress;
+            this.progressIndicatorService.setOverallProgress(overallProgress)
+        }
+        if (!appConfigUpdated) {
+            await this.settingService.updateAppConfigurationForPlugin(appRemotes);
+        }
+        this.progressModal.hide();
+        if (nonCompatibleWidgets) {
+            const alertMessage = {
+                title: 'Information',
+                description: `Following widgets are not compatible with Application Builder ${appVersion}:
+                ${nonCompatibleWidgets.toLocaleUpperCase()}`,
+                type: 'info',
+                alertType: '', //info|confirm
+                confirmPrimary: false //confirm Button is primary
+            }
+            const confirmNonCompatibleWidgets = this.alertModalDialog(alertMessage);
+            confirmNonCompatibleWidgets.content.event.subscribe(async data => {
+                if (data && !data.isConfirm) {
+                    sessionStorage.setItem('isUpgrade', 'false');
+                    this.settingService.updateAppBuilderMO();
+                    this.showProgressModalDialog('Refreshing...');
+                    await new Promise(resolve => setTimeout(resolve, 4000));
+                    window.location.reload();
+
+                }
+            });
+        } else {
+            sessionStorage.setItem('isUpgrade', 'false');
+            this.settingService.updateAppBuilderMO();
+            this.showProgressModalDialog('Refreshing...');
+            await new Promise(resolve => setTimeout(resolve, 4000));
+            window.location.reload();
+
+        }
+    }
+
+    private async verifyPluginsOnDirectInstall() {
+        if (this.userHasAdminRights) {
+            this.showProgressModalDialog('Verifying plugins! Please wait...');
+            let appList = await this.getApplicationList();
+            let widgetCatalog: WidgetCatalog;
+            const appRemotes = this.currentApp?.config?.remotes;
+            appList = appList.filter(app => (app.name && app.name.toLowerCase().includes('widget') || app.contextPath && app.contextPath.includes('widget')) && app.manifest && app.manifest.noAppSwitcher === true);
+            forkJoin([this.widgetCatalogService.fetchWidgetCatalog(), this.widgetCatalogService.fetchWidgetForDemoCatalog()])
+                .subscribe(async ([widgetList1, widgetList2]) => {
+                    const widgetCatalogWidgets = [...widgetList1.widgets];
+                    widgetCatalog = widgetList1;
+                    widgetList2.widgets.forEach((widget: WidgetModel) => {
+                        const widgetObj = widgetCatalogWidgets.find(widgetObj => widgetObj.contextPath === widget.contextPath);
+                        if (!widgetObj) { widgetCatalog.widgets.push(widget); }
+                    });
+                    appList.forEach(app => {
+                        const appWidgetObj = widgetCatalog.widgets.find(widgetObj => widgetObj.contextPath === app.contextPath);
+                        if (!appWidgetObj) {
+                            widgetCatalog.widgets.push({
+                                contextPath: app.contextPath,
+                                title: app.name,
+                                requiredPlatformVersion: (app.manifest && app.manifest.requiredPlatformVersion ? app.manifest.requiredPlatformVersion : ''),
+                                version: (app.manifest && app.manifest.version ? app.manifest.version : '')
+                            });
+                        }
+
+                    });
+                    let plugins = [];
+                    if (widgetCatalog && widgetCatalog.widgets && widgetCatalog.widgets.length > 0) {
+                        widgetCatalog.widgets.forEach(widget => {
+                            const appObj = appList.find(app => app.contextPath === widget.contextPath);
+                            widget.installedVersion = (appObj && appObj.manifest && appObj.manifest.version ? appObj.manifest.version : '');
+                            widget.installed = appObj && this.findInstalledWidget(widget, widgetCatalog); //(widgetObj != undefined);
+                        });
+                        let installedWidgets = widgetCatalog.widgets.filter(widget => widget.installed);
+                        let nonCompatibleWidgets = '';
+                        let appConfigUpdated = false;
+                        if (installedWidgets && installedWidgets.length > 0) {
+                            installedWidgets.forEach(widget => {
+                                const compatiblePlugin = widgetCatalog.widgets.find(plugin => (plugin.oldContextPath ? plugin.oldContextPath === widget.contextPath : plugin.contextPath === widget.contextPath) &&
+                                    this.widgetCatalogService.isCompatiblieVersion(plugin));
+                                if (compatiblePlugin) {
+                                    widget.isNextVersionAvailable = true;
+                                    plugins.push(compatiblePlugin);
+                                } else {
+                                    if (!this.widgetCatalogService.isCompatiblieVersion(widget)) {
+                                        nonCompatibleWidgets += `${widget.title} \n`;
                                     }
                                 }
                             });
-                        } else if(plugins && plugins.length > 0) {
-                            this.progressIndicatorService.setMessage('Saving plugins configuration...');
-                            await this.updateAppConfigurationForPlugin(plugins);
-                            this.progressIndicatorService.setProgress(28);
+                            if (plugins && plugins.length > 0) {
+                                sessionStorage.setItem('isUpgrade', 'true');
+                                await this.updateAppConfigurationForPlugin(plugins, 'true');
+                                await this.uninstallWidgets(plugins);
+                                await this.settingService.getAppBuilderConfig();
+                                const appBuilderConfig = (await this.settingService.getAppBuilderConfigs());
+                                await this.installPlugins(appBuilderConfig, appRemotes, widgetCatalog, nonCompatibleWidgets);
+                                appConfigUpdated = true;
+                            }
+                        }
+                        if (!appConfigUpdated) {
+                            await this.settingService.updateAppConfigurationForPlugin(appRemotes);
+                            this.showProgressModalDialog('Refreshing...');
+                            await new Promise(resolve => setTimeout(resolve, 4000));
+                            window.location.reload();
                         }
                     }
-                }
-                if(isDownloadUpgrade) {
-                    await this.downlaodAndUpgradeAppBuilder();
-                }
-                if(isDownloadUpgrade && plugins && plugins.length > 0) {
-                    await this.uninstallWidgets(plugins);
-                }
-            }, error => {
-                this.alertService.danger("There is some technical error! Please try after sometime.");
-                this.progressModal.hide();
-            });
-     }
-
-     // if same widget exists in widget catalog json more than one time with different version
-    private findInstalledWidget(widget: WidgetModel, widgetCatalog: any) {
-        const checkWidgetInCatalog = widgetCatalog.widgets.filter(widgetCatalogWidget => widget.id ? widgetCatalogWidget.id === widget.id : widgetCatalogWidget.contextPath === widget.contextPath);
-        if (checkWidgetInCatalog && checkWidgetInCatalog.length > 1) {
-            const isWidgetInstalled = checkWidgetInCatalog.find(installObj => installObj.installed);
-            if (isWidgetInstalled) return false;
-            return widget.isCompatible && this.widgetCatalogService.checkInstalledVersion(widget);
+                }, error => {
+                    this.alertService.danger("There is some technical error! Please try after sometime.");
+                    this.progressModal.hide();
+                });
         }
-        return true;
     }
 
-    private async updateAppConfigurationForPlugin(plugins: any) {
+    private async updateAppConfigurationForPlugin(plugins: any, underMaintenance?: any) {
         let remotes = {};
         for (const pluginBinary of plugins) {
             (remotes[pluginBinary.contextPath] = remotes[pluginBinary.contextPath] || []).push(pluginBinary.moduleName);
         };
         // updating config MO to retain widget status
-        await this.settingService.updateAppConfigurationForPlugin(remotes, 'true');
-      }
+        await this.settingService.updateAppConfigurationForPlugin(remotes, underMaintenance);
+    }
 
     private async uninstallWidgets(plugins: any) {
         const appList = await this.getApplicationList();
         for (const pluginBinary of plugins) {
-            const widgetAppObj = appList.find(app => pluginBinary.oldContextPath ? app.contextPath === pluginBinary.oldContextPath : app.contextPath === pluginBinary.contextPath)
-            if (widgetAppObj) {
+            const widgetAppObj: IApplication = appList.find(app => pluginBinary.oldContextPath ? app.contextPath === pluginBinary.oldContextPath : app.contextPath === pluginBinary.contextPath)
+            if (widgetAppObj && (widgetAppObj.manifest && !widgetAppObj.manifest?.isPackage)) {
                 try {
                     await this.appService.delete(widgetAppObj.id);
                 } catch (e) {
-                        console.error(e);
+                    console.error(e);
                 }
             }
         };
-      }
-    
+    }
+
+    // if same widget exists in widget catalog json more than one time with different version
+    private findInstalledWidget(widget: WidgetModel, widgetCatalog: any) {
+        const checkWidgetInCatalog = widgetCatalog.widgets.filter(widgetCatalogWidget => widget.id ? widgetCatalogWidget.id === widget.id : widgetCatalogWidget.contextPath === widget.contextPath);
+        if (checkWidgetInCatalog && checkWidgetInCatalog.length > 1) {
+            const isWidgetInstalled = checkWidgetInCatalog.find(installObj => installObj.installed);
+            if (isWidgetInstalled) return false;
+            return this.checkInstalledVersionForDirectInstall(widget);
+        }
+        return true;
+    }
+
+    private logError() {
+        this.alertService.danger("Unable verify plugin due to technical error! Please try after sometime.");
+        this.progressModal.hide();
+    }
+    checkInstalledVersionForDirectInstall(widget: WidgetModel) {
+        if (!widget.installedVersion) return true;
+        const major = '>=' + semver.major(widget.installedVersion) + '.0.0';
+        return semver.satisfies(widget.version, major);
+    }
 }

@@ -101,7 +101,16 @@
 
                 <div class="form-group">
                     <label for="dashboardPath"><span>Path</span></label>
-                    <input type="text" class="form-control" id="dashboardPath" name="dashboardPath" placeholder="e.g. Some Folder/My First Application (required)" required [autofocus]="!showId()" [(ngModel)]="dashboardName">
+                    <div class="row ">
+                    <div class="col-xs-6">
+                        <ng-select [items]="app.applicationBuilder.dashboards"  bindLabel="name" bindValue="name" id="pathPrefix" name="pathPrefix" [multiple]="false" [closeOnSelect]="true" [searchable]="true"
+                        placeholder="Path(Optional)"  [appendTo]="(appendTo ?  appendTo : 'body')" [(ngModel)]="dashboardPath" >
+                        </ng-select>
+                    </div>
+                     <div class="col-xs-6">   
+                        <input type="text" class="form-control" id="dashboardPath" name="dashboardPath" placeholder="path/name (required)" required [autofocus]="!showId()" [(ngModel)]="dashboardName">
+                     </div>
+                    </div>
                 </div>
 
                 <div class="form-group">

@@ -1,73 +1,77 @@
 {
   "name": "app-builder",
-  "version": "1.3.4",
+  "version": "2.0.0",
   "description": "Application builder for Cumulocity (written by Software AG Global Presales)",
   "main": "index.ts",
   "scripts": {
-    "start": "c8ycli server --env.extraWebpackConfig=./extra-webpack.config.js ",
-    "build": "set NODE_OPTIONS=--max_old_space_size=4096 && c8ycli build --env.extraWebpackConfig=./extra-webpack.config.js --env.mode=production",
+    "start": "c8ycli server --env.extraWebpackConfig=./extra-webpack.config.js",
+    "build": "set NODE_OPTIONS=--max_old_space_size=4096 && c8ycli build --env.extraWebpackConfig=./extra-webpack.config.js",
     "build-dev": "set NODE_OPTIONS=--max_old_space_size=4096 && c8ycli build --env.extraWebpackConfig=./extra-webpack.config.js --env.mode=development",
     "deploy-ci": "c8ycli deploy  -u $npm_config_param1 -T $npm_config_param2 -U $npm_config_param3 -P $npm_config_param4",
     "deploy": "c8ycli deploy ",
-    "postinstall": "patch-package && patch-package --patch-dir node_modules/cumulocity-runtime-widget-loader/patches",
+    "postinstall": "ngcc",
     "prebuild": " gulp clean",
-    "postbuild": " gulp bundle"
+    "postbuild": " gulp bundle",
+    "prebuild-dev": " gulp clean",
+    "postbuild-dev": " gulp bundle"
   },
   "keywords": [],
   "author": "Darpankumar Lalani - Software AG, Global Presales",
   "license": "Apache-2.0",
   "dependencies": {
-    "@angular/animations": "11.1.2",
-    "@angular/cdk": "11.1.2",
-    "@angular/common": "11.1.2",
-    "@angular/compiler": "11.1.2",
-    "@angular/core": "11.1.2",
-    "@angular/forms": "11.1.2",
-    "@angular/platform-browser": "11.1.2",
-    "@angular/platform-browser-dynamic": "11.1.2",
-    "@angular/router": "11.1.2",
-    "@angular/upgrade": "11.1.2",
-    "@c8y/ng1-modules": "1011.0.38",
-    "@c8y/ngx-components": "1011.0.38",
-    "@c8y/style": "1011.0.38",
+    "@angular/animations": "14.0.6",
+    "@angular/cdk": "14.1.2",
+    "@angular/common": "14.0.6",
+    "@angular/compiler": "14.0.6",
+    "@angular/core": "14.0.6",
+    "@angular/forms": "14.0.6",
+    "@angular/platform-browser": "14.0.6",
+    "@angular/platform-browser-dynamic": "14.0.6",
+    "@angular/router": "14.0.6",
+    "@angular/upgrade": "14.0.6",
+    "@c8y/client": "1016.0.170",
+    "@c8y/ng1-modules": "1016.0.170",
+    "@c8y/ngx-components": "1016.0.170",
+    "@c8y/style": "1016.0.170",
     "@ng-reactive/async-input": "0.0.1",
-    "@ng-select/ng-select": "^6.1.0",
-    "@ngx-translate/core": "13.0.0",
+    "@ng-select/ng-select": "^9.1.0",
+    "@ngx-translate/core": "14.0.0",
     "angular": "1.6.9",
-    "app-builder-external-assets": "file:binary/app-builder-external-assets-2.1.0.tgz",
-    "comlink": "^4.3.1",
-    "core-js": "^3.15.2",
-    "crypto-js": "^4.0.0",
-    "cumulocity-runtime-widget-loader": "file:binary/cumulocity-runtime-widget-loader-1011.0.20-0.0.3.tgz",
-    "d3-color": "^3.0.1",
+    "app-builder-external-assets": "file:binary/app-builder-external-assets-3.2.0.tgz",
+    "crypto-js": "^4.1.1",
     "delay": "^5.0.0",
     "font-awesome": "^4.7.0",
     "fontawesome": "^4.7.2",
-    "jszip": "^3.6.0",
+    "jszip": "^3.10.1",
     "lodash-es": "^4.0.0",
-    "ngx-bootstrap": "6.2.0",
-    "ngx-markdown": "^11.1.3",
+    "ngx-bootstrap": "9.0.0",
+    "ngx-markdown": "^14.0.1",
     "reflect-metadata": "^0.1.13",
     "rxjs": "~6.6.3",
-    "url-search-params-polyfill": "8.1.1",
-    "webpack-external-import": "^2.2.4",
-    "worker-plugin": "^5.0.1",
-    "zone.js": "~0.11.4"
+    "style-loader": "3.3.1",
+    "zone.js": "~0.11.7"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "0.1102.18",
-    "@angular/compiler-cli": "11.1.2",
-    "@angular/language-service": "11.1.2",
-    "@angular/localize": "11.1.2",
-    "@c8y/cli": "1011.0.38",
+    "@angular-devkit/build-angular": "14.0.6",
+    "@angular/compiler-cli": "14.0.6",
+    "@angular/language-service": "14.0.6",
+    "@angular/localize": "14.0.6",
+    "@angular/service-worker": "14.0.6",
+    "@c8y/cli": "1016.0.170",
+    "@types/jest": "^28.1.6",
     "@types/lodash-es": "^4.17.3",
     "@types/webpack": "^5.28.0",
-    "autoprefixer": "10.2.6",
-    "copy-webpack-plugin": "^6.3.2",
-    "patch-package": "^6.4.7",
-    "typescript": "4.0.7",
+    "del": "^6.1.1",
+    "file-loader": "^6.2.0",
     "gulp": "^4.0.2",
-    "gulp-zip": "^5.0.1"
+    "gulp-json-editor": "^2.5.6",
+    "gulp-zip": "^5.0.1",
+    "html-loader": "4.1.0",
+    "jest": "^28.1.3",
+    "jest-preset-angular": "^12.2.0",
+    "raw-loader": "^4.0.2",
+    "util": "^0.12.5",
+    "typescript": "4.7.4"
   },
   "c8y": {
     "application": {
@@ -79,7 +83,7 @@
       "upgrade": true,
       "rightDrawer": true,
       "sensorAppOneLink": "http://onelink.to/pca6qe",
-      "version": "1.3.4",
+      "version": "2.0.0",
       "contentSecurityPolicy": "base-uri 'none'; default-src 'self' 'unsafe-inline' http: https: ws: wss: blob:; connect-src 'self' *.webmethodscloud.com *.aptrinsic.com *.billwerk.com http: https: ws: wss: blob:;  script-src 'self' open.mapquestapi.com *.twitter.com *.twimg.com *.aptrinsic.com 'unsafe-inline' 'unsafe-eval' data:; style-src * 'unsafe-inline' blob:; img-src * data: blob:; font-src * data:; frame-src *; worker-src 'self' blob:;",
       "icon": {
         "class": "fa fa-magic"
@@ -92,11 +96,16 @@
       "cookiePreferences": {
         "required": true,
         "functional": "These cookies are used to support you during your first steps in the product, to deliver content tailored to your needs, and to collect usage statistics."
-      }
+      },
+      "copy": [{
+        "from": "./ui-assets/fonts",
+        "to": "./fonts/"
+      }, {
+        "from": "./ui-assets/img",
+        "to": "./img/"
+      }]
     },
     "cli": {}
   },
-  "browserslist": [
-    "last 2 major versions"
-  ]
+  "browserslist": ["last 2 major versions"]
 }

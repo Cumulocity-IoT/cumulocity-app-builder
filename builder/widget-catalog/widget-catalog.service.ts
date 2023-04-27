@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2019 Software AG, Darmstadt, Germany and/or its licensors
+* Copyright (c) 2022 Software AG, Darmstadt, Germany and/or its licensors
 *
 * SPDX-License-Identifier: Apache-2.0
 *
@@ -18,25 +18,27 @@
 
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { ApplicationService, InventoryBinaryService, InventoryService } from '@c8y/client';
-import { AlertService } from '@c8y/ngx-components';
-import { AppBuilderExternalAssetsService } from 'app-builder-external-assets';
-import { RuntimeWidgetInstallerService } from 'cumulocity-runtime-widget-loader';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { ApplicationService, IApplication, IManifest } from '@c8y/client';
+import { BehaviorSubject, config, Observable } from 'rxjs';
 import { WidgetCatalog, WidgetModel } from './widget-catalog.model';
 import * as semver from "semver";
-import * as packageJson from "./../../package.json";
-import { catchError } from 'rxjs/operators';
+import { catchError, delay } from 'rxjs/operators';
+import { AlertService, AppStateService, PluginsService, ZipService } from '@c8y/ngx-components';
+import { SettingsService } from './../settings/settings.service';
+import { ProgressIndicatorService } from '../utils/progress-indicator-modal/progress-indicator.service';
+import { AppBuilderExternalAssetsService } from 'app-builder-external-assets';
 
-
+const packageJson = require('./../../package.json');
+const c8yVersion = require('./../../package.json')["@c8y/ngx-components"];
 @Injectable()
 export class WidgetCatalogService {
 
-  C8Y_VERSION = '1011.0.0';
-  C8Y_NEXT_VERSION = '1016.0.0';
+  C8Y_VERSION = '1016.X.X';
   pkgVersion: any;
   private WidgetCatalogPath = '/widgetCatalog/widget-catalog.json';
+ // private WidgetCatalogPath = '/widgetCatalog/widget-catalog.json?ref=preprod';
   private DemoCatalogWidgetsPath = '/demoCatalogWidgets/demo-catalog-widgets.json';
+ // private DemoCatalogWidgetsPath = '/demoCatalogWidgets/demo-catalog-widgets.json?ref=preprod';
   private devBranchPath = "?ref=development";
   private preprodBranchPath = "?ref=preprod";
   private GATEWAY_URL_GitHubAsset = '';
@@ -48,13 +50,14 @@ export class WidgetCatalogService {
   private CATALOG_LABCASE_ID = '';
   private GATEWAY_URL_GitHub = '';
   private GATEWAY_URL_GitHub_FallBack = '';
-  runtimeLoadingCompleted = false;
+  runtimeLoadingCompleted = true;
+  private currentApp: IApplication = null;
 
   widgetDetailsSource: BehaviorSubject<any> = new BehaviorSubject(null);
   widgetDetails$: Observable<any> = this.widgetDetailsSource.asObservable();
   displayListSource: BehaviorSubject<any> = new BehaviorSubject(null);
   displayListValue$: Observable<any> = this.displayListSource.asObservable();
-  
+
   displayListSourceMoreWidgets: BehaviorSubject<any> = new BehaviorSubject(null);
   displayListValueMoreWidgets$: Observable<any> = this.displayListSourceMoreWidgets.asObservable();
 
@@ -65,21 +68,25 @@ export class WidgetCatalogService {
     })
   };
 
-  constructor(private http: HttpClient, private inventoryService: InventoryService,
-    private appService: ApplicationService,
-    private binaryService: InventoryBinaryService, private alertService: AlertService,
-    private runtimeWidgetInstallerService: RuntimeWidgetInstallerService,
-    private externalService: AppBuilderExternalAssetsService) {
+  constructor(private http: HttpClient,
+    private appService: ApplicationService, private appStateService: AppStateService,
+    private settingsService: SettingsService, private pluginsService: PluginsService,
+    private externalService: AppBuilderExternalAssetsService, private zipService: ZipService,
+    private progressIndicatorService: ProgressIndicatorService, private alertService: AlertService) {
     this.GATEWAY_URL_GitHubAPI = this.externalService.getURL('GITHUB', 'gatewayURL_Github');
     this.GATEWAY_URL_GitHubAsset = this.externalService.getURL('GITHUB', 'gatewayURL_GitHubAsset');
     this.GATEWAY_URL_GitHubAPI_FallBack = this.externalService.getURL('GITHUB', 'gatewayURL_Github_Fallback');
     this.GATEWAY_URL_GitHubAsset_FallBack = this.externalService.getURL('GITHUB', 'gatewayURL_GitHubAsset_Fallback');
-    this.C8Y_VERSION = packageJson.dependencies['@c8y/ngx-components']
+    this.C8Y_VERSION = packageJson.dependencies['@c8y/ngx-components'];
+    this.pkgVersion = packageJson.version;
     this.GATEWAY_URL_Labcase = this.externalService.getURL('DBCATALOG', 'gatewayURL');
     this.GATEWAY_URL_Labcase_FallBack = this.externalService.getURL('DBCATALOG', 'gatewayURL_Fallback');
-    this.GATEWAY_URL_GitHub = this.externalService.getURL('GITHUB','gatewayURL_GithubAPI');
-    this.GATEWAY_URL_GitHub_FallBack = this.externalService.getURL('GITHUB','gatewayURL_GithubAPI_Fallback');
-    this.pkgVersion = packageJson.version;
+    this.GATEWAY_URL_GitHub = this.externalService.getURL('GITHUB', 'gatewayURL_GithubAPI');
+    this.GATEWAY_URL_GitHub_FallBack = this.externalService.getURL('GITHUB', 'gatewayURL_GithubAPI_Fallback');
+
+    this.appStateService.currentApplication.subscribe(app => {
+      this.currentApp = app;
+    });
   }
 
 
@@ -129,11 +136,9 @@ export class WidgetCatalogService {
         return this.http.get<WidgetCatalog>(`${urlFallBack}`, this.HTTP_HEADERS)
       }));
     }
+    
   }
 
-  async installWidget(binary: Blob, widget: WidgetModel) {
-    await this.runtimeWidgetInstallerService.installWidget(binary, (msg, type) => { }, widget);
-  }
 
   downloadBinary(binaryId: string): Observable<ArrayBuffer> {
     return this.http.get(`${this.GATEWAY_URL_GitHubAsset}${binaryId}`, {
@@ -149,12 +154,14 @@ export class WidgetCatalogService {
 
   isCompatiblieVersion(widget: any) {
     if (!widget || !widget.requiredPlatformVersion) return false;
-    return semver.satisfies(this.C8Y_VERSION, widget.requiredPlatformVersion);
+    const major = '>=' + semver.major(this.C8Y_VERSION) + '.X.X';
+    return semver.satisfies(this.C8Y_VERSION, widget.requiredPlatformVersion) || semver.satisfies(widget.requiredPlatformVersion,major);
   }
 
-  isNextCompatiblieVersion(widget: any) {
+  isNextCompatiblieVersion(nextC8yVersion: any, widget: any) {
     if (!widget || !widget.requiredPlatformVersion) return false;
-    return semver.satisfies(this.C8Y_NEXT_VERSION,widget.requiredPlatformVersion);
+    const major = '>=' + semver.major(nextC8yVersion) + '.X.X';
+    return semver.satisfies(widget.requiredPlatformVersion, major);
   }
 
   isLatestVersionAvailable(widget: WidgetModel) {
@@ -167,6 +174,10 @@ export class WidgetCatalogService {
 
   checkInstalledVersion(widget: WidgetModel) {
     if (!widget.installedVersion) return true;
+
+    if (widget.installedVersion?.toLocaleLowerCase().includes('beta') ||
+      widget.installedVersion?.toLocaleLowerCase().includes('rc')) return true;
+
     const major = '>=' + semver.major(widget.installedVersion) + '.0.0';
     return semver.satisfies(widget.version, major);
   }
@@ -195,7 +206,7 @@ export class WidgetCatalogService {
     this.displayListSourceMoreWidgets.next(value);
   }
   getWidgetDetailsFromRepo(widgetRepoPath): Observable<any> {
-    const url =  `${this.GATEWAY_URL_GitHub}${widgetRepoPath}/readme`;
+    const url = `${this.GATEWAY_URL_GitHub}${widgetRepoPath}/readme`;
     const urlFallBack = `${this.GATEWAY_URL_GitHub_FallBack}${widgetRepoPath}/readme`;
     return this.http.get(`${url}`, {
       responseType: 'text'
@@ -205,5 +216,221 @@ export class WidgetCatalogService {
         responseType: 'text'
       })
     }));
+  }
+
+
+  async updateRemotesInCumulocityJson(pluginBinary: any) {
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    this.progressIndicatorService.setProgress(50);
+    const currentApp: IApplication = (await this.getCurrentApp(true));
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    this.progressIndicatorService.setProgress(75);
+    const packageObj = this.pluginsService.getMFExports(pluginBinary) ;
+    this.progressIndicatorService.setProgress(95);
+    // updating config MO to retain widget status
+    let remotes = await this.pluginsService.addRemotes(currentApp, packageObj);
+
+    // for C8y 1015 compatibility
+    if(!remotes) {
+      remotes = (currentApp?.config?.remotes ? currentApp.config?.remotes : {});
+      packageObj.forEach((remote: any) => {
+        const key = remote.contextPath + '@' + remote.version;
+        (remotes[key] = remotes[key] || []).push(remote.module);
+      });
+      const config = { remotes};
+       let updatedApp = (await this.appService.update({
+        id: currentApp.id,
+        config
+      } as any)).data;
+    }
+    return this.settingsService.updateAppConfigurationForPlugin(remotes)
+  }
+
+  async updateRemotesToAppBuilderConfig() {
+    
+    const currentApp: IApplication =  (await this.getCurrentApp(true));
+    return this.settingsService.updateAppConfigurationForPlugin(currentApp?.config?.remotes);
+  }
+
+  private getCumulocityJson(archive: File): Observable<any> {
+    return this.zipService.getJsonData(archive, {
+      filename: 'cumulocity.json'
+    });
+  }
+
+  async getCurrentApp(isLatest: boolean = false) {
+    if (!this.currentApp) {
+      await delay(1000);
+      return this.getCurrentApp();
+    }
+    if(isLatest) {
+      this.currentApp = await (await this.appService.detail(this.currentApp.id)).data;
+    }
+    return this.currentApp;
+  }
+
+  async installPackage(packageFile: File) {
+    this.progressIndicatorService.setProgress(30);
+    let widgetC8yJson;
+    try {
+      widgetC8yJson = await this.getCumulocityJson(packageFile).toPromise().then(data => data).catch( (e) => {
+        console.log(e);
+        this.alertService.danger("Unable to find manfifest file. Please refresh and try again.");
+        throw Error("Unable to find manfifest file. Please refresh and try again.");
+      });
+      if (widgetC8yJson.contextPath === undefined) {
+        this.alertService.danger("Plugin Package has no context path.");
+        throw Error("Plugin Package has no context path");
+      }
+    } catch (e) {
+      console.log(e);
+      this.alertService.danger("Not a valid Plugin Package.");
+      throw Error("Not a valid Plugin Package");
+    }
+    const appList = (await this.appService.list({ pageSize: 2000 })).data;
+    let isUpdate = false;
+    if (appList.some(app => app.contextPath === widgetC8yJson.contextPath)) {
+      isUpdate = true;
+      const packageApp = appList.find(app => app.contextPath === widgetC8yJson.contextPath);
+       await this.appService.delete(packageApp.id).catch( (e) => {
+        console.error(e);
+      });
+      
+      this.progressIndicatorService.setProgress(35);
+      
+      // Upload the binary
+      // const appBinary = (await this.appService.binary(packageApp).upload(packageFile)).data;
+      // Update the app
+      // this.progressIndicatorService.setProgress(40);
+     /*  await this.appService.update({
+        ...widgetC8yJson,
+        id: packageApp.id,
+        activeVersionId: appBinary.id.toString()
+      });
+      if (window && window['aptrinsic']) {
+        window['aptrinsic']('track', 'gp_runtime_widget_updated', {
+          "widgetName": packageApp.name
+        });
+      }
+      return this.updateRemotesInCumulocityJson(packageApp) */
+    }  //else {
+      this.progressIndicatorService.setProgress(35);
+      // Create the pluginPackage's app
+      try {
+        let packageApp = (await this.appService.create({
+          name: widgetC8yJson.name,
+          key: widgetC8yJson.key,
+          contextPath: widgetC8yJson.contextPath,
+          manifest: { isPackage: true } as unknown as IManifest,
+          resourcesUrl: "/",
+          type: "HOSTED"
+        } as any)).data;
+  
+        // Upload the binary
+        const appBinary = (await this.appService.binary(packageApp).upload(packageFile)).data;
+  
+        // Update the app
+        this.progressIndicatorService.setProgress(40);
+        packageApp = (await this.appService.update({
+          id: packageApp.id,
+          activeVersionId: appBinary.id.toString()
+        } as any)).data;
+  
+        if (window && window['aptrinsic']) {
+          if(isUpdate) {
+            window['aptrinsic']('track', 'gp_runtime_widget_updated', {
+              "widgetName": packageApp.name
+            });
+          } else {
+            window['aptrinsic']('track', 'gp_runtime_widget_installed', {
+              "widgetName": packageApp.name
+            });
+          }
+         
+        }
+        return this.updateRemotesInCumulocityJson(packageApp)
+      }
+      catch(e) {
+        console.log(e);
+        const appRemotes = this.currentApp?.config.remotes;
+        return this.settingsService.updateAppConfigurationForPlugin(appRemotes)
+      }
+   // }
+  }
+
+  async removePlugins(pluginBinary: any) {
+    const currentApp = await this.getCurrentApp(true);
+    const packageObj = this.pluginsService.getMFExports(pluginBinary) ;
+    return this.pluginsService.removeRemotes(currentApp, packageObj);
+  }
+  async updateAppConfigRemotes(remotes: any) {
+    return this.settingsService.updateAppConfigurationForPlugin(remotes);
+  }
+
+  async filterInstalledWidgets(widgetCatalog: WidgetCatalog, userHasAdminRights: boolean) {
+    if (!widgetCatalog || !widgetCatalog.widgets
+        || widgetCatalog.widgets.length === 0) {
+        return;
+    }
+
+    const currentApp: IApplication =  (await this.getCurrentApp());
+    const appList = await this.pluginsService.listPackages();
+    let installedPlugins = currentApp?.config?.remotes;
+    installedPlugins = (installedPlugins ? this.removeVersionFromPluginRemotes(installedPlugins) : []);
+    for(let widget of widgetCatalog.widgets) {
+        const widgetObj = installedPlugins.find( plugin => plugin.pluginContext === widget.contextPath);
+        const appObj = appList.find(app => app.contextPath === widget.contextPath);
+        widget.installed = (widgetObj != undefined && widgetObj && appObj != undefined);
+        widget.isCompatible = this.isCompatiblieVersion(widget);
+        this.actionFlagGetWidgets(widget, userHasAdminRights);
+    }
+   
+     return widgetCatalog.widgets.filter(widget => !widget.installed);
+  }
+
+ removeVersionFromPluginRemotes(plugins: any) : Array<any>{
+    if(plugins) {
+      return Object.keys(plugins).map(key => ({pluginContext: key.split('@')[0], value: plugins[key]}));
+    }
+    return [];
+  }
+
+  /**
+     * compatible: 001
+     * non compatible: 002
+     * refresh: 003
+     * force upgrade 004 (my widget)
+     * invisible 000
+     */
+  actionFlagGetWidgets(widget: WidgetModel, userHasAdminRights: boolean) {
+
+    if (userHasAdminRights) {
+      if (widget.isCompatible && !widget.installed) { widget.actionCode = '001'; }
+      else if (!widget.isCompatible && !widget.installed) { widget.actionCode = '002'; }
+      else if (widget.isReloadRequired && widget.installed) { widget.actionCode = '003'; }
+      else { widget.actionCode = '000'; }
+    } else {
+      widget.actionCode = '000';
+    }
+  }
+
+  async isOwnAppBuilder() {
+    const currentApp = await this.getCurrentApp();
+    const currentTenantId = this.settingsService.getTenantName();
+    const appBuilderTenantId = (currentApp && currentApp.owner && currentApp.owner.tenant ? currentApp.owner.tenant.id : undefined);
+    return (currentApp && currentTenantId === appBuilderTenantId);
+  }
+
+  async cloneAppBuilder() {
+    const currentApp = await this.getCurrentApp();
+    let { data: clonedAppBuilder } = await this.appService.clone(currentApp.id);
+    clonedAppBuilder.contextPath = currentApp.contextPath;
+    clonedAppBuilder.key = currentApp.key;
+    clonedAppBuilder.name = currentApp.name;
+    delete clonedAppBuilder.type;
+    await this.appService.update({
+      id: clonedAppBuilder.id,
+      ...clonedAppBuilder
+    });
   }
 }

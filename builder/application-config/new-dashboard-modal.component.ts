@@ -23,6 +23,7 @@ import {WizardComponent} from "../../wizard/wizard.component";
 import {WELCOME_DASHBOARD_TEMPLATE} from "./dashboard-templates";
 import {HELP_SUPPORT_DASHBOARD_TEMPLATE} from "./help-support-templates";
 import {AppBuilderNavigationService} from "../navigation/app-builder-navigation.service";
+import { AppDataService } from '../app-data.service';
 import { Subject } from 'rxjs';
 
 @Component({
@@ -35,6 +36,7 @@ export class NewDashboardModalComponent {
 
     dashboardId: string = '12598412';
     dashboardName: string = '';
+    dashboardPath: string = null;
     dashboardIcon: string = 'th';
     deviceId: string = '';
     deviceName: string = '';
@@ -49,9 +51,12 @@ export class NewDashboardModalComponent {
 
     @ViewChild(WizardComponent, {static: true}) wizard: WizardComponent;
 
-    constructor(public bsModalRef: BsModalRef, private appService: ApplicationService, private inventoryService: InventoryService, private navigation: AppBuilderNavigationService) {
-        this.onSave = new Subject();
-    }
+    constructor(public bsModalRef: BsModalRef, private appService: ApplicationService, 
+        private inventoryService: InventoryService, private navigation: AppBuilderNavigationService,
+        private appDataService: AppDataService) {
+            this.onSave = new Subject();
+        }
+    
 
     showId() {
         switch(this.creationMode) {
@@ -148,7 +153,8 @@ export class NewDashboardModalComponent {
         await this.addTemplateDashboard(application, name, visibility, icon, template, tabGroup, selectedGlobalRoles);
     }
 
-    async addTemplateDashboard(application, name: string, visibility: '' | 'hidden' | 'no-nav', icon: string, template: any, tabGroup: string, selectedGlobalRoles: any, isGroupTemplate: boolean = false) {
+    async addTemplateDashboard(application, dbName: string, visibility: '' | 'hidden' | 'no-nav', icon: string, template: any, tabGroup: string, selectedGlobalRoles: any, isGroupTemplate: boolean = false) {
+        const name = (this.dashboardPath ? `${this.dashboardPath}/${dbName}` : dbName );
         const dashboardManagedObject = (await this.inventoryService.create({
             c8y_Global: {},
             "c8y_Dashboard!name!app-builder-db": {},
@@ -182,6 +188,7 @@ export class NewDashboardModalComponent {
             id: application.id,
             applicationBuilder: application.applicationBuilder
         } as any);
+        this.appDataService.forceUpdate = true;
 
         this.navigation.refresh();
         // TODO?

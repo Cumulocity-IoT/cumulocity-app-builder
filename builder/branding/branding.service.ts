@@ -18,10 +18,10 @@
 
 import { Injectable } from "@angular/core";
 import * as fa from "fontawesome";
-import * as d3 from "d3-color";
 import * as delay from "delay";
 import { SettingsService } from "../settings/settings.service";
 declare const FontFace: any;
+import * as d3 from "d3-color";
 
 /**
  * Adds style elements to the head which set the css variables required to re-theme cumulocity
@@ -144,13 +144,13 @@ body {
     /* All the other text: */
     --brand-dark: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     /* --input-focus-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)}; */
-    --header-hover-color: ${this.colorToHex(app.applicationBuilder.branding.colors.hover)};
+    --header-hover-color: ${app.applicationBuilder.branding.colors.hover ? this.colorToHex(app.applicationBuilder.branding.colors.hover) : '#14629f'};
     --header-color: ${app.applicationBuilder.branding.colors.headerBar ? this.colorToHex(app.applicationBuilder.branding.colors.headerBar) : '#ffffff'};
     --dropdown-background: ${app.applicationBuilder.branding.colors.headerBar ? this.colorToHex(app.applicationBuilder.branding.colors.headerBar) : '#ffffff'};
     --toolbar-background:${app.applicationBuilder.branding.colors.toolBar ? this.colorToHex(app.applicationBuilder.branding.colors.toolBar) : '#ffffff'};
     --toolbar-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     --page-tabs-background:${app.applicationBuilder.branding.colors.tabBar ? this.colorToHex(app.applicationBuilder.branding.colors.tabBar) : '#ffffff'};
-    --toolbar-actions-color-hover: ${app.applicationBuilder.branding.colors.toolBar ? this.colorToHex(app.applicationBuilder.branding.colors.hover) : '#ffffff'};
+    --toolbar-actions-color-hover: ${app.applicationBuilder.branding.colors.toolBar ? this.colorToHex(app.applicationBuilder.branding.colors.hover) : '#14629f'};
     --toolbar-focus-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     --dropdown-actions-color-hover: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     --component-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
@@ -159,7 +159,7 @@ body {
     --page-tabs-actions-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     --page-tabs-actions-color-hover: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     --list-group-actions-color: var(--component-link-color, #000);
-    --dropdown-active-color:${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+    --dropdown-active-color:${this.colorToHex(app.applicationBuilder.branding.colors.active)};
     --tooltip-background: ${this.colorToHex(app.applicationBuilder.branding.colors.active)};/*0b385b*/
     --tooltip-color: ${this.colorToHex(app.applicationBuilder.branding.colors.textOnActive)};
     --link-color: #1776BF;
@@ -222,20 +222,20 @@ a, a:hover {
     --body-background-color: var(--brand-dark,#f2f3f4);
 }
 .label-color {
-    color: var(--navigator-active-color, #000);
+    color: var(--navigator-active-bg, #000);
 }
 .card-color {
     background: var(--brand-primary, #fff);
-    color: var(--navigator-active-color, #000);
+    color: var(--navigator-active-bg, #000);
 }
 .nav-tabs > li > button {
-    color: var(--navigator-active-bg,#0b385b);
+    color: var(--navigator-active-bg,#0b385b) !important;
 }
 .nav-tabs > li > button:hover:not([disabled]) {
-    color: var(--brand-primary,#1776bf);
+    color: var(--brand-primary,#1776bf) !important;
 }
 select.form-control:focus, select:focus {
-    color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+    color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)} !important;
 }
 label.c8y-checkbox input[type='checkbox']:checked + span::after, label.c8y-radio input[type='checkbox']:checked + span::after {
     color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
@@ -302,13 +302,13 @@ body {
     /* All the other text: */
     --brand-dark: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     /* --input-focus-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)}; */
-    --header-hover-color: ${this.colorToHex(app.applicationBuilder.branding.colors.hover)};
+    --header-hover-color: ${app.applicationBuilder.branding.colors.hover ? this.colorToHex(app.applicationBuilder.branding.colors.hover) : '#14629f'};
     --header-color: ${app.applicationBuilder.branding.colors.headerBar ? this.colorToHex(app.applicationBuilder.branding.colors.headerBar) : '#ffffff'};
     --dropdown-background: ${app.applicationBuilder.branding.colors.headerBar ? this.colorToHex(app.applicationBuilder.branding.colors.headerBar) : '#ffffff'};
     --toolbar-background:${app.applicationBuilder.branding.colors.toolBar ? this.colorToHex(app.applicationBuilder.branding.colors.toolBar) : '#ffffff'};
     --toolbar-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     --page-tabs-background:${app.applicationBuilder.branding.colors.tabBar ? this.colorToHex(app.applicationBuilder.branding.colors.tabBar) : '#ffffff'};
-    --toolbar-actions-color-hover: ${app.applicationBuilder.branding.colors.toolBar ? this.colorToHex(app.applicationBuilder.branding.colors.hover) : '#ffffff'};
+    --toolbar-actions-color-hover: ${app.applicationBuilder.branding.colors.toolBar ? this.colorToHex(app.applicationBuilder.branding.colors.hover) : '#14629f'};
     --toolbar-focus-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     --dropdown-actions-color-hover: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     --component-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
@@ -317,7 +317,7 @@ body {
     --page-tabs-actions-color: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     --page-tabs-actions-color-hover: ${this.colorToHex(app.applicationBuilder.branding.colors.text)};
     --list-group-actions-color: var(--component-link-color, #000);
-    --dropdown-active-color:${this.colorToHex(app.applicationBuilder.branding.colors.text)};
+    --dropdown-active-color:${this.colorToHex(app.applicationBuilder.branding.colors.active)};
     --tooltip-background: ${this.colorToHex(app.applicationBuilder.branding.colors.active)};/*0b385b*/
     --tooltip-color: ${this.colorToHex(app.applicationBuilder.branding.colors.textOnActive)};
     ${app.applicationBuilder.branding.logoHeight != undefined ? '--navigator-platform-logo-height: ' + app.applicationBuilder.branding.logoHeight + 'px;' : ''}
@@ -365,13 +365,13 @@ body {
     color: var(--navigator-active-color, #000);
 }
 .nav-tabs > li > button {
-    color: var(--navigator-active-bg,#0b385b);
+    color: var(--navigator-active-bg,#0b385b) !important;
 }
 .nav-tabs > li > button:hover:not([disabled]) {
-    color: var(--brand-primary,#1776bf);
+    color: var(--brand-primary,#1776bf) !important;
 }
 select.form-control:focus, select:focus {
-    color: ${this.colorToHex(app.applicationBuilder.branding.colors.primary)};
+    color: ${this.colorToHex(app.applicationBuilder.branding.colors.primary)} !important;
 }
 `;
             } else {

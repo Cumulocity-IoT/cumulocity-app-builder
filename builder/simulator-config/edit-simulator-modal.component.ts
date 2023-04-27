@@ -23,9 +23,10 @@ import {
     ViewChild,
     ViewContainerRef,
     OnInit,
-    ComponentFactory
+    ComponentFactory,
+    ComponentRef
 } from '@angular/core';
-import { BsModalRef } from 'ngx-bootstrap/modal';
+import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import {ApplicationService, FetchClient} from '@c8y/client';
 import {AppIdService} from "../app-id.service";
 import {SimulatorConfig} from "../simulator/simulator-config";
@@ -34,6 +35,10 @@ import {SimulatorCommunicationService} from "../simulator/mainthread/simulator-c
 import * as _ from 'lodash';
 import { SimulatorNotificationService } from './simulatorNotification.service';
 import { FileSimulatorNotificationService } from './file-simulator.service';
+import { SimulatorWorkerAPI } from '../simulator/mainthread/simulator-worker-api.service';
+import { SimulatorConfigService } from './simulator-config.service';
+import { AlertMessageModalComponent } from '../../builder/utils/alert-message-modal/alert-message-modal.component';
+import { SimulationStrategyConfigComponent } from '../../builder/simulator/simulation-strategy';
 
 @Component({
     templateUrl: './edit-simulator-modal.component.html'
@@ -46,12 +51,14 @@ export class EditSimulatorModalComponent implements OnInit {
     isMSExist: boolean = false;
     isMSCheckSpin: boolean = false;
     isCSVSimulator: boolean = false;
+    showWarning: boolean;
     constructor(
-        private simSvc: SimulatorCommunicationService,
+        private simSvc: SimulatorWorkerAPI, private simConfigService: SimulatorConfigService,
         public bsModalRef: BsModalRef, private simulationStrategiesService: SimulationStrategiesService,
         private resolver: ComponentFactoryResolver, private injector: Injector,
         private appService: ApplicationService, private appIdService: AppIdService, private fetchClient: FetchClient,
-        private simulatorNotificationService: SimulatorNotificationService, private fileSimulatorNotificationService: FileSimulatorNotificationService
+        private simulatorNotificationService: SimulatorNotificationService,
+        private fileSimulatorNotificationService: FileSimulatorNotificationService, private modalService: BsModalService
     ) {}
 
     ngOnInit() {
@@ -86,7 +93,7 @@ export class EditSimulatorModalComponent implements OnInit {
         
         if (metadata.configComponent != null) {
             const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(metadata.configComponent);
-            const componentRef = this.configWrapper.createComponent(factory);
+            const componentRef: ComponentRef<SimulationStrategyConfigComponent> = this.configWrapper.createComponent(factory);
             componentRef.instance.config = this.simulatorConfig.config;
 
             //existing config - check for new operations - config on simulator config
@@ -129,6 +136,11 @@ export class EditSimulatorModalComponent implements OnInit {
             //Accessing EditMode variable in simulator strategy
             componentRef.instance.config.isEditMode = true; 
             this.simulatorConfig.metadata = metadata;
+            this.simConfigService.runOnServer$.subscribe((val) => {
+                this.simulatorConfig.serverSide = val;
+                componentRef.instance.config.serverSide = val;
+                this.checkIntervalValidation();
+            });
         }
     }
 
@@ -182,7 +194,7 @@ export class EditSimulatorModalComponent implements OnInit {
         }
         
         // We could just wait for them to refresh, but it's nicer to instantly refresh
-        await this.simSvc.simulator.checkForSimulatorConfigChanges();
+        await this.simSvc.checkForSimulatorConfigChanges();
 
         this.bsModalRef.hide();
     }
@@ -199,8 +211,59 @@ export class EditSimulatorModalComponent implements OnInit {
         this.isMSCheckSpin = true;
         const response = await this.fetchClient.fetch('service/simulator-app-builder/health'); 
         const data = await response.json()
-        if(data && data.status && data.status === "UP") { this.isMSExist = true;}
-        else { this.isMSExist = false;}
+        if(data && data.status && data.status === "UP") {
+            this.isMSExist = true;
+            if (this.simulatorConfig.serverSide) {
+                this.simConfigService.setRunOnServer(this.simulatorConfig.serverSide);
+            }
+        }
+        else { 
+            this.isMSExist = false;
+            if (this.simulatorConfig.serverSide) {
+                this.simConfigService.setRunOnServer(this.simulatorConfig.serverSide);
+            }
+        }
         this.isMSCheckSpin = false;
+    }
+
+    async toggleRunOnServer() {
+        if (!this.simulatorConfig.serverSide) {
+            const alertMessage = {
+                title: 'Confirmation',
+                description: `You are about to switch simulator as browser based. Browser based simulator will run till your browser is active and may impact on application performance in a long run.
+                Do you want to proceed ?`,
+                type: 'warning',
+                alertType: 'confirm', //info|confirm
+                confirmPrimary: false //confirm Button is primary
+            }
+            const confirmDialog = this.alertModalDialog(alertMessage);
+            await confirmDialog.content.event.subscribe(async data => {
+                if (data && data.isConfirm) {
+                    this.simConfigService.setRunOnServer(this.simulatorConfig.serverSide);
+                    this.checkIntervalValidation();
+                } else {
+                    this.simulatorConfig.serverSide = true;
+                    this.simConfigService.setRunOnServer(true);
+                }
+            });
+        } else {
+            this.simConfigService.setRunOnServer(this.simulatorConfig.serverSide);
+        }
+    }
+
+    private alertModalDialog(message: any): BsModalRef {
+        return this.modalService.show(AlertMessageModalComponent, { class: 'c8y-wizard', initialState: { message } });
+    }
+
+    checkIntervalValidation() {
+        let serverSide;
+        this.simConfigService.runOnServer$.subscribe((val) => {
+            serverSide = val;
+            if (!serverSide && this.simulatorConfig.config.interval < 30) {
+                this.simulatorConfig.config.intervalInvalid = true;
+            } else {
+                this.simulatorConfig.config.intervalInvalid = false;
+            }
+        });
     }
 }

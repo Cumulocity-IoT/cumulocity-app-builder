@@ -1,9 +1,8 @@
 <c8y-title>Simulators</c8y-title>
-
 <ng-container *ngIf="simulatorConfigById$ | async as simulatorConfigById">
 <div class="card-group interact-grid" *ngIf="lockStatus$ | async as lockStatus">
     <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3" style="min-height: 165px">
-        <a  *ngIf="userHasAdminRights && lockStatus.isLockOwned else locked" class="card add-card clickable" [ngClass]="{'add-card-color' : applyTheme}" (click)="showCreateSimulatorDialog()">
+        <a  *ngIf="userHasAdminRights && (lockStatus.isLockOwned || !isSimulatorsExist) else locked" class="card add-card clickable" [ngClass]="{'add-card-color' : applyTheme}" (click)="showCreateSimulatorDialog()">
             <i c8yIcon="plus-square"></i><br>
             Add Simulator
         </a>
@@ -33,23 +32,23 @@
                 <i c8yIcon="server"></i>
             </div>
             <div class="dropdown card-actions" dropdown (click)="$event.stopPropagation()" *ngIf="userHasAdminRights && lockStatus.isLockOwned">
-                <button title="Settings" id="appSettings-{{simulatorConfig.name}}" class="dropdown-toggle c8y-dropdown" dropdownToggle type="button">
+                <button title="Settings" id="appSettings-{{simulatorConfig.name}}" class="dropdown-toggle c8y-dropdown" dropdownToggle type="button" [ngClass]="{'label-color': applyTheme}">
                     <i c8yIcon="ellipsis-v"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-right" *dropdownMenu role="menu">
                     <li role="menuitem">
                         <a class="dropdown-item clickable" (click)="showEditSimulatorDialog(simulatorConfig)">
-                            <i c8yIcon="edit"></i> Edit
+                            <i c8yIcon="edit" [ngClass]="{'label-color': applyTheme}"></i><span [ngClass]="{'label-color': applyTheme}"> Edit</span>
                         </a>
                     </li>
                     <li role="menuitem">
                         <a class="dropdown-item clickable" (click)="exportSimulatorConfig(simulatorConfig)">
-                            <i c8yIcon="download"></i> Export
+                            <i c8yIcon="download" [ngClass]="{'label-color': applyTheme}"></i> <span [ngClass]="{'label-color': applyTheme}"> Export</span>
                         </a>
                     </li>
                     <li role="menuitem">
                         <a class="dropdown-item clickable" (click)="deleteSimulator(simulatorConfig)">
-                            <i c8yIcon="times"></i> Remove
+                            <i c8yIcon="times" [ngClass]="{'label-color': applyTheme}"></i> <span [ngClass]="{'label-color': applyTheme}"> Remove</span>
                         </a>
                     </li>
                 </ul>

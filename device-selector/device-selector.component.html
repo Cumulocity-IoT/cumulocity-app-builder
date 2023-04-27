@@ -1,5 +1,5 @@
 <div class="row col-xs-12" style="display: inline-flex;"><input type="text" class="form-control"  name="deviceGroup_{{field_id}}"
-    [placeholder]="placeHolder" [required]="required" 
+    [placeholder]="placeHolder" [required]="required" container="body"
     [(ngModel)]="value" [typeahead]="suggestions$"  (typeaheadLoading)="changeTypeaheadLoading($event)"
     [typeaheadAsync]="true" typeaheadWaitMs="500" typeaheadOptionField="name" (typeaheadOnSelect)="onSelect($event)"
     [isAnimated]="true" autocomplete="off" [typeaheadOptionsLimit]="5"  [typeaheadMinLength]="3" (typeaheadOnBlur)="typeaheadOnBlur($event)">

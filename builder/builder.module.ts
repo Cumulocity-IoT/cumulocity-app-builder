@@ -41,11 +41,9 @@ import { AppListModule, RedirectToDefaultApplicationOrBuilder } from "./app-list
 import { MarkdownModule } from "ngx-markdown";
 import { BrandingDirtyGuardService } from "./branding/branding-dirty-guard.service";
 import { AppListComponent } from "./app-list/app-list.component";
-import { LockStatus } from "./simulator/worker/simulation-lock.service";
 import { fromEvent, Observable } from "rxjs";
-import { withLatestFrom } from "rxjs/operators";
-import { proxy } from "comlink";
-import { Client , BasicAuth, CookieAuth } from '@c8y/client';
+import { distinctUntilChanged, filter, withLatestFrom } from "rxjs/operators";
+import { Client , BasicAuth, CookieAuth, TenantService } from '@c8y/client';
 import { TemplateCatalogModule } from "./template-catalog/template-catalog.module";
 import { RectangleSpinnerModule } from "./utils/rectangle-spinner/rectangle-spinner.module";
 import { DeviceSelectorModalModule } from "./utils/device-selector-modal/device-selector.module";
@@ -60,13 +58,17 @@ import { HomeComponent } from './home/home.component';
 import { WidgetCatalogModule } from './widget-catalog/widget-catalog.module';
 import { AlertMessageModalModule } from "./utils/alert-message-modal/alert-message-modal.module";
 import { AppBuilderUpgradeService } from "./app-builder-upgrade/app-builder-upgrade.service";
+import { SimulatorWorkerAPI } from "./simulator/mainthread/simulator-worker-api.service";
+import { SimulatorManagerService } from "./simulator/mainthread/simulator-manager.service";
 import { NgSelectModule } from "@ng-select/ng-select";
+import { LockStatus } from "./simulator/mainthread/simulation-lock.service";
 import { ButtonsModule } from "ngx-bootstrap/buttons";
 import { DashboardNodeComponent } from "./application-config/dashboard-node.component";
 import { CollapseModule } from 'ngx-bootstrap/collapse';
 import { DragDropModule } from "@angular/cdk/drag-drop";
 import { BsModalRef, BsModalService } from "ngx-bootstrap/modal";
 import { AlertMessageModalComponent } from "./utils/alert-message-modal/alert-message-modal.component";
+import { AppDataService } from "./app-data.service";
 @NgModule({
     imports: [
         ApplicationModule,
@@ -91,7 +93,7 @@ import { AlertMessageModalComponent } from "./utils/alert-message-modal/alert-me
             }, {
                 path: 'application/:applicationId/simulator-config',
                 component: SimulatorConfigComponent
-            }, 
+            },
             {
                 path: 'settings-properties',
                 component: CustomPropertiesComponent
@@ -145,37 +147,16 @@ import { AlertMessageModalComponent } from "./utils/alert-message-modal/alert-me
 })
 export class BuilderModule {
     private renderer: Renderer2;
-    constructor(appStateService: AppStateService, loginService: LoginService, simSvc: SimulatorCommunicationService, 
+    constructor(appStateService: AppStateService, loginService: LoginService, private appDataService: AppDataService,
+        simSvc: SimulatorWorkerAPI, simulatorManagerService: SimulatorManagerService,
         appIdService: AppIdService, private settingService: SettingsService, private appBuilderUpgradeService: AppBuilderUpgradeService,
         rendererFactory: RendererFactory2, @Inject(DOCUMENT) private _document: Document,
         private modalService: BsModalService) {
-        // Pass the app state to the worker from the main thread (Initially and every time it changes)
-        appStateService.currentUser.subscribe(async (user) => {
-            let isCookieAuth = false;
-            let cookieAuth = null;
-            let xsrfToken = null;
-            const token = localStorage.getItem(loginService.TOKEN_KEY) || sessionStorage.getItem(loginService.TOKEN_KEY);
-            if (!token) {
-                // XSRF token required by webworker while cookie auth used. use case: login using sso
-                cookieAuth = new CookieAuth();
-                xsrfToken = cookieAuth.getCookieValue('XSRF-TOKEN');
-                isCookieAuth = true;
-            }
-            if (user != null) {
-                const tfa = localStorage.getItem(loginService.TFATOKEN_KEY) || sessionStorage.getItem(loginService.TFATOKEN_KEY);
-                if (token !== undefined && token) {
-                    return await simSvc.simulator.setUserAndCredentials(user, { token, tfa }, isCookieAuth, null);
-                } else {
-                    return await simSvc.simulator.setUserAndCredentials(user, { token, tfa }, isCookieAuth, xsrfToken);
-                }
-            }
-            return await simSvc.simulator.setUserAndCredentials(user, {}, isCookieAuth, xsrfToken);
-        });
-
+        
         const lockStatus$ = new Observable<{ isLocked: boolean, isLockOwned: boolean, lockStatus?: LockStatus }>(subscriber => {
-            simSvc.simulator
-                .addLockStatusListener(proxy(lockStatus => subscriber.next(lockStatus)))
-                .then(listenerId => subscriber.add(() => simSvc.simulator.removeListener(listenerId)));
+            const listenerId = simSvc
+                .addLockStatusListener(lockStatus => subscriber.next(lockStatus));
+            subscriber.add(() => simSvc.removeListener(listenerId));
         });
 
         // If the user leaves the page then unlock the simulators
@@ -183,13 +164,17 @@ export class BuilderModule {
             .pipe(withLatestFrom(lockStatus$))
             .subscribe(([event, lockStatus]) => {
                 if (lockStatus.isLockOwned) {
-                    simSvc.simulator.unlock();
+                    simSvc.unlock();
                 }
             });
-        appStateService.currentTenant.subscribe(async (tenant) => {
-            await simSvc.simulator.setTenant(tenant)
-            this.settingService.setTenant(tenant);
+       
+         appStateService.currentTenant
+        .pipe(filter(tenant => !!tenant))
+        .pipe(distinctUntilChanged())
+        .subscribe(async (tenant) => {
             if(tenant) {
+                await simSvc.setTenant(tenant)
+                this.settingService.setTenant(tenant);
                 const validAnalyticsProvider = await this.settingService.loadAnalyticsProvider();
                 if(validAnalyticsProvider) {
                     this.renderer = rendererFactory.createRenderer(null, null);
@@ -212,9 +197,22 @@ export class BuilderModule {
             }
         });
        
-        appIdService.appId$.subscribe(async (appId) => 
+        appIdService.appId$
+        .pipe(filter(appId => !!appId))
+        .pipe(distinctUntilChanged())
+        .subscribe(async (appId) => 
         {
-            await simSvc.simulator.setAppId(appId)
+            if(appId) {   
+                this.appDataService.getAppDetails(appId)
+                .pipe(filter(app => !!app))
+                .pipe(distinctUntilChanged()).subscribe( app => {
+                    if(app.applicationBuilder && app.applicationBuilder?.simulators && app.applicationBuilder?.simulators.length > 0){
+                        simulatorManagerService.initialize();                 
+                    }
+                });
+                
+                await simSvc.setAppId(appId) 
+            }
             this.registerAndTrackAnalyticsProvider(false, appId);
         });
     }

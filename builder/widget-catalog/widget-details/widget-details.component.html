@@ -13,12 +13,12 @@
                         <button class="btn btn-clean btn-icon btn-md"
                             title="Update - Latest version available - {{widgetDetails.version}}" *ngSwitchCase="'001'">
                             <i c8yIcon="cloud-upload" class="widget-action-icon blink_me_update"
-                                (click)="updateWidget(widgetDetails, false)"></i>
+                                (click)="updateWidget(widgetDetails)"></i>
                         </button>
                         <button class="btn btn-clean btn-icon btn-md" title="Update (Not Compatible)"
                             *ngSwitchCase="'002'">
                             <i c8yIcon="level-up" class="widget-action-icon blink_me_update"
-                                (click)="updateWidget(widgetDetails, false)"></i>
+                                (click)="updateWidget(widgetDetails)"></i>
                         </button>
                         <button class="btn btn-clean btn-icon btn-md" title="Refresh" *ngSwitchCase="'003'">
                             <i c8yIcon="refresh" class="widget-action-icon text-info" (click)="refresh()"></i>
@@ -73,7 +73,7 @@
                             <i c8yIcon="refresh" class="widget-action-icon text-info" (click)="refresh()"></i>
                         </div>
                         <div class="text-danger" title="Uninstall Widget" *ngSwitchDefault><i class="widget-action-icon"
-                                c8yIcon="minus-circle" title="Uninstall Widget" (click)="uninstallWidget(widgetDetails)"></i></div>
+                                c8yIcon="minus-circle" title="Uninstall Widget" style="margin-top:3px;" (click)="uninstallWidget(widgetDetails)"></i></div>
                     </div>
                 </div>
                 <div class="card-block bg-white">
@@ -103,10 +103,12 @@
                     <div class="card-title" style="color: #0B385B">
                         About
                     </div>
+                    <div style="color: #0B385B;position: absolute;right: 15px"  class="card-title">
+                        <span class="label label-info" style="text-transform:capitalize;font-size: 12px;">{{widgetDetails.pluginType}}</span>
+                    </div>
                 </div>
                 <div class="card-block bg-white">
                     <markdown ngPreserveWhitespaces class="variable-binding" name="description" [data]="description"></markdown>
-                   
                 </div>
                 <div class="card-block bg-white">
                     <button class="btn btn-primary" style="position: absolute;bottom: 20px"

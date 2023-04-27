@@ -30,10 +30,11 @@ import {
     withLatestFrom,
     debounceTime
 } from "rxjs/operators";
-import { interval, merge, Observable, of, Subscription } from "rxjs";
+import { from, interval, merge, Observable, of, Subscription } from "rxjs";
 import * as deepEqual from "fast-deep-equal";
 import { SimulationStrategiesService } from "../simulation-strategies.service";
 import { Injectable } from "@angular/core";
+import { AppDataService } from "./../../app-data.service";
 
 export interface DeviceSimulatorInstance {
     id: number,
@@ -45,7 +46,7 @@ export interface DeviceSimulatorInstance {
 /**
  * Manages the lifecycle of the simulators
  */
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class SimulatorManagerService {
     simulatorInstances: DeviceSimulatorInstance[] = [];
     simulatorConfigById = new Map<number, SimulatorConfig>();
@@ -57,6 +58,7 @@ export class SimulatorManagerService {
         private simulatorWorkerAPI: SimulatorWorkerAPI, private appService: ApplicationService,
         private appIdService: AppIdService, private lockService: SimulationLockService,
         private simulationStrategiesService: SimulationStrategiesService,
+        private appDataService: AppDataService
     ) { }
 
     initialize() {
@@ -71,6 +73,7 @@ export class SimulatorManagerService {
                         this.simulatorWorkerAPI._checkForSimulatorConfigChanges // Check if asked to
                     ).pipe(
                         debounceTime(100),
+                        //switchMap(() => from(this.appDataService.getAppDetails(appId))),
                         switchMap(() => this.appService.detail(appId)),
                         map(res => res.data),
                         map((application: IApplication & { applicationBuilder: any; }) => application.applicationBuilder.simulators || []),
@@ -148,9 +151,8 @@ export class SimulatorManagerService {
     }
 
     async loadSimulatorConfig(appId: string) {
-        this.simulatorConfigById.clear();
-
         const app = (await this.appService.detail(appId)).data as IApplication & { applicationBuilder: any; };
+        this.simulatorConfigById.clear();
         if (app.applicationBuilder.simulators) {
             const sortedSimulators = app.applicationBuilder.simulators.sort((a, b) => a.name > b.name ? 1 : -1);
             for (let simulatorConfig of sortedSimulators as SimulatorConfig[]) {

@@ -11,7 +11,7 @@
           <span title={{node.title}} style="margin-left:20px;">{{ node.title | translate }}</span>
         </div>
         <div class="col-sm-2 column-overflow" title={{node.dashboard.id}} id="dashboard-id-{{node.title}}" *ngIf="node.isDashboard">
-          {{ node.dashboard.id }}
+          {{ node.dashboard.id }} <a class="copy-dashboard" title="Copy Dashboard ID" (click)="copyDashboardID(node.dashboard.id)"><i c8yIcon="copy"></i></a>
         </div>
         <div class="col-sm-1 column-overflow" *ngIf="node.isDashboard" 
         title="{{node.dashboard.visibility === 'no-nav' ? 'Tabs Only' : node.dashboard.visibility === 'hidden' ? 'Hidden': node.dashboard.visibility}}">
@@ -21,7 +21,7 @@
         <div class="col-sm-1 column-overflow" *ngIf="node.isDashboard" title="{{ node.dashboard.tabGroup }}">
           {{ node.dashboard.tabGroup }}
         </div>
-        <div class="col-sm-1 column-overflow" *ngIf="node.isDashboard">
+        <div class="col-sm-2 column-overflow" *ngIf="node.isDashboard">
           <span *ngFor="let role of node.dashboard.roles" title="{{role.name}}">
             {{role.name}} <br>
           </span>
@@ -29,11 +29,11 @@
         <div class="col-sm-2 column-overflow" *ngIf="node.isDashboard" title="{{node.dashboard.groupTemplate ? 'Children of: ' :''}}{{node.dashboard.deviceId || '-'}}">
           {{node.dashboard.groupTemplate ? 'Children of: ' :''}}{{node.dashboard.deviceId || '-'}}
         </div>
-        <div class="col-sm-2" *ngIf="node.isDashboard">
-          <button class="btn btn-default" id="editDashboardButton-{{node.dashboard.id}}" title="Edit Dashboard"
-            (click)="editDashboardClicked(node.dashboard)">Edit</button>
-          <button class="btn btn-default" id="deleteDashboardButton-{{node.dashboard.id}}" title="Delete Dashboard"
-            (click)="deleteDashboardClicked(node.dashboard)">Delete</button>
+        <div class="col-sm-1" *ngIf="node.isDashboard">
+          <a id="editDashboardButton-{{node.dashboard.id}}" title="Edit Dashboard"
+            (click)="editDashboardClicked(node.dashboard)"><i style="font-size:18px;cursor: pointer;" c8yIcon="edit"></i></a>
+          <a id="deleteDashboardButton-{{node.dashboard.id}}" title="Delete Dashboard"
+            (click)="deleteDashboardClicked(node.dashboard)" style="margin-left:20px;cursor: pointer;"><i c8yIcon="delete" style="font-size:18px;"></i></a>
         </div>
         <i class="collapse-expand-icon" [ngClass]="node.children.length === 0 ? 'empty-space': ''" id="collapse-button"
           [c8yIcon]="node.children && objectKeys(node.children).length > 0  ?  (!isCollapsed ?  'collapse-arrow': 'expand-arrow') : '' "></i>

@@ -29,7 +29,7 @@ import { debounceTime, map, switchMap, tap, filter } from "rxjs/operators";
  * The public api for talking to the simulators
  * Fields starting with _ are for use only by the worker
  */
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class SimulatorWorkerAPI {
     private _listenerId;
     _incomingOperations = new BehaviorSubject<any[]>([]);
@@ -39,13 +39,13 @@ export class SimulatorWorkerAPI {
     _listeners = new Map<number, Subscription>();
     _checkForSimulatorConfigChanges = new Subject<any>();
     retrieveOperations: boolean = false;
-
+    
     constructor(
         private fetchClient: FetchClient,
         private lockService: SimulationLockService,
         private appStateService: AppStateService,
         private appIdService: AppIdService
-    ) { }
+    ) {}
 
     setUserAndCredentials(user: IUser | null, credentials: ICredentials, isCookieAuth: boolean, cookieAuth: any) {
         if (isCookieAuth) {

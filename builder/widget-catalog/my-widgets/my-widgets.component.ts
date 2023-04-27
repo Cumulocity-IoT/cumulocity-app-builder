@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2019 Software AG, Darmstadt, Germany and/or its licensors
+* Copyright (c) 2022 Software AG, Darmstadt, Germany and/or its licensors
 *
 * SPDX-License-Identifier: Apache-2.0
 *
@@ -21,19 +21,18 @@ import {
     ApplicationService,
     UserService,
     IApplication,
-    InventoryService
+    FetchClient
 } from "@c8y/client";
-import { AlertService, AppStateService, DynamicComponentService } from "@c8y/ngx-components";
+import { AlertService, AppStateService, DynamicComponentService, PluginsService } from "@c8y/ngx-components";
 import { ProgressIndicatorModalComponent } from '../../utils/progress-indicator-modal/progress-indicator-modal.component';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { previewModalComponent } from '../preview-modal/preview-modal.component';
 import { WidgetCatalog, WidgetModel } from '../widget-catalog.model';
 import { WidgetCatalogService } from '../widget-catalog.service';
 import { concat, forkJoin, from, fromEvent, interval, Observable, of } from 'rxjs';
-import { RuntimeWidgetLoaderService } from 'cumulocity-runtime-widget-loader';
 import { AlertMessageModalComponent } from "../../utils/alert-message-modal/alert-message-modal.component";
 import { ActivatedRoute, Router } from "@angular/router";
-
+import { ProgressIndicatorService } from "../../utils/progress-indicator-modal/progress-indicator.service";
 
 @Component({
     templateUrl: './my-widgets.component.html',
@@ -58,12 +57,9 @@ export class MyWidgetsComponent implements OnInit {
     constructor(private appStateService: AppStateService, private modalService: BsModalService,
         private userService: UserService, private widgetCatalogService: WidgetCatalogService,
         private alertService: AlertService, private componentService: DynamicComponentService,
-        private runtimeWidgetLoaderService: RuntimeWidgetLoaderService, private appService: ApplicationService,
-        private router: Router, private route: ActivatedRoute) {
+        private appService: ApplicationService, private fetchClient: FetchClient, private pluginsService: PluginsService,
+        private router: Router, private route: ActivatedRoute,private progressIndicatorService: ProgressIndicatorService) {
         this.userHasAdminRights = userService.hasAllRoles(appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN", "ROLE_APPLICATION_MANAGEMENT_ADMIN"]);
-        this.runtimeWidgetLoaderService.isLoaded$.subscribe(isLoaded => {
-            this.widgetCatalogService.runtimeLoadingCompleted = isLoaded;
-        })
         this.widgetCatalogService.displayListValue$.subscribe((value) => {
             if (value) {
                 this.displayListValue = value;
@@ -74,9 +70,31 @@ export class MyWidgetsComponent implements OnInit {
     }
 
 
-    ngOnInit() {
+   async ngOnInit() {
         if (this.userHasAdminRights) {
-            if (this.widgetCatalogService.runtimeLoadingCompleted) {
+            const ownAppBuilder = (await this.widgetCatalogService.isOwnAppBuilder());
+            if(!ownAppBuilder) {
+                const alertMessage = {
+                    title: 'Application Builder',
+                    description: `It looks like you are currently using a subscribed Application Builder in this tenant. To use the Widget Catalog, you’ll need to install an instance of the Application Builder.
+                    
+                    Please confirm if you wish to install the Application Builder.`,
+                    type: 'warning',
+                    alertType: 'confirm', //info|confirm
+                    confirmPrimary: true //confirm Button is primary
+                }
+                const installDemoDialogRef = this.alertModalDialog(alertMessage);
+                await installDemoDialogRef.content.event.subscribe(async data => {
+                    if (data && data.isConfirm) {
+                        this.showProgressModalDialog('Please wait...');
+                        await this.widgetCatalogService.cloneAppBuilder();
+                        window.location.reload();
+                    } else {
+                        this.router.navigateByUrl(`/home`);
+                    }
+                });
+            }
+            else if (this.widgetCatalogService.runtimeLoadingCompleted) {
                 this.loadWidgetsFromCatalog();
             } else {
                 this.isBusy = true;
@@ -101,8 +119,7 @@ export class MyWidgetsComponent implements OnInit {
     private async loadWidgetsFromCatalog() {
 
         this.isBusy = true;
-        this.appList = (await this.appService.list({ pageSize: 2000 })).data;
-        this.appList = this.appList.filter(app => (app.name && app.name.toLowerCase().includes('widget') || app.contextPath && app.contextPath.includes('widget')) && app.manifest && app.manifest.noAppSwitcher === true);
+        this.appList = await this.pluginsService.listPackages();
         forkJoin([this.widgetCatalogService.fetchWidgetCatalog(), this.widgetCatalogService.fetchWidgetForDemoCatalog()])
             .subscribe(async ([widgetList1, widgetList2]) => {
                 this.widgetCatalog = widgetList1;
@@ -115,7 +132,6 @@ export class MyWidgetsComponent implements OnInit {
                 this.appList.forEach(app => {
                     const appWidgetObj = this.widgetCatalog.widgets.find(widgetObj => widgetObj.contextPath === app.contextPath);
                     if (!appWidgetObj) {
-                        appWidgetObj
                         this.widgetCatalog.widgets.push({
                             contextPath: app.contextPath,
                             title: app.name,
@@ -195,9 +211,21 @@ export class MyWidgetsComponent implements OnInit {
         await unInstallDemoDialogRef.content.event.subscribe(async data => {
             if (data && data.isConfirm) {
                 this.showProgressModalDialog(`Uninstalling widgets...`)
-                for (const widget of this.widgetCatalog.widgets) {
-                    await this.uninstallWidget(widget, true);
+                this.progressIndicatorService.setProgress(10);
+                let isWidgetFound = false;
+                let updatedAppRemotes = null;
+                 for (const widget of this.widgetCatalog.widgets) {
+                    const widgetAppObj = this.appList.find(app => app.contextPath === widget.contextPath)
+                    if(widgetAppObj) {
+                        isWidgetFound = true;
+                        updatedAppRemotes = await this.widgetCatalogService.removePlugins(widgetAppObj);
+                        widget.actionCode = '003';
+                    }
                 };
+                if(isWidgetFound) {
+                    this.progressIndicatorService.setProgress(90);
+                    await this.widgetCatalogService.updateAppConfigRemotes(updatedAppRemotes);
+                }
                 this.hideProgressModalDialog();
                 this.refresh();
             }
@@ -213,7 +241,7 @@ export class MyWidgetsComponent implements OnInit {
     }
     async updateWidget(widget: WidgetModel, bulkUpdate: boolean): Promise<void> {
         const currentHost = window.location.host.split(':')[0];
-        if (currentHost === 'localhost' || currentHost === '127.0.0.1' || isDevMode()) {
+        if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
             this.alertService.warning("Runtime widget installation isn't supported when running Application Builder on localhost or in development mode.");
             return;
         }
@@ -230,11 +258,14 @@ export class MyWidgetsComponent implements OnInit {
             const installDemoDialogRef = this.alertModalDialog(alertMessage);
             await installDemoDialogRef.content.event.subscribe(async data => {
                 if (data && data.isConfirm) {
+                    this.progressIndicatorService.setProgress(5);
                     await this.initiateUpdateWidgetProcess(widget);
                 }
             });
 
-        } else { await this.initiateUpdateWidgetProcess(widget); }
+        } else { 
+            this.progressIndicatorService.setProgress(5);
+            await this.initiateUpdateWidgetProcess(widget); }
 
     }
 
@@ -242,10 +273,13 @@ export class MyWidgetsComponent implements OnInit {
         return this.modalService.show(AlertMessageModalComponent, { class: 'c8y-wizard', initialState: { message } });
     }
     private async initiateUpdateWidgetProcess(widget: WidgetModel) {
-        this.showProgressModalDialog(`Updating ${widget.title}`)
+        this.showProgressModalDialog(`Updating ${widget.title}`);
+        this.progressIndicatorService.setProgress(10);
         let blob: any;
         let fileName = "";
         if (widget.binaryLink && widget.binaryLink !== '') {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            this.progressIndicatorService.setProgress(15);
             blob = await new Promise<any>((resolve) => {
                 this.widgetCatalogService.downloadBinary(widget.binaryLink)
                     .subscribe(data => {
@@ -257,6 +291,8 @@ export class MyWidgetsComponent implements OnInit {
             });
             fileName = widget.binaryLink.replace(/^.*[\\\/]/, '');
         } else {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            this.progressIndicatorService.setProgress(15);
             blob = await new Promise<any>((resolve) => {
                 this.widgetCatalogService.downloadBinaryFromLabcase(widget.link)
                     .subscribe(data => {
@@ -270,11 +306,13 @@ export class MyWidgetsComponent implements OnInit {
         }
 
         const fileOfBlob = new File([blob], fileName);
+        this.progressIndicatorService.setProgress(30);
         await new Promise<any>((resolve) => {
-            this.widgetCatalogService.installWidget(fileOfBlob, widget).then(() => {
+            this.widgetCatalogService.installPackage(fileOfBlob).then(async () => {
                 widget.isReloadRequired = true;
                 widget.installedVersion = widget.version;
                 this.actionFlag(widget);
+                await new Promise(resolve => setTimeout(resolve, 5000));
                 this.hideProgressModalDialog();
                 resolve(true);
             });
@@ -287,16 +325,20 @@ export class MyWidgetsComponent implements OnInit {
             return;
         }
 
-        await this.widgetCatalog.widgets.forEach(async widget => {
+        const currentApp: IApplication =  (await this.widgetCatalogService.getCurrentApp());
+        let installedPlugins = currentApp?.config?.remotes;
+        installedPlugins = (installedPlugins ? this.widgetCatalogService.removeVersionFromPluginRemotes(installedPlugins) : []);
+        for(let widget of this.widgetCatalog.widgets) {
             widget.isCompatible = this.widgetCatalogService.isCompatiblieVersion(widget);
             const appObj = this.appList.find(app => app.contextPath === widget.contextPath);
-            widget.installedVersion = (appObj && appObj.manifest && appObj.manifest.version ? appObj.manifest.version : '');
-            widget.installed = appObj && this.findInstalledWidget(widget); //(widgetObj != undefined);
+            const widgetObj = installedPlugins.find( plugin => plugin.pluginContext === widget.contextPath);
+            widget.installedVersion = (widgetObj && appObj && appObj.manifest && appObj.manifest.version ? appObj.manifest.version : '');
+            widget.installed = widgetObj && appObj && this.findInstalledWidget(widget); //(widgetObj != undefined);
             if (widget.installed && !widget.isReloadRequired && this.isUpdateAvailable(widget)) {
                 this.isUpdateRequired = true;
             }
             this.actionFlag(widget);
-        });
+        }
         this.widgetCatalog.widgets = this.widgetCatalog.widgets.filter(widget => widget.installed);
     }
 
@@ -339,34 +381,30 @@ export class MyWidgetsComponent implements OnInit {
         }
     }
 
-    async uninstallWidget(widget: WidgetModel, bulkDelete: boolean) {
-        if (!bulkDelete) {
-            const alertMessage = {
-                title: 'Uninstall widget',
-                description: `You are about to uninstall ${widget.title}.
+    async uninstallWidget(widget: WidgetModel) {
+        const alertMessage = {
+            title: 'Uninstall widget',
+            description: `You are about to uninstall ${widget.title}.
                 Do you want to proceed?`,
-                type: 'danger',
-                alertType: 'confirm', //info|confirm
-                confirmPrimary: true //confirm Button is primary
-            }
-            const installDemoDialogRef = this.alertModalDialog(alertMessage);
-            await installDemoDialogRef.content.event.subscribe(async data => {
-                if (data && data.isConfirm) {
-                    const widgetAppObj = this.appList.find(app => app.contextPath === widget.contextPath)
-                    if (widgetAppObj) {
-                        await this.appService.delete(widgetAppObj.id);
-                        widget.actionCode = '003';
-                    }
-                }
-            });
-        } else {
-            const widgetAppObj = this.appList.find(app => app.contextPath === widget.contextPath)
-            if (widgetAppObj) {
-                await this.appService.delete(widgetAppObj.id);
-                widget.actionCode = '003';
-            }
+            type: 'danger',
+            alertType: 'confirm', //info|confirm
+            confirmPrimary: true //confirm Button is primary
         }
-
+        const installDemoDialogRef = this.alertModalDialog(alertMessage);
+        await installDemoDialogRef.content.event.subscribe(async data => {
+            if (data && data.isConfirm) {
+                this.showProgressModalDialog(`Uninstalling ${widget.title}`);
+                this.progressIndicatorService.setProgress(5);
+                this.progressIndicatorService.setProgress(25);
+                const widgetAppObj = this.appList.find(app => app.contextPath === widget.contextPath)
+                const updatedAppRemotes = await this.widgetCatalogService.removePlugins(widgetAppObj);
+                this.progressIndicatorService.setProgress(90);
+                await this.widgetCatalogService.updateAppConfigRemotes(updatedAppRemotes);
+                this.hideProgressModalDialog();
+                widget.actionCode = '003';
+                
+            }
+        });
     }
 
     // Tile List View

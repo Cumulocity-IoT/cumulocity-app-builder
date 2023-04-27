@@ -24,7 +24,7 @@ import './cumulocity.json';
 
 angular.module("c8y.smartRulesUI", ["c8y.smartRules"])
     .component('legacySmartRules', {
-        template: require("@c8y/ng1-modules/smartRules/views/list.html").default,
+        template: require("./smart-rules-list.html").default,
         controller: ['c8yTitle', 'gettext', function (c8yTitle: any, gettext: any) {
             c8yTitle.changeTitle({
                 title: gettext('Smart Rules')

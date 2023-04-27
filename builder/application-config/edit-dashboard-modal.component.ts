@@ -22,6 +22,7 @@ import {ApplicationService, InventoryService} from '@c8y/client';
 import {WizardComponent} from "../../wizard/wizard.component";
 import {AppBuilderNavigationService} from "../navigation/app-builder-navigation.service";
 import {IApplicationBuilderApplication} from "../iapplication-builder-application";
+import { AppDataService } from '../app-data.service';
 import { Subject } from 'rxjs';
 
 @Component({
@@ -48,9 +49,12 @@ export class EditDashboardModalComponent implements OnInit{
 
     @ViewChild(WizardComponent, {static: true}) wizard: WizardComponent;
 
-    constructor(public bsModalRef: BsModalRef, private appService: ApplicationService, private inventoryService: InventoryService, private navigation: AppBuilderNavigationService) {
-        this.onSave = new Subject();
-    }
+    constructor(public bsModalRef: BsModalRef, private appService: ApplicationService, 
+        private inventoryService: InventoryService, private navigation: AppBuilderNavigationService,
+        private appDataService: AppDataService) {
+            this.onSave = new Subject();
+        }
+    
     
     async ngOnInit() {
         if(this.deviceId) {
@@ -91,6 +95,7 @@ export class EditDashboardModalComponent implements OnInit{
             id: this.app.id,
             applicationBuilder: this.app.applicationBuilder
         } as any);
+        this.appDataService.forceUpdate = true;
         this.onSave.next(true);
         this.bsModalRef.hide();
         this.navigation.refresh();
