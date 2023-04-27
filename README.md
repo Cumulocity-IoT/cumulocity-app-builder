@@ -159,7 +159,7 @@ Congratulations! You have created an application and added your first screen.
 ## User Guide
 
 ### How to convert existing widget into plugin
-We are going to publish video tutorial where you will find detailed instructions about converting your existing widget into plugin.
+Please go through [How to convert Cumulocity IoT widgets to plugins](https://tech.forums.softwareag.com/t/how-to-convert-cumulocity-iot-widgets-to-plugins/277977) for step by step guide to convert existing widgets to plugin
 
 ### How to upgrade Application Builder to 2.0
 Application Builder 2.0 is based on micro-frontend architecture and existing Custom Widgets/Runtime widgets are no longer compatible.
