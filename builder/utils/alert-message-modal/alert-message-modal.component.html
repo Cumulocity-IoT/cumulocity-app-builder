@@ -5,18 +5,17 @@
         <i c8y-icon="exclamation-circle" class="dlt-c8y-icon-exclamation-circle"></i>
         <span ng-show="title">{{message.title}}</span>
       </h3>
-      <p class="modal-inner-scroll text-break-word" style="white-space: pre-line;" ng-bind-html="body | translate">
-        {{message.description}}
-      </p><br>
+      <div class="modal-inner-scroll text-break-word" [innerHTML]="message?.description" style="white-space: pre-line;text-align: justify;" >
+      </div><br>
 
       <div class="alert-footer">
         <a *ngIf="message.externalLink && message.externalLink !== ''" [href]="message.externalLink" target="_blank"
           class="btn btn-info pull-left" role="button">{{message.externalLinkLabel}}</a>
-        <button *ngIf="message.alertType === 'confirm'" title="Cancel" class="btn btn-default"
+        <button *ngIf="message.alertType === 'confirm' || message.alertType === 'install'" title="Cancel" class="btn btn-default"
           [ngClass]="{'btn-primary': !message.confirmPrimary}" (click)="dismiss()">
           Cancel
         </button>
-        <button *ngIf="message.alertType !== 'confirm' && message.alertType !== 'maintenance'" title="Ok"
+      <button *ngIf="message.alertType !== 'confirm' && message.alertType !== 'install' && message.alertType !== 'maintenance'" title="Ok"
           class="btn btn-primary" (click)="dismiss()">
           Ok
         </button>
@@ -26,6 +25,9 @@
         </button>
         <button *ngIf="message.alertType === 'maintenance'" title="Logout" class="btn btn-primary" (click)="logout()">
           Logout
+        </button>
+        <button *ngIf="message.alertType === 'install'" title="Logout" class="btn btn-primary" (click)="confirm()">
+          Install Now
         </button>
       </div>
     </div>

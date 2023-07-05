@@ -247,4 +247,11 @@ export class SettingsService {
         })
     }
 
+    async getCurrentApp() {
+        if(this.currentApp) {  return this.currentApp;}
+        else {
+            await delay(500);
+            return await this.getCurrentApp();
+        }
+    }
 }

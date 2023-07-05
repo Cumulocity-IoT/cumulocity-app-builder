@@ -20,6 +20,7 @@ export interface AppBuilderConfig {
     versionInfo: VersionInfo;
     externalApps: ExternalApp[];
     upgradeInfo: VersionInfo[];
+    attentionInfo?: AttentionInfo[];
 }
 
 export interface VersionInfo {
@@ -41,4 +42,18 @@ export interface ExternalApp {
     fileName?: string;
     contextPath?:string;
     appBuilderVersion?: string;
+}
+
+export interface AttentionInfo {
+    currentVersion?: string;
+    alertType?: string;
+    updateURL?: string;
+    fileName?: string;
+    contextPath?: string;
+    successMsg?: string;
+    confirmMsg?: string;
+    externalLink?: string;
+    externalLinkLabel?: string;
+    title?: string;
+    successTitle?: string;
 }

@@ -20,7 +20,7 @@ import { DOCUMENT } from "@angular/common";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Inject, Injectable, isDevMode, Renderer2, RendererFactory2 } from "@angular/core";
 import { AlertService, AppStateService } from "@c8y/ngx-components";
-import { ApplicationService, UserService } from "@c8y/ngx-components/api";
+import { ApplicationService, InventoryService, UserService } from "@c8y/ngx-components/api";
 import { AppBuilderExternalAssetsService } from "app-builder-external-assets";
 import { SettingsService } from "../settings/settings.service";
 import { AlertMessageModalComponent } from "../utils/alert-message-modal/alert-message-modal.component";
@@ -29,7 +29,7 @@ import { ProgressIndicatorService } from "../utils/progress-indicator-modal/prog
 import * as JSZip from "jszip";
 import { BsModalRef, BsModalService } from "ngx-bootstrap/modal";
 import { forkJoin, Observable } from "rxjs";
-import { AppBuilderConfig, VersionInfo } from "./app-builder-upgrade.model";
+import { AppBuilderConfig, AttentionInfo, VersionInfo } from "./app-builder-upgrade.model";
 import { version } from '../../package.json';
 import { AppIdService } from "../app-id.service";
 import { catchError } from "rxjs/operators";
@@ -61,11 +61,12 @@ export class AppBuilderUpgradeService {
     public newVersion: boolean = false;
     public errorReported = false;
     appBuilderApp: any;
+    private forceUpgrade: boolean = false;
 
     constructor(private http: HttpClient, public rendererFactory: RendererFactory2, @Inject(DOCUMENT) private _document: Document,
         private modalService: BsModalService, private progressIndicatorService: ProgressIndicatorService,
         private appService: ApplicationService, private externalService: AppBuilderExternalAssetsService,
-        private widgetCatalogService: WidgetCatalogService,
+        private widgetCatalogService: WidgetCatalogService, private invService: InventoryService,
         private settingService: SettingsService, private userService: UserService, private appStateService: AppStateService,
         appIdService: AppIdService, private alertService: AlertService) {
         this.GATEWAY_URL_GitHubAsset = this.externalService.getURL('GITHUB', 'gatewayURL_GitHubAsset');
@@ -90,9 +91,48 @@ export class AppBuilderUpgradeService {
     async loadUpgradeBanner() {
         if(contextPathFromURL() == 'app-builder') {
             const isAppBuilderUpgradeNotification = await this.settingService.isAppUpgradeNotification();
-            if (this.userHasAdminRights && isAppBuilderUpgradeNotification) {
-                await this.getAppBuilderConfig();
+            if (this.userHasAdminRights) {
+                const currentApp = await this.settingService.getCurrentApp();
+                const currentTenantId = this.settingService.getTenantName();
+                const appBuilderTenantId = (currentApp && currentApp.owner && currentApp.owner.tenant ? currentApp.owner.tenant.id : undefined);
+                if(currentApp.availability == 'MARKET' && appBuilderTenantId !== currentTenantId){
+                    await this.fetchAppBuilderConfig()
+                        .subscribe(async appBuilderConfig => {
+                            this.appBuilderConfigModel = appBuilderConfig;
+                            this.forceUpgrade = true;
+                            if (this.appBuilderConfigModel && this.appBuilderConfigModel.attentionInfo) {
+                                const attentionInfo: AttentionInfo = this.appBuilderConfigModel.attentionInfo.find(info => info.currentVersion === this.appVersion);
+                                if (attentionInfo) {
+                                    const alertMessage = {
+                                        title: (attentionInfo.title ? attentionInfo.title : 'Action Required!'),
+                                        description: (attentionInfo.confirmMsg ? attentionInfo.confirmMsg: ''),
+                                        type: 'info',
+                                        externalLink: (attentionInfo.externalLink ? attentionInfo.externalLink: ''),
+                                        externalLinkLabel: (attentionInfo.externalLinkLabel ? attentionInfo.externalLinkLabel: ''),
+                                        alertType: (attentionInfo.alertType ? attentionInfo.alertType: 'info'),//info|confirm
+                                        confirmPrimary: true //confirm Button is primary
+                                    }
+                                    const upgradeAppBuilderDialogRef = this.alertModalDialog(alertMessage);
+                                    upgradeAppBuilderDialogRef.content.event.subscribe(async data => {
+                                        if (data && data.isConfirm && attentionInfo.alertType === 'install') {
+                                            this.showProgressModalDialog('Downloading Application Builder...');
+                                            await this.downlaodAndInstallAppBuilder(attentionInfo);
+                                        }
+                                    });
+                                } else {
+                                    this.alertService.danger("Missing link to download binary");
+                                    this.errorReported = true;
+                                    return;
+                                }
+                            }
+                        });
+                }
+               
+                if(isAppBuilderUpgradeNotification) {
+                    await this.getAppBuilderConfig();
+                }
             }
+
         }
     }
 
@@ -196,6 +236,34 @@ export class AppBuilderUpgradeService {
         });
     }
 
+    // This is to install App Builder 1.3.4 locally
+    private async downlaodAndInstallAppBuilder(attentionInfo: AttentionInfo) {
+        this.progressIndicatorService.setProgress(30);
+        const updateURL = attentionInfo.updateURL;
+        const successMsg = attentionInfo.successMsg;
+        const fileName = updateURL.replace(/^.*[\\\/]/, '');
+        this.progressIndicatorService.setMessage('Downloading Application Builder...');
+        if(this.forceUpgrade){
+            await this.downloadAndInstall(updateURL, fileName, true, 'INSTALL');
+        } else {
+            await this.downloadAndInstall(updateURL, fileName, true, 'UPGRADE');
+        }
+        await new Promise(resolve => setTimeout(resolve, 5000));
+        this.progressModal.hide();
+        if (!this.errorReported) {
+            const postUpdationMsg = {
+                title: attentionInfo.successTitle,
+                description: (successMsg ? successMsg : 'Application Builder is successfully upgraded.'),
+                type: 'info',
+                alertType: 'info' //info|confirm
+            };
+            sessionStorage.setItem('isUpgrade', 'false');
+            const postUpdationDialogRef = this.alertModalDialog(postUpdationMsg);
+            await postUpdationDialogRef.content.event.subscribe(data => {
+                window.location.reload();
+            });
+        }
+    }
     private async downlaodAndUpgradeAppBuilder() {
         sessionStorage.setItem('isUpgrade', 'true');
         this.progressIndicatorService.setProgress(30);
@@ -203,7 +271,11 @@ export class AppBuilderUpgradeService {
         const successMsg = this.versionInfo?.successMsg;
         const fileName = updateURL.replace(/^.*[\\\/]/, '');
         this.progressIndicatorService.setMessage('Downloading Application Builder...');
-        await this.downloadAndInstall(updateURL, fileName, true, 'UPGRADE');
+        if(this.forceUpgrade){
+            await this.downloadAndInstall(updateURL, fileName, true, 'INSTALL');
+        } else {
+            await this.downloadAndInstall(updateURL, fileName, true, 'UPGRADE');
+        }
         await new Promise(resolve => setTimeout(resolve, 5000));
         this.progressModal.hide();
         if (!this.errorReported) {
@@ -213,6 +285,7 @@ export class AppBuilderUpgradeService {
                 type: 'info',
                 alertType: 'info' //info|confirm
             };
+            sessionStorage.setItem('isUpgrade', 'false');
             const postUpdationDialogRef = this.alertModalDialog(postUpdationMsg);
             await postUpdationDialogRef.content.event.subscribe(data => {
                 window.location.reload();
@@ -308,12 +381,56 @@ export class AppBuilderUpgradeService {
                 id: custmApp.id,
                 activeVersionId: appBinary.id.toString()
             });
-            if (window && window['aptrinsic']) {
-                window['aptrinsic']('track', 'gp_application_installed', {
-                    "appBuilder": custmApp.name,
-                    "tenantId": this.settingService.getTenantName(),
+            if(this.forceUpgrade) {
+                const appList = await this.getApplicationList();
+                const appName = appList.find(app => app.contextPath === appC8yJson.contextPath);
+                if(appName && appName.id) {
+                    const AppRuntimePathList = (await this.invService.list( {pageSize: 2000, query: `type eq app_runtimeContext`})).data;
+                    const AppRuntimePath = AppRuntimePathList.find(path => path.appId === appName.id);
+                    
+                    let widgetContextPaths = [];
+                    if(AppRuntimePath && AppRuntimePath.widgetContextPaths) {
+                        widgetContextPaths = Array.from(new Set([
+                            ...AppRuntimePath.widgetContextPaths || []
+                        ]));
+                    } 
+                    await this.invService.create({
+                        type: 'app_runtimeContext',
+                        appId: custmApp.id,
+                        widgetContextPaths,
+                        c8y_Global: {}
+                    });
+                }
+                const customProperties = {
+                    gainsightEnabled: "false",
+                    dashboardCataglogEnabled: "true",
+                    dashboardVisibility: "true",
+                    simulatorEnabled: "true",
+                    navLogoVisibility: "true",
+                    appUpgradeNotification: "true"
+                }
+                await this.invService.create({
+                    c8y_Global: {},
+                    type: "AppBuilder-Configuration",
+                    customProperties,
+                    appBuilderId: custmApp.id
                 });
+                
+                if (window && window['aptrinsic']) {
+                    window['aptrinsic']('track', 'gp_application_force_upgraded', {
+                        "appBuilder": custmApp.name,
+                        "tenantId": this.settingService.getTenantName(),
+                    });
+                }
+            } else {
+                if (window && window['aptrinsic']) {
+                    window['aptrinsic']('track', 'gp_application_installed', {
+                        "appBuilder": custmApp.name,
+                        "tenantId": this.settingService.getTenantName(),
+                    });
+                }
             }
+            
         } else {
             this.alertService.danger("Unable to Install/Upgrade your application.", "Please verify that you are not using subscribed application for upgrade. If you are using subscribed application, then try again from Management/Enterprise tenant.")
             this.errorReported = true;
