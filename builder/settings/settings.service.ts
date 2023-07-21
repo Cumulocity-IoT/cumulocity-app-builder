@@ -107,6 +107,9 @@ export class SettingsService {
         if(this.appBuilderConfig) {
             return (this.appBuilderConfig?.underMaintenance ? this.appBuilderConfig?.underMaintenance : 'false');
         }
+        else if(this.isAppConfigNotFound) {
+            return false;
+        }
         else {
             await delay(500);
             return await this.getAppBuilderMaintenanceStatus();
