@@ -1,10 +1,10 @@
 {
   "name": "app-builder",
-  "version": "2.0.0",
+  "version": "2.1.0-dev-1",
   "description": "Application builder for Cumulocity (written by Software AG Global Presales)",
   "main": "index.ts",
   "scripts": {
-    "start": "c8ycli server --env.extraWebpackConfig=./extra-webpack.config.js",
+    "start": "c8ycli server --env.extraWebpackConfig=./extra-webpack.config.js ",
     "build": "set NODE_OPTIONS=--max_old_space_size=4096 && c8ycli build --env.extraWebpackConfig=./extra-webpack.config.js",
     "build-dev": "set NODE_OPTIONS=--max_old_space_size=4096 && c8ycli build --env.extraWebpackConfig=./extra-webpack.config.js --env.mode=development",
     "deploy-ci": "c8ycli deploy  -u $npm_config_param1 -T $npm_config_param2 -U $npm_config_param3 -P $npm_config_param4",
@@ -29,10 +29,10 @@
     "@angular/platform-browser-dynamic": "14.0.6",
     "@angular/router": "14.0.6",
     "@angular/upgrade": "14.0.6",
-    "@c8y/client": "1016.0.170",
-    "@c8y/ng1-modules": "1016.0.170",
-    "@c8y/ngx-components": "1016.0.170",
-    "@c8y/style": "1016.0.170",
+    "@c8y/client": "1018.0.125",
+    "@c8y/ng1-modules": "1018.0.125",
+    "@c8y/ngx-components": "1018.0.125",
+    "@c8y/style": "1018.0.125",
     "@ng-reactive/async-input": "0.0.1",
     "@ng-select/ng-select": "^9.1.0",
     "@ngx-translate/core": "14.0.0",
@@ -57,7 +57,7 @@
     "@angular/language-service": "14.0.6",
     "@angular/localize": "14.0.6",
     "@angular/service-worker": "14.0.6",
-    "@c8y/cli": "1016.0.170",
+    "@c8y/cli": "1018.0.125",
     "@types/jest": "^28.1.6",
     "@types/lodash-es": "^4.17.3",
     "@types/webpack": "^5.28.0",
@@ -97,15 +97,20 @@
         "required": true,
         "functional": "These cookies are used to support you during your first steps in the product, to deliver content tailored to your needs, and to collect usage statistics."
       },
-      "copy": [{
-        "from": "./ui-assets/fonts",
-        "to": "./fonts/"
-      }, {
-        "from": "./ui-assets/img",
-        "to": "./img/"
-      }]
+      "copy": [
+        {
+          "from": "./ui-assets/fonts",
+          "to": "./fonts/"
+        },
+        {
+          "from": "./ui-assets/img",
+          "to": "./img/"
+        }
+      ]
     },
     "cli": {}
   },
-  "browserslist": ["last 2 major versions"]
+  "browserslist": [
+    "last 2 major versions"
+  ]
 }

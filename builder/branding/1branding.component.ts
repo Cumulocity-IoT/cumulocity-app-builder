@@ -21,7 +21,7 @@ import { ActivatedRoute } from "@angular/router";
 import { ApplicationService } from "@c8y/client";
 import { map, switchMap, tap } from "rxjs/operators";
 import { from, Observable, Subscription } from "rxjs";
-import { BrandingService } from "./branding.service";
+import { BrandingService } from "./1branding.service";
 import { DOCUMENT } from "@angular/common";
 import { CustomBrandingComponent } from "./custom-branding.component";
 import { BsModalRef, BsModalService } from "ngx-bootstrap/modal";
@@ -53,26 +53,9 @@ export class BrandingComponent implements OnDestroy {
                     .then(res => res.data as any)
             )),
             tap((app: any & { applicationBuilder: any }) => {
-                if(app.applicationBuilder.branding) {
-                    this.showIcon = !app.applicationBuilder.branding.hideIcon;
-                    if (app.applicationBuilder.branding.colors.hover === '' || app.applicationBuilder.branding.colors.hover === undefined) {
-                        app.applicationBuilder.branding.colors.hover = '#14629F';
-                    }
-                } else
-                {
-                    app.applicationBuilder.branding = {
-                        colors: {
-                            primary: '#f9fafb',
-                            active: '#e7ebee',
-                            text: '#011f3d',
-                            textOnPrimary: '#011f3d',
-                            textOnActive: '#512950',
-                            hover: '#058192',
-                            headerBar: 'white',
-                            toolBar: 'white',
-                            tabBar: 'white'
-                        }
-                    };
+                this.showIcon = !app.applicationBuilder.branding.hideIcon;
+                if (app.applicationBuilder.branding.colors.hover === '' || app.applicationBuilder.branding.colors.hover === undefined) {
+                    app.applicationBuilder.branding.colors.hover = '#14629F';
                 }
             })
         )
@@ -215,9 +198,6 @@ export class BrandingComponent implements OnDestroy {
         });
     }
 
-    activateCustomeTheme() {
-        this.customTheme = !this.customTheme;
-    }
     async deleteTheme(app) {
         let finalApp = app.applicationBuilder.customBranding.filter((theme) => theme.themeName !== this.themeName);
         app.applicationBuilder.customBranding = finalApp;
