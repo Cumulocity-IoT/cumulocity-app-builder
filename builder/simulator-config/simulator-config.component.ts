@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2019 Software AG, Darmstadt, Germany and/or its licensors
+* Copyright (c) 2023 Software AG, Darmstadt, Germany and/or its licensors
 *
 * SPDX-License-Identifier: Apache-2.0
 *
@@ -34,8 +34,8 @@ import { SimulatorNotificationService } from './simulatorNotification.service';
 import { DOCUMENT } from '@angular/common';
 import { FileSimulatorNotificationService } from './file-simulator.service';
 import { SimulatorWorkerAPI } from '../simulator/mainthread/simulator-worker-api.service';
-import { AppDataService } from './../../builder/app-data.service';
-import { LockStatus, LOCK_TIMEOUT } from './../../builder/simulator/mainthread/simulation-lock.service';
+import { AppDataService } from '../app-data.service';
+import { LockStatus, LOCK_TIMEOUT } from '../simulator/mainthread/simulation-lock.service';
 @Component({
     templateUrl: './simulator-config.component.html',
     styleUrls: ['./simulator-config.component.less']
@@ -77,13 +77,14 @@ export class SimulatorConfigComponent implements OnDestroy {
             })
         );
         this.appSubscription = app.subscribe((app) => {
-            if (app && app.applicationBuilder.branding.enabled && (app.applicationBuilder.selectedTheme && app.applicationBuilder.selectedTheme !== 'Default')) {
+            if (app  && app.applicationBuilder && app.applicationBuilder.branding && app.applicationBuilder.branding.enabled && (app.applicationBuilder.selectedTheme && 
+                app.applicationBuilder.selectedTheme !== 'Default' && app.applicationBuilder.selectedTheme !== 'Classic')) {
                 this.applyTheme = true;
                 this.renderer.addClass(this.document.body, 'simulator-body-theme');
             } else {
                 this.applyTheme = false;
             }
-            if(app.applicationBuilder && app.applicationBuilder?.simulators && app.applicationBuilder?.simulators.length > 0){
+            if(app  &&  app.applicationBuilder && app.applicationBuilder?.simulators && app.applicationBuilder?.simulators.length > 0){
                 this.isSimulatorsExist = true;
             }
         });
@@ -177,7 +178,7 @@ export class SimulatorConfigComponent implements OnDestroy {
             simulator: simulatorConfig
         });
         // We could just wait for them to refresh, but it's nicer to instantly refresh
-       // await this.simSvc.checkForSimulatorConfigChanges();
+        await this.simSvc.checkForSimulatorConfigChanges();
     }
 
     ngOnDestroy(): void {

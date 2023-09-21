@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2019 Software AG, Darmstadt, Germany and/or its licensors
+* Copyright (c) 2023 Software AG, Darmstadt, Germany and/or its licensors
 *
 * SPDX-License-Identifier: Apache-2.0
 *
@@ -35,11 +35,11 @@ import { BehaviorSubject, throwError } from 'rxjs';
 import { SimulatorNotificationService } from './simulatorNotification.service';
 import { FileSimulatorNotificationService } from './file-simulator.service';
 import { AlertService } from '@c8y/ngx-components';
-import { UpdateableAlert } from '../../builder/utils/UpdateableAlert';
+import { UpdateableAlert } from '../utils/UpdateableAlert';
 import { SimulatorWorkerAPI } from '../simulator/mainthread/simulator-worker-api.service';
 import { SimulatorConfigService } from './simulator-config.service';
-import { AlertMessageModalComponent } from '../../builder/utils/alert-message-modal/alert-message-modal.component';
-import { SimulatorManagerService } from '../../builder/simulator/mainthread/simulator-manager.service';
+import { AlertMessageModalComponent } from '../utils/alert-message-modal/alert-message-modal.component';
+import { SimulatorManagerService } from '../simulator/mainthread/simulator-manager.service';
 
 @Component({
     templateUrl: './new-simulator-modal.component.html'
