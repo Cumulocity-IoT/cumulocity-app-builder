@@ -72,6 +72,11 @@ export function generalBranding(app: any) {
     .ng-select.ng-select-single .ng-select-container .ng-value-container {
         color: var(--c8y-form-control-color-default) !important;
     }
+    .powered-by{
+        padding-top:5px;
+        background-color:var(--navigator-bg-color,#22A6AA);
+        color:var(--navigator-text-color,white);
+    }
     `;
 
     

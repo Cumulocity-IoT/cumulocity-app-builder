@@ -222,14 +222,12 @@
                             <i c8yIcon="refresh" class="action-icon text-info" (click)="refresh()"></i>
                         </button>
                     </div>
-                    <div style="display: inline-block;">
-                        <i *ngIf="!widget.isCompatible || widget.isDeprecated"
-                        title="This widget may not compatible or deprecated!" c8yIcon="warning"
-                        class="warning-icon-grid text-warning"></i>
-                    </div>
                 </div>
                 <div class="card-block text-center card-column-30">
                     <div style="display:block; width:95%;">
+                        <i *ngIf="!widget.isCompatible || widget.isDeprecated"
+                        title="This widget may not compatible or deprecated!" c8yIcon="warning"
+                        class="wi-grid text-warning" style="padding-right: 5px;"></i>
                         <i [c8yIcon]="widget.icon" style="margin-right: 5px;"></i>
                         <span title="{{widget.title}}" class="text-medium">{{widget.title}} </span>
                     </div>
