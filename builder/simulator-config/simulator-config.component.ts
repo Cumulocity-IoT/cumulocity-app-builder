@@ -45,7 +45,7 @@ export class SimulatorConfigComponent implements OnDestroy {
 
     lockStatus$ = new BehaviorSubject<{ isLocked: boolean, isLockOwned: boolean, lockStatus?: LockStatus }>({ isLocked: false, isLockOwned: false });
     simulatorConfigById$ = new BehaviorSubject<Map<number, SimulatorConfig>>(new Map());
-
+    appID:string;
     isUnlocking = false;
     applyTheme = false;
     private _lockStatusListener: number;
@@ -70,6 +70,7 @@ export class SimulatorConfigComponent implements OnDestroy {
         const app = this.appIdService.appIdDelayedUntilAfterLogin$.pipe(
             switchMap(appId =>  {
                 if (appId) {
+                    this.appID=appId;
                 return from(this.appDataService.getAppDetails(appId));
                 } else {
                 return of(null);
@@ -91,7 +92,7 @@ export class SimulatorConfigComponent implements OnDestroy {
     }
 
     showCreateSimulatorDialog() {
-        this.bsModalRef = this.modalService.show(NewSimulatorModalComponent, { backdrop: 'static', class: 'c8y-wizard' });
+        this.bsModalRef = this.modalService.show(NewSimulatorModalComponent, { backdrop: 'static', class: 'c8y-wizard',initialState:{appId:this.appID}});
     }
 
     async showEditSimulatorDialog(simulatorConfig: SimulatorConfig) {
