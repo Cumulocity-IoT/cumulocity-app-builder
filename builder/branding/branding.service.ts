@@ -49,10 +49,6 @@ export class BrandingService {
         document.head.appendChild(this.appGeneral);
         document.head.appendChild(this.appBranding);
         document.head.appendChild(this.powerByBlock);
-        this.settingService.isNavlogoVisible().then(isVisible => {
-            this.isNavlogoVisible = isVisible;
-            this.updatePowerbyLogo(this.isNavlogoVisible);
-        });
         this.favicon = document.head.querySelector('[rel=icon]');
         if (typeof FontFace != 'undefined') {
             // this.fontAwesomeLoaded = new FontFace('FontAwesome', 'url(./fontawesome-webfont-20fd1704ea223900efa9fd4e869efb08.woff2)').load();
@@ -72,7 +68,10 @@ export class BrandingService {
                 this.updateStyleForApp(app);
             });
         }
-        this.updatePowerbyLogo(this.isNavlogoVisible);
+        this.settingService.isNavlogoVisible().then(isVisible => {
+            this.isNavlogoVisible = isVisible;
+            this.updatePowerbyLogo(this.isNavlogoVisible);
+        });
         if (app && app.applicationBuilder) {
             this.appGeneral.innerText =  generalBranding(app);
             if (app.applicationBuilder.branding && app.applicationBuilder.branding.enabled){
@@ -102,7 +101,7 @@ export class BrandingService {
         } else {
             this.favicon.removeAttribute('type');
             this.favicon.setAttribute('href', 'favicon.ico');
-            this.appBranding.innerText = '';
+            this.appBranding.innerText = ``;
         }
     }
 
@@ -139,6 +138,9 @@ export class BrandingService {
             this.powerByBlock.innerText = `
             .powered-by {
                 display: block;
+                padding-top:5px;
+                background-color:var(--navigator-bg-color,#22A6AA);
+                color:var(--navigator-text-color,white);
             }
             `
         } else {
