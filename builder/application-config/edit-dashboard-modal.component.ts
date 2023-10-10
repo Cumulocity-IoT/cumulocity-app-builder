@@ -41,6 +41,7 @@ export class EditDashboardModalComponent implements OnInit{
     dashboardVisibility: '' | 'hidden' | 'no-nav' = '';
     globalRoles: any;
     dashboardID: string = '';
+    templateType = 0 // 0: default, 1: group, 2: type
 
     index: number = 0;
 
@@ -58,15 +59,38 @@ export class EditDashboardModalComponent implements OnInit{
     
     async ngOnInit() {
         if(this.deviceId) {
-            const device = (await this.inventoryService.detail(this.deviceId)).data;
-            if(device) { this.deviceName = device.name; }
+            if(this.templateType == 2){
+                this.deviceName = this.deviceId;
+            } else {
+                const device = (await this.inventoryService.detail(this.deviceId)).data;
+                if(device) { this.deviceName = device.name; }
+            }
         }
     }
     
     getSelectedDevice(device: any) {
         this.deviceId = device.id;
         this.deviceName = device.name;
+        this.templateType = 0;
         if(device && device.id === '') {
+            this.deviceName = '';
+        }
+    }
+
+    getSelectedGroup(device: any) {
+        this.deviceId = device.id;
+        this.deviceName = device.name;
+        this.templateType = 1;
+        if(device && device.id === '') {
+            this.deviceName = '';
+        }
+    }
+
+    getSelectedType(type: any){
+        this.deviceId = type;
+        this.deviceName = type;
+        this.templateType = 2;
+        if(type && type === '') {
             this.deviceName = '';
         }
     }
@@ -90,6 +114,7 @@ export class EditDashboardModalComponent implements OnInit{
         dashboard.icon = this.dashboardIcon;
         dashboard.deviceId = this.deviceId;
         dashboard.roles =  this.roles;
+        dashboard.templateType = this.templateType
 
         await this.appService.update({
             id: this.app.id,

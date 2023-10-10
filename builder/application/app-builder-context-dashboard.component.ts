@@ -19,7 +19,7 @@ import {Component, Inject, OnDestroy, Renderer2} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
 import { from, interval, Observable, Subscription } from "rxjs";
 import {ContextDashboardType} from "@c8y/ngx-components/context-dashboard";
-import { InventoryService, ApplicationService, UserService, IApplication } from "@c8y/client";
+import { InventoryService, ApplicationService, UserService, IApplication, IManagedObject } from "@c8y/client";
 import {last} from "lodash-es";
 import {SMART_RULES_AVAILABILITY_TOKEN} from "./smartrules/smart-rules-availability.upgraded-provider";
 import {IApplicationBuilderApplication} from "../iapplication-builder-application";
@@ -81,7 +81,10 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
     }[] = [];
 
     subscriptions = new Subscription();
-
+    private readonly LIST_FILTER = {
+        pageSize: 2000,
+        withTotalPages: true
+    };
     constructor(
         private activatedRoute: ActivatedRoute, private router:Router,
         private inventoryService: InventoryService,
@@ -170,7 +173,12 @@ export class AppBuilderContextDashboardComponent implements OnDestroy {
                     const isGroupTemplate = (dashboard && dashboard.groupTemplate) || false;
                     if (isGroupTemplate) {
                         //  const childAssets = (await this.inventoryService.childAssetsList(dashboard.deviceId, {pageSize: 2000, query: 'has(c8y_IsDevice)'})).data;
-                        const childAssets = (await this.inventoryService.childAssetsList(dashboard.deviceId, { pageSize: 2000, query: `$filter=(has(c8y_IsDevice) and (id eq '${this.tabGroup}')) ` })).data;
+                        let childAssets: IManagedObject[];
+                        if(dashboard.templateType && dashboard.templateType == 2) {
+                            childAssets = (await this.inventoryService.listQuery({ __filter: { __and: [{ __or: [{__has: 'c8y_IsDevice' }, {__has: 'c8y_IsAsset'  } ]}, {__and: [{id: this.tabGroup },{type: dashboard.deviceId }] }] }}, this.LIST_FILTER)).data;
+                        } else {
+                            childAssets = (await this.inventoryService.childAssetsList(dashboard.deviceId, { pageSize: 2000, query: `$filter=(has(c8y_IsDevice) and (id eq '${this.tabGroup}')) ` })).data;
+                        }
                         const matchingDevice = (childAssets && childAssets.length > 0 ? childAssets[0] : null);
                         if (matchingDevice) {
                             return {

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2019 Software AG, Darmstadt, Germany and/or its licensors
+* Copyright (c) 2023 Software AG, Darmstadt, Germany and/or its licensors
 *
 * SPDX-License-Identifier: Apache-2.0
 *
@@ -21,7 +21,7 @@ import { InventoryService, IResultList, IManagedObject } from '@c8y/client';
 import { Observable, Observer} from 'rxjs';
 import { TypeaheadMatch } from 'ngx-bootstrap/typeahead/typeahead-match.class';
 import { ControlContainer, NgForm } from '@angular/forms';
-import { generateRegEx } from "./../builder/utils/global-fun";
+import { generateRegEx } from "../../builder/utils/global-fun";
 
 @Component({
     selector: 'device-selector',

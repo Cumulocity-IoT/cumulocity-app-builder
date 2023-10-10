@@ -146,10 +146,11 @@
                     </ng-select>
                 </div>
                 <div class="form-group" style="min-height: 50px;" *ngIf="creationMode === 'group-template' else nonGroupTemplate">
-                    <label for="group"><span>Group/Asset </span></label>
+                    <label for="group"><span>Group/Asset/Type </span></label>
                    <!--  <input type="text" class="form-control" id="group" name="group" placeholder="e.g. 12345" [(ngModel)]="deviceId"> -->
-                    <device-selector id="groupId" name="groupId" [isGroup]="true" [(value)]="deviceName" [placeHolder]="'Type your Group Name'" [required]="true"
-                    (selectedDevice)= "getSelectedDevice($event)"  (onBlurDevice)= "getSelectedDevice($event)"></device-selector>
+                    <device-selector id="groupId" name="groupId" [isGroup]="true" [isTypeSupport]="true" [(value)]="deviceName" [placeHolder]="'Type your Group Name'" [required]="true"
+                    (selectedDevice)= "getSelectedGroup($event)"  (onBlurDevice)= "getSelectedGroup($event)"
+                    [placeHolderType]="'Enter your Asset/Device type'" (selectedType)= "getSelectedType($event)"  (onBlurType)= "getSelectedType($event)"></device-selector>
                 </div>
                 <ng-template #nonGroupTemplate>
                 <div class="form-group" style="min-height: 50px;">
