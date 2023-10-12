@@ -152,7 +152,7 @@ export class BuilderModule {
         appIdService: AppIdService, private settingService: SettingsService, private appBuilderUpgradeService: AppBuilderUpgradeService,
         rendererFactory: RendererFactory2, @Inject(DOCUMENT) private _document: Document,
         private modalService: BsModalService) {
-        
+
         const lockStatus$ = new Observable<{ isLocked: boolean, isLockOwned: boolean, lockStatus?: LockStatus }>(subscriber => {
             const listenerId = simSvc
                 .addLockStatusListener(lockStatus => subscriber.next(lockStatus));
@@ -207,7 +207,8 @@ export class BuilderModule {
                 .pipe(filter(app => !!app))
                 .pipe(distinctUntilChanged()).subscribe( app => {
                     if(app.applicationBuilder && app.applicationBuilder?.simulators && app.applicationBuilder?.simulators.length > 0){
-                        simulatorManagerService.initialize();                 
+                        simulatorManagerService.initialize();          
+                        simSvc.startOperationListener();       
                     }
                 });
                 

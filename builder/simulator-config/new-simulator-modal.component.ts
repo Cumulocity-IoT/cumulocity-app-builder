@@ -283,6 +283,7 @@ export class NewSimulatorModalComponent implements OnInit{
 
         if(isFirstSimulator) {
             this.simulatorManagerService.initialize();
+            this.simSvc.startOperationListener();
         }
         // this.simulatorsNameList.push(this.simulatorName);
         // We could just wait for them to refresh, but it's nicer to instantly refresh
