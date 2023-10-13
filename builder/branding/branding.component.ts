@@ -215,7 +215,10 @@ export class BrandingComponent implements OnDestroy {
         });
     }
 
-    activateCustomeTheme() {
+    activateCustomeTheme(app) {
+        if(app && app.applicationBuilder && app.applicationBuilder.selectedTheme == 'Default'){
+            this.setTheme(app, '#1776bf', '#14629F', '#0b385b', '#ffffff', '#ffffff','#14629F', '#ffffff', '#ffffff', '#ffffff','Classic');
+        }
         this.customTheme = !this.customTheme;
     }
     async deleteTheme(app) {
