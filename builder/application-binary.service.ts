@@ -17,13 +17,12 @@
  */
 
 import { Injectable } from "@angular/core";
-import { ApplicationService, ApplicationType, IApplication, IManifest, IResultList, IUploadParamsOverride, TenantService } from "@c8y/client";
-import { AlertService, AppStateService, ModalService, Status, ZipService, gettext } from "@c8y/ngx-components";
+import { ApplicationService, ApplicationType, IApplication, IResultList, IUploadParamsOverride, TenantService } from "@c8y/client";
+import { AppStateService, ModalService, Status, ZipService, gettext } from "@c8y/ngx-components";
 import { BehaviorSubject, Observable } from 'rxjs';
-import { get, kebabCase } from 'lodash-es';
+import { kebabCase } from 'lodash-es';
 import { SettingsService } from "./settings/settings.service";
-const CUMULOCITY_JSON = 'cumulocity.json';
-const MICROSERVICE_NAME_MAX_LENGTH = 23;
+import { DependencyDescription } from "./template-catalog/template-catalog.model";
 
 
 @Injectable({ providedIn: 'root' })
@@ -34,7 +33,6 @@ export class ApplicationBinaryService {
 
     constructor(
         private modal: ModalService,
-        private alertService: AlertService,
         private appStateService: AppStateService,
         private applicationService: ApplicationService,
         private zipService: ZipService,
@@ -42,106 +40,33 @@ export class ApplicationBinaryService {
         private settingService: SettingsService
     ) { }
 
-    async createAppForArchive(archive, isPackageTypeArchive = false): Promise<IApplication> {
-        let isPackage = false;
-        const appType = await this.getAppType(archive);
+    async createAppForMicroservice(binary, dependencies: DependencyDescription): Promise<IApplication> {
         let appModel: any = {};
-        const supportedAppTypes = [ApplicationType.HOSTED, ApplicationType.MICROSERVICE];
+        appModel = await this.getCumulocityJson(binary).toPromise();
 
-        if (supportedAppTypes.includes(appType)) {
-            try {
-                appModel = await this.getCumulocityJson$(archive).toPromise();
-                isPackage = appModel.isPackage;
-            } catch (e) {
-                // do nothing, we allow having HOSTED applications without the manifest file
-            }
-        }
-        const name = this.getBaseNameFromArchiveOrAppModel(archive, appType, appModel);
-        const clearedName = this.removeForbiddenCharacters(name);
-        const key = this.getAppKey(appModel, clearedName);
-        const contextPath = this.getContextPath(appModel, name);
+        const key =  `${kebabCase(dependencies.id)}-key`
+        const contextPath = appModel?.contextPath || dependencies?.id.toLowerCase();
 
-        const appToSave = {
+        const appObj = {
             resourcesUrl: '/',
-            type: appType,
-            name,
+            type: ApplicationType.MICROSERVICE,
+            name: dependencies.id,
             key,
             contextPath
         };
 
-        /* if (this.isNameLengthExceeded(name, appType)) {
-          const error = new Error();
-          error.name = ERROR_TYPE.MICROSERVICE_NAME_TOO_LONG;
-          error.message = this.translateService.instant(ERROR_MESSAGES[error.name], {
-            name,
-            maxChars: MICROSERVICE_NAME_MAX_LENGTH
-          });
-          throw error;
-        } */
-        return (
-            await this.applicationService.create({
-                ...appToSave,
-                manifest: {
-                    isPackage,
-                    ...(appModel?.package && { package: appModel.package })
-                } as unknown as IManifest
-            })
-        ).data;
+        return (await this.applicationService.create({...appObj})).data;
     }
-    private getCumulocityJson$(archive: File): Observable<any> {
+    
+    private getCumulocityJson(archive: File): Observable<any> {
         return this.zipService.getJsonData(archive, {
-            filename: CUMULOCITY_JSON
+          filename: 'cumulocity.json'
         });
-    }
-    private getAppType(archive: File): Promise<ApplicationType> {
-        return this.getCumulocityJson$(archive)
-            .toPromise()
-            .then(
-                data =>
-                    get(data, 'type') ||
-                    (get(data, 'apiVersion') ? ApplicationType.MICROSERVICE : ApplicationType.HOSTED)
-            )
-            .catch(() => ApplicationType.HOSTED);
-    }
-    private getBaseNameFromArchiveOrAppModel(
-        archive: any,
-        appType: ApplicationType,
-        appModel?: IApplication
-    ): string {
-        let baseName = appModel?.name || archive.name.replace(/\.zip$/i, '');
-        if (appType === 'MICROSERVICE') {
-            baseName = this.removeVersionFromName(baseName);
-        }
-        return baseName;
-    }
+      }
 
-    private removeVersionFromName(name: string) {
-        const versionRegExp = /-\d+\.\d+\.\d+(\.\d+)?(-\d+)?(.*)$/;
-        return name.replace(versionRegExp, '');
-    }
-
-    private isNameLengthExceeded(name, appType) {
-        return name.length > MICROSERVICE_NAME_MAX_LENGTH && appType === ApplicationType.MICROSERVICE;
-    }
-    private removeForbiddenCharacters(str: string): string {
-        return str.replace(/[^a-zA-Z0-9-_]/g, '');
-    }
-    private getAppKey(appModel: IApplication, name: string): string {
-        let key = appModel?.key;
-        if (!key) {
-            key = `${kebabCase(name)}-key`;
-        }
-        return key;
-    }
-
-    private getContextPath(appModel: IApplication, name: string): string {
-        return appModel?.contextPath || name.toLowerCase();
-    }
-
-    //====================
     async uploadMicroservice(file: File, microservice: IApplication): Promise<void> {
-        const subscribeToCurrentTenant = await this.askIfActivationAfterUploadNeeded();
-        const microserviceApp: IApplication = await this.uploadArchiveToApp(file, microservice);
+        const subscribeToCurrentTenant = await this.requestForSubscription();
+        const microserviceApp: IApplication = await this.uploadBinary(file, microservice);
         if(microserviceApp) {
             if(window && window['aptrinsic'] ){
                 window['aptrinsic']('track', 'gp_microservice_installed', {
@@ -154,7 +79,7 @@ export class ApplicationBinaryService {
         await this.subscribeMicroservice(microservice, subscribeToCurrentTenant);
     }
 
-    private async askIfActivationAfterUploadNeeded(): Promise<boolean> {
+    private async requestForSubscription(): Promise<boolean> {
         try {
             await this.modal.confirm(
                 gettext('Subscribe to microservice'),
@@ -190,64 +115,15 @@ export class ApplicationBinaryService {
             return this.tenantService.unsubscribeApplication(tenant, app);
         }
     }
-    async uploadArchiveToApp(
-        archive: File,
-        app: IApplication,
-        isNewVersion = false
-    ): Promise<IApplication> {
-        let uploadOverrides: IUploadParamsOverride;
-        if (isNewVersion) {
-            uploadOverrides = await this.getUploadOverrides(archive, app);
-        }
-        const binaryService = this.applicationService.binary(app);
-        this.xhr = binaryService.uploadWithProgressXhr(
-            archive,
-            this.updateUploadProgress.bind(this),
-            '',
-            uploadOverrides
-        );
 
-        const binaryMo = await binaryService.getXMLHttpResponse(this.xhr);
-
-        return (await this.setAppActiveVersion(app, (binaryMo.binaryId || binaryMo.id) as string)).data;
+    async uploadBinary( file: File, app: IApplication ): Promise<IApplication> {
+        const appBinary = (await this.applicationService.binary(app).upload(file)).data;
+        return (await this.setActiveVersion(app, appBinary.id as string)).data;
     }
 
-    private async getUploadOverrides(
-        archive: File,
-        app: IApplication
-    ): Promise<IUploadParamsOverride> {
-        const { version } = await this.getCumulocityJson$(archive).toPromise();
-        const isInitialPackage = app.applicationVersions?.length === 0;
-        return {
-            listUrl: 'versions',
-            headers: {
-                Accept: 'application/vnd.com.nsn.cumulocity.applicationVersion+json;charset=UTF-8;ver=0.9'
-            },
-            bodyFileProperty: 'applicationBinary',
-            requestBody: {
-                applicationVersion: { version, ...(isInitialPackage && { tags: ['latest'] }) }
-            }
-        };
-    }
-    updateUploadProgress(event): void {
-        if (event.lengthComputable) {
-            const currentProgress = this.progress.value;
-            this.progress.next(currentProgress + (event.loaded / event.total) * (95 - currentProgress));
-        }
-    }
-
-    setAppActiveVersion(app: IApplication, activeVersionId: string): Promise<IApplication> {
+    setActiveVersion(app: IApplication, activeVersionId: string): Promise<IApplication> {
         return this.applicationService.update({ id: app.id, activeVersionId });
     }
-    cancelAppCreation(app: IApplication): void {
-        if (this.xhr) {
-            this.xhr.abort();
-        }
-        if (app) {
-            this.applicationService.delete(app);
-        }
-    }
-
 
     getApplications(customFilter: any = {}): Promise<IResultList<IApplication>> {
         const filter: object = {
@@ -263,7 +139,6 @@ export class ApplicationBinaryService {
         const apps = (await this.getApplications()).data;
         const ms = apps.filter(app => this.isMicroservice(app) && app.name === name);
         return (ms && ms.length > 0 ? true: false);
-        // return microservices.sort((a, b) => a.name.localeCompare(b.name));
     }
 
     isMicroservice(app: IApplication): boolean {

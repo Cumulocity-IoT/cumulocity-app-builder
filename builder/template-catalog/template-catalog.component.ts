@@ -337,7 +337,7 @@ export class TemplateCatalogModalComponent implements OnInit {
                         const fileName = dependency.link.replace(/^.*[\\\/]/, '');
                         const fileOfBlob = new File([blob], fileName);
 
-                        const createdApp = await this.applicationBinaryService.createAppForArchive(fileOfBlob);
+                        const createdApp = await this.applicationBinaryService.createAppForMicroservice(fileOfBlob, dependency);
                         this.progressIndicatorService.setProgress(50);
                         counter = 50;
                         this.microserviceDownloadProgress$ = this.microserviceDownloadProgress.subscribe(async val => {
@@ -354,7 +354,6 @@ export class TemplateCatalogModalComponent implements OnInit {
                         dependency.isInstalled = true;
                         this.isReloadRequired = true;
                     } catch (ex) {
-                        this.applicationBinaryService.cancelAppCreation(createdApp);
                         createdApp = null;
                         this.alertService.danger("There is some technical error! Please try after sometime.");
                         console.error(ex.message);
