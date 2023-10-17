@@ -71,7 +71,8 @@ export interface BinaryDescription {
 }
 
 export interface DependencyDescription {
-    id: string;
+    id?: string;
+    ids?: string[];
     title: string;
     repository: string;
     link: string;
@@ -81,6 +82,7 @@ export interface DependencyDescription {
     isSupported?: boolean;
     visible?: boolean;
     contextPath?: string;
+    type?: string;
 }
 
 export interface CumulocityDashboard {
@@ -90,5 +92,6 @@ export interface CumulocityDashboard {
     global: boolean;
     isFrozen?: boolean;
     priority?: number;
+    classes?: object
 }
 

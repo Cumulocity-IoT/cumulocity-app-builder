@@ -27,6 +27,8 @@ import { DeviceSelectorModalModule } from "../utils/device-selector-modal/device
 import { TemplateUpdateModalComponent } from "./template-update.component";
 import { NgSelectModule } from "@ng-select/ng-select";
 import {TooltipModule} from "ngx-bootstrap/tooltip";
+import { WidgetCatalogService } from "./../widget-catalog/widget-catalog.service";
+import { BsDropdownModule } from "ngx-bootstrap/dropdown";
 
 @NgModule({
     imports: [
@@ -37,7 +39,8 @@ import {TooltipModule} from "ngx-bootstrap/tooltip";
         RectangleSpinnerModule,
         DeviceSelectorModalModule,
         NgSelectModule,
-        TooltipModule
+        TooltipModule,
+        BsDropdownModule.forRoot(),
     ],
     declarations: [
         TemplateCatalogModalComponent,
@@ -48,7 +51,8 @@ import {TooltipModule} from "ngx-bootstrap/tooltip";
         TemplateUpdateModalComponent
     ],
     providers: [
-        TemplateCatalogService
+        TemplateCatalogService,
+        WidgetCatalogService
     ]
 })
 export class TemplateCatalogModule { }
