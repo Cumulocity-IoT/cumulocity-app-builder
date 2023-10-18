@@ -146,7 +146,7 @@ import { AppDataService } from "./app-data.service";
 })
 export class BuilderModule {
     private renderer: Renderer2;
-    constructor(appStateService: AppStateService, loginService: LoginService, private appDataService: AppDataService,
+    constructor(appStateService: AppStateService, private appDataService: AppDataService,
         simSvc: SimulatorWorkerAPI, simulatorManagerService: SimulatorManagerService,
         appIdService: AppIdService, private settingService: SettingsService, private appBuilderUpgradeService: AppBuilderUpgradeService,
         rendererFactory: RendererFactory2, @Inject(DOCUMENT) private _document: Document,
