@@ -16,14 +16,23 @@
         </li>
     </ul>
 </c8y-action-bar-item>
+<div class="card-group col-xs-12 col-sm-12 col-md-12 col-lg-12">
+    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="card">
+            <div class="card-header widget-catalog-deprecation-warning">
+                <i [c8yIcon]="'warning'"></i>
+                <strong>Deprecated:</strong>&nbsp; Widget Catalog will be removed in a future release. Please manage your widgets/plugins from Administration -> Ecosystem -> Extensions.
+            </div>
+        </div>
+    </div>
+</div>
 
 <div *ngIf="isBusy" class="col-xs-12 col-sm-12 col-md-12" style="padding-bottom:50px;padding-top:20px">
     <rectangle-spinner style="position: relative; left: 47%;">
     </rectangle-spinner>
 </div>
-<div class="card-group interact-grid" *ngIf="!isBusy && displayListValue !== '1'">
-    <div class="card-group col-xs-12 col-sm-12 col-md-12 col-lg-12">
-        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+<div class="card-group col-xs-12 col-sm-12 col-md-12 col-lg-12" *ngIf="!isBusy && displayListValue !== '1'">
+    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
             <div class="card">
                 <div class="card-header">
                     <!-- Search -->
@@ -134,7 +143,6 @@
                     </div>
                 </div>
             </div>
-        </div>
     </div>
 </div>
 <div *ngIf="!isBusy && displayListValue === '1'">
@@ -172,13 +180,13 @@
 
                 </div>
                 <hr />
-                <div class="card-block" >
-                    <div *ngIf="!widgetCatalog?.widgets?.length" class="c8y-empty-state text-center" style="max-width: 100%;flex-direction: column; align-items: center;">
+                <div class="" >
+                    <div *ngIf="!widgetCatalog?.widgets?.length" class="card-block c8y-empty-state text-center" style="max-width: 100%;flex-direction: column; align-items: center;">
                         <h1 c8yIcon="package" class="c8y-icon-duocolor" style="font-size: 90px;"></h1>
                         <h3>No widget to list.</h3>
                         <p>Please Install widgets.</p>
                     </div>
-                    <div class="c8y-empty-state text-center" style="max-width: 100%; flex-direction: column; align-items: center;"
+                    <div class="card-block c8y-empty-state text-center" style="max-width: 100%; flex-direction: column; align-items: center;"
                         *ngIf="widgetCatalog?.widgets?.length && !filterWidgets?.length">
                         <h3>No widget to list.</h3>
                     </div>
