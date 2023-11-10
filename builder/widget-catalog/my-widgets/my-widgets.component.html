@@ -199,7 +199,7 @@
             <div class="card">
                 <div class="card-actions m-t-0">
                     <div class="dropdown" dropdown (click)="$event.stopPropagation()" *ngIf="userHasAdminRights">
-                        <button title="Settings" id="appSettings-{{widget.name}}" class="dropdown-toggle c8y-dropdown" dropdownToggle type="button">
+                        <button title="Settings" id="widgetSettings-{{widget.title}}" class="dropdown-toggle c8y-dropdown" dropdownToggle type="button">
                             <i c8yIcon="ellipsis-v"></i>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-right" *dropdownMenu role="menu">

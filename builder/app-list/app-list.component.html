@@ -2,7 +2,7 @@
 
 <div class="card-group interact-grid">
     <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2" style="min-height: 194px;" *ngIf="userHasAdminRights">
-        <button (click)="createAppWizard()" class="card add-card">
+        <button (click)="createAppWizard()" class="card add-card" id="addApplication">
             <i  style="font-size: 36px;" c8y-icon="plus-circle" class="text-muted dlt-c8y-icon-plus-circle"></i>
             <br>Add application
         </button>
@@ -25,7 +25,7 @@
                                 </button>
                             </li>
                             <li role="menuitem">
-                                <button type="button" title="Remove" (click)="deleteApplication(app.id)">
+                                <button type="button" id="{{app.name}}-deleteApp" title="Remove" (click)="deleteApplication(app.id)">
                                     <i c8yIcon="times" ></i> <span> Remove</span>
                                 </button>
                             </li>

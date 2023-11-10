@@ -2,7 +2,7 @@
 <ng-container *ngIf="simulatorConfigById$ | async as simulatorConfigById">
 <div class="card-group interact-grid" *ngIf="lockStatus$ | async as lockStatus">
     <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3" style="min-height: 165px">
-        <button *ngIf="userHasAdminRights && (lockStatus.isLockOwned || !isSimulatorsExist) else locked" [ngClass]="{'add-card-color' : applyTheme}"  (click)="showCreateSimulatorDialog()" class="card add-card">
+        <button id="addSimulator" *ngIf="userHasAdminRights && (lockStatus.isLockOwned || !isSimulatorsExist) else locked" [ngClass]="{'add-card-color' : applyTheme}"  (click)="showCreateSimulatorDialog()" class="card add-card">
             <i  style="font-size: 36px;" c8y-icon="plus-circle" class="text-muted dlt-c8y-icon-plus-circle"></i>
             <br>Add Simulator
         </button>
@@ -34,7 +34,7 @@
             </div>
             <div class="card-actions m-t-0">
             <div class="dropdown" dropdown (click)="$event.stopPropagation()" *ngIf="userHasAdminRights && lockStatus.isLockOwned">
-                <button title="Settings" id="appSettings-{{simulatorConfig.name}}" class="dropdown-toggle c8y-dropdown" dropdownToggle type="button" [ngClass]="{'label-color': applyTheme}">
+                <button title="Settings" id="simSettings-{{simulatorConfig.name}}" class="dropdown-toggle c8y-dropdown" dropdownToggle type="button" [ngClass]="{'label-color': applyTheme}">
                     <i c8yIcon="ellipsis-v"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-right" *dropdownMenu role="menu">
