@@ -117,6 +117,9 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     ) {
         this.app = combineLatest([appIdService.appIdDelayedUntilAfterLogin$, this.refreshApp]).pipe(
             map(([appId]) => appId),
+            tap(appId => {
+                this.appDataService.forceUpdate = true;
+            }),
             switchMap(appId => from(
                 this.appDataService.getAppDetails(appId)
             )),

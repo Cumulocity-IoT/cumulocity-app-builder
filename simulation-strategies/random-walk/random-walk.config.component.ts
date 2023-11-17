@@ -162,6 +162,7 @@ import { SimulatorConfigService } from "../../builder/simulator-config/simulator
     }
     .op-field {
         margin-bottom: 10px;
+        min-height:25px;
     }
     `],
     viewProviders: [{ provide: ControlContainer, useExisting: NgForm }]

@@ -68,6 +68,7 @@ export class NewSimulatorModalComponent implements OnInit{
     deviceName: string | undefined;
     groupName: string | undefined;
     numberOfDevice: number | 0;
+    deviceType: string| undefined;
     isGroup: boolean = false;
     configFromFile: any;
     runOnServer: boolean = false;
@@ -306,6 +307,7 @@ export class NewSimulatorModalComponent implements OnInit{
         for (let index = 0; index < this.numberOfDevice; index++) {
             const childManageObject: Partial<IManagedObject> = {
                 c8y_IsDevice: {},
+                type: (this.deviceType ? this.deviceType: null),
                 name: this.simulatorName + '-' + (index + 1),
                 c8y_RequiredAvailability: {
                     responseInterval: 5
