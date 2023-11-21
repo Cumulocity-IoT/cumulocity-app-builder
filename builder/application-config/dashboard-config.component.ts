@@ -40,7 +40,7 @@ import { DOCUMENT } from "@angular/common";
 import { moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { AppDataService } from "../app-data.service";
 import { Clipboard } from '@angular/cdk/clipboard';
-
+import { IconSelectorService } from "@c8y/ngx-components/icon-selector";
 export interface DashboardConfig {
     id: string,
     name: string,
@@ -49,6 +49,7 @@ export interface DashboardConfig {
     icon: string,
     deviceId?: string,
     roles?: any,
+    templateType?: number,
     groupTemplate: {
         groupId: string
     },
@@ -108,13 +109,17 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
 
     constructor(
         private appIdService: AppIdService, private appService: ApplicationService, private appStateService: AppStateService,
-        private brandingService: BrandingService, private inventoryService: InventoryService, private navigation: AppBuilderNavigationService,
+        private inventoryService: InventoryService, private navigation: AppBuilderNavigationService,
+        private iconSelector: IconSelectorService, private brandingService: BrandingService,
         private modalService: BsModalService, private alertService: AlertService, private settingsService: SettingsService,
         private accessRightsService: AccessRightsService, private userService: UserService, private appDataService: AppDataService,
         @Inject(DOCUMENT) private document: Document, private renderer: Renderer2, private cd: ChangeDetectorRef, private clipboard: Clipboard
     ) {
         this.app = combineLatest([appIdService.appIdDelayedUntilAfterLogin$, this.refreshApp]).pipe(
             map(([appId]) => appId),
+            tap(appId => {
+                this.appDataService.forceUpdate = true;
+            }),
             switchMap(appId => from(
                 this.appDataService.getAppDetails(appId)
             )),
@@ -144,7 +149,8 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
         let count = 0;
         this.appSubscription = this.app.pipe(first()).
             subscribe(app => {
-                if (app.applicationBuilder.branding.enabled && (app.applicationBuilder.selectedTheme && app.applicationBuilder.selectedTheme !== 'Default')) {
+                if (app.applicationBuilder.branding?.enabled && (app.applicationBuilder.selectedTheme && app.applicationBuilder.selectedTheme !== 'Default'
+                && app.applicationBuilder.selectedTheme !== 'Classic')) {
                     this.applyTheme = true;
                     this.renderer.addClass(this.document.body, 'dashboard-body-theme');
                 } else {
@@ -389,7 +395,8 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
                         dashboardType: 'group-template'
                     } : {
                         dashboardType: 'standard'
-                    })
+                    }),
+                    templateType: dashboard.templateType
                 }
             });
             this.bsModalRef.content.onSave.subscribe((isReloadRequired: boolean) => {

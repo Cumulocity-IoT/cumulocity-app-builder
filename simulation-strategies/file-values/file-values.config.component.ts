@@ -37,7 +37,7 @@ import { SimulatorConfigService } from "../../builder/simulator-config/simulator
                 <div class="form-group">
                         <label for="csvJsonFile"><span>Upload a File</span></label>
                         <div style="display: inline-flex;">
-                        <input type="file" class="form-control" id="csvJsonFile" name="csvJsonFile" (change)="fileUploaded($event)" accept=".json,.csv;">
+                        <input type="file" class="form-control" id="csvJsonFile" name="csvJsonFile" (change)="fileUploaded($event)" accept=".json,.csv">
                         <div *ngIf="isUploading" style="color:blue;margin: 5px;"><i class="fa fa-circle-o-notch fa-spin"></i></div>
                         </div>
                         <div *ngIf="isError" style="color:red;">Invalid File Format!</div>

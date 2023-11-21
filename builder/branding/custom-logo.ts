@@ -15,19 +15,21 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
  */
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
 
-@Injectable()
-export class SimulatorConfigService {  
+export function customLogo(branding: any) {
+    const customLogo = `
+    body {
+        ${branding.logoHeight != undefined ? '--navigator-platform-logo-height: ' + branding.logoHeight + 'px;' : ''}
+    }
+    .navigator .title .tenant-brand {
+        background-image: url(${CSS.escape(branding.logo || '')});
+        padding-bottom: var(--navigator-platform-logo-height,28px);
+    }
+    
+    .title .c8y-app-icon {
+        ${branding.logoHeight != undefined ? '' : 'margin-top: -16px;'}
+    }
+    `;
 
-  constructor() {             
-  }
-
-  runOnServerSource: BehaviorSubject<any> = new BehaviorSubject(null);
-  runOnServer$: Observable<any> = this.runOnServerSource.asObservable();
-
-  setRunOnServer(runOnServer: any) {
-    this.runOnServerSource.next(runOnServer);
-  }
+    return customLogo;
 }

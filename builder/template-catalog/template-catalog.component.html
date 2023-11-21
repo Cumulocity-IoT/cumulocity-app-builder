@@ -1,7 +1,7 @@
 <div class="modal-header text-center bg-primary">
-    <h4 *ngIf="isCatalogDisplayed()" class="text-uppercase" style="margin:0; letter-spacing: 0.15em;color:#000">Dashboard Catalog
+    <h4 *ngIf="isCatalogDisplayed()" class="text-uppercase" style="margin:0; letter-spacing: 0.15em;">Dashboard Catalog
     </h4>
-    <h4 *ngIf="isDetailPageDisplayed()" class="text-uppercase" style="margin:0; letter-spacing: 0.15em;color:#000">
+    <h4 *ngIf="isDetailPageDisplayed()" class="text-uppercase" style="margin:0; letter-spacing: 0.15em;">
         {{selectedTemplate?.title}}</h4>
 </div>
 <div class="modal-body">
@@ -38,7 +38,7 @@
                 <div class="card-demo flip-card-inner">
                     <div class="flip-card-front">
                         <img class="card-image"
-                            [src]="template?.thumbnail && template?.thumbnail != '' ? template?.thumbnail : './images/placeholder.png'" />
+                            [src]="template?.thumbnail && template?.thumbnail != '' ? template?.thumbnail : './img/placeholder.png'" />
                         <div class="card-data">
                             <h3 [title]="template?.title">
                                 <b>{{ template?.title }} </b>
@@ -100,12 +100,43 @@
                     </select>
                 </div>
 
+                <div *ngIf="templateDetails.input?.devices?.length > 0">
+                    <div class="form-group" *ngFor="let device of templateDetails.input.devices; let i = index">
+                        <label for="device"><span>Device/Sensor/Asset - Type: {{device.type}}</span></label>
+                        <div class="input-group">
+                            <input type="text" [readonly]="true" name="selected-device" class="form-control" id="selected-device" 
+                            placeholder="Device/Group/Asset/Type" [ngModel]="templateDetails.input.devices[i].reprensentation?.name"/>
+                            <div class="input-group-btn dropdown" dropdown>
+                              <button type="button" dropdownToggle class="btn btn-primary dropdown-toggle c8y-dropdown">
+                                <span >{{assetButtonText}}</span>
+                                <span class="caret"></span>
+                              </button>
+                              <ul class="dropdown-menu dropdown-menu-right" *dropdownMenu>
+                                <li><button type="button" (click)="openDeviceSelectorDialog(i, 0)">Device/Asset</button></li>
+                                <li><button type="button"(click)="openDeviceSelectorDialog(i, 1)">Device Group</button></li>
+                                <li><button type="button"(click)="openDeviceSelectorDialog(i, 2)">Device/Asset Type</button></li>
+                              </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+
+                <div class="form-group" *ngIf="!groupTemplate else groupTemplateTabGroup">
+                    <label for="tabgroup"><span>Tab Group</span></label>
+                    <input type="text" class="form-control" id="tabgroup" name="tabgroup" placeholder="e.g. TabGroup1" [(ngModel)]="dashboardConfiguration.tabGroup">
+                </div>
+                <ng-template #groupTemplateTabGroup>
                 <div class="form-group">
                     <label for="tabgroup"><span>Tab Group</span></label>
-                    <input type="text" class="form-control" id="tabgroup" name="tabgroup" placeholder="e.g. TabGroup1"
-                        [(ngModel)]="dashboardConfiguration.tabGroup">
+                    <select name="tabgroup" id="tabgroup" [(ngModel)]="dashboardConfiguration.tabGroup">
+                        <option value="deviceId">Device ID</option>
+                        <option value="">None</option>
+                    </select>
                 </div>
-                
+                </ng-template>
+
+
                 <div class="form-group">
                     <label for="globalRoles"><span>Global Roles (Optional)</span> 
                         <button class="btn btn-link">
@@ -116,22 +147,6 @@
                     placeholder="select Role(s)" [(ngModel)]="dashboardConfiguration.roles"  [appendTo]="'.modal-content'"  >
                     </ng-select>
                 </div>
-                <div *ngIf="templateDetails.input?.devices?.length > 0">
-                    <div class="form-group" *ngFor="let device of templateDetails.input.devices; let i = index">
-                        <label for="device"><span>Device/Sensor/Asset - Type: {{device.type}}</span></label>
-                        <form class="form-inline">
-                            <div class="form-group" style="width: 60%; padding:0px">
-                                <label class="sr-only" for="selected-device">Device/Sensor</label>
-                                <input [readonly]="true" name="selected-device" class="form-control"
-                                    style="width: 100%;" id="selected-device" placeholder="Device/Sensor/Asset" type="text"
-                                    [ngModel]="templateDetails.input.devices[i].reprensentation?.name">
-                            </div>
-                            <button type="button" style="width: 40%;" class="btn btn-primary"
-                                (click)="openDeviceSelectorDialog(i)">Select Device</button>
-                        </form>
-                    </div>
-                </div>
-
                 <div *ngIf="templateDetails.input?.images?.length > 0">
                     <div class="form-group" *ngFor="let image of templateDetails.input.images; let i = index">
                         <label for="exampleInputFile">Image - Type: {{image.type}}</label>
@@ -156,15 +171,31 @@
                 <label for="Depedencies"><span>Dependencies:</span></label>
                 <ul class="list-group">
                     <ng-container *ngFor="let dependency of templateDetails.input.dependencies; let i = index" >
-                    <li *ngIf="dependency.visible" class="list-group-item">
+                    <li *ngIf="dependency.visible && dependency.type !== 'microservice'" class="list-group-item">
                             <span *ngIf="dependency.isInstalled" class="badge badge-success">INSTALLED</span>
                             <span *ngIf="!dependency.isInstalled" class="badge badge-danger">NOT INSTALLED</span>
-                            <a href="{{dependency.repository}}"style="color:#000;" target="_blank">{{dependency.title}}</a>
+                            <a href="{{dependency.repository}}" target="_blank">{{dependency.title}}
+                            <span *ngIf="dependency.type" class="badge badge-info">{{dependency.type}}</span></a>
                             <button *ngIf="!dependency.isInstalled && dependency.isSupported" type="button" style="margin-left: 10px"
                                 class="btn btn-primary btn-xs btn-icon" (click)="installDependency(dependency)">
                                 <i class="fa fa-cloud-download"></i>
                                 Install</button>
                             <button *ngIf="!dependency.isInstalled && !dependency.isSupported" disabled type="button" style="margin-left: 10px"
+                                class="btn btn-xs btn-icon">
+                                <i class="fa fa-warning"></i>
+                                Not supported!</button>
+                    </li>
+
+                    <li *ngIf="dependency.visible && dependency.type === 'microservice'" class="list-group-item">
+                            <span *ngIf="dependency.isInstalled" class="badge badge-success">INSTALLED</span>
+                            <span *ngIf="!dependency.isInstalled" class="badge badge-danger">NOT INSTALLED</span>
+                            <a href="{{dependency.repository}}" target="_blank">{{dependency.title}}
+                            <span *ngIf="dependency.type" class="badge badge-info">{{dependency.type}}</span></a>
+                            <button *ngIf="!dependency.isInstalled && dependency.isSupported && isMSEnabled" type="button" style="margin-left: 10px"
+                                class="btn btn-primary btn-xs btn-icon" (click)="installDependency(dependency)">
+                                <i class="fa fa-cloud-download"></i>
+                                Install</button>
+                            <button *ngIf="(!dependency.isInstalled && !dependency.isSupported) || !isMSEnabled" disabled type="button" style="margin-left: 10px"
                                 class="btn btn-xs btn-icon">
                                 <i class="fa fa-warning"></i>
                                 Not supported!</button>
@@ -176,7 +207,7 @@
     </div>
 </div>
 <div class="modal-footer">
-    <button *ngIf="isDetailPageDisplayed()" type="button" class="btn btn-default"
+    <button *ngIf="isDetailPageDisplayed() && !this.dashboard" type="button" class="btn btn-default"
         (click)="onBackButtonClicked()">Back</button>
     <button type="button" class="btn btn-default" (click)="onCancelButtonClicked()">Cancel</button>
     <button *ngIf="isDetailPageDisplayed()" type="button" class="btn btn-primary" (click)="onSaveButtonClicked()"

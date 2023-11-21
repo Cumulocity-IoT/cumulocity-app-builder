@@ -21,13 +21,14 @@ import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { catchError, map } from "rxjs/operators";
 import { has, get } from "lodash-es";
-import { IManagedObject, IManagedObjectBinary } from '@c8y/client';
+import {IManagedObjectBinary } from '@c8y/client';
 import { BinaryDescription, CumulocityDashboard, DependencyDescription, DeviceDescription, TemplateCatalogEntry, TemplateDashboardWidget, TemplateDetails } from "./template-catalog.model";
 import { ApplicationService, InventoryBinaryService, InventoryService } from "@c8y/ngx-components/api";
 import { AppBuilderNavigationService } from "../navigation/app-builder-navigation.service";
-import { Alert, AlertService } from "@c8y/ngx-components";
+import {AlertService } from "@c8y/ngx-components";
 import { AppBuilderExternalAssetsService } from 'app-builder-external-assets';
 import { DashboardConfig } from "builder/application-config/dashboard-config.component";
+import { SettingsService } from "../settings/settings.service";
 
 const packageJson = require('./../../package.json');
 @Injectable()
@@ -47,7 +48,7 @@ export class TemplateCatalogService {
     constructor(private http: HttpClient, private inventoryService: InventoryService,
         private appService: ApplicationService, private navigation: AppBuilderNavigationService,
         private binaryService: InventoryBinaryService, private alertService: AlertService,
-        private externalService: AppBuilderExternalAssetsService) {
+        private externalService: AppBuilderExternalAssetsService, private settingsService: SettingsService) {
         this.GATEWAY_URL_GitHubAPI = this.externalService.getURL('GITHUB','gatewayURL_Github');
         this.GATEWAY_URL_GitHubAsset =  this.externalService.getURL('GITHUB','gatewayURL_GitHubAsset');
         this.GATEWAY_URL_GitHubAPI_FallBack = this.externalService.getURL('GITHUB','gatewayURL_Github_Fallback');
@@ -137,6 +138,18 @@ export class TemplateCatalogService {
         }));
     }
 
+    downloadLargeBinary(binaryId: string){
+        return this.http.get(`${this.GATEWAY_URL_GitHubAsset}${binaryId}`, {
+            responseType: 'arraybuffer'
+        })
+        .pipe(catchError(err => {
+            console.log('Template Catalog: Download Binary: Error in primary endpoint! using fallback...');
+            return this.http.get(`${this.GATEWAY_URL_GitHubAsset_FallBack}${binaryId}`, {
+              responseType: 'arraybuffer'
+            })
+        }));
+    }
+
     getGithubURL(relativePath: string){
         let url = `${this.GATEWAY_URL_GitHubAPI}`;
         if(this.isFallBackActive) {
@@ -157,12 +170,24 @@ export class TemplateCatalogService {
         });
     }
 
-    async createDashboard(application, dashboardConfiguration, templateCatalogEntry: TemplateCatalogEntry, templateDetails: TemplateDetails) {
+    async createDashboard(application, dashboardConfiguration, templateCatalogEntry: TemplateCatalogEntry, templateDetails: TemplateDetails, isGroupTemplate: boolean = false) {
         templateDetails = await this.uploadBinariesToC8Y(templateDetails);
-        templateDetails = this.updateTemplateWidgetsWithInput(templateDetails);
-
+        templateDetails = this.updateTemplateWidgetsWithInput(templateDetails,isGroupTemplate);
+        let deviceId = "";
+        if(templateDetails?.input?.devices) {
+            const device = templateDetails.input.devices.find(device => (device.reprensentation) && (device.reprensentation.id));
+            if(device){ deviceId = device.reprensentation.id; }
+        }
         await this.inventoryService.create({
-            "c8y_Dashboard": this.getCumulocityDashboardRepresentation(dashboardConfiguration, templateDetails.widgets)
+            c8y_Global: {},
+            "c8y_Dashboard!name!app-builder-db": {},
+            "c8y_Dashboard": this.getCumulocityDashboardRepresentation(dashboardConfiguration, templateDetails.widgets),
+            ...(isGroupTemplate ? {
+                applicationBuilder_groupTemplate: {
+                    groupId: deviceId,
+                    templateDeviceId: "NO_DEVICE_TEMPLATE_ID"
+                }
+            } : {})
         }).then(({ data }) => {
             application.applicationBuilder.dashboards = [
                 ...application.applicationBuilder.dashboards || [],
@@ -181,10 +206,19 @@ export class TemplateCatalogService {
                         devices: templateDetails.input.devices ? templateDetails.input.devices : [],
                         binaries: templateDetails.input.images ? templateDetails.input.images : [],
                         staticBinaries: templateDetails.input.binaries ? templateDetails.input.binaries : []
-                    }
+                    },
+                    ...(isGroupTemplate ? { groupTemplate: true } : {}),
+                    templateType: dashboardConfiguration.templateType
                 }
             ];
-
+            if (window && window['aptrinsic']) {
+                window['aptrinsic']('track', 'gp_blueprint_forge_dashboard_created', {
+                    "templateName": templateCatalogEntry.title,
+                    "appName": application.name,
+                    "tenantId": this.settingsService.getTenantName(),
+                    "dashboardName": templateCatalogEntry.title
+                });
+            }
             return this.appService.update({
                 id: application.id,
                 applicationBuilder: application.applicationBuilder
@@ -194,13 +228,23 @@ export class TemplateCatalogService {
         });
     }
 
-    async updateDashboard(application, dashboardConfig: DashboardConfig, templateDetails: TemplateDetails, index: number) {
-        templateDetails = this.updateTemplateWidgetsWithInput(templateDetails);
-
+    async updateDashboard(application, dashboardConfig: DashboardConfig, templateDetails: TemplateDetails, index: number, isGroupTemplate: boolean = false) {
+        templateDetails = this.updateTemplateWidgetsWithInput(templateDetails, isGroupTemplate);
+        let deviceId = "";
+        if(templateDetails?.input?.devices) {
+            const device = templateDetails.input.devices.find(device => (device.reprensentation) && (device.reprensentation.id));
+            if(device){ deviceId = device.reprensentation.id; }
+        }
         const dashboardManagedObject = (await this.inventoryService.detail(dashboardConfig.id)).data;
         await this.inventoryService.update({
             id: dashboardManagedObject.id,
-            "c8y_Dashboard": this.getCumulocityDashboardRepresentation(dashboardConfig, templateDetails.widgets)
+            "c8y_Dashboard": this.getCumulocityDashboardRepresentation(dashboardConfig, templateDetails.widgets),
+            ...(isGroupTemplate ? {
+                applicationBuilder_groupTemplate: {
+                    groupId: deviceId,
+                    templateDeviceId: "NO_DEVICE_TEMPLATE_ID"
+                }
+            } : {})
         });
 
         const dashboard = application.applicationBuilder.dashboards[index];
@@ -219,7 +263,9 @@ export class TemplateCatalogService {
                 devices: templateDetails.input.devices ? templateDetails.input.devices : [],
                 binaries: templateDetails.input.images ? templateDetails.input.images : [],
                 staticBinaries: templateDetails.input.binaries ? templateDetails.input.binaries : []
-            }
+            },
+            ...(isGroupTemplate ? { groupTemplate: true } : {}),
+            templateType: dashboardConfig.templateType
         };
 
         await this.appService.update({
@@ -230,9 +276,9 @@ export class TemplateCatalogService {
         this.navigation.refresh();
     }
 
-    private updateTemplateWidgetsWithInput(templateDetails: TemplateDetails): TemplateDetails {
+    private updateTemplateWidgetsWithInput(templateDetails: TemplateDetails, isGroupTemplate: boolean): TemplateDetails {
         if (templateDetails.input.devices && templateDetails.input.devices.length > 0) {
-            templateDetails.widgets = this.updateWidgetConfigurationWithDeviceInformation(templateDetails.input.devices, templateDetails.widgets);
+            templateDetails.widgets = this.updateWidgetConfigurationWithDeviceInformation(templateDetails.input.devices, templateDetails.widgets, isGroupTemplate);
         }
 
         if (templateDetails.input.images && templateDetails.input.images.length > 0) {
@@ -290,6 +336,7 @@ export class TemplateCatalogService {
             icon: dashboardConfiguration.dashboardIcon,
             global: true,
             isFrozen: true,
+            classes:dashboardConfiguration.classes
         };
     }
 
@@ -304,13 +351,18 @@ export class TemplateCatalogService {
         return children;
     }
 
-    private updateWidgetConfigurationWithDeviceInformation(devices: Array<DeviceDescription>, widgets: Array<TemplateDashboardWidget>): Array<TemplateDashboardWidget> {
+    private updateWidgetConfigurationWithDeviceInformation(devices: Array<DeviceDescription>, widgets: Array<TemplateDashboardWidget>, isGroupTemplate: boolean): Array<TemplateDashboardWidget> {
         let updatedWidgets = widgets.map(widget => {
             let widgetStringDescription: any = JSON.stringify(widget);
 
             devices.forEach(device => {
-                widgetStringDescription = widgetStringDescription.replaceAll(`"{{${device.placeholder}.id}}"`, `"${device.reprensentation.id}"`);
-                widgetStringDescription = widgetStringDescription.replaceAll(`"{{${device.placeholder}.name}}"`, `"${device.reprensentation.name}"`);
+                if(isGroupTemplate){
+                    widgetStringDescription = widgetStringDescription.replaceAll(`"{{${device.placeholder}.id}}"`, `"NO_DEVICE_TEMPLATE_ID"`);
+                    widgetStringDescription = widgetStringDescription.replaceAll(`"{{${device.placeholder}.name}}"`, `""`);
+                } else {
+                    widgetStringDescription = widgetStringDescription.replaceAll(`"{{${device.placeholder}.id}}"`, `"${device.reprensentation.id}"`);
+                    widgetStringDescription = widgetStringDescription.replaceAll(`"{{${device.placeholder}.name}}"`, `"${device.reprensentation.name}"`);
+                }
             })
 
             widget = JSON.parse(widgetStringDescription);

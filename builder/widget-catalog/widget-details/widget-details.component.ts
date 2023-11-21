@@ -420,7 +420,7 @@ export class WidgetDetailsComponent implements OnInit {
         if (widgetBinary) {
             await new Promise(resolve => setTimeout(resolve, 1000));
             this.progressIndicatorService.setProgress(30);
-            this.widgetCatalogService.updateRemotesInCumulocityJson(widgetBinary).then(async () => {
+            this.widgetCatalogService.updateRemotesInCumulocityJson(widgetBinary, true).then(async () => {
                 widget.installed = true;
                 widget.isReloadRequired = true;
                 this.actionFlag(widget);

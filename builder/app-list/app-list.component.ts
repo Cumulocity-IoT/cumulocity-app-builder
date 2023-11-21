@@ -27,7 +27,7 @@ import {
 } from "@c8y/client";
 import { catchError, map } from "rxjs/operators";
 import { from, Observable } from "rxjs";
-import { AppStateService } from "@c8y/ngx-components";
+import { AppStateService, PluginsService } from "@c8y/ngx-components";
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import { NewApplicationModalComponent } from "./new-application-modal.component";
 import { Router } from "@angular/router";
@@ -47,7 +47,7 @@ export class AppListComponent {
     bsModalRef: BsModalRef;
     isBusy = true;
     constructor(private router: Router, private appService: ApplicationService,
-        private appStateService: AppStateService, private modalService: BsModalService,
+        private appStateService: AppStateService, private modalService: BsModalService, private pluginService: PluginsService,
         private userService: UserService, private appListService: AppListService, private realTimeService: Realtime) {
         this.userHasAdminRights = userService.hasRole(appStateService.currentUser.value, "ROLE_APPLICATION_MANAGEMENT_ADMIN")
         this.appListService.refreshAppList$.subscribe(() => {
@@ -72,12 +72,12 @@ export class AppListComponent {
             if (!this.allApplications || this.allApplications.length === 0) {
                 this.allApplications = (await this.appService.listByUser(this.appStateService.currentUser.value, { pageSize: 2000 })).data;
             }
-            this.applications = this.allApplications.filter(app => app.hasOwnProperty('applicationBuilder'));
+            this.applications = this.allApplications.filter((app:IApplication)=> app.hasOwnProperty('applicationBuilder') &&  !this.pluginService.isPackage(app));
             this.applications = this.applications.sort((a, b) => a.id > b.id ? 1 : -1);
             this.isBusy = false;
         } else {
             this.allApplications = (await this.appService.listByUser(this.appStateService.currentUser.value, { pageSize: 2000 })).data;
-            this.applications = this.allApplications.filter(app => app.hasOwnProperty('applicationBuilder'));
+            this.applications = this.allApplications.filter((app:IApplication) => app.hasOwnProperty('applicationBuilder') &&  !this.pluginService.isPackage(app));
             this.applications = this.applications.sort((a, b) => a.id > b.id ? 1 : -1);
             this.isBusy = false;
         }

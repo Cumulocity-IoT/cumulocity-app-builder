@@ -15,11 +15,23 @@
         </li>
     </ul>
 </c8y-action-bar-item>
+
+<div class="card-group col-xs-12 col-sm-12 col-md-12 col-lg-12">
+    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="card">
+            <div class="card-header widget-catalog-deprecation-warning">
+                <i [c8yIcon]="'warning'"></i>
+                <strong>Deprecated:</strong>&nbsp; Widget Catalog will be removed in a future release. Please manage your widgets/plugins from Administration -> Ecosystem -> Extensions.
+            </div>
+        </div>
+    </div>
+</div>
+
 <div *ngIf="isBusy" class="col-xs-12 col-sm-12 col-md-12" style="padding-bottom:50px;padding-top:20px">
     <rectangle-spinner style="position: relative; left: 47%;">
     </rectangle-spinner>
 </div>
-<div class="card-group interact-grid" *ngIf="!isBusy && displayListValue !== '1'">
+<div  *ngIf="!isBusy && displayListValue !== '1'">
     <div class="card-group col-xs-12 col-sm-12 col-md-12 col-lg-12">
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
             <div class="card">
@@ -44,19 +56,7 @@
                                 <span></span> Show All
                             </label>
                         </div>
-
-                        <!--  <button *ngIf="!selectMultipe" class="btn btn-clean pull-right" style="padding: 6px 8px;" id="update-widget" [disabled]="true" >
-                                    <i c8yIcon="upload" style="font-size: 16px;" ></i> Install
-                                </button>
-                                <button *ngIf="selectMultipe" class="btn btn-link pull-right" id="update-widget" (click)="installMultiple()">
-                                    <i c8yIcon="upload" style="font-size: 16px;" ></i> Install
-                                </button>
-                                <label class="c8y-switch pull-right" title="Select Multiple">
-                                    <input type="checkbox" [(ngModel)]="selectMultipe"/>
-                                    <span></span> Select multiple
-                                  </label> -->
                     </div>
-
                 </div>
                 <hr />
                 <div class="card-block">
@@ -169,28 +169,16 @@
                                 <span></span> Show All
                             </label>
                         </div>
-
-                        <!--  <button *ngIf="!selectMultipe" class="btn btn-clean pull-right" style="padding: 6px 8px;" id="update-widget" [disabled]="true" >
-                                    <i c8yIcon="upload" style="font-size: 16px;" ></i> Install
-                                </button>
-                                <button *ngIf="selectMultipe" class="btn btn-link pull-right" id="update-widget" (click)="installMultiple()">
-                                    <i c8yIcon="upload" style="font-size: 16px;" ></i> Install
-                                </button>
-                                <label class="c8y-switch pull-right" title="Select Multiple">
-                                    <input type="checkbox" [(ngModel)]="selectMultipe"/>
-                                    <span></span> Select multiple
-                                  </label> -->
                     </div>
-
                 </div>
                 <hr />
-                <div class="card-block" >
-                    <div *ngIf="!widgetCatalog?.widgets?.length" class="c8y-empty-state text-center" style="max-width:100%; flex-direction: column; align-items: center;">
+                <div class="" >
+                    <div *ngIf="!widgetCatalog?.widgets?.length" class="card-block c8y-empty-state text-center" style="max-width:100%; flex-direction: column; align-items: center;">
                         <h1 c8yIcon="package" class="c8y-icon-duocolor" style="font-size: 90px;"></h1>
                         <h3>No widget to list.</h3>
                         <p>Please install widgets.</p>
                     </div>
-                    <div class="c8y-empty-state text-center" style="max-width:100%;flex-direction: column; align-items: center;"
+                    <div class="card-block c8y-empty-state text-center" style="max-width:100%;flex-direction: column; align-items: center;"
                         *ngIf="widgetCatalog?.widgets?.length && !filterWidgets?.length">
                         <h3>No widget to list.</h3>
                     </div>
@@ -201,21 +189,21 @@
     <div class="card-group interact-grid col-xs-12 col-sm-12 col-md-12 col-lg-12" *ngIf="filterWidgets?.length > 0">
         <div class="col-xs-12 col-sm-4 col-md-3" *ngFor="let widget of filterWidgets">
             <div class="card">
-                <div class="dropdown card-actions" dropdown (click)="$event.stopPropagation()"
-                    style="z-index: 1;cursor: pointer;">
-                    <button type="button" title="Settings" id="appSettings-{{widget.name}}"
-                        class="dropdown-toggle c8y-dropdown cursor-pointer" dropdownToggle>
-                        <i c8yIcon="ellipsis-v"></i>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-right" *dropdownMenu role="menu">
-                        <li role="menuitem" [ngStyle]="widget.repository ? {'cursor': 'pointer'} : {'cursor': 'not-allowed'}">
-                            <a (click)="openDocumentation(widget.repository)" class="dropdown-item clickable fs-12" [class.disabled]="!widget.repository">
-                                <i c8yIcon="external-link"></i> Documentation
-                            </a>
-                        </li>
-                    </ul>
+                <div class="card-actions m-t-0">
+                    <div class="dropdown" dropdown (click)="$event.stopPropagation()" *ngIf="userHasAdminRights">
+                        <button title="Settings" id="appSettings-{{widget.name}}" class="dropdown-toggle c8y-dropdown" dropdownToggle type="button">
+                            <i c8yIcon="ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-right" *dropdownMenu role="menu">
+                            <li role="menuitem"  [ngStyle]="widget.repository ? {'cursor': 'pointer'} : {'cursor': 'not-allowed'}">
+                                <a (click)="openDocumentation(widget.repository)" [class.disabled]="!widget.repository" class="dropdown-item clickable fs-12">
+                                    <i c8yIcon="external-link"></i> Documentation
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-                <div class="card-actions" style="left: 0px !important; top: 15px !important">
+                <div class="card-actions" style="left: 5px !important; top: 10px !important;width: fit-content;">
                     <div class="text-warning" [ngSwitch]="widget.actionCode">
                         <button class="btn btn-clean btn-icon btn-md"
                             title="Install" *ngSwitchCase="'001'">

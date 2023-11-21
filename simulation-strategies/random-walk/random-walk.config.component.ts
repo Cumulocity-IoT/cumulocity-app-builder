@@ -44,11 +44,11 @@ import { SimulatorConfigService } from "../../builder/simulator-config/simulator
         </div>
         <div class="form-group">
             <label for="minvalue"><span>Minimum Value</span></label>
-            <input type="number" class="form-control" id="minvalue" name="minvalue" placeholder="e.g. 10 (required)" required [(ngModel)]="config.alternateConfigs.operations[0].minValue">
+            <input type="number" class="form-control" id="minvalue" name="minvalue" max="{{config.alternateConfigs.operations[0].maxValue}}" placeholder="e.g. 10 (required)" required [(ngModel)]="config.alternateConfigs.operations[0].minValue">
         </div>
         <div class="form-group">
             <label for="maxvalue"><span>Maximum Value</span></label>
-            <input type="number" class="form-control" id="maxvalue" name="maxvalue" placeholder="e.g. 20 (required)" required [(ngModel)]="config.alternateConfigs.operations[0].maxValue">
+            <input type="number" class="form-control" id="maxvalue" name="maxvalue" min="{{config.alternateConfigs.operations[0].minValue}}" placeholder="e.g. 20 (required)" required [(ngModel)]="config.alternateConfigs.operations[0].maxValue">
         </div>
         <ng-container *ngIf="config.alternateConfigs.opEnabled">
             <div class="form-group">
@@ -114,13 +114,13 @@ import { SimulatorConfigService } from "../../builder/simulator-config/simulator
                                         </div>
                                         <div class="col-lg-6 op-field">
                                             <label for="minvalue_{{i}}"><span>Minimum Value</span></label>
-                                            <input type="number" class="form-control" id="minvalue_{{i}}" name="minvalue_{{i}}" placeholder="e.g. 10 (required)" required [(ngModel)]="config.alternateConfigs.operations[i].minValue">
+                                            <input type="number" class="form-control" id="minvalue_{{i}}" name="minvalue_{{i}}" max="{{config.alternateConfigs.operations[i].maxValue}}" placeholder="e.g. 10 (required)" required [(ngModel)]="config.alternateConfigs.operations[i].minValue">
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-6 op-field">
                                             <label for="maxvalue_{{i}}"><span>Maximum Value</span></label>
-                                            <input type="number" class="form-control" id="maxvalue_{{i}}" name="maxvalue_{{i}}" placeholder="e.g. 20 (required)" required [(ngModel)]="config.alternateConfigs.operations[i].maxValue">
+                                            <input type="number" class="form-control" id="maxvalue_{{i}}" name="maxvalue_{{i}}" min="{{config.alternateConfigs.operations[i].minValue}}" placeholder="e.g. 20 (required)" required [(ngModel)]="config.alternateConfigs.operations[i].maxValue">
                                         </div>
                                     </div>
                                     <div class="row">
@@ -162,6 +162,7 @@ import { SimulatorConfigService } from "../../builder/simulator-config/simulator
     }
     .op-field {
         margin-bottom: 10px;
+        min-height:25px;
     }
     `],
     viewProviders: [{ provide: ControlContainer, useExisting: NgForm }]

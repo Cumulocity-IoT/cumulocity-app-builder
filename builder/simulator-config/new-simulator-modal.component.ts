@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2019 Software AG, Darmstadt, Germany and/or its licensors
+* Copyright (c) 2023 Software AG, Darmstadt, Germany and/or its licensors
 *
 * SPDX-License-Identifier: Apache-2.0
 *
@@ -22,7 +22,8 @@ import {
     ComponentFactoryResolver, ComponentRef,
     Injector,
     ViewChild,
-    ViewContainerRef
+    ViewContainerRef,
+    OnInit
 } from '@angular/core';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { WizardComponent } from "../../wizard/wizard.component";
@@ -35,20 +36,27 @@ import { BehaviorSubject, throwError } from 'rxjs';
 import { SimulatorNotificationService } from './simulatorNotification.service';
 import { FileSimulatorNotificationService } from './file-simulator.service';
 import { AlertService } from '@c8y/ngx-components';
-import { UpdateableAlert } from '../../builder/utils/UpdateableAlert';
+import { UpdateableAlert } from '../utils/UpdateableAlert';
 import { SimulatorWorkerAPI } from '../simulator/mainthread/simulator-worker-api.service';
 import { SimulatorConfigService } from './simulator-config.service';
-import { AlertMessageModalComponent } from '../../builder/utils/alert-message-modal/alert-message-modal.component';
-import { SimulatorManagerService } from '../../builder/simulator/mainthread/simulator-manager.service';
+import { AlertMessageModalComponent } from '../utils/alert-message-modal/alert-message-modal.component';
+import { SimulatorManagerService } from '../simulator/mainthread/simulator-manager.service';
+import { switchMap} from "rxjs/operators";
+import { AppDataService } from '../app-data.service';
+import { from, of, Subscription } from "rxjs";
 
 @Component({
     templateUrl: './new-simulator-modal.component.html'
 })
-export class NewSimulatorModalComponent {
+export class NewSimulatorModalComponent implements OnInit{
     busy: boolean = false;
     isConfigFileUploading: boolean = false;
     isConfigFileError: boolean = false;
-
+    appId:string;
+    simulatorList:any[];
+    simulatorsNameList:string[]=[];
+    appSubscription:Subscription;
+    isduplicateSmulatorName:boolean=false;
     @ViewChild(WizardComponent, { static: true }) wizard: WizardComponent;
 
     @ViewChild("configWrapper", { read: ViewContainerRef, static: true }) configWrapper: ViewContainerRef;
@@ -60,6 +68,7 @@ export class NewSimulatorModalComponent {
     deviceName: string | undefined;
     groupName: string | undefined;
     numberOfDevice: number | 0;
+    deviceType: string| undefined;
     isGroup: boolean = false;
     configFromFile: any;
     runOnServer: boolean = false;
@@ -75,9 +84,37 @@ export class NewSimulatorModalComponent {
         private appService: ApplicationService, private appIdService: AppIdService, private fetchClient: FetchClient,
         private simulatorNotificationService: SimulatorNotificationService, private fileSimulatorNotificationService: FileSimulatorNotificationService,
         private simulatorConfigService: SimulatorConfigService,private modalService: BsModalService,
-        private simulatorManagerService: SimulatorManagerService
+        private simulatorManagerService: SimulatorManagerService,private appDataService: AppDataService
     ) { }
-
+    async ngOnInit(): Promise<void> {
+        this.appDataService.forceUpdate = true;
+        await this.getAppDetails(this.appId);            
+    }
+    //Getting application details
+    async getAppDetails(appId:string){
+        const app = this.appIdService.appIdDelayedUntilAfterLogin$.pipe(
+            switchMap(appId =>  {
+                if (appId) {
+                return from(this.appDataService.getAppDetails(appId));
+                } else {
+                return of(null);
+                }
+            })
+        );
+        this.appSubscription = app.subscribe((app) => {
+        if(app  &&  app.applicationBuilder && app.applicationBuilder?.simulators){
+            this.simulatorList=app.applicationBuilder?.simulators
+        }
+        this.getSimulatorsNameList(this.simulatorList);
+    });
+    
+    }
+    //Getting a list of all existing simulator names
+    async getSimulatorsNameList(simulatorList:any[]){
+        simulatorList.forEach(simulator=>{
+            this.simulatorsNameList.push(simulator.name);
+        });
+    }
     async openSimulatorConfig() {
         this.wizard.selectStep('config');
 
@@ -119,7 +156,15 @@ export class NewSimulatorModalComponent {
 
         }
     }
-
+    //validating if simulator name already exists
+    validateSimulatorName(){
+        if(this.simulatorsNameList.includes(this.simulatorName)){
+            this.isduplicateSmulatorName=true;
+        }
+        else{
+            this.isduplicateSmulatorName=false;
+        }
+    }
     resetDialogSize() {
         this.bsModalRef.setClass('modal-sm');
     }
@@ -239,10 +284,12 @@ export class NewSimulatorModalComponent {
 
         if(isFirstSimulator) {
             this.simulatorManagerService.initialize();
+            this.simSvc.startOperationListener();
         }
+        // this.simulatorsNameList.push(this.simulatorName);
         // We could just wait for them to refresh, but it's nicer to instantly refresh
         await this.simSvc.checkForSimulatorConfigChanges();
-
+        
         this.bsModalRef.hide();
     }
     getSelectedDevice(device: any) {
@@ -260,6 +307,7 @@ export class NewSimulatorModalComponent {
         for (let index = 0; index < this.numberOfDevice; index++) {
             const childManageObject: Partial<IManagedObject> = {
                 c8y_IsDevice: {},
+                type: (this.deviceType ? this.deviceType: null),
                 name: this.simulatorName + '-' + (index + 1),
                 c8y_RequiredAvailability: {
                     responseInterval: 5
