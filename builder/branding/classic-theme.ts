@@ -32,7 +32,8 @@ export function classicTheme(branding: any) {
 
     const classicTheme = `
     body {
-
+        --globalPresalesLogoURL: url("./img/globalPresalesLogo.png");
+        
         /* Navigator color: */
         --brand-primary: ${_primary_Hex};
         --brand-light: ${_lighter_primary_Hex};

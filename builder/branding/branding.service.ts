@@ -139,8 +139,10 @@ export class BrandingService {
             .powered-by {
                 display: block;
                 padding-top:5px;
-                background-color:var(--navigator-bg-color,#22A6AA);
-                color:var(--navigator-text-color,white);
+                color:var(--navigator-text-color,var(--c8y-navigator-text-color-default));
+            }
+            .navigator-slot-bottom::before {
+                background-image: var(--globalPresalesLogoURL, url("./img/globalPresalesLogoDefault.png"));
             }
             `
         } else {
