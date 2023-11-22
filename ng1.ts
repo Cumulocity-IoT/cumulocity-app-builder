@@ -32,7 +32,7 @@ import '@c8y/ng1-modules/scada/cumulocity.json';
 import '@c8y/ng1-modules/htmlWidget/cumulocity.json';
 import '@c8y/ng1-modules/applicationLinks/cumulocity.json';
 // import '@c8y/ng1-modules/quickLinks/cumulocity.json';
-//import '@c8y/ng1-modules/helpAndSupport/cumulocity.json';
+import '@c8y/ng1-modules/helpAndSupport/cumulocity.json';
 import '@c8y/ng1-modules/eventList/cumulocity.json';
 // import '@c8y/ng1-modules/export/cumulocity.json';
 import '@c8y/ng1-modules/dataPointTable/cumulocity.json';

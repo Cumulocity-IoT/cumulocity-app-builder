@@ -26,6 +26,7 @@ import { customLogo } from "./custom-logo";
 import { classicTheme } from "./classic-theme";
 import { standardTheme } from "./standard-theme";
 declare const FontFace: any;
+import * as d3 from "d3-color";
 
 /**
  * Adds style elements to the head which set the css variables required to re-theme cumulocity

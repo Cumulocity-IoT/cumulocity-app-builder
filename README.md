@@ -228,11 +228,29 @@ Would you like to create your own Custom Runtime widget? Please refer our [Demo 
 ## Troubleshooting
 
  ### Application Builder 2.0.0 and later
+
+ * **Persistent 'Under Maintenance' Warning Despite Upgrade to Application Builder 2.0:**
+   Typically, users should encounter this warning during the upgrade procedure, although its presence should be brief – lasting no more than a few minutes. If this warning persists even after the upgrade has finished, it indicates a potential issue during plugin installation or may be connected to network-related problems.
+To address this issue, you can follow these steps:
+
+	**Note**: You may need to install your widgets/plugins manually from widget catalog or from administration after following these steps.
+
+
+	 1. Logout from Application Builder Application.
+	 2. Login again to cumulocity and navigate to Administration -> Ecosystem -> All Applications
+	 3. Select Application Builder (custom) and delete it.
+	 4. Click on Add Application
+	 5. Install Application Builder 2.0 from [here](https://github.com/SoftwareAG/cumulocity-app-builder/releases)
+	 6. Logout from Administration
+	 7. Login again to cumulocity and navigate to Application Builder
+	 8. Application Builder 2.0 will commence the installation process.
+
+	 If the problem continues to persist, please don't hesitate to reach out to us for assistance using [Software AG Tech Community](https://tech.forums.softwareag.com/tag/Cumulocity-IoT).
  
  *  **Widget/plugins are not installed after upgrade:**
  There are multiple reasons that your widgets/plugins might not installed such as browser page refreshed, network error, etc.
  In this scenario you can follow any of the below approach:
-   1. If you have installed many widgets in earlier version of application builder then you can downgrade application builder by following [How to downgrade Application Builder to 1.3.x](https://github.com/SoftwareAG/cumulocity-app-builder/edit/2.0.0-dev-1/README.md#how-to-downgrade-application-builder-to-13x) and try again.
+   1. If you have installed many widgets in earlier version of application builder then you can downgrade application builder by following [How to downgrade Application Builder to 1.3.x](https://github.com/SoftwareAG/cumulocity-app-builder#how-to-downgrade-application-builder-to-13x) and try again.
    2. If you have few widgets installed in earlier version of application builder, then you can just uninstall those widgets manually from Administration -> Ecosystem -> All Applications and install corresponding plugin either from Widget Catalog or from Administration -> Ecosystem -> Packages.
  
  
