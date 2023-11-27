@@ -74,22 +74,24 @@ export abstract class DeviceIntervalSimulator extends DeviceSimulator {
       }
 
     async createMeasurement(entity: Partial<IMeasurementCreate>) {
-        return this.fetchClient.fetch("/measurement/measurements", {
-            headers: {
-                "content-type": "application/json",
-                "Accept": "application/json"
-            },
+        let { headers } = this.fetchClient.getFetchOptions({});
+        delete(headers["X-Cumulocity-Application-Key"]); // Need to remove this key to make device available whenever measurements sent
+        headers["content-type"] = "application/json";
+        headers["Accept"] = "application/json";
+        return fetch("/measurement/measurements", {
+            headers,
             body: JSON.stringify(entity),
             method: 'POST'
         });
     }
 
     async createEvent(entity: IEvent) {
-        return this.fetchClient.fetch("/event/events", {
-            headers: {
-                "content-type": "application/json",
-                "Accept": "application/json"
-            },
+        let { headers } = this.fetchClient.getFetchOptions({});
+        delete(headers["X-Cumulocity-Application-Key"]); // Need to remove this key to make device available whenever measurements sent
+        headers["content-type"] = "application/json";
+        headers["Accept"] = "application/json";
+        return fetch("/event/events", {
+            headers,
             body: JSON.stringify(entity),
             method: 'POST'
         });
