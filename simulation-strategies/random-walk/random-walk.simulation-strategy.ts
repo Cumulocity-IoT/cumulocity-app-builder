@@ -103,8 +103,8 @@ export class RandomWalkSimulationStrategy extends DeviceIntervalSimulator {
         randomWalkConfigParam.previousValue = measurementValue;
         this.updateConfigParam(randomWalkConfigParam);
 
-        this.measurementService.create({
-            sourceId: deviceId,
+        this.createMeasurement({
+            source: { id: deviceId},
             time: new Date(),
             [this.config.fragment]: {
                 [this.config.series]: {

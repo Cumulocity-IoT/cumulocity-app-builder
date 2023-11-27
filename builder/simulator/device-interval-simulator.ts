@@ -17,7 +17,7 @@
  */
 
 import { Injector } from '@angular/core';
-import { InventoryService } from '@c8y/client';
+import { FetchClient, IEvent, IMeasurementCreate, InventoryService } from '@c8y/client';
 import {DeviceSimulator} from "./device-simulator";
 
 /**
@@ -31,9 +31,11 @@ export abstract class DeviceIntervalSimulator extends DeviceSimulator {
 
     abstract onTick(deviceId?:string);
     private inventoryService: InventoryService;
+    private fetchClient: FetchClient;
     constructor(protected injector: Injector) { 
         super(); 
         this.inventoryService = injector.get(InventoryService);
+        this.fetchClient = injector.get(FetchClient);
     }
     onStart() {
         this.intervalHandle = setInterval(() => {
@@ -70,4 +72,26 @@ export abstract class DeviceIntervalSimulator extends DeviceSimulator {
     
         return response;
       }
+
+    async createMeasurement(entity: Partial<IMeasurementCreate>) {
+        return this.fetchClient.fetch("/measurement/measurements", {
+            headers: {
+                "content-type": "application/json",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify(entity),
+            method: 'POST'
+        });
+    }
+
+    async createEvent(entity: IEvent) {
+        return this.fetchClient.fetch("/event/events", {
+            headers: {
+                "content-type": "application/json",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify(entity),
+            method: 'POST'
+        });
+    }
 }

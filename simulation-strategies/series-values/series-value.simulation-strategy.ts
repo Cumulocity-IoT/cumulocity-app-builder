@@ -88,8 +88,8 @@ export class SeriesValueSimulationStrategy extends DeviceIntervalSimulator {
 
         const measurementValue = valueSeriesConfigParam.seriesvalues[valueSeriesConfigParam.seriesValueMeasurementCounter++];
         this.updateConfigParam(valueSeriesConfigParam);
-        this.measurementService.create({
-            sourceId: deviceId,
+        this.createMeasurement({
+            source: { id: deviceId},
             time: new Date(),
             [this.config.fragment]: {
                 [this.config.series]: {

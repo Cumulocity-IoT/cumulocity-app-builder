@@ -214,7 +214,10 @@ export class NewSimulatorModalComponent implements OnInit{
                     name: this.simulatorName,
                     c8y_RequiredAvailability: {
                         responseInterval: 5
-                    }
+                    },
+                    c8y_SupportedOperations: [
+                        "c8y_Connection_status"
+                    ]
                 })).data;
                 this.deviceName = this.simulatorName;
                 this.deviceId = device.id;
@@ -311,7 +314,10 @@ export class NewSimulatorModalComponent implements OnInit{
                 name: this.simulatorName + '-' + (index + 1),
                 c8y_RequiredAvailability: {
                     responseInterval: 5
-                }
+                },
+                c8y_SupportedOperations: [
+                    "c8y_Connection_status"
+                ]
             };
             await this.inventoryService.childAssetsCreate(childManageObject, group.id);
         }
