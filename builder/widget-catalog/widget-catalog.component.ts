@@ -217,7 +217,7 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
         this.progressIndicatorService.setProgress(10);
         if(widgetBinary) {
             this.progressIndicatorService.setProgress(30);
-            this.widgetCatalogService.updateRemotesInCumulocityJson(widgetBinary).then(async () => {
+            this.widgetCatalogService.updateRemotesInCumulocityJson(widgetBinary, true).then(async () => {
                 widget.installed = true;
                 widget.isReloadRequired = true;
                 this.widgetCatalogService.actionFlagGetWidgets(widget, this.userHasAdminRights);

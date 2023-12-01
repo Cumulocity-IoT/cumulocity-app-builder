@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2019 Software AG, Darmstadt, Germany and/or its licensors
+* Copyright (c) 2023 Software AG, Darmstadt, Germany and/or its licensors
 *
 * SPDX-License-Identifier: Apache-2.0
 *
@@ -37,8 +37,8 @@ import { SimulatorNotificationService } from './simulatorNotification.service';
 import { FileSimulatorNotificationService } from './file-simulator.service';
 import { SimulatorWorkerAPI } from '../simulator/mainthread/simulator-worker-api.service';
 import { SimulatorConfigService } from './simulator-config.service';
-import { AlertMessageModalComponent } from '../../builder/utils/alert-message-modal/alert-message-modal.component';
-import { SimulationStrategyConfigComponent } from '../../builder/simulator/simulation-strategy';
+import { AlertMessageModalComponent } from '../utils/alert-message-modal/alert-message-modal.component';
+import { SimulationStrategyConfigComponent } from '../simulator/simulation-strategy';
 
 @Component({
     templateUrl: './edit-simulator-modal.component.html'

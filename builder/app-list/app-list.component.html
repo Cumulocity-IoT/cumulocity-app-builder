@@ -2,10 +2,10 @@
 
 <div class="card-group interact-grid">
     <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2" style="min-height: 194px;" *ngIf="userHasAdminRights">
-        <a class="card add-card clickable" id="addApplication" (click)="createAppWizard()">
-            <i c8yIcon="plus-square"></i><br>
-            Add application
-        </a>
+        <button (click)="createAppWizard()" class="card add-card" id="addApplication">
+            <i  style="font-size: 36px;" c8y-icon="plus-circle" class="text-muted dlt-c8y-icon-plus-circle"></i>
+            <br>Add application
+        </button>
     </div>
     <div class="c8y-empty-state text-center" style="max-width:100%; flex-direction: column; align-items: center;" *ngIf="!isBusy && !applications.length">
         <h3>No application to list.</h3>
@@ -13,27 +13,24 @@
     <ng-container *ngIf="applications && applications.length > 0">
         <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2" *ngFor="let app of applications">
             <div class="card clickable" (click)="openApp(app)">
-                <div class="dropdown card-actions" dropdown (click)="$event.stopPropagation()" *ngIf="userHasAdminRights">
-                    <button title="Settings" id="appSettings-{{app.name}}" class="dropdown-toggle c8y-dropdown" dropdownToggle type="button">
-                        <i c8yIcon="ellipsis-v"></i>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-right" *dropdownMenu role="menu">
-                        <li role="menuitem">
-                            <a class="dropdown-item" (click)="openApp(app, '/config')">
-                                <i c8yIcon="edit"></i> Edit
-                            </a>
-                        </li>
-                        <!-- <li role="menuitem">
-                            <a class="dropdown-item" (click)="exportApp(app)">
-                                <i c8yIcon="download"></i> Export
-                            </a>
-                        </li> -->
-                        <li role="menuitem">
-                            <a (click)="deleteApplication(app.id)" class="dropdown-item clickable">
-                                <i c8yIcon="times"></i> Remove
-                            </a>
-                        </li>
-                    </ul>
+                <div class="card-actions m-t-0">
+                    <div class="dropdown" dropdown (click)="$event.stopPropagation()" *ngIf="userHasAdminRights">
+                        <button title="Settings" id="appSettings-{{app.name}}" class="dropdown-toggle c8y-dropdown" dropdownToggle type="button">
+                            <i c8yIcon="ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-right" *dropdownMenu role="menu">
+                            <li role="menuitem">
+                                <button type="button" title="Edit" (click)="openApp(app, '/config')">
+                                    <i c8yIcon="edit" ></i><span> Edit</span>
+                                </button>
+                            </li>
+                            <li role="menuitem">
+                                <button type="button" id="{{app.name}}-deleteApp" title="Remove" (click)="deleteApplication(app.id)">
+                                    <i c8yIcon="times" ></i> <span> Remove</span>
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
                 <div class="card-block text-center" style="margin-bottom: 5px;">
                     <h1 style="margin: 15px 0 10px; font-size: 42px;"><c8y-app-icon [app]="app"></c8y-app-icon></h1>

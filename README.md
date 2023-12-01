@@ -6,14 +6,13 @@ Application Builder is an open-source tool for you to create web applications 
 
 ## What's new?
 
-* **Widgets turned plugins:** Application builder now support micro-frontend plugins. Standard widgets are already available as plugin in widget catalog.
-* **Optimized Performance:** Application builder now provide faster response times, reduced resource usage, and improved user experience.
-* **Custom Branding:** Provides flexibility and control over application’s look and feel.
-* **Dashboards:** Simplified the dashboard navigation by introducing path while creating dashboard.
-* **Seamless upgrade experience:** Upgrade of application builder made simpler. [Click here for more detail.](#how-to-upgrade-application-builder-to-20)
-* **Cumulocity upgrade:** Application Builder is now based on Cumulocity 1016.0.170
+* **New default branding:** Introducing our new default branding, Inspired by Delite 2.0 – Software AG's in-house design system.
+* **Enhanced group template dashboard:** Give an identical dashboard to every device/asset based on its type.
+* **Enhanced dashboard catalog:** Now you can create dashboard based on device group and asset/device type using pre-design dashboard templates.
+* **Dashboard catalog reloaded:** Experience the next level with our latest dashboard templates for Predictive Maintenance, Smart Field Services, and Smart Billing—Now with one-click Microservice installation!
+* **Enhanced Branding:** Various improvement in overall branding.
+* **Cumulocity upgrade:** Application Builder is now based on Cumulocity 1018.0.125
 * **Various bug fixes**
-
 
 ## Features
 * **Browser-based Device Simulators:** Create device simulators that run directly in your browser.
@@ -40,7 +39,7 @@ Application Builder is an open-source tool for you to create web applications 
 * **Dashboard Tree view:** Dashboard Tree view provides hierarchical view for quicker and easier access to a dashboard.
 * **Dashboard Locking:** User can now lock/unlock all dashboards by just one click.
 * **Dashboard Search:** Smart search introduced to quickly search your dashboard.
-* **Seamless upgrade experience:** Upgrade of application builder made simpler.
+* **Seamless upgrade experience:** Upgrade of application builder made simpler. [Click here for more detail.](#how-to-upgrade-application-builder-to-20)
 
 ## Installation
 

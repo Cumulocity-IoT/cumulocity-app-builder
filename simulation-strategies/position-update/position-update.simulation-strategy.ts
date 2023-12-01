@@ -85,7 +85,7 @@ export class PositionUpdateSimulationStrategy extends DeviceIntervalSimulator {
         };
         this.updatePosition(deviceId, position);
 
-        this.eventService.create({
+        this.createEvent({
             source: {
                 id: deviceId
             },

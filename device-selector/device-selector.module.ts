@@ -22,6 +22,7 @@ import {DeviceSelectorComponent} from "./device-selector.component";
 import {FormsModule} from "@angular/forms";
 import { CommonModule } from '@angular/common';  
 import { TypeaheadModule } from 'ngx-bootstrap/typeahead';
+import { ButtonsModule } from "ngx-bootstrap/buttons";
 
 @NgModule({
     imports: [
@@ -29,6 +30,7 @@ import { TypeaheadModule } from 'ngx-bootstrap/typeahead';
         FormsModule,
         CommonModule,
         TypeaheadModule.forRoot(),
+        ButtonsModule.forRoot()
     ],
     declarations: [
         DeviceSelectorComponent

@@ -23,14 +23,14 @@ import { BsModalRef, BsModalService } from "ngx-bootstrap/modal";
 import { DependencyDescription, TemplateCatalogEntry, TemplateDetails } from "./template-catalog.model";
 import { TemplateCatalogService } from "./template-catalog.service";
 import { AlertService, DynamicComponentDefinition, DynamicComponentService } from "@c8y/ngx-components";
-import { Observable, Subject } from "rxjs";
+import { Subject, Subscription, interval } from "rxjs";
 import { ProgressIndicatorModalComponent } from "../utils/progress-indicator-modal/progress-indicator-modal.component";
 
-import './cumulocity.json';
 import { WidgetCatalogService } from "../../builder/widget-catalog/widget-catalog.service";
 import { catchError } from "rxjs/operators";
 import { AccessRightsService } from "../../builder/access-rights.service";
 import { ProgressIndicatorService } from "../../builder/utils/progress-indicator-modal/progress-indicator.service";
+import { ApplicationBinaryService } from "../../builder/application-binary.service";
 
 
 enum TemplateCatalogStep {
@@ -46,6 +46,7 @@ enum TemplateCatalogStep {
 export class TemplateCatalogModalComponent implements OnInit {
 
     app: any;
+    dashboard: any;
 
     private currentStep: TemplateCatalogStep = TemplateCatalogStep.CATALOG;
 
@@ -65,6 +66,10 @@ export class TemplateCatalogModalComponent implements OnInit {
 
     public dashboardPath: string = null;
 
+    public assetButtonText = "Device/Asset";
+
+    private groupTemplate = false;
+
     private appList = [];
 
     public dashboardConfiguration = {
@@ -74,12 +79,14 @@ export class TemplateCatalogModalComponent implements OnInit {
         deviceId: '',
         tabGroup: '',
         dashboardVisibility: '',
-        roles: ''
+        roles: '',
+        templateType: 0 // 0: default, 1: group, 2: type
     };
 
     public selectedDevice: IManagedObject;
 
     public onSave: Subject<boolean>;
+    public onCancel: Subject<boolean>;
 
     private isReloadRequired = false;
 
@@ -87,16 +94,32 @@ export class TemplateCatalogModalComponent implements OnInit {
 
     globalRoles: any;
 
+    private microserviceDownloadProgress = interval(3000);
+    private microserviceDownloadProgress$: Subscription;
+    isMSEnabled: boolean = false;
+
     constructor(private modalService: BsModalService, private modalRef: BsModalRef, private appService: ApplicationService,
         private catalogService: TemplateCatalogService, private componentService: DynamicComponentService,
         private alertService: AlertService, private widgetCatalogService: WidgetCatalogService,
+        private applicationBinaryService: ApplicationBinaryService,
         private accessRightsService: AccessRightsService, private progressIndicatorService: ProgressIndicatorService) {
         this.onSave = new Subject();
+        this.onCancel = new Subject();
     }
 
     async ngOnInit() {
-        this.loadTemplateCatalog();
+        
         this.globalRoles = await this.accessRightsService.getAllGlobalRoles();
+        if(this.dashboard ) {
+            this.selectedTemplate = this.dashboard;
+            this.dashboardConfiguration.dashboardName = this.dashboard.title;
+            this.showDetailPage();
+            this.loadTemplateDetails(this.dashboard);
+        } else {
+            this.loadTemplateCatalog();
+        }
+        this.appList = (await this.appService.list({ pageSize: 2000 })).data;
+        this.isMSEnabled =  this.applicationBinaryService.isMicroserviceEnabled(this.appList);
     }
 
     loadTemplateCatalog(): void {
@@ -129,7 +152,7 @@ export class TemplateCatalogModalComponent implements OnInit {
 
     async loadTemplateDetails(template: TemplateCatalogEntry): Promise<void> {
         this.showLoadingIndicator();
-        this.appList = (await this.appService.list({ pageSize: 2000 })).data;
+        
         this.catalogService.getTemplateDetails(template.dashboard)
             .pipe(catchError(err => {
                 console.log('Dashboard Catalog Details: Error in primary endpoint! using fallback...');
@@ -145,18 +168,33 @@ export class TemplateCatalogModalComponent implements OnInit {
             });
     }
 
-    updateDepedencies() {
+    async updateDepedencies() {
         if (!this.templateDetails || !this.templateDetails.input || !this.templateDetails.input.dependencies
             || this.templateDetails.input.dependencies.length === 0) {
             return;
         }
 
-        this.templateDetails.input.dependencies.forEach(dependency => {
-            this.verifyWidgetCompatibility(dependency);
-            this.componentService.getById(dependency.id).then(widget => {
-                dependency.isInstalled = (widget != undefined);
-            });
-        });
+        for (let dependency of this.templateDetails.input.dependencies) {
+            if (dependency.type && dependency.type == "microservice") {
+                dependency.isInstalled = (await this.applicationBinaryService.verifyExistingMicroservices(dependency.id)) as any;;
+                dependency.isSupported = true;
+                dependency.visible = true;
+            } else {
+                this.verifyWidgetCompatibility(dependency);
+                if(dependency.ids && dependency.ids.length > 0) {
+                    Promise.all(dependency.ids.map( async id => {
+                        return ( await this.componentService.getById(id) ? true : false);
+                    })).then ((widgetStatusList: boolean[]) => {
+                        const widgetObj =  widgetStatusList.find(widget => !widget);
+                        dependency.isInstalled = (widgetObj == undefined);
+                    })
+                } else  {
+                    this.componentService.getById(dependency.id).then(widget => {
+                        dependency.isInstalled = (widget != undefined);
+                    });
+                }
+            }
+        };
     }
 
     showDetailPage(): void {
@@ -167,14 +205,41 @@ export class TemplateCatalogModalComponent implements OnInit {
         this.currentStep = TemplateCatalogStep.CATALOG;
     }
 
-    openDeviceSelectorDialog(index: number): void {
-        this.deviceSelectorModalRef = this.modalService.show(DeviceSelectorModalComponent, { class: 'c8y-wizard', initialState: {} });
-        this.deviceSelectorModalRef.content.onDeviceSelected.subscribe((selectedDevice: IManagedObject) => {
-            this.templateDetails.input.devices[index].reprensentation = {
-                id: selectedDevice.id,
-                name: selectedDevice['name']
-            };
-        })
+    openDeviceSelectorDialog(index: number, templateType: number): void {
+       
+        switch (templateType) {
+            case 1:
+                this.assetButtonText = "Device Group";
+                this.groupTemplate = true;
+                break;
+            case 2:
+                this.assetButtonText = "Device/Asset Type";
+                this.groupTemplate = true;
+                break;
+            default:
+                this.assetButtonText = "Device/Asset";
+                this.groupTemplate = false;
+                break;
+        }
+        this.dashboardConfiguration.templateType = templateType;
+
+        this.deviceSelectorModalRef = this.modalService.show(DeviceSelectorModalComponent, { class: 'c8y-wizard', initialState: {templateType} });
+        if(templateType == 2) {
+            this.deviceSelectorModalRef.content.onTypeSelected.subscribe((selectedType: string) => {
+                this.templateDetails.input.devices[index].reprensentation = {
+                    id: selectedType,
+                    name: selectedType
+                };
+    
+            });
+        } else {
+            this.deviceSelectorModalRef.content.onDeviceSelected.subscribe((selectedDevice: IManagedObject) => {
+                this.templateDetails.input.devices[index].reprensentation = {
+                    id: selectedDevice.id,
+                    name: selectedDevice['name']
+                };
+            })
+        }
     }
 
     onImageSelected(files: FileList, index: number): void {
@@ -194,13 +259,14 @@ export class TemplateCatalogModalComponent implements OnInit {
     }
 
     onCancelButtonClicked(): void {
+        this.onCancel.next(true);
         this.modalRef.hide();
     }
 
     async onSaveButtonClicked() {
         this.showProgressModalDialog('Create Dashboard ...')
         this.dashboardConfiguration.dashboardName = (this.dashboardPath ? `${this.dashboardPath}/${this.dashboardConfiguration.dashboardName}` : this.dashboardConfiguration.dashboardName);
-        await this.catalogService.createDashboard(this.app, this.dashboardConfiguration, this.selectedTemplate, this.templateDetails);
+        await this.catalogService.createDashboard(this.app, this.dashboardConfiguration, this.selectedTemplate, this.templateDetails, this.groupTemplate);
 
         this.hideProgressModalDialog();
         this.onSave.next(this.isReloadRequired);
@@ -244,48 +310,96 @@ export class TemplateCatalogModalComponent implements OnInit {
     async installDependency(dependency: DependencyDescription): Promise<void> {
         const currentHost = window.location.host.split(':')[0];
         if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
-            this.alertService.warning("Runtime widget installation isn't supported when running Application Builder on localhost.");
+            this.alertService.warning("Installation isn't supported when running Application Builder on localhost.");
             return;
-        }
-        const widgetBinaryFound = this.appList.find(app => app.manifest?.isPackage && (app.name.toLowerCase() === dependency.title?.toLowerCase() ||
-            (app.contextPath && app.contextPath?.toLowerCase() === dependency?.contextPath?.toLowerCase())));
-        this.showProgressModalDialog(`Installing ${dependency.title}`);
-        if (widgetBinaryFound) {
+        } 
+        if (dependency.type === "microservice") { // installing plugin
+            this.showProgressModalDialog(`Downloading ${dependency.title}`);
             this.progressIndicatorService.setProgress(10);
             await new Promise(resolve => setTimeout(resolve, 1000));
-            this.progressIndicatorService.setProgress(30);
-            this.widgetCatalogService.updateRemotesInCumulocityJson(widgetBinaryFound).then(async () => {
-                dependency.isInstalled = true;
-                this.isReloadRequired = true;
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                this.hideProgressModalDialog();
-            }, error => {
-                this.alertService.danger("There is some technical error! Please try after sometime.");
-                console.error(error);
+            let counter = 10;
+            this.microserviceDownloadProgress$ = this.microserviceDownloadProgress.subscribe(async val => {
+                counter++;
+                if (counter <= 40) {
+                    this.progressIndicatorService.setProgress(counter);
+                }
             });
-        } else {
-            this.progressIndicatorService.setProgress(10);
             this.catalogService.downloadBinary(dependency.link)
-                .subscribe(data => {
-                    this.progressIndicatorService.setProgress(20);
-                    const blob = new Blob([data], {
-                        type: 'application/zip'
-                    });
-                    const fileName = dependency.link.replace(/^.*[\\\/]/, '');
-                    const fileOfBlob = new File([blob], fileName);
-                    this.widgetCatalogService.installPackage(fileOfBlob).then(async () => {
-                        dependency.isInstalled = true;
-                        this.isReloadRequired = true;
+                .subscribe(async data => {
+                    let createdApp = null;
+                    this.microserviceDownloadProgress$.unsubscribe();
+                    try {
+                        this.progressIndicatorService.setProgress(40);
+                        this.progressIndicatorService.setMessage(`Installing ${dependency.title}`);
+                        const blob = new Blob([data], {
+                            type: 'application/zip'
+                        });
+                        const fileName = dependency.link.replace(/^.*[\\\/]/, '');
+                        const fileOfBlob = new File([blob], fileName);
+
+                        const createdApp = await this.applicationBinaryService.createAppForMicroservice(fileOfBlob, dependency);
+                        this.progressIndicatorService.setProgress(50);
+                        counter = 50;
+                        this.microserviceDownloadProgress$ = this.microserviceDownloadProgress.subscribe(async val => {
+                            counter++;
+                            if (counter <= 80) {
+                                this.progressIndicatorService.setProgress(counter);
+                            }
+                        });
+                        await this.applicationBinaryService.uploadMicroservice(fileOfBlob, createdApp);
+                        this.microserviceDownloadProgress$.unsubscribe();
+                        this.progressIndicatorService.setProgress(80);
                         await new Promise(resolve => setTimeout(resolve, 5000));
                         this.hideProgressModalDialog();
-                    }, error => {
+                        dependency.isInstalled = true;
+                        this.isReloadRequired = true;
+                    } catch (ex) {
+                        createdApp = null;
                         this.alertService.danger("There is some technical error! Please try after sometime.");
-                        console.error(error);
-                    });
+                        console.error(ex.message);
+                    }
                 });
+            
+        } else { // installing plugin
+            const widgetBinaryFound = this.appList.find(app => app.manifest?.isPackage && (app.name.toLowerCase() === dependency.title?.toLowerCase() ||
+                (app.contextPath && app.contextPath?.toLowerCase() === dependency?.contextPath?.toLowerCase())));
+            this.showProgressModalDialog(`Installing ${dependency.title}`);
+            this.progressIndicatorService.setProgress(10);
+            if (widgetBinaryFound) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                this.progressIndicatorService.setProgress(30);
+                this.widgetCatalogService.updateRemotesInCumulocityJson(widgetBinaryFound, true).then(async () => {
+                    dependency.isInstalled = true;
+                    this.isReloadRequired = true;
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    this.hideProgressModalDialog();
+                }, error => {
+                    this.alertService.danger("There is some technical error! Please try after sometime.");
+                    console.error(error);
+                });
+            } else {
+                this.progressIndicatorService.setProgress(10);
+                this.catalogService.downloadBinary(dependency.link)
+                    .subscribe(data => {
+                        this.progressIndicatorService.setProgress(20);
+                        const blob = new Blob([data], {
+                            type: 'application/zip'
+                        });
+                        const fileName = dependency.link.replace(/^.*[\\\/]/, '');
+                        const fileOfBlob = new File([blob], fileName);
+                        this.widgetCatalogService.installPackage(fileOfBlob).then(async () => {
+                            dependency.isInstalled = true;
+                            this.isReloadRequired = true;
+                            await new Promise(resolve => setTimeout(resolve, 5000));
+                            this.hideProgressModalDialog();
+                        }, error => {
+                            this.alertService.danger("There is some technical error! Please try after sometime.");
+                            console.error(error);
+                        });
+                    });
+            }
         }
     }
-
     private isDevicesSelected(): boolean {
         if (!this.templateDetails.input.devices || this.templateDetails.input.devices.length === 0) {
             return true;

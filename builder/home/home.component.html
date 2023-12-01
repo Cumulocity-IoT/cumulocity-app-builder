@@ -15,7 +15,7 @@
                         <p class="home-margin-top-5">
                             <img src="./images/c8y-app-color-dropper.png" class="home-welcome-icon"> Re-brand the applications.</p>
                         <p class="home-margin-top-5"><img src="./images/c8y-app-simulate.png" class="home-welcome-icon">Simulate devices.</p>
-                        <p class="home-margin-top-5"><img src="./images/c8y-app-installing-updates.png" class="home-welcome-icon">Install Widget Plugins via Widget Catalog.</p>
+                      <!--   <p class="home-margin-top-5"><img src="./images/c8y-app-installing-updates.png" class="home-welcome-icon">Install Widget Plugins via Widget Catalog.</p> -->
                     </div>
                 </div>
                 <div class="col-xs-12 col-sm-4 col-md-4">
@@ -27,15 +27,16 @@
             <div class="col-xs-12 col-sm-6 col-md-6"> 
                 <div class="card home-wdiget-card">
                     <div class="card-header">
-                        Get More Widgets
+                        Blueprint Forge &nbsp; <span class="badge badge-success">New</span>
                     </div>
                     <div class="card-block">
                         <div class="row home-widget-body">
                             <div class="col-xs-4 col-sm-2 col-md-2">
-                                <img (click)="navigateToWidgetCatalog()"  src="./images/c8y-app-installing-updates.png">
+                               <button class="btn btn-clean" (click)="openLink('blueprintForge')" ><i style="font-size: 36px;" class="c8y-icon c8y-icon-solution-accelerator"></i></button> 
                             </div>
                             <div class="col-xs-8 col-sm-10 col-md-10">
-                                Get More Widgets by exploring the Application Builder Widget Catalog.
+                                Blueprint Forge provides a simple, coding-free way to build a cumulocity application using pre-built solution templates. 
+                                <button class="btn btn-xs btn-primary" (click)="openLink('blueprintForge')"  >Learn  More >></button>   
                             </div>
                         </div>
                     </div>
@@ -55,7 +56,7 @@
                     <div class="card-block">
                         <div class="row home-widget-body">
                             <div class="col-xs-4 col-sm-2 col-md-2">
-                                <img  (click)="openLink('source')"  src="./images/c8y-app-upgrade.png">
+                                <img  src="./images/c8y-app-upgrade.png">
                             </div>
                             <div class="col-xs-8 col-sm-10 col-md-10">
                                 Discover how you can leverage other demos for your Iot use case <a  href="#" *ngIf="!demoCatalogExist" (click)="installDemoCatalog()" target="_self" >Install Demo Catalog</a>

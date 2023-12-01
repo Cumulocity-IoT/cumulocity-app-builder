@@ -34,7 +34,7 @@ import {LegacyDataExplorerComponent} from "./dataexplorer/legacy-data-explorer.c
 import {LegacySmartRulesComponent} from "./smartrules/legacy-smart-rules.component";
 import {LegacyAlarmsComponent} from "./alarms/legacy-alarms.component";
 import {smartRulesAvailabilityProvider} from "./smartrules/smart-rules-availability.upgraded-provider";
-import {ApplicationService, InventoryService} from "@c8y/client";
+import {ApplicationService, IManagedObject, InventoryService} from "@c8y/client";
 import {IApplicationBuilderApplication} from "../iapplication-builder-application";
 import {GroupTemplateDashboardModule} from "./group-template-dashboard/group-template-dashboard.module";
 import { AccessRightsService } from "../../builder/access-rights.service";
@@ -89,7 +89,23 @@ export class RedirectToFirstDashboardOrConfig implements CanActivate {
                 url += `/dashboard/${firstDashboard.id}`
                 if (firstDashboard.deviceId) {
                     if (firstDashboard.groupTemplate) {
-                        const childAssets = (await this.inventoryService.childAssetsList(firstDashboard.deviceId, {pageSize: 2000, query: 'has(c8y_IsDevice)'})).data;
+                        let childAssets: IManagedObject[];
+                        if(firstDashboard.templateType && firstDashboard.templateType == 2) {
+                            if (firstDashboard.tabGroup) {
+                                childAssets = (await this.inventoryService.listQuery({ __filter: { __and: [{ __or: [{__has: 'c8y_IsDevice' }, {__has: 'c8y_IsAsset'  } ]}, {__and: [{id: firstDashboard.tabGroup },{type: firstDashboard.deviceId }] }] }}, {
+                                    pageSize: 2000,
+                                    withTotalPages: true
+                                })).data;
+                            } else {
+                                childAssets = (await this.inventoryService.listQuery({ __filter: { type: firstDashboard.deviceId}}, {
+                                    pageSize: 2000,
+                                    withTotalPages: true
+                                })).data;
+                            }
+                            
+                        } else {
+                            childAssets =  (await this.inventoryService.childAssetsList(firstDashboard.deviceId, {pageSize: 2000, query: 'has(c8y_IsDevice)'})).data;
+                        }
                         if (childAssets.length > 0) {
                             url += `/device/${childAssets[0].id}`
                         } else {

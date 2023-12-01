@@ -71,7 +71,9 @@ export class HomeComponent implements OnInit {
             case 'forum':
                 window.open(this.externalService.getURL('HOME', type));
                 break;
-
+            case "blueprintForge":
+                window.open("https://github.com/SoftwareAG/cumulocity-blueprint-forge#blueprint-forge-for-cumulocity");
+                break;
             case 'media-01':
             case 'media-02':
             case 'media-03':

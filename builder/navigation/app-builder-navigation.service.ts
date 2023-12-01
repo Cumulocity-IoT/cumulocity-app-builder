@@ -92,8 +92,15 @@ export class AppBuilderNavigationService implements NavigatorNodeFactory {
             }, hierarchy);
 
             if (dashboard.groupTemplate) {
-                const childAssets = await this.inventoryService.childAssetsList(dashboard.deviceId, {pageSize: 2000, query: 'hasany(c8y_IsDevice,c8y_IsAsset)'})
-                .catch(error => {console.error('error in group search',error) }) as any;
+
+                let childAssets: any
+                if (dashboard.templateType && dashboard.templateType == 2) {
+                    childAssets = await this.inventoryService.listQuery({ __filter: { __and: [{ __or: [{ __has: 'c8y_IsDevice' }, { __has: 'c8y_IsAsset' }] }, { type: dashboard.deviceId }] } },{ pageSize: 2000})
+                    .catch(error => { console.error('error in group search', error) }) as any;
+                } else {
+                    childAssets = await this.inventoryService.childAssetsList(dashboard.deviceId, { pageSize: 2000, query: 'hasany(c8y_IsDevice,c8y_IsAsset)' })
+                    .catch(error => { console.error('error in group search', error) }) as any;
+                }
                 if (childAssets && childAssets.data) {
                     for (const device of childAssets?.data) {
                         const nodeName = device.name || device.id;

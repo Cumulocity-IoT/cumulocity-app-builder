@@ -77,22 +77,16 @@
                 <hr />
                 <div class="card-block">
                     <button class="btn"
+                        style="--brand-primary: #f9fafb; border: solid 1px #011f3d;background-color: #f9fafb;color:#011f3d;"
+                        (click)="setTheme(app, '#f9fafb', '#e7ebee', '#011f3d', '#011f3d', '#512950','#058192', '#ffffff', '#ffffff', '#ffffff','Default')">Default</button>
+                    <button class="btn"
                         style="--brand-primary: #1776bf; border: solid 1px var(--brand-light);background-color: #1776bf;color:#fff;"
-                        (click)="setTheme(app, '#1776bf', '#14629F', '#0b385b', '#ffffff', '#ffffff','#14629F', '#ffffff', '#ffffff', '#ffffff','Default')">Default</button>
+                        (click)="setTheme(app, '#1776bf', '#14629F', '#0b385b', '#ffffff', '#ffffff','#14629F', '#ffffff', '#ffffff', '#ffffff','Classic')">Classic</button>
                     <button class="btn"
                         style="--brand-primary: #011f3d; border: solid 1px var(--brand-light);background-color: #011f3d;color:#fff;"
                         (click)="setTheme(app, '#011f3d', '#14629F', '#ffffff', '#ffffff', '#ffffff','#ffffff', '#012c57', '#012c57', '#012c57','Navy Blue')">Navy
                         Blue</button>
-                    <button class="btn"
-                        style="--brand-primary: #FFCC00; border: solid 1px var(--brand-light);background-color: #FFCC00;color:#fff;"
-                        (click)="setTheme(app, '#FFCC00', 'firebrick', 'firebrick', 'firebrick', '#ffffff','firebrick', '#ffff00', '#ffff00', '#ffff00','Yellow')">Yellow</button>
-                    <button class="btn"
-                        style="--brand-primary: #D40511; border: solid 1px var(--brand-light);background-color: #D40511;color:#fff;"
-                        (click)="setTheme(app, '#D40511', '#8b0000', '#ffffff', '#ffffff', '#ffffff','#ffffff', '#ff0718', '#ff0718', '#ff0718','Red')">Red</button>
-                    <button class="btn"
-                        style="--brand-primary: #009000; border: solid 1px var(--brand-light);background-color: #009000;color:#fff;"
-                        (click)="setTheme(app, '#009000', '#205115', '#ffffff', '#ffffff', '#ffffff','#ffffff', '#00ce00', '#00ce00', '#00ce00','Green')">Green</button>
-                    <button class="btn"
+                   <button class="btn"
                         style="--brand-primary: #243138; border: solid 1px var(--brand-light);background-color: #243138;color:#fff;"
                         (click)="setTheme(app, '#243138', '#13202a', '#ffffff', '#ffffff', '#ffffff','#ffffff', '#334650','#334650', '#334650', 'Dark')">Dark</button>
                     <div *ngIf="app.applicationBuilder.customBranding"
@@ -108,12 +102,22 @@
                 </div>
             </div>
         </div>
-        <div class="col-xs-12">
+        <div class="col-xs-12" *ngIf="!customTheme">
+            <div class="card" [ngClass]="{'card-color': applyTheme}">
+                <div style="padding: 20px;text-align: center;">
+                    <button class="btn btn-primary" (click)="activateCustomeTheme(app)"
+                    title="Click here to customize theme">
+                    Forge Your Brand: Unleash Your Creativity
+                </button>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12" *ngIf="customTheme">
             <div class="card" [ngClass]="{'card-color': applyTheme}">
                 <div class="card-header">
                     <h4 translate>Colors</h4>
                     <div style="margin-left:auto">
-                        <button class="btn btn-primary" *ngIf="customTheme" (click)="deleteTheme(app)"
+                        <button class="btn btn-default" *ngIf="customTheme" (click)="deleteTheme(app)"
                             title="Delete Theme">
                             Delete
                         </button>
@@ -126,7 +130,7 @@
                     </div>
                 </div>
                 <hr />
-                <div class="card-block">
+                <div class="card-block" >
                     Colors can be entered as any valid CSS color (white, #fff, #ffffff, rgb(255, 255, 255))<br>
                     <div class="row">
                         <div class="col-xs-12 col-md-4">

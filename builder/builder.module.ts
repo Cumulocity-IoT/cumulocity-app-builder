@@ -43,7 +43,6 @@ import { BrandingDirtyGuardService } from "./branding/branding-dirty-guard.servi
 import { AppListComponent } from "./app-list/app-list.component";
 import { fromEvent, Observable } from "rxjs";
 import { distinctUntilChanged, filter, withLatestFrom } from "rxjs/operators";
-import { Client , BasicAuth, CookieAuth, TenantService } from '@c8y/client';
 import { TemplateCatalogModule } from "./template-catalog/template-catalog.module";
 import { RectangleSpinnerModule } from "./utils/rectangle-spinner/rectangle-spinner.module";
 import { DeviceSelectorModalModule } from "./utils/device-selector-modal/device-selector.module";
@@ -66,7 +65,7 @@ import { ButtonsModule } from "ngx-bootstrap/buttons";
 import { DashboardNodeComponent } from "./application-config/dashboard-node.component";
 import { CollapseModule } from 'ngx-bootstrap/collapse';
 import { DragDropModule } from "@angular/cdk/drag-drop";
-import { BsModalRef, BsModalService } from "ngx-bootstrap/modal";
+import { BsModalRef, BsModalService} from "ngx-bootstrap/modal";
 import { AlertMessageModalComponent } from "./utils/alert-message-modal/alert-message-modal.component";
 import { AppDataService } from "./app-data.service";
 @NgModule({
@@ -147,12 +146,11 @@ import { AppDataService } from "./app-data.service";
 })
 export class BuilderModule {
     private renderer: Renderer2;
-    constructor(appStateService: AppStateService, loginService: LoginService, private appDataService: AppDataService,
+    constructor(appStateService: AppStateService, private appDataService: AppDataService,
         simSvc: SimulatorWorkerAPI, simulatorManagerService: SimulatorManagerService,
         appIdService: AppIdService, private settingService: SettingsService, private appBuilderUpgradeService: AppBuilderUpgradeService,
         rendererFactory: RendererFactory2, @Inject(DOCUMENT) private _document: Document,
         private modalService: BsModalService) {
-        
         const lockStatus$ = new Observable<{ isLocked: boolean, isLockOwned: boolean, lockStatus?: LockStatus }>(subscriber => {
             const listenerId = simSvc
                 .addLockStatusListener(lockStatus => subscriber.next(lockStatus));
@@ -207,7 +205,8 @@ export class BuilderModule {
                 .pipe(filter(app => !!app))
                 .pipe(distinctUntilChanged()).subscribe( app => {
                     if(app.applicationBuilder && app.applicationBuilder?.simulators && app.applicationBuilder?.simulators.length > 0){
-                        simulatorManagerService.initialize();                 
+                        simulatorManagerService.initialize();          
+                        simSvc.startOperationListener();       
                     }
                 });
                 

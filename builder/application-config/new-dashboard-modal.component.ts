@@ -44,6 +44,7 @@ export class NewDashboardModalComponent {
     dashboardVisibility: '' | 'hidden' | 'no-nav' = '';
     selectedGlobalRoles: any;
     dashboardTemplate: 'welcome' = 'welcome';
+    templateType = 0 // 0: default, 1: group, 2: type
 
     app: any;
     globalRoles: any;
@@ -69,7 +70,26 @@ export class NewDashboardModalComponent {
     getSelectedDevice(device: any) {
         this.deviceId = device.id;
         this.deviceName = device.name;
+        this.templateType = 0;
         if(device && device.id === '') {
+            this.deviceName = '';
+        }
+    }
+
+    getSelectedGroup(device: any) {
+        this.deviceId = device.id;
+        this.deviceName = device.name;
+        this.templateType = 1;
+        if(device && device.id === '') {
+            this.deviceName = '';
+        }
+    }
+
+    getSelectedType(type: any){
+        this.deviceId = type;
+        this.deviceName = type;
+        this.templateType = 2;
+        if(type && type === '') {
             this.deviceName = '';
         }
     }
@@ -181,7 +201,8 @@ export class NewDashboardModalComponent {
                 tabGroup,
                 roles: selectedGlobalRoles,
                 ...(this.deviceId != '' ? { deviceId: this.deviceId } : {}),
-                ...(isGroupTemplate ? { groupTemplate: true } : {})
+                ...(isGroupTemplate ? { groupTemplate: true } : {}),
+                templateType: this.templateType
             }
         ];
         await this.appService.update({

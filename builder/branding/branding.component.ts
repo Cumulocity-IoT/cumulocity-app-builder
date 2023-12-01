@@ -53,9 +53,26 @@ export class BrandingComponent implements OnDestroy {
                     .then(res => res.data as any)
             )),
             tap((app: any & { applicationBuilder: any }) => {
-                this.showIcon = !app.applicationBuilder.branding.hideIcon;
-                if (app.applicationBuilder.branding.colors.hover === '' || app.applicationBuilder.branding.colors.hover === undefined) {
-                    app.applicationBuilder.branding.colors.hover = '#14629F';
+                if(app.applicationBuilder.branding) {
+                    this.showIcon = !app.applicationBuilder.branding.hideIcon;
+                    if (app.applicationBuilder.branding.colors.hover === '' || app.applicationBuilder.branding.colors.hover === undefined) {
+                        app.applicationBuilder.branding.colors.hover = '#14629F';
+                    }
+                } else
+                {
+                    app.applicationBuilder.branding = {
+                        colors: {
+                            primary: '#f9fafb',
+                            active: '#e7ebee',
+                            text: '#011f3d',
+                            textOnPrimary: '#011f3d',
+                            textOnActive: '#512950',
+                            hover: '#058192',
+                            headerBar: 'white',
+                            toolBar: 'white',
+                            tabBar: 'white'
+                        }
+                    };
                 }
             })
         )
@@ -198,6 +215,12 @@ export class BrandingComponent implements OnDestroy {
         });
     }
 
+    activateCustomeTheme(app) {
+        if(app && app.applicationBuilder && app.applicationBuilder.selectedTheme == 'Default'){
+            this.setTheme(app, '#1776bf', '#14629F', '#0b385b', '#ffffff', '#ffffff','#14629F', '#ffffff', '#ffffff', '#ffffff','Classic');
+        }
+        this.customTheme = !this.customTheme;
+    }
     async deleteTheme(app) {
         let finalApp = app.applicationBuilder.customBranding.filter((theme) => theme.themeName !== this.themeName);
         app.applicationBuilder.customBranding = finalApp;

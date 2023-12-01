@@ -28,17 +28,47 @@
                     </select>
                 </div>
 
-                <div class="form-group">
-                    <label for="tabgroup"><span>Tab Group</span></label>
-                    <input type="text" class="form-control" id="tabgroup" name="tabgroup" placeholder="e.g. TabGroup1"
-                        [(ngModel)]="dashboardConfig.tabGroup">
-                </div>
 
                 <div class="form-group">
                     <label for="icon"><span>Icon</span></label>
                     <icon-selector id="icon" name="icon" [(value)]="dashboardConfig.icon" appendTo=".modal-content">
                     </icon-selector>
                 </div>
+
+                <div *ngIf="templateDetails.input?.devices?.length > 0">
+                    <div class="form-group" *ngFor="let device of templateDetails.input.devices; let i = index">
+                        <label for="device"><span>Device/Sensor/Asset - Type: {{device.type}}</span></label>
+                        <div class="input-group">
+                            <input type="text" name="selected-device" [readonly]="true"  class="form-control" id="selected-device" 
+                            placeholder="Device/Group/Asset/Type" [ngModel]="templateDetails.input.devices[i].reprensentation?.name"/>
+                            <div class="input-group-btn dropdown" dropdown>
+                              <button type="button" dropdownToggle class="btn btn-primary dropdown-toggle c8y-dropdown">
+                                <span >{{assetButtonText}}</span>
+                                <span class="caret"></span>
+                              </button>
+                              <ul class="dropdown-menu dropdown-menu-right" *dropdownMenu>
+                                <li><button type="button" (click)="openDeviceSelectorDialog(i,0)">Device/Asset</button></li>
+                                <li><button type="button"(click)="openDeviceSelectorDialog(i, 1)">Device Group</button></li>
+                                <li><button type="button"(click)="openDeviceSelectorDialog(i, 2)">Device/Asset Type</button></li>
+                              </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group" *ngIf="!groupTemplate else groupTemplateTabGroup">
+                    <label for="tabgroup"><span>Tab Group</span></label>
+                    <input type="text" class="form-control" id="tabgroup" name="tabgroup" placeholder="e.g. TabGroup1" [(ngModel)]="dashboardConfig.tabGroup">
+                </div>
+                <ng-template #groupTemplateTabGroup>
+                <div class="form-group">
+                    <label for="tabgroup"><span>Tab Group</span></label>
+                    <select name="tabgroup" id="tabgroup" [(ngModel)]="dashboardConfig.tabGroup">
+                        <option value="deviceId">Device ID</option>
+                        <option value="">None</option>
+                    </select>
+                </div>
+                </ng-template>
 
                 <div class="form-group">
                     <label for="globalRoles"><span>Global Roles (Optional)</span> 
@@ -49,22 +79,6 @@
                     <ng-select  [items]="globalRoles" name="globalRole" id="globalRole"  bindLabel="name"   [multiple]="true" [closeOnSelect]="false" [searchable]="true"
                     placeholder="select Role(s)" [(ngModel)]="dashboardConfig.roles"   [appendTo]="'.modal-content'" >
                     </ng-select>
-                </div>
-
-                <div *ngIf="templateDetails.input?.devices?.length > 0">
-                    <div class="form-group" *ngFor="let device of templateDetails.input.devices; let i = index">
-                        <label for="device"><span>Device/Sensor/Asset - Type: {{device.type}}</span></label>
-                        <form class="form-inline">
-                            <div class="form-group" style="width: 60%; padding:0px">
-                                <label class="sr-only" for="selected-device">Device/Sensor</label>
-                                <input [readonly]="true" name="selected-device" class="form-control"
-                                    style="width: 100%;" id="selected-device" placeholder="Device/Sensor/Asset" type="text"
-                                    [ngModel]="templateDetails.input.devices[i].reprensentation?.name">
-                            </div>
-                            <button type="button" style="width: 40%;" class="btn btn-primary"
-                                (click)="openDeviceSelectorDialog(i)">Select Device</button>
-                        </form>
-                    </div>
                 </div>
 
                 <div *ngIf="templateDetails.input?.images?.length > 0">

@@ -80,8 +80,8 @@ export class RandomValueSimulationStrategy extends DeviceIntervalSimulator {
     onTick(groupDeviceId?: any) {
         const measurementValue = Math.floor(Math.random() * (this.config.maxValue - this.config.minValue + 1)) + this.config.minValue;
 
-        this.measurementService.create({
-            sourceId: (groupDeviceId ? groupDeviceId : this.config.deviceId),
+        this.createMeasurement({
+            source: { id: (groupDeviceId ? groupDeviceId : this.config.deviceId)},
             time: new Date(),
             [this.config.fragment]: {
                 [this.config.series]: {

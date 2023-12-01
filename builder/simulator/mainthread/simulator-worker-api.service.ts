@@ -47,15 +47,6 @@ export class SimulatorWorkerAPI {
         private appIdService: AppIdService
     ) {}
 
-    setUserAndCredentials(user: IUser | null, credentials: ICredentials, isCookieAuth: boolean, cookieAuth: any) {
-        if (isCookieAuth) {
-            this.fetchClient.defaultHeaders = { 'X-XSRF-TOKEN': cookieAuth };
-        }
-        this.fetchClient.setAuth(new BasicAuth(credentials));
-        this.startOperationListener();
-        this.appStateService.currentUser.next(user);
-    }
-
     /**
      * This will poll every 5 seconds for operations.
      * The observable is used to send "new" operations to the
@@ -71,7 +62,7 @@ export class SimulatorWorkerAPI {
 
         this._incomingOperationsSub = merge(
             of(-1), // Check the current value immediately
-            interval(10000), // Check every 5 seconds
+            interval(15000), // Check every 15 seconds
         ).pipe(
             debounceTime(100),
             filter( t => this.retrieveOperations), //only go through if we need the calls

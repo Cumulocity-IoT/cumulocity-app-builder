@@ -27,8 +27,9 @@ export type IApplicationBuilderApplication = IApplication & {
             visibility?: '' | 'hidden' | 'no-nav',
             icon: string,
             deviceId?: string,
-            groupTemplate?: boolean
-            roles?: any
+            groupTemplate?: boolean,
+            roles?: any,
+            templateType?: number
         }[],
         simulators?: SimulatorConfig[]
     }
