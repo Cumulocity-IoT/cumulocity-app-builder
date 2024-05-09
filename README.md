@@ -226,6 +226,28 @@ Would you like to create your own Custom Runtime widget? Please refer our [Demo 
 
 ## Troubleshooting
 
+ ### Application Builder 2.1.0
+  * **Theme Troubles? Existing applications with customized themes are not displaying the correct appearance:**
+     Application Builder 2.1.0 now defaults to the new Delite Theme. If your application has a custom theme and is not displaying correctly after an upgrade, please follow these steps for a quick workaround:
+    1. Revert or install Application Builder 2.0.0.
+    2. Go to your application.
+    3. Go to Configuration -> Styling.
+    4. Copy all the color code which you customized into notepad.
+    5. Update Application Builder 2.1.0.
+    6. Go to your application.
+    7. Go to Configuration -> Styling.
+    8. Click on best match theme out of Default, Classic, Navy Blue or Dark.
+    9. Click on "Forge your brand: Unleash your creativity" button.
+    10. Update all color code which you copied in step 4.
+    11. Save your changes.
+ 
+ * **Theme Troubles? Application Installed from Demo Catalog not showing the correct appearance:**
+     Application Builder 2.1.0 now defaults to the new Delite Theme. If you demo from the Demo Catalog is stuck with the old theme, Please follow these steps for quick workaround:
+   	1. Go to demo application which you installed from Demo Catalog.
+   	2. Go to Configuration -> Styling.
+   	3. Click on "Default" theme button.
+   	4. Save your changes.
+
  ### Application Builder 2.0.0 and later
 
  * **Persistent 'Under Maintenance' Warning Despite Upgrade to Application Builder 2.0:**
