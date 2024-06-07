@@ -30,6 +30,8 @@ export class AppIdService {
     /** same as the appId$ but the value is pended until after the user logs in */
     readonly appIdDelayedUntilAfterLogin$: Observable<string|undefined>;
 
+    isCommunityMSExist = false;
+
     constructor(router: Router, appStateService: AppStateService) {
         router.events.pipe(
                 filter(event => event instanceof ActivationEnd),

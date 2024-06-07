@@ -297,11 +297,11 @@ export class WidgetDetailsComponent implements OnInit {
             this.progressIndicatorService.setProgress(15);
             blob = await new Promise<any>((resolve) => {
                 this.widgetCatalogService.downloadBinary(widget.binaryLink)
-                    .subscribe(data => {
-                        const blob = new Blob([data], {
-                            type: 'application/zip'
-                        });
+                    .then(blob => {
                         resolve(blob);
+                    }).catch(err => {
+                        this.hideProgressModalDialog();
+                        this.widgetCatalogService.loadErrorMessageDialog();
                     });
             });
             fileName = widget.binaryLink.replace(/^.*[\\\/]/, '');
@@ -310,11 +310,11 @@ export class WidgetDetailsComponent implements OnInit {
             this.progressIndicatorService.setProgress(15);
             blob = await new Promise<any>((resolve) => {
                 this.widgetCatalogService.downloadBinaryFromLabcase(widget.link)
-                    .subscribe(data => {
-                        const blob = new Blob([data], {
-                            type: 'application/zip'
-                        });
+                    .then(blob => {
                         resolve(blob);
+                    }).catch(err => {
+                        this.hideProgressModalDialog();
+                        this.widgetCatalogService.loadErrorMessageDialog();
                     });
             });
             fileName = widget.fileName;
@@ -434,11 +434,8 @@ export class WidgetDetailsComponent implements OnInit {
             await new Promise(resolve => setTimeout(resolve, 1000));
             this.progressIndicatorService.setProgress(15);
             this.widgetCatalogService.downloadBinary(widget.binaryLink)
-                .subscribe(data => {
+                .then(blob => {
                     this.progressIndicatorService.setProgress(20);
-                    const blob = new Blob([data], {
-                        type: 'application/zip'
-                    });
                     const fileName = widget.binaryLink.replace(/^.*[\\\/]/, '');
                     const fileOfBlob = new File([blob], fileName);
                     this.widgetCatalogService.installPackage(fileOfBlob).then(async () => {
@@ -452,6 +449,9 @@ export class WidgetDetailsComponent implements OnInit {
                         this.alertService.danger("There is some technical error! Please try after sometime.");
                         console.error(error);
                     });
+                }).catch(err => {
+                    this.hideProgressModalDialog();
+                    this.widgetCatalogService.loadErrorMessageDialog();
                 });
         }
     }

@@ -33,7 +33,7 @@ import { AppBuilderConfig, VersionInfo } from "./app-builder-upgrade.model";
 import { AppIdService } from "../app-id.service";
 import { catchError, delay, first } from "rxjs/operators";
 import * as semver from "semver";
-import { IApplication } from "@c8y/client";
+import { FetchClient, IApplication } from "@c8y/client";
 import * as _ from 'lodash';
 import { WidgetCatalogService } from "./../widget-catalog/widget-catalog.service";
 import { WidgetCatalog, WidgetModel } from "./../widget-catalog/widget-catalog.model";
@@ -62,25 +62,44 @@ export class AppBuilderUpgradeService {
     public appVersion: string = appVersion;
     public newVersion: boolean = false;
     public errorReported = false;
+    private readonly CUMULOCITY_COMMUNITY_MS_HEALTH_URL = '/service/c8y-community-utils/health';
 
     constructor(private http: HttpClient, public rendererFactory: RendererFactory2, @Inject(DOCUMENT) private _document: Document,
-        private modalService: BsModalService, private progressIndicatorService: ProgressIndicatorService,
+        private modalService: BsModalService, private progressIndicatorService: ProgressIndicatorService, private client: FetchClient,
         private appService: ApplicationService, private externalService: AppBuilderExternalAssetsService,
         private settingService: SettingsService, private userService: UserService, private appStateService: AppStateService,
-        appIdService: AppIdService, private alertService: AlertService, private widgetCatalogService: WidgetCatalogService) {
-        this.GATEWAY_URL_GitHubAsset = this.externalService.getURL('GITHUB', 'gatewayURL_GitHubAsset');
-        this.GATEWAY_URL_GitHubAPI = this.externalService.getURL('GITHUB', 'gatewayURL_Github');
-        this.GATEWAY_URL_Labcase = this.externalService.getURL('DBCATALOG', 'gatewayURL');
-        this.GATEWAY_URL_GitHubAPI_FallBack = this.externalService.getURL('GITHUB', 'gatewayURL_Github_Fallback');
-        this.GATEWAY_URL_GitHubAsset_FallBack = this.externalService.getURL('GITHUB', 'gatewayURL_GitHubAsset_Fallback');
-        this.GATEWAY_URL_Labcase_FallBack = this.externalService.getURL('DBCATALOG', 'gatewayURL_Fallback');
+        private appIdService: AppIdService, private alertService: AlertService, private widgetCatalogService: WidgetCatalogService) {
 
-        appIdService.appIdDelayedUntilAfterLogin$.pipe(first()).subscribe(() => {
+        this.GATEWAY_URL_GitHubAsset = 'service/c8y-community-utils/githubAsset?path=';
+        this.GATEWAY_URL_GitHubAPI_FallBack = this.externalService.getURL('GITHUB', 'gatewayURL_Github_Fallback');
+        this.GATEWAY_URL_GitHubAPI = this.externalService.getURL('GITHUB', 'gatewayURL_Github');
+        this.GATEWAY_URL_Labcase = 'service/c8y-community-utils/labcaseAsset?id=';
+        this.GATEWAY_URL_GitHubAPI_FallBack = this.externalService.getURL('GITHUB', 'gatewayURL_Github_Fallback');
+        this.GATEWAY_URL_GitHubAsset_FallBack = 'service/c8y-community-utils/githubAsset?path=';
+        this.GATEWAY_URL_Labcase_FallBack = 'service/c8y-community-utils/labcaseAsset?id=';
+        
+
+         //  this.GATEWAY_URL_GitHubAsset = this.externalService.getURL('GITHUB', 'gatewayURL_GitHubAsset');
+         //  this.GATEWAY_URL_Labcase = this.externalService.getURL('DBCATALOG', 'gatewayURL');
+         //  this.GATEWAY_URL_GitHubAsset_FallBack = this.externalService.getURL('GITHUB', 'gatewayURL_GitHubAsset_Fallback');
+         //  this.GATEWAY_URL_Labcase_FallBack = this.externalService.getURL('DBCATALOG', 'gatewayURL_Fallback');
+
+        this.appIdService.appIdDelayedUntilAfterLogin$.pipe(first()).subscribe(() => {
             this.userHasAdminRights = userService.hasRole(appStateService.currentUser.value, "ROLE_APPLICATION_MANAGEMENT_ADMIN")
             this.appStateService.currentApplication.subscribe(app => {
                 this.currentApp = app;
                 this.verifyPlugins();
             });
+
+            this.getCumulocityCommunityMSHealth().then(response => {
+                if(response && response.status === "UP") {
+                    this.appIdService.isCommunityMSExist = true;
+                } else  {
+                    this.appIdService.isCommunityMSExist = false;
+                }
+              }).catch(err => {
+                    this.appIdService.isCommunityMSExist = false;
+              })
         });
     }
 
@@ -235,14 +254,16 @@ export class AppBuilderUpgradeService {
             this.errorReported = true;
             return;
         }
+        if(!this.appIdService.isCommunityMSExist) {
+            this.widgetCatalogService.loadErrorMessageDialog();
+            this.errorReported = true;
+            return;
+        }
         this.progressIndicatorService.setProgress(40);
         let appC8yJson;
         let binaryFile;
         try {
-            const data: ArrayBuffer = await this.downloadBinary(binaryLocation, isGithub);
-            const blob = new Blob([data], {
-                type: 'application/zip'
-            });
+            const blob = await this.downloadBinary(binaryLocation, isGithub);
             binaryFile = new File([blob], fileName, { type: "'application/zip'" })
             this.progressIndicatorService.setProgress(50);
             this.progressIndicatorService.setProgress(60);
@@ -335,25 +356,24 @@ export class AppBuilderUpgradeService {
             });
         }
     }
-    private downloadBinary(binaryId: string, isGithub: boolean): Promise<ArrayBuffer> {
-        let url = `${this.GATEWAY_URL_GitHubAsset}${binaryId}`;
-        if (!isGithub) {
-            url = `${this.GATEWAY_URL_Labcase}${binaryId}`
+    private async downloadBinary(binaryId: string, isGithub: boolean): Promise<any> {
+        if(this.appIdService.isCommunityMSExist) {
+            let url = `${this.GATEWAY_URL_GitHubAsset}${binaryId}`;
+            if (!isGithub) {
+                url = `${this.GATEWAY_URL_Labcase}${binaryId}`
+            }
+            const response = await this.client.fetch(`${url}`);
+            if(response && response.ok) {
+                return (await response.blob());
+            } else  {
+                this.alertService.danger("Unable to download binary! Please try after sometime. If problem persists, please contact the administrator.");
+            }
+            
+        } else {
+            this.hideProgressModalDialog();
+            this.widgetCatalogService.loadErrorMessageDialog();
+           
         }
-        return this.http.get(url, {
-            responseType: 'arraybuffer'
-        })
-            .pipe(catchError(err => {
-                console.log('App Builder Upgrade Binary: Error in primary endpoint! using fallback...');
-                let url = `${this.GATEWAY_URL_GitHubAsset_FallBack}${binaryId}`;
-                if (!isGithub) {
-                    url = `${this.GATEWAY_URL_Labcase_FallBack}${binaryId}`
-                }
-                return this.http.get(url, {
-                    responseType: 'arraybuffer'
-                })
-            }))
-            .toPromise();
     }
 
     fetchAppBuilderConfig(): Observable<AppBuilderConfig> {
@@ -443,22 +463,14 @@ export class AppBuilderUpgradeService {
                 this.progressIndicatorService.setProgress(10);
                 let binary = null;
                 let fileName = '';
+                let blob = null;
                 if (pluginBinary.binaryLink && pluginBinary.binaryLink !== '') {
-                    binary = await new Promise(resolve => this.widgetCatalogService.downloadBinary(pluginBinary.binaryLink)
-                    .subscribe(binaryData => resolve(binaryData), error => {
-                        this.logError();
-                    })) as any;
+                    blob = await this.widgetCatalogService.downloadBinary(pluginBinary.binaryLink); 
                     fileName = pluginBinary.binaryLink.replace(/^.*[\\\/]/, '');
                 } else {
-                    binary = await new Promise(resolve => this.widgetCatalogService.downloadBinaryFromLabcase(pluginBinary.link)
-                    .subscribe(binaryData => resolve(binaryData), error => {
-                        this.logError();
-                    })) as any;
+                    blob = await this.widgetCatalogService.downloadBinaryFromLabcase(pluginBinary.link)
                     fileName = pluginBinary.fileName;
                 }
-                const blob = new Blob([binary], {
-                    type: 'application/zip'
-                });
                 const fileOfBlob = new File([blob], fileName);
                 await this.widgetCatalogService.installPackage(fileOfBlob);
                 appConfigUpdated = true;
@@ -617,4 +629,7 @@ export class AppBuilderUpgradeService {
         const major = '>=' + semver.major(widget.installedVersion) + '.0.0';
         return semver.satisfies(widget.version, major);
     }
+    async getCumulocityCommunityMSHealth() {
+        return (await (await this.client.fetch(`${this.CUMULOCITY_COMMUNITY_MS_HEALTH_URL}`)).json());
+     } 
 }
