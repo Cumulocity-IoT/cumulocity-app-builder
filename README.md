@@ -11,7 +11,7 @@ Application Builder is an open-source tool for you to create web applications 
 * **Enhanced dashboard catalog:** Now you can create dashboard based on device group and asset/device type using pre-design dashboard templates.
 * **Dashboard catalog reloaded:** Experience the next level with our latest dashboard templates for Predictive Maintenance, Smart Field Services, and Smart Billing—Now with one-click Microservice installation!
 * **Enhanced Branding:** Various improvement in overall branding.
-* **Cumulocity upgrade:** Application Builder is now based on Cumulocity 1018.0.125
+* **Cumulocity upgrade:** Application Builder is now based on Cumulocity 1018.0.x
 * **Various bug fixes**
 
 ## Features

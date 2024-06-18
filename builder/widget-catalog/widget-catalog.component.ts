@@ -230,11 +230,8 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
         } else {
             this.progressIndicatorService.setProgress(15);
             this.widgetCatalogService.downloadBinary(widget.binaryLink)
-            .subscribe(data => {
+            .then(blob => {
                 this.progressIndicatorService.setProgress(20);
-                const blob = new Blob([data], {
-                    type: 'application/zip'
-                });
                 const fileName = widget.binaryLink.replace(/^.*[\\\/]/, '');
                 const fileOfBlob = new File([blob], fileName);
                 this.widgetCatalogService.installPackage(fileOfBlob).then(async () => {
@@ -247,6 +244,9 @@ export class WidgetCatalogComponent implements OnInit, OnDestroy {
                     this.alertService.danger("There is some technical error! Please try after sometime.");
                     console.error(error);
                 });
+            }).catch(err => {
+                this.hideProgressModalDialog();
+                this.widgetCatalogService.loadErrorMessageDialog();
             });
         } 
         

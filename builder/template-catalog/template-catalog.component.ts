@@ -22,7 +22,7 @@ import { DeviceSelectorModalComponent } from "../utils/device-selector-modal/dev
 import { BsModalRef, BsModalService } from "ngx-bootstrap/modal";
 import { DependencyDescription, TemplateCatalogEntry, TemplateDetails } from "./template-catalog.model";
 import { TemplateCatalogService } from "./template-catalog.service";
-import { AlertService, DynamicComponentDefinition, DynamicComponentService } from "@c8y/ngx-components";
+import { AlertService, DynamicComponentDefinition, DynamicComponentService, PluginsService } from "@c8y/ngx-components";
 import { Subject, Subscription, interval } from "rxjs";
 import { ProgressIndicatorModalComponent } from "../utils/progress-indicator-modal/progress-indicator-modal.component";
 
@@ -31,6 +31,7 @@ import { catchError } from "rxjs/operators";
 import { AccessRightsService } from "../../builder/access-rights.service";
 import { ProgressIndicatorService } from "../../builder/utils/progress-indicator-modal/progress-indicator.service";
 import { ApplicationBinaryService } from "../../builder/application-binary.service";
+import { AlertMessageModalComponent } from "../../builder/utils/alert-message-modal/alert-message-modal.component";
 
 
 enum TemplateCatalogStep {
@@ -101,7 +102,7 @@ export class TemplateCatalogModalComponent implements OnInit {
     constructor(private modalService: BsModalService, private modalRef: BsModalRef, private appService: ApplicationService,
         private catalogService: TemplateCatalogService, private componentService: DynamicComponentService,
         private alertService: AlertService, private widgetCatalogService: WidgetCatalogService,
-        private applicationBinaryService: ApplicationBinaryService,
+        private applicationBinaryService: ApplicationBinaryService, private pluginsService: PluginsService,
         private accessRightsService: AccessRightsService, private progressIndicatorService: ProgressIndicatorService) {
         this.onSave = new Subject();
         this.onCancel = new Subject();
@@ -325,15 +326,13 @@ export class TemplateCatalogModalComponent implements OnInit {
                 }
             });
             this.catalogService.downloadBinary(dependency.link)
-                .subscribe(async data => {
+                .then(async blob => {
                     let createdApp = null;
                     this.microserviceDownloadProgress$.unsubscribe();
                     try {
                         this.progressIndicatorService.setProgress(40);
                         this.progressIndicatorService.setMessage(`Installing ${dependency.title}`);
-                        const blob = new Blob([data], {
-                            type: 'application/zip'
-                        });
+                       
                         const fileName = dependency.link.replace(/^.*[\\\/]/, '');
                         const fileOfBlob = new File([blob], fileName);
 
@@ -358,10 +357,15 @@ export class TemplateCatalogModalComponent implements OnInit {
                         this.alertService.danger("There is some technical error! Please try after sometime.");
                         console.error(ex.message);
                     }
+                }).catch(err => {
+                    this.hideProgressModalDialog();
+                    this.loadErrorMessageDialog();
                 });
             
         } else { // installing plugin
-            const widgetBinaryFound = this.appList.find(app => app.manifest?.isPackage && (app.name.toLowerCase() === dependency.title?.toLowerCase() ||
+
+            const packageList = await this.pluginsService.listPackages(); 
+            const widgetBinaryFound = packageList.find(app => (app.name.toLowerCase() === dependency.title?.toLowerCase() ||
                 (app.contextPath && app.contextPath?.toLowerCase() === dependency?.contextPath?.toLowerCase())));
             this.showProgressModalDialog(`Installing ${dependency.title}`);
             this.progressIndicatorService.setProgress(10);
@@ -380,11 +384,8 @@ export class TemplateCatalogModalComponent implements OnInit {
             } else {
                 this.progressIndicatorService.setProgress(10);
                 this.catalogService.downloadBinary(dependency.link)
-                    .subscribe(data => {
+                    .then(blob => {
                         this.progressIndicatorService.setProgress(20);
-                        const blob = new Blob([data], {
-                            type: 'application/zip'
-                        });
                         const fileName = dependency.link.replace(/^.*[\\\/]/, '');
                         const fileOfBlob = new File([blob], fileName);
                         this.widgetCatalogService.installPackage(fileOfBlob).then(async () => {
@@ -396,6 +397,9 @@ export class TemplateCatalogModalComponent implements OnInit {
                             this.alertService.danger("There is some technical error! Please try after sometime.");
                             console.error(error);
                         });
+                    }).catch(err => {
+                        this.hideProgressModalDialog();
+                        this.loadErrorMessageDialog();
                     });
             }
         }
@@ -459,5 +463,20 @@ export class TemplateCatalogModalComponent implements OnInit {
             this.filterTemplates = [...this.filterTemplates];
         }
 
+    }
+    private loadErrorMessageDialog() {
+        const alertMessage = {
+          title: 'Microservice needed!',
+          description: `'Cumulocity Community Utils' microservice is not installed or subscribed. Please download the microservice, then install and subscribe to it by navigating to Administration -> Ecosystems -> Microservices. `,
+          type: 'danger',
+          externalLink: "https://labcase.softwareag.com/storage/d/a02221e54739758ccb1ab839ce09e2cc",
+          externalLinkLabel: "Download the microservice now.",
+          alertType: 'info' //info|confirm
+        }
+        this.alertModalDialog(alertMessage);
+      }
+
+      alertModalDialog(message: any): BsModalRef {
+        return this.modalService.show(AlertMessageModalComponent, { class: 'c8y-wizard', initialState: { message } });
     }
 }

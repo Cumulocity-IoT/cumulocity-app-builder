@@ -282,11 +282,11 @@ export class MyWidgetsComponent implements OnInit {
             this.progressIndicatorService.setProgress(15);
             blob = await new Promise<any>((resolve) => {
                 this.widgetCatalogService.downloadBinary(widget.binaryLink)
-                    .subscribe(data => {
-                        const blob = new Blob([data], {
-                            type: 'application/zip'
-                        });
+                    .then(blob => {
                         resolve(blob);
+                    }).catch(err => {
+                        this.hideProgressModalDialog();
+                        this.widgetCatalogService.loadErrorMessageDialog();
                     });
             });
             fileName = widget.binaryLink.replace(/^.*[\\\/]/, '');
@@ -295,11 +295,11 @@ export class MyWidgetsComponent implements OnInit {
             this.progressIndicatorService.setProgress(15);
             blob = await new Promise<any>((resolve) => {
                 this.widgetCatalogService.downloadBinaryFromLabcase(widget.link)
-                    .subscribe(data => {
-                        const blob = new Blob([data], {
-                            type: 'application/zip'
-                        });
+                    .then(blob => {
                         resolve(blob);
+                    }).catch(err => {
+                        this.hideProgressModalDialog();
+                        this.widgetCatalogService.loadErrorMessageDialog();
                     });
             });
             fileName = widget.fileName;

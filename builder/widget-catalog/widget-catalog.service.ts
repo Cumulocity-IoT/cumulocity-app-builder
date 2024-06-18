@@ -18,7 +18,7 @@
 
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { ApplicationService, IApplication, IManifest } from '@c8y/client';
+import { ApplicationService, FetchClient, IApplication, IManifest } from '@c8y/client';
 import { BehaviorSubject, config, Observable } from 'rxjs';
 import { WidgetCatalog, WidgetModel } from './widget-catalog.model';
 import * as semver from "semver";
@@ -27,13 +27,16 @@ import { AlertService, AppStateService, PluginsService, ZipService } from '@c8y/
 import { SettingsService } from './../settings/settings.service';
 import { ProgressIndicatorService } from '../utils/progress-indicator-modal/progress-indicator.service';
 import { AppBuilderExternalAssetsService } from 'app-builder-external-assets';
+import { AppIdService } from '../app-id.service';
+import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
+import { AlertMessageModalComponent } from '../../builder/utils/alert-message-modal/alert-message-modal.component';
 
 const packageJson = require('./../../package.json');
 const c8yVersion = require('./../../package.json')["@c8y/ngx-components"];
 @Injectable()
 export class WidgetCatalogService {
 
-  C8Y_VERSION = '1016.X.X';
+  C8Y_VERSION = '1018.X.X';
   pkgVersion: any;
   private WidgetCatalogPath = '/widgetCatalog/widget-catalog.json';
  // private WidgetCatalogPath = '/widgetCatalog/widget-catalog.json?ref=preprod';
@@ -71,19 +74,28 @@ export class WidgetCatalogService {
   constructor(private http: HttpClient,
     private appService: ApplicationService, private appStateService: AppStateService,
     private settingsService: SettingsService, private pluginsService: PluginsService,
+    private client: FetchClient, private appIdService: AppIdService,  private modalService: BsModalService,
     private externalService: AppBuilderExternalAssetsService, private zipService: ZipService,
     private progressIndicatorService: ProgressIndicatorService, private alertService: AlertService) {
-    this.GATEWAY_URL_GitHubAPI = this.externalService.getURL('GITHUB', 'gatewayURL_Github');
-    this.GATEWAY_URL_GitHubAsset = this.externalService.getURL('GITHUB', 'gatewayURL_GitHubAsset');
+    this.GATEWAY_URL_GitHubAPI = this.externalService.getURL('GITHUB', 'gatewayURL_Github'); 
+    this.GATEWAY_URL_GitHubAsset = 'service/c8y-community-utils/githubAsset?path=';
     this.GATEWAY_URL_GitHubAPI_FallBack = this.externalService.getURL('GITHUB', 'gatewayURL_Github_Fallback');
-    this.GATEWAY_URL_GitHubAsset_FallBack = this.externalService.getURL('GITHUB', 'gatewayURL_GitHubAsset_Fallback');
+    this.GATEWAY_URL_GitHubAsset_FallBack = 'service/c8y-community-utils/githubAsset?path=';
     this.C8Y_VERSION = packageJson.dependencies['@c8y/ngx-components'];
     this.pkgVersion = packageJson.version;
-    this.GATEWAY_URL_Labcase = this.externalService.getURL('DBCATALOG', 'gatewayURL');
-    this.GATEWAY_URL_Labcase_FallBack = this.externalService.getURL('DBCATALOG', 'gatewayURL_Fallback');
+
+    this.GATEWAY_URL_Labcase = 'service/c8y-community-utils/labcaseAsset?id=';
+    this.GATEWAY_URL_Labcase_FallBack = 'service/c8y-community-utils/labcaseAsset?id=';
+  
     this.GATEWAY_URL_GitHub = this.externalService.getURL('GITHUB', 'gatewayURL_GithubAPI');
     this.GATEWAY_URL_GitHub_FallBack = this.externalService.getURL('GITHUB', 'gatewayURL_GithubAPI_Fallback');
-
+   
+    //this.GATEWAY_URL_GitHubAsset = this.externalService.getURL('GITHUB', 'gatewayURL_GitHubAsset');
+    //this.GATEWAY_URL_GitHubAsset_FallBack = this.externalService.getURL('GITHUB', 'gatewayURL_GitHubAsset_Fallback');
+    //this.GATEWAY_URL_Labcase = this.externalService.getURL('DBCATALOG', 'gatewayURL');
+    //this.GATEWAY_URL_Labcase_FallBack = this.externalService.getURL('DBCATALOG', 'gatewayURL_Fallback');
+    
+  
     this.appStateService.currentApplication.subscribe(app => {
       this.currentApp = app;
     });
@@ -140,16 +152,18 @@ export class WidgetCatalogService {
   }
 
 
-  downloadBinary(binaryId: string): Observable<ArrayBuffer> {
-    return this.http.get(`${this.GATEWAY_URL_GitHubAsset}${binaryId}`, {
-      responseType: 'arraybuffer'
-    })
-      .pipe(catchError(err => {
-        console.log('Widget Catalog: Download Binary: Error in primary endpoint! using fallback...');
-        return this.http.get(`${this.GATEWAY_URL_GitHubAsset_FallBack}${binaryId}`, {
-          responseType: 'arraybuffer'
-        })
-      }));
+ async downloadBinary(binaryId: string): Promise<any> {
+      if(this.appIdService.isCommunityMSExist) {
+        const response = await this.client.fetch(`${this.GATEWAY_URL_GitHubAsset}${binaryId}`);
+        if(response && response.ok) {
+            return (await response.blob());
+        } else  {
+            this.alertService.danger("Unable to download binary! Please try after sometime. If problem persists, please contact the administrator.");
+        }
+        
+    } else {
+      throw Error("Unable to download binary!");     
+    }
   }
 
   isCompatiblieVersion(widget: any) {
@@ -182,16 +196,18 @@ export class WidgetCatalogService {
     return semver.satisfies(widget.version, major);
   }
 
-  downloadBinaryFromLabcase(binaryId: string): Observable<ArrayBuffer> {
-    return this.http.get(`${this.GATEWAY_URL_Labcase}${binaryId}`, {
-      responseType: 'arraybuffer'
-    })
-      .pipe(catchError(err => {
-        console.log('Widget Catalog: Download Binary from Labcase: Error in primary endpoint! using fallback...');
-        return this.http.get(`${this.GATEWAY_URL_Labcase_FallBack}${binaryId}`, {
-          responseType: 'arraybuffer'
-        })
-      }));
+  async downloadBinaryFromLabcase(binaryId: string): Promise<any> {
+    if(this.appIdService.isCommunityMSExist) {
+      const response = await this.client.fetch(`${this.GATEWAY_URL_Labcase}${binaryId}`);
+      if(response && response.ok) {
+          return (await response.blob());
+      } else  {
+          this.alertService.danger("Unable to download binary! Please try after sometime. If problem persists, please contact the administrator.");
+      }
+      
+    } else {
+      throw Error("Unable to download binary!");     
+    }
   }
 
   setWidgetDetails(detail: any) {
@@ -439,5 +455,21 @@ export class WidgetCatalogService {
       id: clonedAppBuilder.id,
       ...clonedAppBuilder
     });
+  }
+
+  loadErrorMessageDialog() {
+    const alertMessage = {
+      title: 'Microservice needed!',
+      description: `'Cumulocity Community Utils' microservice is not installed or subscribed. Please download the microservice, then install and subscribe to it by navigating to Administration -> Ecosystems -> Microservices. `,
+      type: 'danger',
+      externalLink: "https://labcase.softwareag.com/storage/d/a02221e54739758ccb1ab839ce09e2cc",
+      externalLinkLabel: "Download the microservice now.",
+      alertType: 'info' //info|confirm
+    }
+    this.alertModalDialog(alertMessage);
+  }
+
+  alertModalDialog(message: any): BsModalRef {
+    return this.modalService.show(AlertMessageModalComponent, { class: 'c8y-wizard', initialState: { message } });
   }
 }
