@@ -63,14 +63,15 @@ export class AppListNavigation implements NavigatorNodeFactory {
                             path: `/settings-properties`,
                             priority: 0
                         }));
-                        const widgetCatalogNode = new NavigatorNode({
+                        // TODO: remove widget catalog
+                        /* const widgetCatalogNode = new NavigatorNode({
                             label: 'Widget Catalog',
                             icon: 'registry-editor',
                             path: `/widget-catalog/my-widgets`,
                             priority: 2
-                        });
+                        }); */
                         if (this.userService.hasAllRoles(this.appStateService.currentUser.value, ["ROLE_INVENTORY_ADMIN","ROLE_APPLICATION_MANAGEMENT_ADMIN"])) {
-                            appNode.push(widgetCatalogNode);
+                         //   appNode.push(widgetCatalogNode);
                             appNode.push(settingsNode);
                         }
                         return appNode;

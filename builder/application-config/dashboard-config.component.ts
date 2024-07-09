@@ -86,7 +86,6 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
     filterValueForTree = '';
 
     app: Observable<any>;
-    refreshApp = new BehaviorSubject<void>(undefined);;
 
     delayedAppUpdateSubject = new Subject<any>();
     delayedAppUpdateSubscription: Subscription;
@@ -115,7 +114,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
         private accessRightsService: AccessRightsService, private userService: UserService, private appDataService: AppDataService,
         @Inject(DOCUMENT) private document: Document, private renderer: Renderer2, private cd: ChangeDetectorRef, private clipboard: Clipboard
     ) {
-        this.app = combineLatest([appIdService.appIdDelayedUntilAfterLogin$, this.refreshApp]).pipe(
+        this.app = combineLatest([appIdService.appIdDelayedUntilAfterLogin$, this.appDataService.refreshAppForDashboard]).pipe(
             map(([appId]) => appId),
             tap(appId => {
                 this.appDataService.forceUpdate = true;
@@ -137,7 +136,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
                     this.appDataService.forceUpdate = true;
                 }
                 await this.appService.update(app);
-                this.refreshApp.next();
+                this.appDataService.refreshAppForDashboard.next();
                 this.navigation.refresh();
                 // TODO?
                 //this.tabs.refresh();
@@ -347,7 +346,7 @@ export class DashboardConfigComponent implements OnInit, OnDestroy {
             if (isReloadRequired) {
                 let count = 0;
                 this.autoLockDashboard = true;
-                this.refreshApp.next();
+                this.appDataService.refreshAppForDashboard.next();
                 this.prepareDashboardHierarchy(this.bsModalRef.content.app);
                 this.filteredDashboardList = [...this.bsModalRef.content.app.applicationBuilder.dashboards];
                 this.bsModalRef.content.app.applicationBuilder.dashboards.forEach(async (element) => {

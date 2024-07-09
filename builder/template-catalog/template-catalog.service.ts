@@ -30,6 +30,7 @@ import { AppBuilderExternalAssetsService } from 'app-builder-external-assets';
 import { DashboardConfig } from "builder/application-config/dashboard-config.component";
 import { SettingsService } from "../settings/settings.service";
 import { AppIdService } from "../app-id.service";
+import { AppDataService } from "./../../builder/app-data.service";
 
 const packageJson = require('./../../package.json');
 @Injectable()
@@ -49,7 +50,7 @@ export class TemplateCatalogService {
 
     constructor(private http: HttpClient, private inventoryService: InventoryService,
         private appService: ApplicationService, private navigation: AppBuilderNavigationService,
-        private binaryService: InventoryBinaryService, private alertService: AlertService,
+        private binaryService: InventoryBinaryService, private alertService: AlertService,private appDataService: AppDataService,
         private client: FetchClient, private appIdService: AppIdService,
         private externalService: AppBuilderExternalAssetsService, private settingsService: SettingsService) {
         this.GATEWAY_URL_GitHubAPI = this.externalService.getURL('GITHUB','gatewayURL_Github');
@@ -189,7 +190,7 @@ export class TemplateCatalogService {
                     templateDeviceId: "NO_DEVICE_TEMPLATE_ID"
                 }
             } : {})
-        }).then(({ data }) => {
+        }).then(async ({ data }) => {
             application.applicationBuilder.dashboards = [
                 ...application.applicationBuilder.dashboards || [],
                 {
@@ -220,13 +221,14 @@ export class TemplateCatalogService {
                     "dashboardName": templateCatalogEntry.title
                 });
             }
-            return this.appService.update({
+            await this.appService.update({
                 id: application.id,
                 applicationBuilder: application.applicationBuilder
             } as any);
-        }).then(() => {
+            this.appDataService.forceUpdate = true;
+            this.appDataService.refreshAppForDashboard.next();
             this.navigation.refresh();
-        });
+        })
     }
 
     async updateDashboard(application, dashboardConfig: DashboardConfig, templateDetails: TemplateDetails, index: number, isGroupTemplate: boolean = false) {
@@ -273,7 +275,8 @@ export class TemplateCatalogService {
             id: application.id,
             applicationBuilder: application.applicationBuilder
         } as any);
-
+        this.appDataService.forceUpdate = true;
+        this.appDataService.refreshAppForDashboard.next();
         this.navigation.refresh();
     }
 

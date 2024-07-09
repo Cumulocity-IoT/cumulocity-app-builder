@@ -16,7 +16,7 @@
 * limitations under the License.
  */
 
-import {from, Observable} from "rxjs";
+import {BehaviorSubject, from, Observable} from "rxjs";
 import {Injectable} from "@angular/core";
 import { ApplicationService, IApplication } from "@c8y/client";
 
@@ -29,6 +29,7 @@ export class AppDataService {
     private appId: string | number = '';
     private lastUpdated = 0; 
     forceUpdate = false;
+    refreshAppForDashboard = new BehaviorSubject<void>(undefined);
     constructor(private appService: ApplicationService) {
     }
 
