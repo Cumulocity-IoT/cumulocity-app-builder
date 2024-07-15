@@ -4,7 +4,11 @@ Application Builder is an open-source tool for you to create web applications 
 
 ![](https://user-images.githubusercontent.com/38696279/72333172-47cec300-36b3-11ea-9abf-1bb29b490a22.png)
 
-## What's new?
+## What's new ?
+* **Clone to Blueprint Forge:** Users can now clone Application Builder apps to Blueprint Forge apps.
+* **Widget Catalog:** The Widget catalog has been removed.
+
+## 2.1.0
 
 * **New default branding:** Introducing our new default branding, Inspired by Delite 2.0 – Software AG's in-house design system.
 * **Enhanced group template dashboard:** Give an identical dashboard to every device/asset based on its type.
@@ -26,7 +30,6 @@ Application Builder is an open-source tool for you to create web applications 
 * **Home Page:** User can find quick start videos, help and support information on home page.
 * **Tabs:** Group your dashboards into tabs.
 * **Dashboard Catalog:** User can select any pre-designed template for dashboard and ability to install dependent runtime widgets.
-* **Widget Catalog:** Now user has ability to install/update widgets directly from Widget Catalog. This is single place where user can also find widget details such as documentation, preview, license and author details.
 *  **Branding:** Now user can use color picker to choose millions of colors to customize branding. Header, Action bar and tab bar are also customizable.
 *  **Theme:** Application builder now support one clicks theme selection and custom theme creation.
 *  **Server-Side Simulators:** Application Builder now supports Server-side simulators. User just need to install micro-service from [here](https://github.com/SoftwareAG/cumulocity-app-builder/releases/download/v1.3.1/simulator-app-builder.zip) and you will get option while creating simulator to "Run on Server".
