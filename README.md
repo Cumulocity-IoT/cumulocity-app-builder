@@ -5,7 +5,8 @@ Application Builder is an open-source tool for you to create web applications 
 ![](https://user-images.githubusercontent.com/38696279/72333172-47cec300-36b3-11ea-9abf-1bb29b490a22.png)
 
 ## What's new ?
-* **Clone to Blueprint Forge:** Users can now clone Application Builder apps to Blueprint Forge apps.
+* **Deploy with Blueprint Forge:** Users can now clone Application Builder apps and deploy it to Blueprint Forge apps.
+  ![image](https://github.com/user-attachments/assets/a18fad95-93ce-4578-a10a-abedcf9decf9)
 * **Widget Catalog:** The Widget catalog has been removed.
 
 ## 2.1.0
