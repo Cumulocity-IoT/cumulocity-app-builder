@@ -33,6 +33,7 @@ import { NewApplicationModalComponent } from "./new-application-modal.component"
 import { Router } from "@angular/router";
 import { contextPathFromURL } from "../utils/contextPathFromURL";
 import { AppListService } from "./app-list.service";
+import { NewBlueprintForgeModalComponent } from "./new-blueprint-forge-app-modal.component";
 
 @Component({
     templateUrl: './app-list.component.html'
@@ -106,6 +107,13 @@ export class AppListComponent {
         });
     }
 
+    deployWithBlueprintForge(app: IApplication) {
+        this.bsModalRef = this.modalService.show(NewBlueprintForgeModalComponent, {
+            class: 'c8y-wizard', initialState:
+                { application: app, allApplications: this.allApplications }
+        });
+    }
+
     async deleteApplication(id: number) {
         await this.appService.delete(id);
 
@@ -121,7 +129,13 @@ export class AppListComponent {
             this.router.navigateByUrl(`/application/${app.id}${subPath || ''}`);
         }
     }
-    exportApp(app: IApplication) {
+
+    isBlueprintApp(app: IApplication) {
+        return (app && app.manifest?.package === 'blueprint');
+    }
+
+    // TODO: not used. Alternative available in migration tool
+    /* exportApp(app: IApplication) {
         const filename = app.name + '.json';
         const jsonStr = JSON.stringify(app.applicationBuilder);
         let element = document.createElement('a');
@@ -131,5 +145,5 @@ export class AppListComponent {
         document.body.appendChild(element);
         element.click();
         document.body.removeChild(element);
-    }
+    } */
 }

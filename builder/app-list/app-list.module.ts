@@ -30,6 +30,7 @@ import {IconSelectorModule} from "../../icon-selector/icon-selector.module";
 import {ApplicationService, IApplication, UserService} from "@c8y/client";
 import { filter, first } from "rxjs/operators";
 import {contextPathFromURL} from "../utils/contextPathFromURL";
+import { NewBlueprintForgeModalComponent } from "./new-blueprint-forge-app-modal.component";
 
 /**
  * Some app-builder applications hide the ability to create new applications, they do this by having a default application that is redirected to if the user tries to access the '/' path.
@@ -80,10 +81,12 @@ export class RedirectToDefaultApplicationOrBuilder implements CanActivate {
     ],
     declarations: [
         AppListComponent,
-        NewApplicationModalComponent
+        NewApplicationModalComponent,
+        NewBlueprintForgeModalComponent
     ],
     entryComponents: [
-        NewApplicationModalComponent
+        NewApplicationModalComponent,
+        NewBlueprintForgeModalComponent
     ],
     providers: [
         { provide: HOOK_NAVIGATOR_NODES, useClass: AppListNavigation, multi: true}

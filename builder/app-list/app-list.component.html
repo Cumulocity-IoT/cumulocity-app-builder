@@ -29,6 +29,11 @@
                                     <i c8yIcon="times" ></i> <span> Remove</span>
                                 </button>
                             </li>
+                            <li role="menuitem" *ngIf="!isBlueprintApp(app)">
+                                <button type="button" id="{{app.name}}-deployBlueprintForge" title="Deploy with Blueprint Forge" (click)="deployWithBlueprintForge(app)">
+                                    <i c8yIcon="deploy" ></i> <span> Deploy with Blueprint Forge</span>
+                                </button>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -36,8 +41,16 @@
                     <h1 style="margin: 15px 0 10px; font-size: 42px;"><c8y-app-icon [app]="app"></c8y-app-icon></h1>
                     <p style="word-wrap: break-word;" class="e2e-appCardName">{{app.name}}</p>
                 </div>
+                <div class="card-block text-center">
+                    <button *ngIf="!isBlueprintApp(app)" placement="top" class="btn-clean" title="Application Builder App">
+                        <span class="label label-info"> Application Builder app </span>
+                    </button>
+                    <button *ngIf="isBlueprintApp(app)" placement="top" class="btn-clean" title="Blueprint Forge App">
+                        <span class="label label-success"> Blueprint Forge App </span>
+                    </button>
+                </div>
                 <div class="card-actions-group">
-                    <a class="clickable" id="OpenApp-{{app.name}}">
+                    <a class="clickable" id="OpenApp-{{app.name}}" >
                         <i c8yIcon="external-link"></i> Open
                     </a>
                 </div>
