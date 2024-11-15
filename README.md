@@ -1,6 +1,10 @@
+# Deprecation notice
+This tool is not further developed and it might break with upcoming Cumulocity releases. Use it at your own risk.
+The repository is archived but feel free to fork & adapt it to your needs in a new repo.
+
 # Application Builder for Cumulocity
 The Application Builder for Cumulocity provides a simple, coding-free way to create new applications inside Cumulocity. 
-Application Builder is an open-source tool for you to create web applications in a no-code environment. It's being managed by the Software AG's open-source community but not officially supported by Software AG. You can log any issues at [GitHub](https://github.com/SoftwareAG/cumulocity-app-builder/issues) or ask any question on the Software AG Tech Community. Support will provided on best endeavours.
+Application Builder is an open-source tool for you to create web applications in a no-code environment. It's being managed by the Cumulocity's open-source community but not officially supported by Cumulocity GmbH. You can log any issues at [GitHub](https://github.com/Cumulocity-IoT/cumulocity-app-builder/issues) or ask any question on the Tech Community. Support will provided on best endeavours.
 
 ![](https://user-images.githubusercontent.com/38696279/72333172-47cec300-36b3-11ea-9abf-1bb29b490a22.png)
 
@@ -23,7 +27,7 @@ Application Builder is an open-source tool for you to create web applications 
 * **Browser-based Device Simulators:** Create device simulators that run directly in your browser.
 * **DTDL Simulator:** User can now create simulator based on [DTDL](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md)(Digital Twins Definition Language).
 * **Group Simulator:** User can create simulator for existing device group or new device group.
-* **Runtime widgets plugin:** Install widgets without re-compiling. Please refer our [Demo Widget](https://github.com/SoftwareAG/cumulocity-demo-widget-plugin).
+* **Runtime widgets plugin:** Install widgets without re-compiling. Please refer our [Demo Widget](https://github.com/Cumulocity-IoT/cumulocity-demo-widget-plugin).
 * **Group template dashboards:** Give every device in a group an identical dashboard (but customized to the device).
 * **Create an App with a custom contextPath:** Change the URL used to access a particular app.
 * **Application Clone**: User can now clone existing application while creating new one.
@@ -33,9 +37,9 @@ Application Builder is an open-source tool for you to create web applications 
 * **Dashboard Catalog:** User can select any pre-designed template for dashboard and ability to install dependent runtime widgets.
 *  **Branding:** Now user can use color picker to choose millions of colors to customize branding. Header, Action bar and tab bar are also customizable.
 *  **Theme:** Application builder now support one clicks theme selection and custom theme creation.
-*  **Server-Side Simulators:** Application Builder now supports Server-side simulators. User just need to install micro-service from [here](https://github.com/SoftwareAG/cumulocity-app-builder/releases/download/v1.3.1/simulator-app-builder.zip) and you will get option while creating simulator to "Run on Server".
+*  **Server-Side Simulators:** Application Builder now supports Server-side simulators. User just need to install micro-service from [here](https://github.com/Cumulocity-IoT/cumulocity-app-builder/releases/download/v1.3.1/simulator-app-builder.zip) and you will get option while creating simulator to "Run on Server".
 * **Role Based Access:** User can now control dashboard visibility in application builder by assigning global role(s) to a dashboard.
-* **File(CSV/JSON) Based Simulator:** Application Builder now supports File Based Simulators(Server-side). User just need to install micro-service from [here](https://github.com/SoftwareAG/cumulocity-app-builder/releases/download/v1.3.1/csv-simulator-ms.zip) and use simulator type as File(CSV/JSON). User can import CSV/JSON file to create measurements/events to simulate use cases.
+* **File(CSV/JSON) Based Simulator:** Application Builder now supports File Based Simulators(Server-side). User just need to install micro-service from [here](https://github.com/Cumulocity-IoT/cumulocity-app-builder/releases/download/v1.3.1/csv-simulator-ms.zip) and use simulator type as File(CSV/JSON). User can import CSV/JSON file to create measurements/events to simulate use cases.
 *  **Help & Support:** Try out our new help & support dashboard template while creating dashboard. This will help user to quickly create help and support page for cumulocity application.
 *  **Demo Catalog:** User now able to try out pre-built cumulocity demos by installing Demo Catalog which is available in your home page.
 *  **Auto Upgrade Notification:** From Application Builder 1.3.0 onwards user will get notification whenever new version of app builder available and ability to seamless upgrade by single click.
@@ -49,7 +53,7 @@ Application Builder is an open-source tool for you to create web applications 
 
 ### Install Application Builder
 **First Time:**
-1. Grab the **[Latest Release Zip](https://github.com/SoftwareAG/cumulocity-app-builder/releases)**
+1. Grab the **[Latest Release Zip](https://github.com/Cumulocity-IoT/cumulocity-app-builder/releases)**
 2. Go to the **Administration view** in your tenant (/apps/administration)
 3. Open the **Ecosystem** section in the navigator and click **Applications**
 4. Click **Add application**
@@ -57,7 +61,7 @@ Application Builder is an open-source tool for you to create web applications 
 6. Select the Zip you downloaded earlier
 
 **Incremental Upgrade:**
-1. Grab the **[Latest Release Zip](https://github.com/SoftwareAG/cumulocity-app-builder/releases)**
+1. Grab the **[Latest Release Zip](https://github.com/Cumulocity-IoT/cumulocity-app-builder/releases)**
 2. Go to the **Administration view** in your tenant (/apps/administration)
 3. Open the **Ecosystem** section in the navigator and click **Applications**
 4. Click **Application Builder**
@@ -66,7 +70,7 @@ Application Builder is an open-source tool for you to create web applications 
 
 ### Install Micro Service for Server-Side Simulators
 **First Time:**
-1. Download **[simulator-app-builder](https://github.com/SoftwareAG/cumulocity-app-builder/releases/download/v1.3.1/simulator-app-builder.zip)**
+1. Download **[simulator-app-builder](https://github.com/Cumulocity-IoT/cumulocity-app-builder/releases/download/v1.3.1/simulator-app-builder.zip)**
 2. Go to the **Administration view** in your tenant (/apps/administration)
 3. Open the **Ecosystem** section in the navigator and click **Microservices**
 4. Click **Add microservice**
@@ -75,7 +79,7 @@ Application Builder is an open-source tool for you to create web applications 
 8. Click on **Subscribe** button
 
 **Incremental Upgrade:**
-1. Download **[simulator-app-builder](https://github.com/SoftwareAG/cumulocity-app-builder/releases/download/v1.3.1/simulator-app-builder.zip)**
+1. Download **[simulator-app-builder](https://github.com/Cumulocity-IoT/cumulocity-app-builder/releases/download/v1.3.1/simulator-app-builder.zip)**
 2. Go to the **Administration view** in your tenant (/apps/administration)
 3. Open the **Ecosystem** section in the navigator and click **Microservices**
 4. Click **Simulator-app-builder**
@@ -86,7 +90,7 @@ Application Builder is an open-source tool for you to create web applications 
 
 ### Install Micro Service for File Based Simulators(Server Side)
 **First Time:**
-1. Download **[csv-simulator-ms](https://github.com/SoftwareAG/cumulocity-app-builder/releases/download/v1.3.1/csv-simulator-ms.zip)**
+1. Download **[csv-simulator-ms](https://github.com/Cumulocity-IoT/cumulocity-app-builder/releases/download/v1.3.1/csv-simulator-ms.zip)**
 2. Go to the **Administration view** in your tenant (/apps/administration)
 3. Open the **Ecosystem** section in the navigator and click **Microservices**
 4. Click **Add microservice**
@@ -95,7 +99,7 @@ Application Builder is an open-source tool for you to create web applications 
 8. Click on **Subscribe** button
 
 **Incremental Upgrade:**
-1. Download **[csv-simulator-ms](https://github.com/SoftwareAG/cumulocity-app-builder/releases/download/v1.3.1/csv-simulator-ms.zip)**
+1. Download **[csv-simulator-ms](https://github.com/Cumulocity-IoT/cumulocity-app-builder/releases/download/v1.3.1/csv-simulator-ms.zip)**
 2. Go to the **Administration view** in your tenant (/apps/administration)
 3. pen the **Ecosystem** section in the navigator and click **Microservices**
 4. Click **csv-simulator-ms**
@@ -114,7 +118,7 @@ Application Builder is an open-source tool for you to create web applications 
 **Instructions**
 1. Clone the repository: 
 ```
-git clone https://github.com/SoftwareAG/cumulocity-app-builder.git
+git clone https://github.com/Cumulocity-IoT/cumulocity-app-builder.git
 ```
 2. Change directory: 
 ```
@@ -223,9 +227,9 @@ A more detailed user guide and quick start videos are available in the Home sect
 ## Runtime Widgets
 
 Application Builder supports  widget deployment. Some of the  widget plugins are already available in widget catalog.
-You can find widgets at [Software AG Open Source](https://open-source.softwareag.com/?search=plugin&topic=cumulocity-iot)
+You can find widgets at [Cumulocity Open Source](https://open-source.c8y.io/)
 
-Would you like to create your own Custom Runtime widget? Please refer our [Demo Widget](https://github.com/SoftwareAG/cumulocity-demo-widget-plugin).
+Would you like to create your own Custom Runtime widget? Please refer our [Demo Widget](https://github.com/Cumulocity-IoT/cumulocity-demo-widget-plugin).
 
 
 ## Troubleshooting
@@ -265,17 +269,17 @@ To address this issue, you can follow these steps:
 	 2. Login again to cumulocity and navigate to Administration -> Ecosystem -> All Applications
 	 3. Select Application Builder (custom) and delete it.
 	 4. Click on Add Application
-	 5. Install Application Builder 2.0 from [here](https://github.com/SoftwareAG/cumulocity-app-builder/releases)
+	 5. Install Application Builder 2.0 from [here](https://github.com/Cumulocity-IoT/cumulocity-app-builder/releases)
 	 6. Logout from Administration
 	 7. Login again to cumulocity and navigate to Application Builder
 	 8. Application Builder 2.0 will commence the installation process.
 
-	 If the problem continues to persist, please don't hesitate to reach out to us for assistance using [Software AG Tech Community](https://tech.forums.softwareag.com/tag/Cumulocity-IoT).
+	 If the problem continues to persist, please don't hesitate to reach out to us for assistance using [Tech Community](https://tech.forums.softwareag.com/tag/Cumulocity-IoT).
  
  *  **Widget/plugins are not installed after upgrade:**
  There are multiple reasons that your widgets/plugins might not installed such as browser page refreshed, network error, etc.
  In this scenario you can follow any of the below approach:
-   1. If you have installed many widgets in earlier version of application builder then you can downgrade application builder by following [How to downgrade Application Builder to 1.3.x](https://github.com/SoftwareAG/cumulocity-app-builder#how-to-downgrade-application-builder-to-13x) and try again.
+   1. If you have installed many widgets in earlier version of application builder then you can downgrade application builder by following [How to downgrade Application Builder to 1.3.x](https://github.com/Cumulocity-IoT/cumulocity-app-builder#how-to-downgrade-application-builder-to-13x) and try again.
    2. If you have few widgets installed in earlier version of application builder, then you can just uninstall those widgets manually from Administration -> Ecosystem -> All Applications and install corresponding plugin either from Widget Catalog or from Administration -> Ecosystem -> Packages.
  
  
@@ -364,6 +368,6 @@ If you like to submit a pull request,  please follow below guidelines:
 
 ------------------------------
 
-These tools are provided as-is and without warranty or support. They do not constitute part of the Software AG product suite. Users are free to use, fork and modify them, subject to the license agreement. While Software AG welcomes contributions, we cannot guarantee to include every contribution in the master project.
+These tools are provided as-is and without warranty or support. They do not constitute part of the Cumulocity product suite. Users are free to use, fork and modify them, subject to the license agreement. While Cumulocity GmbH welcomes contributions, we cannot guarantee to include every contribution in the master project.
 _____________________
-For more information you can Ask a Question in the [TECH Community Forums](https://tech.forums.softwareag.com/tag/Cumulocity-IoT).
+
